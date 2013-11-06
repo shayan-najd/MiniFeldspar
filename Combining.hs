@@ -41,39 +41,22 @@ eval (ArrLen a) = (1 +) $ uncurry (flip (-)) $ bounds $ eval a
 eval (ArrIx a i) = eval a ! eval i
 
 
-class Syntactic a where
-  type Internal a
-  toFunC :: a -> FunC (Internal a)
-  fromFunC :: FunC (Internal a) -> a
-  
-instance Syntactic (FunC a) where
-  type Internal (FunC a) = a
-  toFunC ast = ast
-  fromFunC ast = ast  
-
 true , false :: FunC Bool
 true  = LitB True
 false = LitB False
 
-ifC :: Syntactic a => FunC Bool -> a -> a -> a
-ifC c t e = fromFunC (If c (toFunC t) (toFunC e))
+ifC :: FunC Bool -> FunC a -> FunC a -> FunC a
+ifC = If 
 
 c ? ( t , e) = ifC c t e
 
-while :: Syntactic s => ( s -> FunC Bool) -> ( s -> s ) -> s -> s
-while c b i = fromFunC (While (c . fromFunC)
-                        (toFunC . b . fromFunC)
-                        (toFunC i))
-              
-instance (Syntactic a ,Syntactic b) => Syntactic (a , b) where
-  type Internal (a , b) = (Internal a ,Internal b)
-  toFunC (a , b) = Pair (toFunC a) (toFunC b)
-  fromFunC p = (fromFunC (Fst p) , fromFunC (Snd p))
-  
-forLoop :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s ) -> s
-forLoop len init step = snd $ while (\( i , s ) -> i<len )
-                           (\( i , s ) -> ( i+1 , step i s ))
-                           (0 , init )  
+while ::  (FunC s -> FunC Bool) -> (FunC s -> FunC s ) -> FunC s -> FunC s
+while = While 
+
+forLoop :: FunC Int -> FunC s -> (FunC Int -> FunC s -> FunC s ) -> FunC s
+forLoop len init step = Snd $ while (\ (Pair i  s) -> i<len )
+                           (\ (Pair i  s) -> Pair (i+1) (step i s))
+                           (Pair (0 :: FunC Int) init)  
                         
 (==) :: P.Eq a => FunC a -> FunC a -> FunC Bool
 (==) = Prim2 "==" (P.==)
@@ -99,35 +82,31 @@ max = Prim2 "max" (P.max)
 min :: P.Ord a => FunC a -> FunC a -> FunC a
 min = Prim2 "min" (P.min)
 
-instance Num (FunC Int) where  
+instance Num a => Num (FunC a) where  
   (+) = Prim2 "+" (+)
   (-) = Prim2 "-" (-)
   (*) = Prim2 "-" (-)
   abs = Prim1 "abs" abs
   signum = Prim1 "signum" signum
-  fromInteger = LitI . fromInteger
-  
+  fromInteger = Value . fromInteger
+
 data Option a = Option {isSome :: FunC Bool , fromSome :: a}
 
-instance Syntactic a => Syntactic (Option a) where
-  type Internal (Option a) = (Bool,Internal a)
-  fromFunC m = Option (Fst m) (fromFunC $ Snd m)
-  toFunC (Option b a) = Pair b (toFunC a)
   
-undef :: Syntactic a => a
-undef = fromFunC Undef  
+undef :: FunC a
+undef = Undef  
 
 some :: a -> Option a
 some a = Option true a
 
-none :: Syntactic a => Option a
+none :: Option (FunC a)
 none = Option false undef
 
-option :: (Syntactic a , Syntactic b) => b -> (a -> b) -> Option a -> b
+option :: FunC b -> (FunC a -> FunC b) -> Option (FunC a) -> FunC b
 option noneCase someCase opt = ifC (isSome opt)
                                (someCase (fromSome opt ))
                                noneCase
-                               
+                    
 instance Functor Option where
   fmap f (Option b a) = Option b (f a)
   
@@ -154,32 +133,28 @@ divTest a b c = do r1 <- divO a b
 len :: FunC (Array Int a) -> FunC Int
 len arr = ArrLen arr
 
-(<!>) :: Syntactic a => FunC (Array Int ( Internal a)) -> FunC Int -> a
-arr <!> ix = fromFunC (ArrIx arr ix )                   
+(<!>) ::  FunC (Array Int a) -> FunC Int -> FunC a
+(<!>) = ArrIx                 
 
 
 data Vector a where
   Indexed :: FunC Int -> (FunC Int -> a) -> Vector a
   
-instance Syntactic a => Syntactic (Vector a) where
-  type Internal (Vector a) = Array Int ( Internal a)
-  toFunC (Indexed l ixf) = Arr l (toFunC . ixf)
-  fromFunC arr = Indexed (len arr) (arr <!>)
-  
-zipWithVec :: ( Syntactic a , Syntactic b) =>
-              (a -> b -> c) -> Vector a -> Vector b -> Vector c
+zipWithVec :: (FunC a -> FunC  b -> c) -> Vector (FunC a) 
+              -> Vector (FunC b) -> Vector c
 zipWithVec f (Indexed l1 ixf1 ) ( Indexed l2 ixf2 ) = 
   Indexed (min l1 l2 ) (\ ix -> f (ixf1 ix) (ixf2 ix))
 
-sumVec :: (Syntactic a , Num a) => Vector a -> a
+sumVec :: (Num a) => Vector (FunC a) -> (FunC a)
 sumVec (Indexed l ixf) = forLoop l 0 (\ ix s -> s + ixf ix )
 
 instance Functor Vector where
   fmap f (Indexed l ixf) = Indexed l ( f . ixf )  
   
-scalarProd :: (Syntactic a , Num a) => Vector a -> Vector a -> a
+scalarProd :: Num a => Vector (FunC a) -> Vector (FunC a) -> FunC a
 scalarProd a b = sumVec (zipWithVec (*) a b)
 
-memorize :: Syntactic a => Vector a -> Vector a
-memorize (Indexed l ixf) = Indexed l (\ n -> Arr l (toFunC . ixf ) <!> n)
+memorize :: Vector (FunC a) -> Vector (FunC a)
+memorize (Indexed l ixf) = Indexed l (\ n -> Arr l ixf  <!> n)
 
+ 
