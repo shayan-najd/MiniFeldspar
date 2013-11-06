@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE GADTs,TypeFamilies,FlexibleInstances #-}
 
 import Prelude hiding (Ord(..),Eq(..))
@@ -20,7 +21,9 @@ data FunC a where
   Arr :: FunC Int -> (FunC Int -> FunC a) -> FunC (Array Int a)
   ArrLen :: FunC (Array Int a) -> FunC Int
   ArrIx :: FunC (Array Int a) -> FunC Int -> FunC a
-
+  Let   :: FunC a -> ( a -> FunC b) -> FunC b
+  
+  
 eval :: FunC a -> a
 eval (LitI i )= i
 eval (LitB b) = b
@@ -39,7 +42,9 @@ eval (Arr l ixf) = listArray (0 ,lm1) [eval $ ixf $ Value i
   where lm1 = eval l - 1
 eval (ArrLen a) = (1 +) $ uncurry (flip (-)) $ bounds $ eval a
 eval (ArrIx a i) = eval a ! eval i
-
+eval (Let y f)   =  let x = eval y 
+                    in  eval (f x)
+eval (Variable _) = undefined                        
 
 true , false :: FunC Bool
 true  = LitB True
@@ -48,15 +53,16 @@ false = LitB False
 ifC :: FunC Bool -> FunC a -> FunC a -> FunC a
 ifC = If 
 
+(?) :: FunC Bool -> (FunC a, FunC a) -> FunC a
 c ? ( t , e) = ifC c t e
 
 while ::  (FunC s -> FunC Bool) -> (FunC s -> FunC s ) -> FunC s -> FunC s
 while = While 
 
 forLoop :: FunC Int -> FunC s -> (FunC Int -> FunC s -> FunC s ) -> FunC s
-forLoop len init step = Snd $ while (\ (Pair i  s) -> i<len )
+forLoop ln int step = Snd $ while (\ (Pair i  _) -> i<ln )
                            (\ (Pair i  s) -> Pair (i+1) (step i s))
-                           (Pair (0 :: FunC Int) init)  
+                           (Pair (0 :: FunC Int) int)  
                         
 (==) :: P.Eq a => FunC a -> FunC a -> FunC Bool
 (==) = Prim2 "==" (P.==)
