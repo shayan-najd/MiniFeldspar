@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs,DeriveDataTypeable,StandaloneDeriving,ScopedTypeVariables #-}
+{-# LANGUAGE GADTs #-}
 {-# OPTIONS_GHC -Wall #-}
 
 -- Typed and untyped deBruijn
@@ -90,10 +90,7 @@ ucheck = (ueval ufour [] == I 4)
 
 data WExp where 
   Wrap ::  Exp e a -> WExp
-
-deriving instance Typeable Exp 
-deriving instance Typeable UExp
-
+ 
 convert :: UExp -> Maybe WExp
 convert (UCon i)     = return $ Wrap $ Con i
 convert (UAdd e1 e2) = do     
