@@ -1,8 +1,12 @@
-{-# LANGUAGE Rank2Types, GADTs, ScopedTypeVariables #-}
+{-# LANGUAGE GADTs,DeriveDataTypeable,StandaloneDeriving,ScopedTypeVariables #-}
+{-# OPTIONS_GHC -Wall #-}
 
 -- Typed and untyped deBruijn
 
 module TypedAndUntyped where
+
+import Unsafe.Coerce
+import Data.Data
 
 data Var e a where
   Z :: Var (e,a) a
@@ -84,3 +88,53 @@ ufour = (ucompose `UApp` udouble `UApp` udouble) `UApp` (UCon 1)
 
 ucheck = (ueval ufour [] == I 4)
 
+data WExp where 
+  Wrap ::  Exp e a -> WExp
+
+deriving instance Typeable Exp 
+deriving instance Typeable UExp
+
+convert :: UExp -> Maybe WExp
+convert (UCon i)     = return $ Wrap $ Con i
+convert (UAdd e1 e2) = do     
+  we1 <- convert e1
+  we2 <- convert e2
+  case (we1,we2) of
+    (Wrap e1',Wrap e2') -> do let e1'' = unsafeCoerce e1'
+                              let e2'' = unsafeCoerce e2'
+                              return $ Wrap $ Add e1'' e2''
+convert (UVar uv)    = case convertVar uv of
+  (WrapVar v) -> return $ Wrap $ Var v 
+convert (UAbs eb)    = do 
+  web <- convert eb
+  case web of
+    Wrap eb' -> do let eb'' = unsafeCoerce eb'
+                   return $ Wrap $ Abs eb''
+convert (UApp e1 e2)  = do   
+  we1 <- convert e1
+  we2 <- convert e2
+  case (we1,we2) of
+    (Wrap e1',Wrap e2') -> do let e1'' = unsafeCoerce e1'
+                              let e2'' = unsafeCoerce e2'
+                              return $ Wrap $ App e1'' e2''
+    
+data WVar where 
+  WrapVar :: Var e a -> WVar 
+
+convertVar :: UVar -> WVar 
+convertVar  UZ     = WrapVar Z
+convertVar (US uv) = case convertVar uv of
+  (WrapVar v) -> WrapVar $ S v
+
+
+prop_correctConvert :: UExp -> Maybe Bool
+prop_correctConvert ue = do 
+  let uv = ueval ue []
+  we <- convert ue
+  case we of 
+    Wrap e -> case uv of    
+      I i -> return $ i == eval (unsafeCoerce e) ()
+      F f -> return $ f (I 5) == I ((eval ((unsafeCoerce e) :: Exp () (Int -> Int)) ()) 5)
+      
+      
+pcheck = (prop_correctConvert udouble == Just True)
