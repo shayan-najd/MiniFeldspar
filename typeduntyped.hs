@@ -133,11 +133,11 @@ weval (Wrap ex) = WrapVal (eval (unsafeCoerce ex) ())
 
 prop_correctConvert' :: UExp -> Bool
 prop_correctConvert' ue = case (ueval ue [],weval $ convert ue) of
-    (I i,r) -> i       == unsafeCoerce r
-    (F f,r) -> -- testing the (extensional) equality of the two functions 
+    (I i,WrapVal r) -> i       == unsafeCoerce r
+    (F f,WrapVal r) -> -- testing the (extensional) equality of the two functions
                -- of type Int -> Int
       and [f (I i) == I ((unsafeCoerce r) i) 
           | i <- [-100..100]]
       
 pcheck' :: Bool
-pcheck' = prop_correctConvert udouble
+pcheck' = prop_correctConvert' udouble
