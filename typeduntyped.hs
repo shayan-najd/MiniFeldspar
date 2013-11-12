@@ -141,3 +141,5 @@ prop_correctConvert' ue = case (ueval ue [],weval $ convert ue) of
       
 pcheck' :: Bool
 pcheck' = prop_correctConvert' udouble
+
+
