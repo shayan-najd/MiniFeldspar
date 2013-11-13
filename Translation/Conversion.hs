@@ -15,7 +15,6 @@ class SEq s where
 data SType a where  
   SInt     :: SType Int 
   (:->)    :: SType t1 -> SType t2 -> SType (t1 -> t2) 
-  AnySType :: SType a 
   
 instance SEq SType where
   SInt        =:= SInt           =  return Refl
@@ -29,7 +28,6 @@ instance SEq SType where
 data SEnv a where
   Empty :: SEnv ()
   (:::) :: SType t -> SEnv e -> SEnv (e,t)
-  AnySEnv :: SEnv a
     
 instance SEq SEnv where
   Empty       =:= Empty       =  return Refl
@@ -42,40 +40,48 @@ instance SEq SEnv where
 data WExp where 
   WrapExp :: Exp e t -> SEnv e -> SType t -> WExp
  
-convert :: UExp -> Maybe WExp
-convert (UCon i)      =  return $ WrapExp (Con i) Empty SInt
-convert (UAdd e1 e2)  =  do 
-  WrapExp e1' env1 t1 <- convert e1
-  WrapExp e2' env2 t2 <- convert e2  
+convert :: UExp -> [WSType] -> Maybe WExp
+convert (UCon i)      _    =  return $ WrapExp (Con i) Empty SInt
+convert (UAdd e1 e2)  env  =  do 
+  WrapExp e1' env1 t1 <- convert e1 env
+  WrapExp e2' env2 t2 <- convert e2 env 
   Refl <- env1 =:= env2
   Refl <- t1   =:= SInt 
   Refl <- t2   =:= SInt
   return $ WrapExp (Add e1' e2') env1 SInt
-convert (UVar uv)     =  do
-  WrapVar v env t <- convertVar uv  
-  return $ WrapExp (Var v) env t
-convert (UApp e1 e2)  =  do
-  WrapExp e1' env1 tf <- convert e1
-  WrapExp e2' env2 ta <- convert e2  
+convert (UVar uv)     env  =  do
+  WrapVar v ev t <- convertVar uv env 
+  return $ WrapExp (Var v) ev t
+convert (UApp e1 e2)  env  =  do
+  WrapExp e1' env1 (ta :-> tb) <- convert e1 env
+  WrapExp e2' env2 ta'         <- convert e2 env  
   Refl <- env1 =:= env2
-  let tb = AnySType
-  Refl <- tf   =:= (ta :-> tb)  
+  Refl <- ta =:= ta'
   return $ WrapExp (App e1' e2') env1 tb
-convert (UAbs eb)     =  do
-  WrapExp eb' envb tb <- convert eb
-  let e  = AnySEnv
-  let ta = AnySType    
-  Refl <- envb =:= (ta ::: e)
+convert (UAbs eb)     env  =  do
+  --let ta = undefined
+  let ta = SInt -- <-- WARNING: This is a hack working if the language
+                --              were first-order with Int being the only
+                --              base type.
+  WrapExp eb' (ta' ::: e) tb <- convert eb (WrapSType ta :env)
+  Refl <- ta =:= ta'
   return $ WrapExp (Abs eb') e (ta :-> tb) 
 
 data WVar where 
   WrapVar :: Var e t -> SEnv e -> SType t-> WVar 
 
-convertVar :: UVar -> Maybe WVar 
-convertVar  UZ      =  return $ WrapVar Z (AnySType ::: AnySEnv) AnySType
-convertVar (US uv)  =  do 
-  WrapVar v     e t <- convertVar uv
-  return $ WrapVar (S v) (AnySType ::: e) t
+data WSType where 
+  WrapSType :: SType a -> WSType
+ 
+convertVar :: UVar -> [WSType]-> Maybe WVar 
+convertVar  UZ     [wt]      = do 
+  case wt of
+    WrapSType st -> return $ WrapVar Z (st ::: Empty) st
+convertVar (US uv) (wt:env)  =  do 
+  WrapVar v     e t <- convertVar uv env
+  case wt of
+    WrapSType st -> return $ WrapVar (S v) (st ::: e) t
+convertVar _       _         = fail ""    
 
 data WVal where
   WrapVal :: a -> SType a -> WVal
@@ -88,11 +94,11 @@ weval (WrapExp ex env t) = do
 prop_correctConvert :: UExp -> Maybe Bool
 prop_correctConvert ue = case ueval ue emptyUEnv of 
   I i -> do 
-    WrapVal r t <- (weval <=< convert) ue
+    WrapVal r t <- (weval <=< flip convert []) ue
     Refl <- t =:= SInt
     return $ i == r
   F f -> do
-    WrapVal r t <- (weval <=< convert) ue
+    WrapVal r t <- (weval <=< flip convert []) ue
     Refl <- t =:= (SInt :-> SInt)
     return $  and [f (I i) == I (r i) 
                   | i <- [-100..100]]
@@ -102,3 +108,4 @@ pcheck1 = prop_correctConvert udouble == Just True
 
 pcheck2 :: Bool
 pcheck2 = prop_correctConvert ufour == Just True
+
