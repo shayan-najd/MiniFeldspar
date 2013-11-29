@@ -54,6 +54,9 @@ ucompose :: UExp
 ucompose = UAbs (UAbs (UAbs (UVar (US (US UZ)) 
                              `UApp` (UVar (US UZ) `UApp` UVar UZ))))
 
+ufourth :: UExp
+ufourth = ucompose `UApp` udouble `UApp` udouble
+
 ufour :: UExp
 ufour = (ucompose `UApp` udouble `UApp` udouble) `UApp` (UCon 1)
 
