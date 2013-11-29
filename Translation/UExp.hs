@@ -1,5 +1,7 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE GADTs #-}
+-- Shayan Najd and Philip Wadler, 15 Nov 2013
+
 module UExp where 
 
 data UVal where
