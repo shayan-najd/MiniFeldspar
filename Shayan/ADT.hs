@@ -26,7 +26,7 @@ data Typ =
   deriving Eq
            
 -- Using this monad has the following benefits:
---   (a) it will not have the problem of the error producing code being ignored
+--   (a) it will not have the problem of error producing code being ignored
 --       due to Haskell's laziness. For example, in the following the error 
 --       producing code is ignored:
 --       $> take 1 [0,error "Disaster!"] 
@@ -44,9 +44,9 @@ t1 === t2
 
 -- Extraction of values from environment
 get :: Var -> [a] -> ErrM a
-get Zro     (x:_)  = return x
-get (Suc n) (_:xs) = get n xs
-get _       []     = fail "Scope Error!"
+get Zro     (x : _ ) = return x
+get (Suc n) (_ : xs) = get n xs
+get _       []       = fail "Scope Error!"
 
 -- Values
 data Val =
@@ -61,7 +61,7 @@ app _       _  = fail "Type Error!"
 -- Addition of two values
 add :: Val -> Val -> ErrM Val
 add (Num i) (Num j) = return (Num (i + j))
-add _       (_    ) = fail "Type Error!"
+add _       _       = fail "Type Error!"
 
 -- Evaluation of expressions under specific environment of values 
 evl :: Exp -> [Val] -> ErrM Val
@@ -110,7 +110,7 @@ four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
 
 -- Two simple test cases
 test :: Bool
-test =  (case evl four [] of 
-            Right (Num 4) -> True
-            _             -> False) 
-        && (chk four [] == Right Int)
+test = (case evl four [] of 
+          Right (Num 4) -> True
+          _             -> False) 
+       && (chk four [] == Right Int)
