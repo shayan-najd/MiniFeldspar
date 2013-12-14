@@ -1,8 +1,9 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE GADTs #-}
-module Conversion where
+module ADTToGADT where
 
 import Prelude hiding (exp)
+import ErrorMonad
 import qualified ADT  as U
 import qualified GADT as T
 
@@ -12,7 +13,7 @@ data Eql a b where
   --Reflexivity as a proof of equality
 
 -- Equality of Types
-eqlTyp :: T.Typ t -> T.Typ t' -> U.ErrM (Eql t t')
+eqlTyp :: T.Typ t -> T.Typ t' -> ErrM (Eql t t')
 eqlTyp T.Int         T.Int           = return Rfl
 eqlTyp (T.Arr t1 t2) (T.Arr t1' t2') = do Rfl <- eqlTyp t1 t1'
                                           Rfl <- eqlTyp t2 t2'
@@ -20,7 +21,7 @@ eqlTyp (T.Arr t1 t2) (T.Arr t1' t2') = do Rfl <- eqlTyp t1 t1'
 eqlTyp _             _               = fail "Type Error!"
 
 -- Equality of Environments
-eqlEnv :: T.Env e -> T.Env e' -> U.ErrM (Eql e e')
+eqlEnv :: T.Env e -> T.Env e' -> ErrM (Eql e e')
 eqlEnv T.Emp         T.Emp           = return Rfl
 eqlEnv (t `T.Ext` e) (t' `T.Ext` e') = do Rfl <- eqlEnv e e'
                                           Rfl <- eqlTyp t t'
@@ -44,21 +45,21 @@ data Exp where
   Exp :: T.Exp e t -> T.Env e -> T.Typ t -> Exp
 
 -- Type Translation from ADTs to GADTs
-typ :: U.Typ -> U.ErrM Typ
+typ :: U.Typ -> ErrM Typ
 typ U.Int          = return (Typ T.Int)
 typ (U.Arr ta tr)  = do Typ ta' <- typ ta
                         Typ tr' <- typ tr
                         return (Typ (T.Arr ta' tr'))
 
 -- Environment Translation from ADTs to GADTs
-env :: [U.Typ] -> U.ErrM Env
+env :: [U.Typ] -> ErrM Env
 env []      = return (Env T.Emp)
 env (t : r) = do Typ t' <- typ t
                  Env r' <- env r
                  return (Env (t' `T.Ext` r'))
 
 -- Variable Translation from ADTs to GADTs
-var :: U.Var -> [U.Typ] -> U.ErrM Var
+var :: U.Var -> [U.Typ] -> ErrM Var
 var U.Zro     (t : r) = do Env r' <- env r
                            Typ t' <- typ t
                            return (Var T.Zro (t' `T.Ext` r') t')
@@ -71,7 +72,7 @@ var _          []     = fail "Impossible!"
                         -- to be empty.
 
 -- Expression Translation from ADTs to GADTs
-exp :: U.Exp -> [U.Typ] -> U.ErrM Exp
+exp :: U.Exp -> [U.Typ] -> ErrM Exp
 exp (U.Con i)     r = do Env r' <- env r
                          return (Exp (T.Con i) r' T.Int)
 exp (U.Var x)     r = do Var x' r' t' <- var x r
@@ -93,8 +94,8 @@ exp (U.Add el er) r = do Exp el' rl T.Int <- exp el r
 evl :: U.Exp -> Int
 evl m  = case (do Exp m' T.Emp T.Int <- exp m []
                   return (T.evl m' ())) of
-           Right i -> i
-           Left  s -> error s   
+           Rgt i -> i
+           Lft s -> error s   
  
 test :: Bool
 test = evl U.four == 4

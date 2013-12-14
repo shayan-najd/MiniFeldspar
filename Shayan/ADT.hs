@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 module ADT where
  
+import ErrorMonad
+
 -- ADT representation (Debruijn indices) of the simply-typed lambda calculus 
 -- expressions with Integer constants and a built-in addition operator
 data Exp =
@@ -25,17 +27,6 @@ data Typ =
   | Arr Typ Typ
   deriving Eq
            
--- Using this monad has the following benefits:
---   (a) it will not have the problem of error producing code being ignored
---       due to Haskell's laziness. For example, in the following the error 
---       producing code is ignored:
---       $> take 1 [0,error "Disaster!"] 
---          [0]
---   (b) the type forces the programmer to write a handler for the potential 
---       error    
---   (c) it keeps the error message
-type ErrM t = Either String t
-
 -- Equality between types
 (===) :: Typ -> Typ -> ErrM ()
 t1 === t2 
@@ -43,7 +34,7 @@ t1 === t2
   | otherwise = fail "Type Error!" 
 
 -- Extraction of values from environment
-get :: Var -> [a] -> ErrM a
+get :: Monad m => Var -> [a] -> m a
 get Zro     (x : _ ) = return x
 get (Suc n) (_ : xs) = get n xs
 get _       []       = fail "Scope Error!"
@@ -68,8 +59,8 @@ evl :: Exp -> [Val] -> ErrM Val
 evl (Con i)     _ = return (Num i)
 evl (Var x)     r = get x r
 evl (Abs _  eb) r = return (Fun (\ va -> case evl eb (va : r) of 
-                                    Right vb -> vb
-                                    Left  s  -> error s))
+                                    Rgt vb -> vb
+                                    Lft s  -> error s))
 evl (App ef ea) r = do vf <- evl ef r
                        va <- evl ea r
                        vf `app` va 
@@ -111,6 +102,29 @@ four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
 -- Two simple test cases
 test :: Bool
 test = (case evl four [] of 
-          Right (Num 4) -> True
-          _             -> False) 
-       && (chk four [] == Right Int)
+          Rgt (Num 4) -> True
+          _           -> False) 
+       && (chk four [] == Rgt Int)
+
+instance Show Exp where 
+  show (Con i)               = show i 
+  show (Var v)               = show v 
+  show (Abs t eb)            = "(\\" ++ show t ++ " -> " ++ show eb ++ ")"
+  show (App ef@(App _ _) ea) = "(" ++ show ef ++ ") " ++ show ea
+  show (App ef@(Add _ _) ea) = "(" ++ show ef ++ ") " ++ show ea
+  show (App ef ea)           = show ef ++ " " ++ show ea
+  show (Add el@(App _ _) er) = "(" ++ show el ++ ") + " ++ show er 
+  show (Add el@(Add _ _) er) = "(" ++ show el ++ ") + " ++ show er 
+  show (Add el er)           = show el ++ " + " ++ show er 
+
+instance Show Typ where                  
+  show Int                        = "Int"
+  show (t1@(_  `Arr` _) `Arr` t2) = "(" ++ show t1 ++ ") -> " ++ show t2 
+  show (t1  `Arr` t2)             = show t1 ++ " -> " ++ show t2 
+
+instance Show Var where
+ show = ("x"++) . show . int
+
+int :: Var -> Int  
+int Zro     =  0
+int (Suc v) =  1 + int v 
