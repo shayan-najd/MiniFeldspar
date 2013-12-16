@@ -2,43 +2,10 @@
 {-# LANGUAGE GADTs #-}
 module GADT where
 
--- GADT representation (Debruijn indices) of the simply-typed lambda calculus 
--- expressions with Integer constants and a built-in addition operator
-data Exp e t where
-  Con :: Int -> Exp e Int
-  Add :: Exp e Int -> Exp e Int -> Exp e Int
-  Var :: Var e t -> Exp e t
-  Abs :: Typ ta -> Exp (ta , e) tb -> Exp e (ta -> tb)
-  App :: Exp e (ta -> tb) -> Exp e ta -> Exp e tb
-
--- Variables
-data Var e t where
-  Zro :: Var (t , e) t
-  Suc :: Var e tp -> Var (ts , e) tp
-
--- Types (Singleton)
-data Typ t where
-  Int :: Typ Int
-  Arr :: Typ ta -> Typ tb -> Typ (ta -> tb)
-
--- Environment (Singleton)
-data Env e where
-  Emp :: Env ()
-  Ext :: Typ t -> Env e -> Env (t , e)
-
--- Extraction of values from environment
-get :: Var e t -> e -> t
-get Zro     (x , _ ) = x
-get (Suc n) (_ , xs) = get n xs
-
--- Extraction of values from environment with singletons
-gets :: Var e t -> Env e -> Typ t
-gets Zro     (x `Ext` _ ) = x
-gets (Suc n) (_ `Ext` xs) = gets n xs
-gets _       Emp          = error "Impossible!" 
-                            -- the redundant pattern checker cannot guess that
-                            -- and instance of Var never lets the environment to
-                            -- to be empty.
+import Expression.GADT
+import Type.GADT
+import Variable.GADT
+import Environment.GADT
 
 -- Evaluation of expressions under specific environment of values 
 evl :: Exp e t -> e -> t
