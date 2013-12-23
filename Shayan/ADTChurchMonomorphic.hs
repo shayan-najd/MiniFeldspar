@@ -5,7 +5,7 @@ import Expression.ADTChurchMonomorphic
 import Type.ADTSimple
 import Variable.ADT
 import Environment.ADT
-import Value
+import Value.ADT
 import ErrorMonad
 
 -- Evaluation of expressions under specific environment of values 

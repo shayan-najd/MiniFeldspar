@@ -14,7 +14,7 @@ import Control.Applicative (Applicative(..))
 --   (c) it keeps the error message
 data ErrM t = Rgt t 
             | Lft String
-              deriving Eq
+              deriving (Eq , Show)
 
 instance Functor ErrM where
   fmap f (Rgt x) = Rgt (f x)

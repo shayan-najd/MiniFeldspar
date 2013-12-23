@@ -8,7 +8,7 @@ import Variable.ADT
 -- (a la Curry) expressions with Integer constants and a built-in addition 
 -- operator
 data Exp a =
-    Con a Int
+    Con a Integer
   | Var a Var
   | Abs a (Exp a) 
   | App a (Exp a) (Exp a)

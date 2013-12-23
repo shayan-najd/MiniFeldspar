@@ -4,7 +4,7 @@ module ADTChurchPolymorphic where
 import Expression.ADTChurchPolymorphic  
 import Variable.ADT
 import Environment.ADT
-import Value
+import Value.ADT
 import TypeCheckingClass
 import ErrorMonad
 

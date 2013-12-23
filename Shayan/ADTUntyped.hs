@@ -4,7 +4,7 @@ module ADTUntyped where
 import Expression.ADTUntyped 
 import Variable.ADT
 import Environment.ADT
-import Value
+import Value.ADT
 import ErrorMonad
 
 -- Evaluation of expressions under specific environment of values 

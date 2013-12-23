@@ -7,7 +7,7 @@ import Type.ADTSimple
 -- ADT representation (Debruijn indices) of the simply-typed lambda calculus 
 -- expressions with Integer constants and a built-in addition operator
 data Exp =
-    Con Int
+    Con Integer
   | Var Var
   | Abs Typ Exp 
   | App Exp Exp 

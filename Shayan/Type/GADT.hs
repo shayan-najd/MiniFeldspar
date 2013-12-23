@@ -4,7 +4,7 @@ module Type.GADT where
 
 -- Types (Singleton)
 data Typ t where
-  Int :: Typ Int
+  Int :: Typ Integer
   Arr :: Typ ta -> Typ tb -> Typ (ta -> tb)
 
 

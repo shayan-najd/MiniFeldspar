@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
-module Value where
+module Value.ADT where
 
 import ErrorMonad
 
 -- Values
 data Val =
-    Num Int
+    Num Integer
   | Fun (Val -> Val)
     
 -- Application of two values

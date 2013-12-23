@@ -4,7 +4,7 @@ module ADTExplicitPolymorphic where
 import Expression.ADTExplicitPolymorphic
 import Variable.ADT
 import Environment.ADT
-import Value
+import Value.ADT
 import TypeCheckingClass
 import ErrorMonad
 

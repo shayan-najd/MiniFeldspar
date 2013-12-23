@@ -6,7 +6,7 @@ import Variable.ADT
 -- ADT representation (Debruijn indices) of the lambda calculus 
 -- expressions with Integer constants and a built-in addition operator
 data Exp =
-    Con Int
+    Con Integer
   | Var Var
   | Abs Exp 
   | App Exp Exp 

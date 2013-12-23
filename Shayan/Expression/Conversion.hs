@@ -3,6 +3,7 @@
            , ScopedTypeVariables #-}
 module Expression.Conversion where
 
+import qualified Expression.ADTUntypedUnscoped as UU
 import qualified Expression.ADTUntyped as U
 import qualified Expression.ADTChurchMonomorphic as ACM
 import qualified Expression.ADTChurchPolymorphic as ACP
@@ -16,6 +17,7 @@ import qualified Type.GADT as G
 import qualified Type.Existential as W
 import Type.Conversion ()
 
+import qualified Variable.ADT as A
 import qualified Variable.Existential as W
 import Variable.Conversion ()
 
@@ -30,6 +32,7 @@ import qualified ADTExplicitPolymorphic as E
 import Conversion
 import Solver
 import EqualityProof
+import ErrorMonad
 
 import Control.Applicative ((<$>),(<*>),pure)
 import Data.Traversable(traverse)
@@ -82,6 +85,28 @@ cnvExpUToEAM (U.App ef ea) = E.App <$> newMT <*> cnvExpUToEAM ef
                                <*> cnvExpUToEAM ea
 cnvExpUToEAM (U.Add ef ea) = E.Add <$> newMT <*> cnvExpUToEAM ef 
                                <*> cnvExpUToEAM ea
+
+instance Eq a => Cnv (UU.Exp a , [(a , U.Exp)]) U.Exp where
+  cnv (e , rf) = cnvExpUUToU e [] rf 
+
+cnvExpUUToU :: Eq a => UU.Exp a -> [(a , A.Nat)] -> [(a , U.Exp)] -> ErrM U.Exp 
+cnvExpUUToU (UU.Con i)     _  _  = return (U.Con i)
+cnvExpUUToU (UU.Var s)     rb rf = case (A.getTbl s rb , A.getTbl s rf) of
+  (Just x  , _)                 -> return (U.Var x)
+  (Nothing , Just e)            -> return e
+  _                             -> fail "Scope Error!"
+cnvExpUUToU (UU.Abs s  eb) rb rf = do eb' <- cnvExpUUToU eb 
+                                             ((s , A.Zro) : sucAll rb) rf
+                                      return (U.Abs eb')       
+cnvExpUUToU (UU.App ef ea) rb rf = do ef' <- cnvExpUUToU ef rb rf 
+                                      ea' <- cnvExpUUToU ea rb rf 
+                                      return (U.App ef' ea')
+cnvExpUUToU (UU.Add el er) rb rf = do el' <- cnvExpUUToU el rb rf 
+                                      er' <- cnvExpUUToU er rb rf 
+                                      return (U.Add el' er')     
+
+sucAll :: [(a , A.Nat)] -> [(a , A.Nat)]
+sucAll = map (\ (x , y) -> (x , A.Suc y))
 
 instance Cnv (ACM.Exp , A.Env AS.Typ) W.Exp where
   cnv (ACM.Con i     , r) = do W.Env r' <- cnv r

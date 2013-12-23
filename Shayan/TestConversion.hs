@@ -24,7 +24,7 @@ import qualified GADT as G
 
 import ErrorMonad
 
-tstEvl :: Cnv a W.Exp => a -> Int
+tstEvl :: Cnv a W.Exp => a -> Integer
 tstEvl e  = case (do W.Exp e' G.Emp G.Int <- cnv e
                      return (G.evl e' ())) of
               Rgt i -> i

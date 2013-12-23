@@ -25,7 +25,7 @@ chk (App ef _ ) r = case chk ef r of
 chk (Add _  _ ) _ = Int 
  
 -- An example expression doubling the input number                    
-dbl :: Exp () (Int -> Int)
+dbl :: Exp () (Integer -> Integer)
 dbl = Abs Int (Var Zro `Add` Var Zro)
 
 -- An example expression composing two types
@@ -35,7 +35,7 @@ compose ta tb tc = Abs (tb `Arr` tc) (Abs (ta `Arr` tb) (Abs ta
                   (Var (Suc (Suc Zro)) `App` (Var (Suc Zro) `App` Var Zro))))
 
 -- An example expression representing the Integer 4
-four :: Exp () Int
+four :: Exp () Integer
 four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
  
 -- Two simple test cases
