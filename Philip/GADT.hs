@@ -69,6 +69,7 @@ four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
  
 -- Two test cases
 test :: Bool
-test = (run four () == 4) && 
-       (case chk four Emp of 
+test = (case chk four Emp of 
           Int -> True)
+       &&
+       (run four () == 4)
