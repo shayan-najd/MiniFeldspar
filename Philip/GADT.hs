@@ -4,6 +4,8 @@ module GADT where
 
 -- GADT representation (Debruijn indices) of the simply-typed lambda calculus 
 -- with integer constants and addition.
+-- Philip Wadler and Shayan Nadj, November 2013
+
 data Exp e a where
   Con :: Int -> Exp e Int
   Add :: Exp e Int -> Exp e Int -> Exp e Int
