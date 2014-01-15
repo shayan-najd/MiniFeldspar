@@ -2,6 +2,12 @@
 {-# LANGUAGE GADTs #-}
 module Conversion where
 
+-- Convert from ADT to GADT representation.
+-- Simply-typed lambda calculus with de Bruijn indicies
+-- with integer constants and addition.
+-- Philip Wadler and Shayan Najd, November 2013
+
+
 import Prelude hiding (exp)
 import qualified ADT  as U
 import GADT hiding (run,test)
