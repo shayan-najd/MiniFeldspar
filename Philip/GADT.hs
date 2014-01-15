@@ -3,7 +3,7 @@
 module GADT where
 
 -- GADT representation (Debruijn indices) of the simply-typed lambda calculus 
--- expressions with Integer constants and a built-in addition operator
+-- with integer constants and addition.
 data Exp e a where
   Con :: Int -> Exp e Int
   Add :: Exp e Int -> Exp e Int -> Exp e Int
@@ -36,10 +36,7 @@ gets :: Var e a -> Env e -> Typ a
 gets Zro     (Ext _  x) = x
 gets (Suc n) (Ext xs _) = gets n xs
 gets _       Emp        = error "Impossible!" 
-                          -- the redundant pattern checker cannot guess that
-                          -- and instance of Var never lets the environment to
-                          -- to be empty.
-
+ 
 -- Evaluation of expressions under specific environment of values 
 run :: Exp e a -> e -> a
 run (Con i)     _ = i
@@ -70,7 +67,8 @@ compose s t u = Abs (t `Arr` u) (Abs (s `Arr` t) (Abs s
 four :: Exp () Int
 four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
  
--- Two simple test cases
+-- Two test cases
 test :: Bool
-test = (run four () == 4) && (case chk four Emp of 
-                                 Int -> True)
+test = (run four () == 4) && 
+       (case chk four Emp of 
+          Int -> True)
