@@ -2,8 +2,8 @@
 module ADT where
  
 -- ADT representation.
--- Simply-typed lambda calculus with de Bruijn indicies
--- with integer constants and addition.
+-- Simply-typed lambda calculus with de Bruijn indices,
+-- with integer constants, and addition.
 -- Philip Wadler and Shayan Najd, November 2013
 
 import ErrorMonad
