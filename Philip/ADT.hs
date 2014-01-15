@@ -6,6 +6,7 @@ module ADT where
 -- with integer constants and addition.
 -- Philip Wadler and Shayan Najd, November 2013
 
+import ErrorMonad
 
 data Exp =
     Con Int
@@ -66,12 +67,12 @@ add (Num i) (Num j) = return (Num (i + j))
 add _       (_    ) = fail "Type Error!"
 
 -- Evaluation of expressions under specific environment of values 
-run :: Exp -> [Val] -> Either String Val
+run :: Exp -> [Val] -> ErrM Val
 run (Con i)     _ = return (Num i)
 run (Var x)     r = get x r
 run (Abs _  eb) r = return (Fun (\ v -> case run eb (v : r) of 
-                                    Right vr -> vr
-                                    Left  s  -> error s))
+                                    Rgt vr -> vr
+                                    Lft s  -> error s))
 run (App ef ea) r = do vf <- run ef r
                        va <- run ea r
                        vf `app` va 
@@ -115,5 +116,5 @@ test :: Bool
 test =  (chk four [] == Just Int) 
         && 
         (case run four [] of 
-            Right (Num 4) -> True
-            _             -> False)
+            Rgt (Num 4) -> True
+            _           -> False)

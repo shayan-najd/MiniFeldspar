@@ -10,8 +10,9 @@ module Conversion where
 
 import Prelude hiding (exp)
 import qualified ADT  as U
-import GADT hiding (run,test)
 import qualified GADT as T
+import GADT hiding (run,test)
+import ErrorMonad
 
 -- Proof of Equality
 data Eql a b where
@@ -101,8 +102,8 @@ exp (U.Add el er) r = do WExp el' r'  Int <- exp el r
 run :: U.Exp -> Int
 run m  = case (do WExp m' Emp Int <- exp m []
                   return (T.run m' ())) of
-           Right i -> i
-           Left  s -> error s   
+           Rgt i -> i
+           Lft s -> error s   
            
 -- Test case
 test :: Bool

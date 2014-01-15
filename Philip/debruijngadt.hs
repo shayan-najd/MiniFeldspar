@@ -106,7 +106,7 @@ eval :: Exp e a -> e -> a
 eval (Con i) r       =  i
 eval (Add m n) r     =  eval m r + eval n r
 eval (Var x) r       =  fetch x r
-eval (Abs t n) r     =  \v -> eval n (r,v)
+eval (Abs t n) r     =  \v -> eval e (r,v)
 eval (App l m) r     =  eval l r (eval m r)
 
 ifetch :: Var e a -> Env e -> Typ a
