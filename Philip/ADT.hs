@@ -106,7 +106,7 @@ compose s t u = Abs (Arr t u)
 four :: Exp
 four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
 
--- Two simple test cases
+-- Two test cases
 test :: Bool
 test =  (case run four [] of 
             Right (Num 4) -> True
