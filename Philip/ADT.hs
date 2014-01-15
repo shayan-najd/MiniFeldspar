@@ -2,7 +2,7 @@
 module ADT where
  
 -- ADT representation (Debruijn indices) of the simply-typed lambda calculus 
--- expressions with Integer constants and a built-in addition operator
+-- with integer constants and an addition.
 data Exp =
     Con Int
   | Var Var
