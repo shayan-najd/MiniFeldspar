@@ -1,9 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
 module ADT where
  
--- ADT representation (Debruijn indices) of the simply-typed lambda calculus 
--- with integer constants and an addition.
--- Philip Wadler and Shayan Nadj, November 2013
+-- ADT representation.
+-- Simply-typed lambda calculus with de Bruijn indicies
+-- with integer constants and addition.
+-- Philip Wadler and Shayan Najd, November 2013
+
 
 data Exp =
     Con Int
