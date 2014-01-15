@@ -71,9 +71,6 @@ var (U.Suc x) (t : r) = do
   WTyp t'       <- typ t
   return (WVar (Suc x') (Ext r' t') tr)
 var _          []     = fail "Impossible!"  
-                        -- the redundant pattern checker cannot guess that
-                        -- and instance of Var never lets the environment to
-                        -- to be empty.
 
 -- Expression Translation from ADTs to GADTs
 exp :: Monad m => U.Exp -> [U.Typ] -> m WExp
