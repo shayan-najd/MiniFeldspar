@@ -103,9 +103,11 @@ run m  = case (do WExp m' Emp Int <- exp m []
                   return (T.run m' ())) of
            Right i -> i
            Left  s -> error s   
- 
+           
+-- Test case
 test :: Bool
 test = (run U.four == 4)
 
+-- Run all test cases
 main :: Bool
 main = U.test && T.test && test
