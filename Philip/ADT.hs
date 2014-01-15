@@ -3,6 +3,8 @@ module ADT where
  
 -- ADT representation (Debruijn indices) of the simply-typed lambda calculus 
 -- with integer constants and an addition.
+-- Philip Wadler and Shayan Nadj, November 2013
+
 data Exp =
     Con Int
   | Var Var
