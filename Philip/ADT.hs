@@ -108,7 +108,8 @@ four = (compose Int Int Int `App` dbl `App` dbl) `App` (Con 1)
 
 -- Two test cases
 test :: Bool
-test =  (case run four [] of 
+test =  (chk four [] == Just Int) 
+        && 
+        (case run four [] of 
             Right (Num 4) -> True
-            _             -> False) 
-        && (chk four [] == Just Int)
+            _             -> False)
