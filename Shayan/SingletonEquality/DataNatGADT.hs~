@@ -1,5 +1,0 @@
-instance EqlSin NS.Nat where
-  eqlSin NS.Zro     NS.Zro      = return Rfl
-  eqlSin (NS.Suc n) (NS.Suc n') = do Rfl <- eqlSin n n' 
-                                     return Rfl 
-  eqlSin _       _              = fail "Type Error!"                           

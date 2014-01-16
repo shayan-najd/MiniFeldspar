@@ -1,3 +1,0 @@
-module Data.Proxy where
-
-data T (t :: k) = T
