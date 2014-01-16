@@ -1,16 +1,20 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, StandaloneDeriving #-}
 module Variable.GADT where
 
+import qualified Data.Nat as N
+
 -- Variables
-data Var e t where
-  Zro :: Var (t , e) t
-  Suc :: Var e tp -> Var (ts , e) tp
+data Var r t where
+  Zro :: Var (t , r) t
+  Suc :: Var r tp -> Var (t , r) tp
 
+deriving instance Eq (Var e t)
+  
 instance Show (Var e t) where
- show = ("x"++) . show . int
+ show = ("x"++) . show . cnvNat
 
-int :: Var e t -> Int  
-int Zro     =  0
-int (Suc v) =  1 + int v 
+cnvNat :: Var e t -> N.Nat  
+cnvNat Zro     =  N.Zro
+cnvNat (Suc v) =  succ (cnvNat v) 
  

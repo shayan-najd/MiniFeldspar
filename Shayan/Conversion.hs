@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Conversion where
 
