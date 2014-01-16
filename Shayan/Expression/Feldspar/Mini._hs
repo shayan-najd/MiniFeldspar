@@ -1,0 +1,23 @@
+{-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE GADTs #-}
+module Expression.Feldspar.Mini where
+
+import Data.Array
+
+data Exp a where
+  LitI     :: Int -> Exp Int
+  LitB     :: Bool -> Exp Bool
+  If       :: Exp Bool -> Exp a -> Exp a -> Exp a
+  While    :: (Exp s -> Exp Bool) -> (Exp s -> Exp s ) -> Exp s -> Exp s
+  Pair     :: Exp a -> Exp b -> Exp (a , b)
+  Fst      :: Exp (a , b) -> Exp a
+  Snd      :: Exp (a , b) -> Exp b
+  Prim1    :: String -> (a -> b) -> Exp a -> Exp b
+  Prim2    :: String -> (a -> b -> c) -> Exp a -> Exp b -> Exp c
+  Value    :: a -> Exp a
+  Variable :: String -> Exp a
+  Undef    :: Exp a 
+  Arr      :: Exp Int -> (Exp Int -> Exp a) -> Exp (Array Int a)
+  ArrLen   :: Exp (Array Int a) -> Exp Int
+  ArrIx    :: Exp (Array Int a) -> Exp Int -> Exp a
+  Let      :: Exp a -> ( a -> Exp b) -> Exp b

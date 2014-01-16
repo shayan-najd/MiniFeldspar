@@ -1,0 +1,23 @@
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
+{-# LANGUAGE TypeFamilies #-}
+module Evaluation.STLC.GADT where
+
+import Evaluation 
+import Expression.STLC.GADT
+import Environment.GADT as E
+import ErrorMonad
+ 
+instance Evl (Exp e a) where
+  type Val (Exp e a) = a
+  type Env (Exp e a) = e 
+  evl (Con i)     _ = return i
+  evl (Var x)     r = return (get x r)
+  evl (Abs _  eb) r = return (\ va -> case evl eb (va , r) of
+                                 Rgt x -> x
+                                 Lft s -> error s)
+  evl (App ef ea) r = do ef' <- evl ef r 
+                         ea' <- evl ea r
+                         return (ef' $ ea')
+  evl (Add el er) r = do el' <- evl el r  
+                         er' <- evl er r
+                         return (el' + er')

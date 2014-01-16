@@ -1,0 +1,8 @@
+import Environment.GADT                                              
+
+instance EqlSin tf => EqlSin (EG.Env tf) where 
+  eqlSin EG.Emp       EG.Emp         = return Rfl
+  eqlSin (EG.Ext t e) (EG.Ext t' e') = do Rfl <- eqlSin e e'
+                                          Rfl <- eqlSin t t'
+                                          return Rfl
+  eqlSin  _           _              = fail "Scope Error!"     

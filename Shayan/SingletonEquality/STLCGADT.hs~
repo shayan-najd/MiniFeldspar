@@ -1,0 +1,6 @@
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
+{-# LANGUAGE GADTs #-}
+module SingletonEquality.STLCGADT where
+
+import Type.Feldspar.GADT
+import SingletonEquality

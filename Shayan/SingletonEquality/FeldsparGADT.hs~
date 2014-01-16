@@ -1,0 +1,3 @@
+{-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE GADTs #-}
+module SingletonEquality where

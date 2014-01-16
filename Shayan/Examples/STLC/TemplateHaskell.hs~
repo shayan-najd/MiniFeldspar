@@ -1,0 +1,37 @@
+{-# LANGUAGE TemplateHaskell, NoMonomorphismRestriction, Rank2Types #-}
+module Examples.TemplateHaskell where
+
+import Conversion.TemplateHaskell ()
+import qualified Expression.ADTUntypedMonomorphic as U
+
+tst0THQ = [|| 1 ||]
+
+tst0Exp = cnvQ [] tst0THQ
+
+tst1THQ = [|| \ x -> $$tst0THQ + x ||]
+
+tst1Exp = cnvQ [] tst1THQ 
+
+-- Vanilla
+tst0Van :: Integer
+tst0Van = undefined
+
+tst2THQ = [|| \ x -> tst0Van + x ||]
+
+tst2Exp' = cnvQ [] tst2THQ
+
+tst2Exp  = cnvQ [('tst0Van , U.Con 1)] tst2THQ
+
+f =  \ x -> [|| x + 1 ||]
+
+c :: (m a -> m b) -> m (a -> b) 
+c = error "impossible"
+
+s :: Monad m => (a -> m b) -> m (a -> b)
+s  = c . r
+
+r :: Monad m => (a -> m b) -> (m a -> m b)
+r = (=<<)
+
+g :: (forall d. m d -> d) -> (a -> m b) -> (a -> b)
+g prj f =  prj . f

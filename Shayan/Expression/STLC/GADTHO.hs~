@@ -1,0 +1,11 @@
+{-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE GADTs, FlexibleContexts #-}
+module Expression.STLC.GADTHO where
+ 
+-- GADT representation (Debruijn indices) of the simply-typed lambda calculus 
+-- expressions with Integer constants and a built-in addition operator
+data Exp t where
+  Con :: Integer -> Exp Integer
+  Add :: Exp Integer -> Exp Integer -> Exp Integer
+  Abs :: (Exp ta -> Exp tb) -> Exp (ta -> tb)
+  App :: Exp (ta -> tb) -> Exp ta -> Exp tb 

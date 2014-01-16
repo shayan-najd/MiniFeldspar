@@ -1,0 +1,24 @@
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, FlexibleContexts #-}
+module Type.Feldspar.Singleton where
+
+import qualified Type.GADT as G
+import Singleton
+import ErrorMonad
+import Control.Applicative ((<$>),(<*>))
+
+instance Sig G.Typ Integer where
+  sig T = return G.Int 
+ 
+instance (Sig G.Typ ta , Sig G.Typ tb) => Sig G.Typ (ta -> tb) where
+  sig T = G.Arr <$> sig (T :: T ta) <*> sig (T :: T tb)
+  
+-- The remaining is only due to a bug in GHC (refer to GHCBUG.hs)
+class SigTyp t where
+  sigTyp :: T t -> ErrM (G.Typ t)
+
+instance SigTyp Integer where
+  sigTyp T = return G.Int 
+ 
+instance (SigTyp ta , SigTyp tb) => SigTyp (ta -> tb) where
+  sigTyp T = G.Arr <$> sigTyp (T :: T ta) <*> sigTyp (T :: T tb)
