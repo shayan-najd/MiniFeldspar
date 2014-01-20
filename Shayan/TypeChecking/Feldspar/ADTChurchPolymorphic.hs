@@ -3,14 +3,13 @@
 module TypeChecking.Feldspar.ADTChurchPolymorphic where
  
 import Expression.Feldspar.ADTChurchPolymorphic  
-import Unification
+import Unification as U
 import Environment.ADT as E
 import TypeChecking
  
-instance Chk (Exp a) where
+instance Uni a => Chk (Exp a) where
   type Env (Exp a) = E.Env a
   type Typ (Exp a) = a
-  type Mnd (Exp a) = Uni a
   chk (ConI _)    _ = tCon "Int" []
   chk (ConB _)    _ = tCon "Bol" []
   chk (Var x)     r = get x r

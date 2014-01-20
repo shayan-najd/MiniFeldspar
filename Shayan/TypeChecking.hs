@@ -1,11 +1,10 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies, ConstraintKinds #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts #-}
 module TypeChecking where
 
-import GHC.Exts (Constraint)
+import Unification
 
-class Chk (e :: *) where
+class Uni (Typ e) => Chk (e :: *) where
   type Env e :: *
-  type Mnd e :: (* -> *) -> Constraint
   type Typ e :: *
-  chk :: Mnd e m => e -> Env e -> m (Typ e)
+  chk :: e -> Env e -> Mnd (Typ e) (Typ e)

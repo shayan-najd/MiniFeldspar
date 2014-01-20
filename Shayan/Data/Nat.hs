@@ -11,7 +11,7 @@ instance Enum Nat where
   toEnum   = cnvIntVar
 
 instance Show Nat where
- show = ("x"++) . show . cnvVarInt
+ show = show . cnvVarInt
 
 cnvVarInt :: Nat -> Int  
 cnvVarInt Zro     = 0

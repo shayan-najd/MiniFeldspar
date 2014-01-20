@@ -3,14 +3,13 @@
 module TypeChecking.STLC.ADTChurchPolymorphic where
  
 import Expression.STLC.ADTChurchPolymorphic  
-import Unification
+import Unification as U
 import Environment.ADT as E
 import TypeChecking
 
-instance Chk (Exp a) where
+instance Uni a => Chk (Exp a) where
   type Env (Exp a)  = E.Env a
   type Typ (Exp a)  = a
-  type Mnd (Exp a)  = Uni a
   chk (Con _)     _ = tCon "Int" []
   chk (Var x)     r = get x r
   chk (Abs ta eb) r = do tb <- chk eb (ta : r)

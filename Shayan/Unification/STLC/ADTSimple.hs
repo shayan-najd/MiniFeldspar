@@ -1,12 +1,13 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses , TypeFamilies #-}
 module Unification.STLC.ADTSimple where
 
 import qualified Type.STLC.ADTSimple as AS
 import ErrorMonad
 import Unification
 
-instance Uni AS.Typ ErrM where
+instance Uni AS.Typ where
+  type Mnd AS.Typ = ErrM 
   tCon "Int"  []        = return AS.Int
   tCon "Arr"  [ta,tb]   = return (AS.Arr ta tb)
   tCon _      _         = fail "Type Error!"

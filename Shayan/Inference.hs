@@ -4,6 +4,7 @@ module Inference where
 
 import qualified TypeChecking as Chk
 import ErrorMonad
+import qualified Unification as U
 import Unification (Uni)
 import Conversion 
 import InferenceMonad
@@ -19,8 +20,8 @@ inf :: ( Chk.Chk e
        , e         ~ ef t
        , Traversable ef
        , Chk.Typ e ~ t
-       , Chk.Mnd e ~ Uni t  
-       , Uni t       (State (Nat , [EqlC r])) -- (InfM r) 
+       , U.Mnd t   ~ (State (Nat , [EqlC r]))  
+       , Uni t        
        , Cnv t       (Typ r)
        , Cnv (Typ r) t) =>
        (eu -> InfM r e) -> (eu , Chk.Env e) -> ErrM e

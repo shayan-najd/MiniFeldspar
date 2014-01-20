@@ -1,12 +1,14 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances  #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeFamilies  #-}
 module Unification.Feldspar.ADTSimple where
 
 import qualified Type.Feldspar.ADTSimple as FS
 import Unification
 import ErrorMonad
  
-instance Uni FS.Typ ErrM where
+instance Uni FS.Typ where
+  type Mnd FS.Typ = ErrM
+  
   tCon "Int" []         = return FS.Int
   tCon "Bol" []         = return FS.Bol
   tCon "Arr" [ta , tb]  = return (FS.Arr ta tb)

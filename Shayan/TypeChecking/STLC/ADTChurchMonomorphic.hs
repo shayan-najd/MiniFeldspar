@@ -6,11 +6,11 @@ import Expression.STLC.ADTChurchMonomorphic
 import Type.STLC.ADTSimple as T
 import Environment.ADT as E
 import TypeChecking
+import Unification.STLC.ADTSimple ()
 
 instance Chk Exp where
   type Env Exp = E.Env T.Typ
   type Typ Exp = T.Typ
-  type Mnd Exp = Monad 
   chk (Con _)     _ = return Int
   chk (Var x)     r = get x r
   chk (Abs ta eb) r = do tb <- chk eb (ta : r)

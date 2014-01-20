@@ -5,13 +5,9 @@ module Examples.Feldspar.GADT where
 import Expression.Feldspar.GADT
 import Type.Feldspar.GADT as T
 import Variable.GADT
-import Environment.GADT as G
 import Evaluation as E
 import Evaluation.Feldspar.GADT ()
 import qualified Value.Feldspar.GADT as V
-import TypeChecking.Feldspar.GADT () 
-import TypeChecking
-import ErrorMonad
 
 -- An example expression doubling the input number                    
 dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)
@@ -29,7 +25,4 @@ four = (compose Int Int Int `App` dbl `App` dbl) `App` (ConI 1)
  
 -- Two simple test cases
 test :: Bool
-test = (evl four (V.addV,()) == return 4) 
-       && (case chk four (Ext (Int `Arr` (Int `Arr` Int)) Emp) of 
-             Rgt Int -> True
-             Lft _   -> False)
+test = evl four (V.addV,()) == return 4

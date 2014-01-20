@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances  #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeFamilies  #-}
 module Unification.Feldspar.ADTWithMetavariable where
 
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
@@ -12,7 +12,8 @@ import qualified Conversion.Type.Feldspar as C
 import Variable.ADT
 
 -- Setting the checker to collect constraints wherever types are unified  
-instance Uni FAM.Typ (State (Nat , [EqlC C.EnvFAMH])) where
+instance Uni FAM.Typ where
+  type Mnd FAM.Typ = (State (Nat , [EqlC C.EnvFAMH]))
   tCon "Int" []         = return FAM.Int
   tCon "Bol" []         = return FAM.Bol
   tCon "Arr" [ta , tb]  = return (FAM.Arr ta tb)

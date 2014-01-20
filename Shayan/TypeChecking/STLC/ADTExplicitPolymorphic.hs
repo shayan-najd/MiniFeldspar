@@ -3,13 +3,12 @@
 module TypeChecking.STLC.ADTExplicitPolymorphic where
 
 import Expression.STLC.ADTExplicitPolymorphic
-import Unification
+import Unification as U
 import Environment.ADT as E
 import TypeChecking 
 
-instance Chk (Exp a) where
+instance Uni a => Chk (Exp a) where
   type Env (Exp a)   = E.Env a
-  type Mnd (Exp a)   = Uni a
   type Typ (Exp a)   = a
   chk (Con t _)     _ = do [] <- eqlCon "Int" t 
                            return t
