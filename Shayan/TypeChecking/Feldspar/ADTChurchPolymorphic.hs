@@ -6,67 +6,71 @@ import Expression.Feldspar.ADTChurchPolymorphic
 import Unification as U
 import Environment.ADT as E
 import TypeChecking
- 
-instance Uni a => Chk (Exp a) where
+import Data.Vector 
+import Data.Nat.GADT  
+
+instance (TypCons a ~ (Zro, (Suc (Suc Zro), (Zro, (Suc (Suc Zro), 
+                       (Suc Zro, r'))))) , Uni a) => 
+         Chk (Exp a) where
   type Env (Exp a) = E.Env a
   type Typ (Exp a) = a
-  chk (ConI _)    _ = tCon "Int" []
-  chk (ConB _)    _ = tCon "Bol" []
+  chk (ConI _)    _ = typCon int Nil
+  chk (ConB _)    _ = typCon bol Nil
   chk (Var x)     r = get x r
   chk (Abs ta eb) r = do tb <- chk eb (ta : r)
-                         tCon "Arr" [ta , tb]
+                         typCon arr (ta ::: tb ::: Nil)
                          
   chk (App ef ea) r = do tf        <- chk ef r
                          ta'       <- chk ea r
-                         [ta , tb] <- eqlCon "Arr" tf 
-                         ta `eql` ta' 
+                         ta ::: tb ::: Nil <- eqlCon arr tf 
+                         eql ta ta' 
                          return tb
                          
   chk (Cnd ec et ef) r = do tc <- chk ec r                         
                             tt <- chk et r
                             tf <- chk ef r
-                            [] <- eqlCon "Bol" tc
-                            tt `eql` tf
+                            _  <- eqlCon bol tc
+                            eql tt tf
                             return tt
                             
   chk (Whl ec eb ei) r = do tc          <- chk ec r                         
                             tb          <- chk eb r
                             ti          <- chk ei r
-                            [tca , tcb] <- eqlCon "Arr" tc
-                            [tba , tbb] <- eqlCon "Arr" tb
-                            []          <- eqlCon "Bol" tcb
-                            ti  `eql` tca
-                            ti  `eql` tba
-                            ti  `eql` tbb
+                            tca ::: tcb ::: Nil <- eqlCon arr tc
+                            tba ::: tbb ::: Nil <- eqlCon arr tb
+                            _                   <- eqlCon bol tcb
+                            eql ti tca
+                            eql ti tba
+                            eql ti tbb
                             return ti                             
                             
   chk (Tpl ef es) r = do tf <- chk ef r                            
                          ts <- chk es r
-                         tCon "Tpl" [tf , ts]
+                         typCon tpl (tf ::: ts ::: Nil)
                          
-  chk (Fst e)     r = do t        <- chk e r                       
-                         [tf , _] <- eqlCon "Tpl" t
+  chk (Fst e)     r = do t                <- chk e r                       
+                         tf ::: _ ::: Nil <- eqlCon tpl t
                          return tf
                          
-  chk (Snd e)     r = do t        <- chk e r                       
-                         [_ , ts] <- eqlCon "Tpl" t
+  chk (Snd e)     r = do t                <- chk e r                       
+                         _ ::: ts ::: Nil <- eqlCon tpl t
                          return ts                          
                          
   chk (Ary el ef) r = do tl <- chk el r                            
                          tf <- chk ef r
-                         [tfa , tfb] <- eqlCon "Arr" tf
-                         []          <- eqlCon "Int" tl
-                         []          <- eqlCon "Int" tfa
-                         tCon "Ary" [tfb]
+                         tfa ::: tfb ::: Nil <- eqlCon arr tf
+                         _                   <- eqlCon int tl
+                         _                   <- eqlCon int tfa
+                         typCon ary (tfb ::: Nil)
   
   chk (Len e)     r = do t <- chk e r                         
-                         [_] <- eqlCon "Ary" t
-                         tCon "Int" []
+                         _ <- eqlCon ary t
+                         typCon int Nil
                          
-  chk (Ind ea ei) r = do ta    <- chk ea r                       
-                         ti    <- chk ei r
-                         [taa] <- eqlCon "Ary" ta
-                         []    <- eqlCon "Int" ti
+  chk (Ind ea ei) r = do ta            <- chk ea r                       
+                         ti            <- chk ei r
+                         (taa ::: Nil) <- eqlCon ary ta
+                         _             <- eqlCon int ti
                          return taa
                          
   chk (Let el eb) r = do tl <- chk el r 

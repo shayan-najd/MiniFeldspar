@@ -38,7 +38,22 @@ type ExsFExp = Exs2 FGDT.Exp (G.Env FG.Typ) FG.Typ
 type ExsSExp = Exs2 SGDT.Exp (G.Env SG.Typ) SG.Typ
 
 instance TH.Quasi ErrM where
-  qNewName = return . TH.mkName 
+  qNewName    = return . TH.mkName 
+  qReport     = undefined
+  qRecover    = undefined
+  qReify      = undefined
+  qLookupName = undefined
+  qReifyInstances   = undefined
+  qReifyRoles       = undefined
+  qReifyAnnotations = undefined
+  qReifyModule      = undefined
+  qAddDependentFile = undefined
+  qAddModFinalizer  = undefined
+  qAddTopDecls      = undefined
+  qLocation   = undefined
+  qRunIO      = undefined
+  qPutQ       = undefined
+  qGetQ       = undefined
  
 instance Cnv TH.Exp (SAUP.Exp TH.Name) where
   cnv (TH.ParensE e)                = cnv e

@@ -6,7 +6,6 @@ module Conversion.Expression.STLC where
 import Prelude hiding (sin)
 import qualified Expression.STLC.ADTUntypedPolymorphic  as AUP
 import qualified Expression.STLC.ADTUntypedMonomorphic  as AUM
-import qualified Expression.STLC.ADTChurchMonomorphic   as ACM
 import qualified Expression.STLC.ADTChurchPolymorphic   as ACP
 import qualified Expression.STLC.ADTExplicitPolymorphic as AEP
 import qualified Expression.STLC.GADT                   as G
@@ -196,39 +195,6 @@ cnvExpUToEAM (AUM.App ef ea) = AEP.App <$> newMta <*> cnvExpUToEAM ef <*>
                                cnvExpUToEAM ea
 cnvExpUToEAM (AUM.Add ef ea) = AEP.Add <$> newMta <*> cnvExpUToEAM ef <*> 
                                cnvExpUToEAM ea
-
----------------------------------------------------------------------------------
--- Conversion from ACM.Exp
--------------------------------------------------------------------------------- 
-instance (SigTyp t , SigEnv e) => 
-         Cnv (ACM.Exp , A.Env AS.Typ) (G.Exp e t) where
-  cnv (e , r) = do e' :: ExsExp <- cnv (e , r)           
-                   cnv e'  
-
-instance Cnv (ACM.Exp , A.Env AS.Typ) ExsExp where
-  cnv (ACM.Con i     , r) = do ExsSin r' <- cnv r
-                               return (Exs2 (G.Con i) r' G.Int)
-  cnv (ACM.Var x     , r) = do Exs2 x' r' t' <- cnv (x , r)
-                               return (Exs2 (G.Var x') r' t')
-  cnv (ACM.Abs ta eb , r) = do ExsSin ta'   :: ExsTyp <- cnv ta
-                               Exs2 eb' (ta'' `G.Ext` r') tb 
-                                            :: ExsExp <- cnv(eb , ta : r)
-                               Rfl <- eqlSin ta' ta''
-                               return (Exs2 (G.Abs ta' eb') r' (G.Arr ta' tb))
-  cnv (ACM.App ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 
-                                            :: ExsExp <- cnv (ef , r)
-                               Exs2 ea' ra ta'           
-                                            :: ExsExp <- cnv (ea , r)
-                               Rfl <- eqlSin rf ra
-                               Rfl <- eqlSin ta ta'
-                               return (Exs2 (G.App ef' ea') rf tb)
-  cnv (ACM.Add el er , r) = do Exs2 el' rl G.Int 
-                                            :: ExsExp <- cnv (el , r)
-                               Exs2 er' rr G.Int 
-                                            :: ExsExp <- cnv (er , r)
-                               Rfl <- eqlSin rl rr
-                               return (Exs2 (G.Add el' er') rl G.Int)
-
 ---------------------------------------------------------------------------------
 -- Conversion from ACP.Exp
 ---------------------------------------------------------------------------------

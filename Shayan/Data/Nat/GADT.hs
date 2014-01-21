@@ -7,5 +7,4 @@ data Suc n
 
 data Nat n where
   Zro :: Nat Zro
-  Suc :: Nat n -> Nat (Suc n)
-  
+  Suc :: Nat n -> Nat (Suc n)  

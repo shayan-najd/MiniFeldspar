@@ -22,7 +22,6 @@ import qualified Environment.GADT as G
 import Evaluation.STLC.GADT()
 import qualified Examples.STLC.ADTUntypedMonomorphic  as AUM
 import qualified Examples.STLC.ADTUntypedPolymorphic  as AUP
-import qualified Examples.STLC.ADTChurchMonomorphic   as ACM
 import qualified Examples.STLC.ADTChurchPolymorphic   as ACP
 import qualified Examples.STLC.ADTExplicitPolymorphic as AEP
 import qualified Examples.TemplateHaskell             as TH
@@ -56,5 +55,5 @@ isFourQ e  = case (do e':: G.Exp () Integer <- cnv (e
                 Lft s -> error s   
 
 test :: Bool              
-test = isFour AUM.four && isFour' AUP.four && isFour ACM.four && 
+test = isFour AUM.four && isFour' AUP.four &&  
        isFour ACP.four && isFour  AEP.four && isFourQ TH.four
