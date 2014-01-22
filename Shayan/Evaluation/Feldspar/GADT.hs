@@ -13,7 +13,7 @@ instance Evl (Exp e a) where
   evl (ConI i)    _  = V.conI i
   evl (ConB b)    _  = V.conB b
   evl (Var x)     r  = return (get x r)
-  evl (Abs _ eb)  r  = V.abs (\ va -> evl eb (va , r))
+  evl (Abs eb)    r  = V.abs (\ va -> evl eb (va , r))
   evl (App ef ea) r  = do vf <- evl ef r 
                           va <- evl ea r      
                           V.app vf va
@@ -50,5 +50,5 @@ instance Evl (Exp e a) where
                             V.whl vc vb vi
   
   evl (Let el eb)  r = do vl <- evl el r                          
-                          vf <- evl (Abs undefined eb) r
+                          vf <- evl (Abs eb) r
                           V.app vf vl 

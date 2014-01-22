@@ -212,7 +212,7 @@ instance Cnv (ACP.Exp AS.Typ , A.Env AS.Typ) ExsExp where
                                Exs2 eb' (ta'' `G.Ext` r') tb 
                                             :: ExsExp <- cnv(eb , ta : r)
                                Rfl <- eqlSin ta' ta''
-                               return (Exs2 (G.Abs ta' eb') r' (G.Arr ta' tb))
+                               return (Exs2 (G.Abs eb') r' (G.Arr ta' tb))
   cnv (ACP.App ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 
                                             :: ExsExp <- cnv (ef , r)
                                Exs2 ea' ra ta'           
@@ -246,7 +246,7 @@ instance Cnv (AEP.Exp AS.Typ , A.Env AS.Typ) ExsExp where
                                  Exs2 eb' (ta'' `G.Ext` r') tb 
                                             :: ExsExp       <- cnv (eb , ta : r)
                                  Rfl <- eqlSin ta' ta''
-                                 return (Exs2 (G.Abs ta' eb') r' (G.Arr ta' tb))
+                                 return (Exs2 (G.Abs eb') r' (G.Arr ta' tb))
      
   cnv (AEP.App _ ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 
                                             :: ExsExp <- cnv (ef , r)
@@ -276,7 +276,7 @@ cnvGToGHO (G.Con i     , _) = GHO.Con i
 cnvGToGHO (G.Var v     , r) = G.gets v r
 cnvGToGHO (G.Add el er , r) = GHO.Add (cnvGToGHO (el , r)) (cnvGToGHO (er , r))
 cnvGToGHO (G.App ef ea , r) = GHO.App (cnvGToGHO (ef , r)) (cnvGToGHO (ea , r))
-cnvGToGHO (G.Abs _ eb  , r) = GHO.Abs (\ x -> prdAll 
+cnvGToGHO (G.Abs eb    , r) = GHO.Abs (\ x -> prdAll 
                                               (cnvGToGHO (eb , wkn (G.Ext x r))))
 
 wkn :: G.Env (GHO.Exp r) r' -> G.Env (GHO.Exp (t , r)) r'

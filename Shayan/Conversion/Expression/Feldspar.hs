@@ -127,7 +127,7 @@ instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
                                 Exs2 eb' (ta'' `G.Ext` r') tb 
                                              :: ExsExp <- cnv(eb , ta : r)
                                 Rfl <- eqlSin ta' ta''
-                                return (Exs2 (FGDT.Abs ta' eb') r' 
+                                return (Exs2 (FGDT.Abs eb') r' 
                                              (G.Arr ta' tb))
 
   cnv (FACP.App ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 

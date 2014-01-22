@@ -12,7 +12,7 @@ instance Evl (Exp e a) where
   type Env (Exp e a) = e 
   evl (Con i)     _ = V.con i
   evl (Var x)     r = return (get x r)
-  evl (Abs _  eb) r = V.abs (\ va -> evl eb (va , r))
+  evl (Abs eb)    r = V.abs (\ va -> evl eb (va , r))
   evl (App ef ea) r = do vf <- evl ef r 
                          va <- evl ea r
                          V.app vf va

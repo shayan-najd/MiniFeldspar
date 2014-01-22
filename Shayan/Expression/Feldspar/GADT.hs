@@ -4,13 +4,12 @@ module Expression.Feldspar.GADT where
  
 import Variable.GADT
 import Data.Array
-import Type.Feldspar.GADT
 
 data Exp r t where 
   ConI :: Integer  -> Exp r Integer 
   ConB :: Bool     -> Exp r Bool
   Var  :: Var r t  -> Exp r t  
-  Abs  :: Typ ta   -> Exp (ta , r) tb -> Exp r (ta -> tb) 
+  Abs  :: Exp (ta , r) tb -> Exp r (ta -> tb) 
   App  :: Exp r (ta -> tb) -> Exp r ta -> Exp r tb     
   Cnd  :: Exp r Bool ->  Exp r t -> Exp r t -> Exp r t 
   Whl  :: Exp r (t -> Bool) -> Exp r (t -> t) -> Exp r t -> Exp r t  
