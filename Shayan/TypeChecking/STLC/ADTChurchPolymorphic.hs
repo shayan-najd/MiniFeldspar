@@ -13,17 +13,17 @@ instance (TypCons a ~ (Zro, (Suc (Suc Zro), r')), Uni a) =>
          Chk (Exp a) where
   type Env (Exp a)  = E.Env a
   type Typ (Exp a)  = a
-  chk (Con _)     _ = typCon int Nil
+  chk (Con _)     _ = typCon intVar Nil
   chk (Var x)     r = get x r
   chk (Abs ta eb) r = do tb <- chk eb (ta : r)
-                         typCon arr (ta  ::: tb ::: Nil)
+                         typCon arrVar (ta  ::: tb ::: Nil)
   chk (App ef ea) r = do tf                <- chk ef r
                          ta'               <- chk ea r
-                         ta ::: tb ::: Nil <- eqlCon arr tf 
+                         ta ::: tb ::: Nil <- eqlCon arrVar tf 
                          eql ta ta' 
                          return tb
   chk (Add el er) r = do tl <- chk el r
                          tr <- chk er r
-                         _ <- eqlCon int tl 
-                         _ <- eqlCon int tr 
-                         typCon int Nil
+                         _ <- eqlCon intVar tl 
+                         _ <- eqlCon intVar tr 
+                         typCon intVar Nil

@@ -31,20 +31,38 @@ appTs i t = map (appT i t)
 appTtas :: [(N.Nat , Typ r)] -> Typ r -> Typ r
 appTtas ttas t = Prelude.foldl (\ ta (i , t') -> appT i t' ta) t ttas 
 
-int :: G.Var (Zro,r) Zro
-int = G.Zro
+intVar :: G.Var (Zro,r) Zro
+intVar = G.Zro
 
-arr :: G.Var (EnvIntArr r) (Suc (Suc Zro))
-arr = G.Suc G.Zro  
+arrVar :: G.Var (EnvIntArr r) (Suc (Suc Zro))
+arrVar = G.Suc G.Zro  
 
-bol :: G.Var (EnvIntArr (Zro , r)) Zro
-bol = G.Suc (G.Suc G.Zro)
+bolVar :: G.Var (EnvIntArr (Zro , r)) Zro
+bolVar = G.Suc (G.Suc G.Zro)
 
-tpl :: G.Var (EnvIntArr (Zro , (Suc (Suc Zro) , r))) (Suc (Suc Zro))
-tpl = G.Suc (G.Suc (G.Suc G.Zro))
+tplVar :: G.Var (EnvIntArr (Zro , (Suc (Suc Zro) , r))) (Suc (Suc Zro))
+tplVar = G.Suc (G.Suc (G.Suc G.Zro))
 
-ary :: G.Var (EnvFld r) (Suc Zro)
-ary = G.Suc (G.Suc (G.Suc (G.Suc G.Zro)))
+aryVar :: G.Var (EnvFld r) (Suc Zro)
+aryVar = G.Suc (G.Suc (G.Suc (G.Suc G.Zro)))
+
+int :: Typ (EnvIntArr r)
+int = App intVar Nil
+
+arr :: Typ (EnvIntArr r) -> Typ (EnvIntArr r) -> Typ (EnvIntArr r) 
+arr ta tb = App arrVar (ta ::: (tb ::: Nil))
+
+bol :: Typ (EnvIntArr (Zro , r))
+bol = App bolVar Nil
+
+tpl :: r' ~ (EnvIntArr (Zro , (Suc (Suc Zro) , r))) => 
+       Typ r' -> Typ r' -> Typ r'
+tpl tf ts = App tplVar (tf ::: (ts ::: Nil))       
+
+ary :: Typ (EnvFld r) -> Typ (EnvFld r)
+ary ta = App aryVar (ta ::: Nil)  
+
+
 
 type EnvIntArr r = (Zro               -- Int has no  argument
                   ,(Suc (Suc Zro)     -- Arr has two arguments

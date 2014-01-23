@@ -34,11 +34,10 @@ instance Cnv AS.Typ AS.Typ where
 ---------------------------------------------------------------------------------
  
 instance Cnv AM.Typ (H.Typ (H.EnvIntArr ())) where
-  cnv AM.Int         = return (H.App H.int Nil)
-  cnv (AM.Arr ta tr) = do ta' <- cnv ta
-                          tr' <- cnv tr
-                          return (H.App H.arr
-                                  (ta' ::: tr' ::: Nil) )
+  cnv AM.Int         = return H.int
+  cnv (AM.Arr ta tb) = do ta' <- cnv ta
+                          tb' <- cnv tb
+                          return (H.arr ta' tb')
   cnv (AM.Mta i)     = return (H.Mta i)                           
  
 instance Cnv AM.Typ (ExsSin T.Typ) where

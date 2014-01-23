@@ -14,6 +14,7 @@ import Data.Vector
 import Conversion
 import Existential
 import Unification
+import ErrorMonad
 
 type ExsTyp = ExsSin FT.Typ                
 ---------------------------------------------------------------------------------
@@ -49,17 +50,16 @@ instance Cnv FAS.Typ FAS.Typ where
 --  Conversion from FAM.Typ
 ---------------------------------------------------------------------------------
 instance Cnv FAM.Typ (H.Typ (EnvFld ())) where
-  cnv FAM.Int         = return (H.App int Nil)
-  cnv FAM.Bol         = return (H.App bol Nil)
-  cnv (FAM.Arr ta tb) = do ta' <- cnv ta
-                           tb' <- cnv tb
-                           return (H.App arr (ta' ::: (tb' ::: Nil)))
-  cnv (FAM.Tpl ta tb) = do ta' <- cnv ta
-                           tb' <- cnv tb
-                           return (H.App tpl (ta' ::: (tb' ::: Nil)))
-  cnv (FAM.Ary t)     = do t' <- cnv t
-                           return (H.App ary (t' ::: Nil))
-  cnv (FAM.Mta i)     = return (H.Mta i)                             
+  cnv = cnv' 
+     where 
+       cnv' tam = case tam of 
+         FAM.Int       -> pure int
+         FAM.Bol       -> pure bol
+         FAM.Arr ta tb -> arr <$@> ta <*@> tb
+         FAM.Tpl tf ts -> tpl <$@> tf <*@> ts
+         FAM.Ary ta    -> ary <$@> ta
+         FAM.Mta i     -> H.Mta <$> pure i                             
+         where ?cnv = cnv'
 
 instance Cnv FAM.Typ ExsTyp where
   cnv t = do t' :: FAS.Typ <- cnv t 
@@ -84,16 +84,20 @@ instance Cnv FAM.Typ FAM.Typ where
 --  Conversion from FG.Typ
 ---------------------------------------------------------------------------------
 instance Cnv (FT.Typ a) FAS.Typ where
-  cnv FT.Int         = return FAS.Int
-  cnv FT.Bol         = return FAS.Bol
-  cnv (FT.Arr ta tb) = do ta' <- cnv ta
-                          tb' <- cnv tb
-                          return (FAS.Arr ta' tb')
-  cnv (FT.Tpl tf ts) = do tf' <- cnv tf
-                          ts' <- cnv ts
-                          return (FAS.Tpl tf' ts')
-  cnv (FT.Ary t)     = do t' <- cnv t
-                          return (FAS.Ary t')
+  cnv = cnv' 
+    where
+      cnv' :: FT.Typ t -> ErrM FAS.Typ
+      cnv' tg = case tg of
+        FT.Int         -> return FAS.Int
+        FT.Bol         -> return FAS.Bol
+        FT.Arr ta tb   -> do ta' <- cnv' ta
+                             tb' <- cnv' tb
+                             return (FAS.Arr ta' tb')
+        FT.Tpl tf ts   -> do tf' <- cnv' tf
+                             ts' <- cnv' ts
+                             return (FAS.Tpl tf' ts')
+        FT.Ary ta      -> do ta' <- cnv' ta
+                             return (FAS.Ary ta')
  
 instance Cnv (FT.Typ a) FAM.Typ where
   cnv FT.Int         = return FAM.Int
