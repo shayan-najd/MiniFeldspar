@@ -9,6 +9,7 @@ import ErrorMonad
 import Prelude hiding (foldr,notElem)
 import Data.Foldable
 import SingletonEquality.DataNatGADT ()
+import Data.Vector
 
 -- Constraint Solving (Herbrand style constraint solving)
 slv :: [Typ r] -> [EqlC r] -> ErrM [Typ r]
@@ -17,8 +18,8 @@ slv mem []
 -- Optional Optimization (assuming syntactic equlity of types):    
 -- slv mem ((t :~: t') : cs) | t == t'  
 --  = slv mem cs
-slv mem ((App n c ts :~: App n' c' ts') : cs)
-  = do Rfl <- eqlSin n n'
+slv mem ((App c ts :~: App c' ts') : cs)
+  = do Rfl <- eqlSin (len ts) (len ts')
        if c == c' 
          then slv mem  (zipWith (:~:) (toList ts) (toList ts') ++ cs)  
          else fail "Type Error!"     

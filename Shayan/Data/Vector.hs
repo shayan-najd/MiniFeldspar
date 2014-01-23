@@ -20,3 +20,7 @@ instance Functor (Vec n) where
 instance Foldable (Vec n) where 
   foldMap _ Nil        = mempty
   foldMap f (x ::: xs) = f x `mappend` foldMap f xs
+
+len :: Vec n a -> Nat n
+len Nil        = Zro
+len (_ ::: xs) = Suc (len xs)

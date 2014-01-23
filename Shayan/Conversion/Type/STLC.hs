@@ -37,10 +37,10 @@ type EnvAMH = (Zro            -- Int has no  argument
               ,(Suc (Suc Zro),())) -- Arr has two arguments
 
 instance Cnv AM.Typ (H.Typ EnvAMH) where
-  cnv AM.Int         = return (H.App Zro G.Zro Nil)
+  cnv AM.Int         = return (H.App G.Zro Nil)
   cnv (AM.Arr ta tr) = do ta' <- cnv ta
                           tr' <- cnv tr
-                          return (H.App (Suc (Suc Zro)) (G.Suc G.Zro) 
+                          return (H.App (G.Suc G.Zro) 
                                   (ta' ::: tr' ::: Nil) )
   cnv (AM.Mta i)     = return (H.Mta i)                           
  
@@ -62,9 +62,9 @@ instance Cnv AM.Typ AM.Typ where
 -- Conversion from AM.Typ
 ---------------------------------------------------------------------------------
 instance Cnv (H.Typ EnvAMH) AM.Typ where
-  cnv (H.App Zro G.Zro Nil)  = pure AM.Int
-  cnv (H.App (Suc (Suc Zro)) (G.Suc G.Zro) (ta ::: tr ::: Nil)) 
-                             = let ?cnv = cnv in 
-                               AM.Arr <$@> ta <*@> tr
-  cnv (H.App _ _  _)         = fail "Type Error!"
-  cnv (H.Mta i)              = AM.Mta <$> pure i                           
+  cnv (H.App G.Zro Nil)  = pure AM.Int
+  cnv (H.App (G.Suc G.Zro) (ta ::: tr ::: Nil)) 
+                         = let ?cnv = cnv in 
+                            AM.Arr <$@> ta <*@> tr
+  cnv (H.App _  _)       = fail "Type Error!"
+  cnv (H.Mta i)          = AM.Mta <$> pure i                           

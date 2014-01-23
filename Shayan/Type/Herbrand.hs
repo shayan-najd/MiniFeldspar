@@ -3,23 +3,22 @@
 module Type.Herbrand where
 
 import qualified Variable.GADT as G
-import qualified Data.Nat.GADT as S
 import Data.Nat
 import Data.Vector
 import Data.Foldable
 
 data Typ r where 
-   App :: S.Nat n -> G.Var r n -> Vec n (Typ r) -> Typ r
+   App :: G.Var r n -> Vec n (Typ r) -> Typ r
    Mta :: Nat -> Typ r  
 
 -- Collecting metavariables in a typ
 mtas :: Typ r -> [Nat]
-mtas (Mta i)      = [i]
-mtas (App _ _ ts) = foldMap mtas ts 
+mtas (Mta i)    = [i]
+mtas (App _ ts) = foldMap mtas ts 
 
 -- Subtitution of a metavariable ([i := t]) in a type 
 appT :: Nat -> Typ r -> Typ r -> Typ r
-appT i t (App n c vs)        = App n c (appT i t `fmap` vs)  
+appT i t (App c vs)          = App c (appT i t `fmap` vs)  
 appT i t (Mta j) | j == i    = t
                  | otherwise = Mta j           
 
