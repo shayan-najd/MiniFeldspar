@@ -2,10 +2,10 @@
 {-# LANGUAGE GADTs #-}
 module Type.Herbrand where
 
-import Data.Vector
-import Variable.ADT
 import qualified Variable.GADT as G
 import qualified Data.Nat.GADT as S
+import Data.Nat
+import Data.Vector
 import Data.Foldable
 
 data Typ r where 

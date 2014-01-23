@@ -17,14 +17,24 @@ class Monad (Mnd t) => Uni t where
 int :: V.Var (Zro,r) Zro
 int = V.Zro
 
-arr :: V.Var (Zro,(Suc (Suc Zro),r)) (Suc (Suc Zro))
+arr :: V.Var (EnvIntArr r) (Suc (Suc Zro))
 arr = V.Suc V.Zro  
 
-bol :: V.Var (Zro,(Suc (Suc Zro),(Zro,r))) Zro
+bol :: V.Var (EnvIntArr (Zro , r)) Zro
 bol = V.Suc (V.Suc V.Zro)
 
-tpl :: V.Var (Zro,(Suc (Suc Zro),(Zro,(Suc (Suc Zro),r)))) (Suc (Suc Zro))
+tpl :: V.Var (EnvIntArr (Zro , (Suc (Suc Zro) , r))) (Suc (Suc Zro))
 tpl = V.Suc (V.Suc (V.Suc V.Zro))
 
-ary :: V.Var (Zro,(Suc (Suc Zro),(Zro,(Suc (Suc Zro),(Suc Zro,r))))) (Suc Zro)
+ary :: V.Var (EnvFld r) (Suc Zro)
 ary = V.Suc (V.Suc (V.Suc (V.Suc V.Zro)))
+
+type EnvIntArr r = (Zro               -- Int has no  argument
+                  ,(Suc (Suc Zro)     -- Arr has two arguments
+                  ,r)) 
+                   
+type EnvFld    r = EnvIntArr 
+                   (Zro
+                  ,(Suc (Suc Zro) 
+                  ,(Suc Zro 
+                  ,r)))

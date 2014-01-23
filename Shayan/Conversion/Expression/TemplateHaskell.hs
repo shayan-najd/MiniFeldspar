@@ -31,7 +31,6 @@ import ErrorMonad
 import Singleton
 import Existential
 
-import Control.Applicative ((<$>),(<*>))
 import Prelude hiding (filter)
 
 type ExsFExp = Exs2 FGDT.Exp (G.Env FG.Typ) FG.Typ 

@@ -1,305 +1,265 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, GADTs, ConstraintKinds
-           , ScopedTypeVariables , FlexibleContexts, PolyKinds, TypeHoles #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
+           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
+           , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.STLC where
 
-import Prelude hiding (sin)
-import qualified Expression.STLC.ADTUntypedPolymorphic  as AUP
-import qualified Expression.STLC.ADTUntypedMonomorphic  as AUM
-import qualified Expression.STLC.ADTChurchPolymorphic   as ACP
-import qualified Expression.STLC.ADTExplicitPolymorphic as AEP
-import qualified Expression.STLC.GADT                   as G
-import qualified Expression.STLC.GADTHigherOrder        as GHO
+import qualified Expression.STLC.ADTUntypedPolymorphic  as SAUP
+import qualified Expression.STLC.ADTUntypedMonomorphic  as SAUM
+import qualified Expression.STLC.ADTChurchPolymorphic   as SACP
+import qualified Expression.STLC.ADTExplicitPolymorphic as SAEP
+import qualified Expression.STLC.GADT                   as SGDT
+import qualified Expression.STLC.GADTHigherOrder        as SGHO
 
-import qualified Type.STLC.ADTSimple           as AS
-import qualified Type.STLC.ADTWithMetavariable as AM
+import qualified Type.STLC.ADTSimple           as SAS
+import qualified Type.STLC.ADTWithMetavariable as SAM
 import qualified Type.STLC.GADT                as G
 
 import qualified Variable.ADT             as A
 import qualified Variable.GADT            as G
 
-import qualified Environment.ADTTable     as AT
 import qualified Environment.ADT          as A
+import qualified Environment.ADTTable     as AT
 import qualified Environment.GADT         as G
 
-import TypeChecking.STLC.ADTChurchPolymorphic   ()
-import TypeChecking.STLC.ADTExplicitPolymorphic ()
+import Conversion
+import Conversion.Type.STLC ()
+import Conversion.Variable ()
+import Conversion.Environment (cnvEnvAMAS)
+import Conversion.Existential ()
 
-import InferenceMonad
-import Unification.STLC.ADTWithMetavariable ()
-
+import SingletonEquality
 import SingletonEquality.TypeSTLCGADT ()
 import SingletonEquality.EnvironmentGADT ()
 
-import Conversion.Type.STLC ()
-import Conversion.Variable ()
-import Conversion.Environment ()
-import Conversion.Existential ()
+import TypeChecking.STLC.ADTChurchPolymorphic   ()
+import TypeChecking.STLC.ADTExplicitPolymorphic ()
+import Unification.STLC.ADTWithMetavariable ()
 
+import Inference
+import InferenceMonad
 import Existential
 import Singleton
-import Conversion
-import SingletonEquality
-import ErrorMonad
-import Inference
-import qualified Conversion.Type.STLC as C
 
-import Control.Applicative ((<$>),(<*>),pure)
 import Data.Traversable (traverse)
 
-type ExsExp = Exs2 G.Exp (G.Env G.Typ) G.Typ
+type ExsExp = Exs2 SGDT.Exp (G.Env G.Typ) G.Typ
 type ExsTyp = ExsSin G.Typ
 type SigTyp = Sin G.Typ
 type SigEnv = Sin (G.Env G.Typ)
+
 ---------------------------------------------------------------------------------
--- Conversion from AUP.Exp
+-- Conversion from SAUP.Exp
 ---------------------------------------------------------------------------------
-instance (SigTyp t , SigEnv r , Eq x) => 
-                 Cnv (AUP.Exp x , AT.Env x AS.Typ) (G.Exp r t)      where
-  cnv (e , r) = do e' :: ExsExp <- cnv (e , r)           
-                   cnv e'
-                     
-instance (SigTyp t , SigEnv r , Eq x) =>  
-         Cnv (AUP.Exp x , AT.Env x AS.Typ , AT.Env x AUM.Exp) (G.Exp r t) where
-  cnv (e , rt , rs) = do e' :: AUM.Exp <- cnv (e , rt , rs)
+instance (Eq x , SigEnv r , SigTyp t' , Cnv t SAM.Typ) =>  
+         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) (SGDT.Exp r t') where
+  cnv (e , rt , rf) = do e' :: SAUM.Exp <- cnv (e , rt , rf)
                          cnv (e', map snd rt)
                                           
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) ExsExp            where
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
+instance (Eq x , Cnv t SAM.Typ) => 
+         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) ExsExp  where
+  cnv (e , rt , rf) = do e' :: SACP.Exp SAM.Typ <- cnv (e  , rt , rf)
+                         r' :: AT.Env x SAM.Typ <- cnvEnvAMAS rt
+                         cnv (e' , map snd r')                    
 
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) (ACP.Exp AM.Typ) where
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
+instance (Eq x , Cnv t SAM.Typ , Cnv SAM.Typ t') => 
+         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) (SACP.Exp t') where
+  cnv (e , rt , rf) = do r' :: AT.Env x SAM.Typ <- cnvEnvAMAS rt  
+                         e' :: SAUM.Exp         <- cnv (e , r' , rf)
+                         cnv (e'  , map snd r')
 
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AM.Typ) (ACP.Exp AS.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-  
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AM.Typ) (ACP.Exp AM.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) (ACP.Exp AS.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) (AEP.Exp AM.Typ) where
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-  
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AM.Typ) (AEP.Exp AS.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-  
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AM.Typ) (AEP.Exp AM.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-  
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) (AEP.Exp AS.Typ) where  
-  cnv (e , rt) = do e' :: AUM.Exp <- cnv (e , rt)
-                    cnv (e' , map snd rt)                 
-  
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AM.Typ) AUM.Exp          where
-  cnv (e , rt) = cnvExpUUToU e (zip (map fst rt) [A.Zro ..]) []  
-
-instance Eq a => Cnv (AUP.Exp a , AT.Env a AS.Typ) AUM.Exp          where
-  cnv (e , rt) = cnv (e , rt , [] :: AT.Env a AUM.Exp)  
-
-instance Eq a => 
-         Cnv (AUP.Exp a , AT.Env a AS.Typ , AT.Env a AUM.Exp) AUM.Exp where
-  cnv (e , rt , rf) = cnvExpUUToU e (zip (map fst rt) [A.Zro ..]) rf 
-
-cnvExpUUToU :: Eq a => 
-               AUP.Exp a -> AT.Env a A.Nat -> AT.Env a AUM.Exp -> ErrM AUM.Exp
-cnvExpUUToU (AUP.Con i)     _  _  = return (AUM.Con i)
-cnvExpUUToU (AUP.Var s)     rb rf = case (AT.get s rb , AT.get s rf) of
-  (Just x  , _)                  -> return (AUM.Var x)
-  (Nothing , Just e)             -> return e
-  _                              -> fail "Scope Error!"
-cnvExpUUToU (AUP.Abs s  eb) rb rf = AUM.Abs <$> 
-                                    cnvExpUUToU eb ((s , A.Zro) : 
-                                                    fmap A.Suc `map` rb) rf 
-cnvExpUUToU (AUP.App ef ea) rb rf = AUM.App <$>
-                                    cnvExpUUToU ef rb rf <*>
-                                    cnvExpUUToU ea rb rf 
-cnvExpUUToU (AUP.Add el er) rb rf = AUM.Add <$> 
-                                    cnvExpUUToU el rb rf <*> 
-                                    cnvExpUUToU er rb rf   
-
+instance (Eq x , Cnv t SAM.Typ , Cnv SAM.Typ t') => 
+         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) (SAEP.Exp t') where
+  cnv (e , rt , rf) = do r' :: AT.Env x SAM.Typ <- cnvEnvAMAS rt  
+                         e' :: SAUM.Exp         <- cnv (e , r' , rf)
+                         cnv (e'  , map snd r')
+ 
+instance (Eq x , Cnv t SAM.Typ) => 
+         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) SAUM.Exp where
+  cnv = \ (e , rt , rf) -> do rt' :: AT.Env x SAM.Typ <- cnvEnvAMAS rt 
+                              cnvExpUUToU e (zip (map fst rt') [A.Zro ..]) rf
+    where
+      cnvExpUUToU eaup rb rf = case eaup of      
+        SAUP.Con i     -> return (SAUM.Con i)
+        SAUP.Var s     -> case (AT.get s rb , AT.get s rf) of
+          (Just x  , _)      -> SAUM.Var <$> pure x
+          (Nothing , Just e) -> pure e
+          _                  -> fail "Scope Error!"
+        SAUP.Abs s  eb -> SAUM.Abs <$> 
+                          cnvExpUUToU eb ((s , A.Zro) : fmap A.Suc `map` rb) rf 
+        SAUP.App ef ea -> SAUM.App <$@> ef <*@> ea
+        SAUP.Add el er -> SAUM.Add <$@> el <*@> er
+        where
+          ?cnv = \e -> cnvExpUUToU e rb rf 
+ 
 ---------------------------------------------------------------------------------
--- Conversion from AUM.Exp
+-- Conversion from SAUM.Exp
 ---------------------------------------------------------------------------------
-instance (SigTyp t , SigEnv e) => 
-         Cnv (AUM.Exp , A.Env AS.Typ) (G.Exp e t) where
+instance (SigEnv r , SigTyp t' , Cnv t SAM.Typ) => 
+         Cnv (SAUM.Exp , A.Env t) (SGDT.Exp r t') where
   cnv (e , r) = do e' :: ExsExp <- cnv (e , r)
                    cnv e'               
     
-instance Cnv (AUM.Exp , A.Env AS.Typ) ExsExp where  
-  cnv (e , r) = do e' :: ACP.Exp AS.Typ <- cnv (e , r)
-                   cnv (e' , r)
+instance Cnv t SAM.Typ =>  
+         Cnv (SAUM.Exp , A.Env t) ExsExp where  
+  cnv (e , r) = do r' :: A.Env SAM.Typ    <- cnv r
+                   e' :: SACP.Exp SAM.Typ <- cnv (e , r')
+                   cnv (e' , r')
 
-instance Cnv (AUM.Exp , A.Env AS.Typ) (ACP.Exp AM.Typ) where
-  cnv (e , r) = do r' :: A.Env AM.Typ <- traverse cnv r
-                   cnv (e , r')
+instance (Cnv t SAM.Typ , Cnv SAM.Typ t') => 
+         Cnv (SAUM.Exp , A.Env t) (SACP.Exp t') where
+  cnv = \ (e , r) -> do r' :: A.Env SAM.Typ    <- cnv r
+                        e' :: SACP.Exp SAM.Typ <- inf cnvExpUToACPAM (e , r')
+                        cnv e'
+   where
+     cnvExpUToACPAM eaum = case eaum of
+       SAUM.Con i     -> SACP.Con <$> pure i
+       SAUM.Var v     -> SACP.Var <$> pure v
+       SAUM.Abs eb    -> SACP.Abs <$> newMta <*@> eb
+       SAUM.App ef ea -> SACP.App <$@> ef <*@> ea
+       SAUM.Add el er -> SACP.Add <$@> el <*@> er 
+       where
+           ?cnv = cnvExpUToACPAM
 
-instance Cnv (AUM.Exp , A.Env AM.Typ) (ACP.Exp AS.Typ) where
-  cnv (e , r) = do e' :: ACP.Exp AM.Typ <- cnv (e , r)
-                   traverse cnv e'
-
-instance Cnv (AUM.Exp , A.Env AM.Typ) (ACP.Exp AM.Typ) where
-  cnv = inf cnvExpUToACPAM   
-
-instance Cnv (AUM.Exp , A.Env AS.Typ) (ACP.Exp AS.Typ) where
-  cnv (e , r) = do r' :: A.Env AM.Typ   <- traverse cnv r
-                   e' :: ACP.Exp AM.Typ <- cnv (e , r')
-                   traverse cnv e'
-
-instance Cnv (AUM.Exp , A.Env AS.Typ) (AEP.Exp AM.Typ) where
-  cnv (e , r) = do r' :: A.Env AM.Typ <- traverse cnv r
-                   cnv (e , r')
-
-instance Cnv (AUM.Exp , A.Env AM.Typ) (AEP.Exp AS.Typ) where
-  cnv (e , r) = do e' :: AEP.Exp AM.Typ <- cnv (e , r)
-                   traverse cnv e'
-
-instance Cnv (AUM.Exp , A.Env AM.Typ) (AEP.Exp AM.Typ) where
-  cnv = inf cnvExpUToEAM
-
-instance Cnv (AUM.Exp , A.Env AS.Typ) (AEP.Exp AS.Typ) where
-  cnv (e , r) = do r' :: A.Env AM.Typ   <- traverse cnv r
-                   e' :: AEP.Exp AM.Typ <- cnv (e , r')
-                   traverse cnv e'
-  
--- Conversion from the untyped lambda calculus to the explicitly typed 
--- simply-typed lambda calculus (church style) where every explicit type 
--- annotaion is set as a fresh metavariable
-cnvExpUToACPAM :: AUM.Exp -> InfM C.EnvAMH (ACP.Exp AM.Typ)
-cnvExpUToACPAM (AUM.Con i)     = return (ACP.Con i)
-cnvExpUToACPAM (AUM.Var v)     = return (ACP.Var v)
-cnvExpUToACPAM (AUM.Abs eb)    = ACP.Abs <$> newMta <*> cnvExpUToACPAM eb
-cnvExpUToACPAM (AUM.App ef ea) = ACP.App <$> cnvExpUToACPAM ef <*> 
-                                 cnvExpUToACPAM ea
-cnvExpUToACPAM (AUM.Add ef ea) = ACP.Add <$> cnvExpUToACPAM ef <*> 
-                                 cnvExpUToACPAM ea         
-
-       
--- Conversion from the untyped lambda calculus to the explicitly typed 
--- simply-typed lambda calculus where every explicit type annotaion is
--- set as a fresh metavariable
-cnvExpUToEAM :: AUM.Exp -> InfM C.EnvAMH (AEP.Exp AM.Typ)
-cnvExpUToEAM (AUM.Con i)     = AEP.Con <$> newMta <*> pure i
-cnvExpUToEAM (AUM.Var v)     = AEP.Var <$> newMta <*> pure v
-cnvExpUToEAM (AUM.Abs eb)    = AEP.Abs <$> newMta <*> cnvExpUToEAM eb
-cnvExpUToEAM (AUM.App ef ea) = AEP.App <$> newMta <*> cnvExpUToEAM ef <*> 
-                               cnvExpUToEAM ea
-cnvExpUToEAM (AUM.Add ef ea) = AEP.Add <$> newMta <*> cnvExpUToEAM ef <*> 
-                               cnvExpUToEAM ea
----------------------------------------------------------------------------------
--- Conversion from ACP.Exp
----------------------------------------------------------------------------------
-instance (SigTyp t , SigEnv e) => 
-         Cnv (ACP.Exp AS.Typ , A.Env AS.Typ) (G.Exp e t) where
-  cnv (e , r) = do e' :: ExsExp <- cnv (e , r)           
-                   cnv e'  
-
-instance Cnv (ACP.Exp AS.Typ , A.Env AS.Typ) ExsExp where  
-  cnv (ACP.Con i     , r) = do ExsSin r' <- cnv r
-                               return (Exs2 (G.Con i) r' G.Int)
-  cnv (ACP.Var x     , r) = do Exs2 x' r' t' <- cnv (x , r)
-                               return (Exs2 (G.Var x') r' t')
-  cnv (ACP.Abs ta eb , r) = do ExsSin ta'   :: ExsTyp <- cnv ta
-                               Exs2 eb' (ta'' `G.Ext` r') tb 
-                                            :: ExsExp <- cnv(eb , ta : r)
-                               Rfl <- eqlSin ta' ta''
-                               return (Exs2 (G.Abs eb') r' (G.Arr ta' tb))
-  cnv (ACP.App ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 
-                                            :: ExsExp <- cnv (ef , r)
-                               Exs2 ea' ra ta'           
-                                            :: ExsExp <- cnv (ea , r)
-                               Rfl <- eqlSin rf ra
-                               Rfl <- eqlSin ta ta'
-                               return (Exs2 (G.App ef' ea') rf tb)
-  cnv (ACP.Add el er , r) = do Exs2 el' rl G.Int 
-                                            :: ExsExp <- cnv (el , r)
-                               Exs2 er' rr G.Int 
-                                            :: ExsExp <- cnv (er , r)
-                               Rfl <- eqlSin rl rr
-                               return (Exs2 (G.Add el' er') rl G.Int)
+instance (Cnv t SAM.Typ , Cnv SAM.Typ t') => 
+         Cnv (SAUM.Exp , A.Env t) (SAEP.Exp t') where
+  cnv = \ (e , r) -> do r' :: A.Env SAM.Typ    <- cnv r
+                        e' :: SAEP.Exp SAM.Typ <- inf cnvExpUToAEPAM (e , r')
+                        cnv e'
+   where
+    cnvExpUToAEPAM eaum = case eaum of
+       SAUM.Con i     -> SAEP.Con <$> newMta <*> pure i
+       SAUM.Var v     -> SAEP.Var <$> newMta <*> pure v
+       SAUM.Abs eb    -> SAEP.Abs <$> newMta <*@> eb
+       SAUM.App ef ea -> SAEP.App <$> newMta <*@> ef <*@> ea
+       SAUM.Add el er -> SAEP.Add <$> newMta <*@> el <*@> er 
+       where
+         ?cnv = cnvExpUToAEPAM
 
 ---------------------------------------------------------------------------------
--- Conversion from AEP.Exp
+-- Conversion from SACP.Exp
 ---------------------------------------------------------------------------------
-instance (SigTyp t , SigEnv e) => 
-         Cnv (AEP.Exp AS.Typ , A.Env AS.Typ) (G.Exp e t) where
-  cnv (e , r) = do e' :: ExsExp <- cnv (e , r)           
-                   cnv e'  
+instance (SigEnv r , SigTyp t' , Cnv t' SAM.Typ , t ~ t') => 
+         Cnv (SACP.Exp t , A.Env t) (SGDT.Exp r t') where
+  cnv (e , r) = do r'  :: A.Env    SAM.Typ <- cnv r
+                   e'  :: SACP.Exp SAM.Typ <- cnv e
+                   e'' :: ExsExp           <- cnv (e' , r')       
+                   cnv e''
 
-instance Cnv (AEP.Exp AS.Typ , A.Env AS.Typ) ExsExp where
-  cnv (AEP.Con _ i     , r) = do ExsSin r' <- cnv r
-                                 return (Exs2 (G.Con i) r' G.Int)
-  cnv (AEP.Var _ x     , r) = do Exs2 x' r' t' <- cnv (x , r)
-                                 return (Exs2 (G.Var x') r' t')
-                              
-  cnv (AEP.Abs t eb    , r) = do let (ta `AS.Arr` _) = t
-                                 ExsSin ta' :: ExsSin G.Typ <- cnv ta
-                                 Exs2 eb' (ta'' `G.Ext` r') tb 
-                                            :: ExsExp       <- cnv (eb , ta : r)
-                                 Rfl <- eqlSin ta' ta''
-                                 return (Exs2 (G.Abs eb') r' (G.Arr ta' tb))
-     
-  cnv (AEP.App _ ef ea , r) = do Exs2 ef' rf (G.Arr ta tb) 
-                                            :: ExsExp <- cnv (ef , r)
-                                 Exs2 ea' ra ta'           
-                                            :: ExsExp <- cnv (ea , r)
-                                 Rfl <- eqlSin rf ra
-                                 Rfl <- eqlSin ta ta'
-                                 return (Exs2 (G.App ef' ea') rf tb)
-  cnv (AEP.Add _ el er , r) = do Exs2 el' rl G.Int 
-                                            :: ExsExp <- cnv (el , r)
-                                 Exs2 er' rr G.Int 
-                                            :: ExsExp <- cnv (er , r)
-                                 Rfl <- eqlSin rl rr
-                                 return (Exs2 (G.Add el' er') rl G.Int)
+instance Cnv (SACP.Exp SAS.Typ , A.Env SAS.Typ) ExsExp where
+  cnv (e , r) = do r' :: A.Env SAM.Typ    <- cnv r
+                   e' :: SACP.Exp SAM.Typ <- cnv e
+                   cnv (e' , r') 
+
+instance Cnv (SACP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where  
+  cnv (SACP.Con i     , r) = do 
+    ExsSin r' <- cnv r
+    return (Exs2 (SGDT.Con i) r' G.Int)
+  cnv (SACP.Var x     , r) = do 
+    Exs2 x' r' t' <- cnv (x , r)
+    return (Exs2 (SGDT.Var x') r' t')
+  cnv (SACP.Abs ta eb , r) = do 
+    ExsSin ta'                    :: ExsTyp <- cnv ta
+    Exs2 eb' (ta'' `G.Ext` r') tb :: ExsExp <- cnv(eb , ta : r)
+    Rfl <- eqlSin ta' ta''
+    return (Exs2 (SGDT.Abs eb') r' (G.Arr ta' tb))
+  cnv (SACP.App ef ea , r) = do 
+    Exs2 ef' rf (G.Arr ta tb)     :: ExsExp <- cnv (ef , r)
+    Exs2 ea' ra ta'               :: ExsExp <- cnv (ea , r)
+    Rfl <- eqlSin rf ra
+    Rfl <- eqlSin ta ta'
+    return (Exs2 (SGDT.App ef' ea') rf tb)
+  cnv (SACP.Add el er , r) = do 
+    Exs2 el' rl G.Int             :: ExsExp <- cnv (el , r)
+    Exs2 er' rr G.Int             :: ExsExp <- cnv (er , r)
+    Rfl <- eqlSin rl rr
+    return (Exs2 (SGDT.Add el' er') rl G.Int)
+
+instance Cnv t t' => Cnv (SACP.Exp t) (SACP.Exp t') where
+   cnv = traverse cnv
+   
+---------------------------------------------------------------------------------
+-- Conversion from SAEP.Exp
+---------------------------------------------------------------------------------
+instance (SigEnv r , SigTyp t' , Cnv t' SAM.Typ , t ~ t') => 
+         Cnv (SAEP.Exp t , A.Env t) (SGDT.Exp r t') where
+  cnv (e , r) = do r'  :: A.Env    SAM.Typ <- cnv r
+                   e'  :: SAEP.Exp SAM.Typ <- cnv e
+                   e'' :: ExsExp           <- cnv (e' , r')       
+                   cnv e''
+
+instance Cnv (SAEP.Exp SAS.Typ , A.Env SAS.Typ) ExsExp where
+  cnv (e , r) = do r' :: A.Env SAM.Typ    <- cnv r
+                   e' :: SAEP.Exp SAM.Typ <- cnv e
+                   cnv (e' , r') 
+
+instance Cnv (SAEP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where  
+  cnv (SAEP.Con _ i     , r) = do 
+    ExsSin r' <- cnv r
+    return (Exs2 (SGDT.Con i) r' G.Int)
+  cnv (SAEP.Var _ x     , r) = do 
+    Exs2 x' r' t' <- cnv (x , r)
+    return (Exs2 (SGDT.Var x') r' t')
+  cnv (SAEP.Abs t eb , r) = do 
+    let SAM.Arr ta _ = t
+    ExsSin ta'                    :: ExsTyp <- cnv ta
+    Exs2 eb' (ta'' `G.Ext` r') tb :: ExsExp <- cnv (eb , ta : r)
+    Rfl <- eqlSin ta' ta''
+    return (Exs2 (SGDT.Abs eb') r' (G.Arr ta' tb))
+  cnv (SAEP.App _ ef ea , r) = do 
+    Exs2 ef' rf (G.Arr ta tb)     :: ExsExp <- cnv (ef , r)
+    Exs2 ea' ra ta'               :: ExsExp <- cnv (ea , r)
+    Rfl <- eqlSin rf ra
+    Rfl <- eqlSin ta ta'
+    return (Exs2 (SGDT.App ef' ea') rf tb)
+  cnv (SAEP.Add _ el er , r) = do 
+    Exs2 el' rl G.Int             :: ExsExp <- cnv (el , r)
+    Exs2 er' rr G.Int             :: ExsExp <- cnv (er , r)
+    Rfl <- eqlSin rl rr
+    return (Exs2 (SGDT.Add el' er') rl G.Int)
+
+instance Cnv t t' => Cnv (SAEP.Exp t) (SAEP.Exp t') where
+   cnv = traverse cnv
 
 ---------------------------------------------------------------------------------
--- Conversion from Existentials
+-- Conversion from Higher-Order
 ---------------------------------------------------------------------------------
-instance t ~ t' => Cnv (G.Exp r t , G.Env G.Typ r) (GHO.Exp r t') where
-  cnv (e , r) = cnv (e , cnvGEnv r)           
-  
-instance t ~ t' => Cnv (G.Exp r t , G.Env (GHO.Exp r) r) (GHO.Exp r t') where
-  cnv  = return . cnvGToGHO
-
-cnvGToGHO :: forall r t. (G.Exp r t , G.Env (GHO.Exp r) r) -> GHO.Exp r t
-cnvGToGHO (G.Con i     , _) = GHO.Con i
-cnvGToGHO (G.Var v     , r) = G.gets v r
-cnvGToGHO (G.Add el er , r) = GHO.Add (cnvGToGHO (el , r)) (cnvGToGHO (er , r))
-cnvGToGHO (G.App ef ea , r) = GHO.App (cnvGToGHO (ef , r)) (cnvGToGHO (ea , r))
-cnvGToGHO (G.Abs eb    , r) = GHO.Abs (\ x -> prdAll 
-                                              (cnvGToGHO (eb , wkn (G.Ext x r))))
-
-wkn :: G.Env (GHO.Exp r) r' -> G.Env (GHO.Exp (t , r)) r'
+instance (t ~ t' , r ~ r') => 
+         Cnv (SGDT.Exp r t , G.Env G.Typ r) (SGHO.Exp r' t') where
+  cnv = \ (e , r) -> return (cnvGToGHO e (cnvGEnv r))
+    where
+      cnvGToGHO :: forall rr tt. SGDT.Exp rr tt -> G.Env (SGHO.Exp rr) rr 
+                   -> SGHO.Exp rr tt
+      cnvGToGHO egdt r = case egdt of  
+        SGDT.Con i     -> SGHO.Con i
+        SGDT.Var v     -> G.gets v r
+        SGDT.Add el er -> SGHO.Add (cnvGToGHO el r) (cnvGToGHO er r)
+        SGDT.App ef ea -> SGHO.App (cnvGToGHO ef r) (cnvGToGHO ea r)
+        SGDT.Abs eb    -> SGHO.Abs (\ x -> prdAll 
+                                           (cnvGToGHO eb (wkn (G.Ext x r))))
+ 
+wkn :: G.Env (SGHO.Exp r) r' -> G.Env (SGHO.Exp (t , r)) r'
 wkn G.Emp                    = G.Emp
 wkn (G.Ext e G.Emp)          = G.Ext (sucAll e) G.Emp
 wkn (G.Ext e es@(G.Ext _ _)) = G.Ext (sucAll e) (wkn es)
  
-sucAll :: GHO.Exp r t' -> GHO.Exp (t , r) t' 
-sucAll (GHO.Con i)      = GHO.Con i
-sucAll (GHO.Var v)      = GHO.Var (G.Suc v)
-sucAll (GHO.Add el er)  = GHO.Add (sucAll el) (sucAll er)
-sucAll (GHO.App ef ea)  = GHO.App (sucAll ef) (sucAll ea)
-sucAll (GHO.Abs f)      = GHO.Abs (sucAll . f . prdAll)  
+sucAll :: SGHO.Exp r t' -> SGHO.Exp (t , r) t' 
+sucAll (SGHO.Con i)      = SGHO.Con i
+sucAll (SGHO.Var v)      = SGHO.Var (G.Suc v)
+sucAll (SGHO.Add el er)  = SGHO.Add (sucAll el) (sucAll er)
+sucAll (SGHO.App ef ea)  = SGHO.App (sucAll ef) (sucAll ea)
+sucAll (SGHO.Abs f)      = SGHO.Abs (sucAll . f . prdAll)  
 
-prdAll :: GHO.Exp (t , r) t' -> GHO.Exp r t'
-prdAll (GHO.Con i)         = GHO.Con i
-prdAll (GHO.Var (G.Suc v)) = GHO.Var v
-prdAll (GHO.Var G.Zro)     = error "Impossible!"
-prdAll (GHO.Add el er)     = GHO.Add (prdAll el) (prdAll er)
-prdAll (GHO.App ef ea)     = GHO.App (prdAll ef) (prdAll ea)
-prdAll (GHO.Abs f)         = GHO.Abs (prdAll . f . sucAll) 
+-- Should not contain variable zro
+prdAll :: SGHO.Exp (t , r) t' -> SGHO.Exp r t'
+prdAll (SGHO.Con i)         = SGHO.Con i
+prdAll (SGHO.Var (G.Suc v)) = SGHO.Var v
+prdAll (SGHO.Var G.Zro)     = error "Impossible!"
+prdAll (SGHO.Add el er)     = SGHO.Add (prdAll el) (prdAll er)
+prdAll (SGHO.App ef ea)     = SGHO.App (prdAll ef) (prdAll ea)
+prdAll (SGHO.Abs f)         = SGHO.Abs (prdAll . f . sucAll) 
                                                   
-cnvGEnv :: G.Env G.Typ r -> G.Env (GHO.Exp r) r  
+cnvGEnv :: G.Env G.Typ r -> G.Env (SGHO.Exp r) r  
 cnvGEnv  = undefined 
 
 {-

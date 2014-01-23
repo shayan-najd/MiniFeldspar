@@ -45,11 +45,13 @@ isFour e  = case (do Exs2 e' r' G.Int
               Rgt i -> i == (4 :: Integer)
               Lft s -> error s   
 
-isFour' :: forall ef. (Cnv (ef String, AT.Env String FS.Typ) ExsExp) => 
+isFour' :: forall ef. (Cnv (ef String, AT.Env String FS.Typ 
+                           , AT.Env String AUM.Exp) ExsExp) => 
            ef String -> Bool
 isFour' e  = case (do Exs2 e' r' G.Int 
                              :: ExsExp <- cnv (e , [("add", FS.Int `FS.Arr` 
-                                                    (FS.Int `FS.Arr` FS.Int))])
+                                                    (FS.Int `FS.Arr` FS.Int))]
+                                                 , [] :: AT.Env String AUM.Exp )
                       Rfl <- eqlSin r' (G.Ext (G.Int `G.Arr` 
                                                     (G.Int `G.Arr` G.Int))
                                                     G.Emp)

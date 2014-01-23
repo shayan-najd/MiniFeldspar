@@ -38,10 +38,12 @@ isFour e  = case (do Exs2 e' G.Emp G.Int
               Rgt i -> i == (4 :: Integer)
               Lft s -> error s   
 
-isFour' :: forall x ef. (Eq x , Cnv (ef x, AT.Env x AS.Typ) ExsExp) => 
+isFour' :: forall x ef. (Eq x , Cnv (ef x, AT.Env x AS.Typ 
+                                    , AT.Env x AUM.Exp) ExsExp) => 
            ef x -> Bool
 isFour' e  = case (do Exs2 e' G.Emp G.Int 
-                             :: ExsExp <- cnv (e , [] :: AT.Env x AS.Typ)
+                             :: ExsExp <- cnv (e , [] :: AT.Env x AS.Typ 
+                                                 , [] :: AT.Env x AUM.Exp)
                       evl e' ()) of
                Rgt i -> i == (4 :: Integer)
                Lft s -> error s   

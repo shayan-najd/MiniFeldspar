@@ -3,13 +3,15 @@
            , GADTs #-}
 module Conversion.Environment where
 
-import qualified Environment.ADT  as A
-import qualified Environment.GADT as G
+import qualified Environment.ADT       as A
+import qualified Environment.ADTTable  as AT
+import qualified Environment.GADT      as G
 
 import Conversion
 import SingletonEquality
 import Existential
-
+import ErrorMonad
+ 
 instance Cnv a (ExsSin b) => Cnv (A.Env a) (ExsSin (G.Env b)) where
   cnv []      = return (ExsSin G.Emp)
   cnv (t : r) = do ExsSin t' <- cnv t
@@ -26,3 +28,6 @@ instance (EqlSin tf , e ~ e') => Cnv (G.Env tf e , A.Env (Exs0 tf)) e' where
                                               return (x,ts')
   cnv (_            , _)                 = fail "Scope Error!"  
  
+cnvEnvAMAS :: Cnv a b => AT.Env x a -> ErrM (AT.Env x b)
+cnvEnvAMAS = mapM (\(x , y) -> do y' <- cnv y
+                                  return (x , y'))
