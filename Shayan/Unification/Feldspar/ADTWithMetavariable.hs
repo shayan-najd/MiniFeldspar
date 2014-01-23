@@ -8,7 +8,7 @@ import ErrorMonad
 import Conversion
 import Control.Monad.State(State)
 import InferenceMonad
-import qualified Conversion.Type.Feldspar as C
+import Conversion.Type.Feldspar ()
 import Data.Vector
 import Variable.GADT
 import qualified Data.Nat as NN
@@ -16,7 +16,7 @@ import qualified Data.Nat.GADT as N
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni FAM.Typ where
-  type Mnd     FAM.Typ = (State (NN.Nat , [EqlC C.EnvFAMH]))
+  type Mnd     FAM.Typ = (State (NN.Nat , [EqlC (EnvFld ())]))
   type TypCons FAM.Typ = (N.Zro, (N.Suc (N.Suc N.Zro), (N.Zro
                          , (N.Suc (N.Suc N.Zro), (N.Suc N.Zro, ())))))
   typCon Zro                         Nil                 = return FAM.Int

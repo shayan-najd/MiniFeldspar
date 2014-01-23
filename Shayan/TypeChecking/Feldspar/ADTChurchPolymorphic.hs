@@ -75,6 +75,4 @@ instance (TypCons a ~ (Zro, (Suc (Suc Zro), (Zro, (Suc (Suc Zro),
                          
   chk (Let el eb) r = do tl <- chk el r 
                          tb <- chk eb (tl : r)                          
-                         return tb
-                         
---  chk Any         _ = tCon "Any" [] 
+                         return tb                         

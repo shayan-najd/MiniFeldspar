@@ -10,20 +10,12 @@ import qualified Type.Herbrand                     as H
 
 import qualified Variable.GADT                     as G
 
-import Data.Nat.GADT 
 import Data.Vector
 import Conversion
 import Existential
+import Unification
 
-type ExsTyp = ExsSin FT.Typ
-
-type EnvFAMH = ( Zro                -- Int ~> 0
-               , (Zro               -- Bol ~> 1 
-                 , (Suc (Suc Zro)   -- Arr ~> 2 
-                   , (Suc (Suc Zro) -- Tpl ~> 3  
-                     , (Suc Zro     -- Ary ~> 4    
-                       , ())))))  
-               
+type ExsTyp = ExsSin FT.Typ                
 ---------------------------------------------------------------------------------
 --  Conversion from FAS.Typ
 ---------------------------------------------------------------------------------
@@ -56,22 +48,17 @@ instance Cnv FAS.Typ FAS.Typ where
 ---------------------------------------------------------------------------------
 --  Conversion from FAM.Typ
 ---------------------------------------------------------------------------------
-instance Cnv FAM.Typ (H.Typ EnvFAMH) where
-  cnv FAM.Int         = return (H.App (G.Zro) Nil)
-  cnv FAM.Bol         = return (H.App (G.Suc G.Zro) Nil)
+instance Cnv FAM.Typ (H.Typ (EnvFld ())) where
+  cnv FAM.Int         = return (H.App int Nil)
+  cnv FAM.Bol         = return (H.App bol Nil)
   cnv (FAM.Arr ta tb) = do ta' <- cnv ta
                            tb' <- cnv tb
-                           return (H.App (G.Suc (G.Suc G.Zro)) 
-                                   (ta' ::: (tb' ::: Nil)))
+                           return (H.App arr (ta' ::: (tb' ::: Nil)))
   cnv (FAM.Tpl ta tb) = do ta' <- cnv ta
                            tb' <- cnv tb
-                           return (H.App
-                                   (G.Suc (G.Suc (G.Suc G.Zro))) 
-                                   (ta' ::: (tb' ::: Nil)))
+                           return (H.App tpl (ta' ::: (tb' ::: Nil)))
   cnv (FAM.Ary t)     = do t' <- cnv t
-                           return (H.App 
-                                   (G.Suc (G.Suc (G.Suc (G.Suc G.Zro))))
-                                   (t' ::: Nil))
+                           return (H.App ary (t' ::: Nil))
   cnv (FAM.Mta i)     = return (H.Mta i)                             
 
 instance Cnv FAM.Typ ExsTyp where
@@ -126,15 +113,16 @@ instance a ~ a' => Cnv (FT.Typ a) (FT.Typ a') where
 ---------------------------------------------------------------------------------
 --  Conversion from H.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (H.Typ EnvFAMH) FAM.Typ where
+instance Cnv (H.Typ (EnvFld ())) FAM.Typ where
   cnv = cnv' 
     where
       cnv' th = case th of 
         H.Mta i               -> FAM.Mta <$> pure i
-        H.App G.Zro _         -> pure FAM.Int
-        H.App (G.Suc G.Zro) _ -> pure FAM.Bol
-        H.App (G.Suc (G.Suc G.Zro)) (ta ::: (tb ::: Nil))
+        H.App G.Zro _         -> pure FAM.Int      
+        H.App (G.Suc G.Zro) (ta ::: (tb ::: Nil))
                               -> FAM.Arr <$@> ta <*@> tb
+        H.App (G.Suc (G.Suc G.Zro)) _ 
+                              -> pure FAM.Bol
         H.App (G.Suc (G.Suc (G.Suc G.Zro))) (tf ::: (ts ::: Nil))
                               -> FAM.Tpl <$@> tf <*@> ts
         H.App (G.Suc (G.Suc (G.Suc (G.Suc G.Zro)))) (t ::: Nil)

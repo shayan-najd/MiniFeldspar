@@ -9,15 +9,14 @@ import Conversion
 import Control.Monad.State(State)
 import InferenceMonad
 import Variable.GADT
-import qualified Conversion.Type.STLC as C
 import Data.Vector
 import qualified Data.Nat as NN
-import qualified Data.Nat.GADT as N
+import Conversion.Type.STLC ()
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni AM.Typ where
-  type Mnd AM.Typ = (State (NN.Nat , [EqlC C.EnvAMH]))
-  type TypCons AM.Typ = (N.Zro,(N.Suc (N.Suc N.Zro) ,()))
+  type Mnd AM.Typ     = (State (NN.Nat , [EqlC (EnvIntArr ())]))
+  type TypCons AM.Typ = (EnvIntArr ())
   typCon Zro       Nil                 = return AM.Int
   typCon (Suc Zro) (ta ::: tb ::: Nil) = return (AM.Arr ta tb)
   typCon _         _                   = fail "Type Error!"
