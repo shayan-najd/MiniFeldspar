@@ -4,14 +4,16 @@
            , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.Feldspar where
 
+import Prelude hiding (sin)
 import qualified Expression.Feldspar.ADTUntypedPolymorphic as FAUP
 import qualified Expression.Feldspar.ADTUntypedMonomorphic as FAUM
 import qualified Expression.Feldspar.ADTChurchPolymorphic  as FACP
-import qualified Expression.Feldspar.GADT                  as FGDT
- 
+import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
+import qualified Expression.Feldspar.GADTHigherOrder        as FGHO 
+
 import qualified Type.Feldspar.ADTSimple           as FAS
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
-import qualified Type.Feldspar.GADT                as FGD
+import qualified Type.Feldspar.GADT                as FG
 
 import qualified Variable.ADT            as A
 
@@ -39,16 +41,16 @@ import Singleton
 
 import Data.Traversable(traverse)
 
-type ExsTyp = ExsSin FGD.Typ
-type ExsExp = Exs2 FGDT.Exp (G.Env FGD.Typ) FGD.Typ
-type SinTyp = Sin FGD.Typ
-type SinEnv = Sin (G.Env FGD.Typ)
+type ExsTyp = ExsSin FG.Typ
+type ExsExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ
+type SinTyp = Sin FG.Typ
+type SinEnv = Sin (G.Env FG.Typ)
   
 ---------------------------------------------------------------------------------
 -- Conversion from FAUP
 ---------------------------------------------------------------------------------
 instance (Eq x , SinEnv r , SinTyp t' , Cnv t FAM.Typ) => 
-         Cnv (FAUP.Exp x , AT.Env x t , AT.Env x FAUM.Exp) (FGDT.Exp r t')  where
+         Cnv (FAUP.Exp x , AT.Env x t , AT.Env x FAUM.Exp) (FGFO.Exp r t')  where
   cnv (e , rt , rf) = do e' :: FAUM.Exp <- cnv (e , rt , rf)
                          cnv (e', map snd rt)
 
@@ -96,7 +98,7 @@ instance (Eq x , Cnv t FAM.Typ) =>
 -- Conversion from FAUM
 ---------------------------------------------------------------------------------
 instance (SinEnv r , SinTyp t' , Cnv t FAM.Typ) => 
-         Cnv (FAUM.Exp , A.Env t) (FGDT.Exp r t')  where
+         Cnv (FAUM.Exp , A.Env t) (FGFO.Exp r t')  where
   cnv (e , r) = do e' :: ExsExp <- cnv (e , r)       
                    cnv e'
 
@@ -133,8 +135,8 @@ instance (Cnv t FAM.Typ , Cnv FAM.Typ t') =>
 ---------------------------------------------------------------------------------
 -- Conversion from FACP
 ---------------------------------------------------------------------------------
-instance (SinEnv r , SinTyp t' , Cnv t' FAM.Typ, t ~ t') => 
-         Cnv (FACP.Exp t, A.Env t) (FGDT.Exp r t')  where
+instance (SinEnv r , SinTyp t' , Cnv t FAM.Typ) => 
+         Cnv (FACP.Exp t, A.Env t) (FGFO.Exp r t')  where
   cnv (e , r) = do r'  :: A.Env    FAM.Typ <- cnv r
                    e'  :: FACP.Exp FAM.Typ <- cnv e
                    e'' :: ExsExp           <- cnv (e' , r')       
@@ -148,74 +150,132 @@ instance Cnv (FACP.Exp FAS.Typ , A.Env FAS.Typ) ExsExp where
 instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
   cnv (FACP.ConI i , r)       = do 
     ExsSin r' <- cnv r
-    return (Exs2 (FGDT.ConI i) r' FGD.Int)
+    return (Exs2 (FGFO.ConI i) r' FG.Int)
   cnv (FACP.ConB i , r)       = do 
     ExsSin r' <- cnv r
-    return (Exs2 (FGDT.ConB i) r' FGD.Bol)
+    return (Exs2 (FGFO.ConB i) r' FG.Bol)
   cnv (FACP.Var x  , r)       = do 
     Exs2 x' r' t' <- cnv (x , r)
-    return (Exs2 (FGDT.Var x') r' t')
+    return (Exs2 (FGFO.Var x') r' t')
   cnv (FACP.Abs ta eb , r)    = do 
     ExsSin ta'                    :: ExsTyp <- cnv ta
     Exs2 eb' (ta'' `G.Ext` r') tb :: ExsExp <- cnv(eb , ta : r)
     Rfl <- eqlSin ta' ta''
-    return (Exs2 (FGDT.Abs eb') r' (FGD.Arr ta' tb))
+    return (Exs2 (FGFO.Abs ta' eb') r' (FG.Arr ta' tb))
   cnv (FACP.App ef ea , r)    = do 
-    Exs2 ef' rf (FGD.Arr ta tb) :: ExsExp <- cnv (ef , r)
+    Exs2 ef' rf (FG.Arr ta tb) :: ExsExp <- cnv (ef , r)
     Exs2 ea' ra ta'             :: ExsExp <- cnv (ea , r)
     Rfl <- eqlSin rf ra
     Rfl <- eqlSin ta ta'
-    return (Exs2 (FGDT.App ef' ea') rf tb)
+    return (Exs2 (FGFO.App ef' ea') rf tb)
   cnv (FACP.Cnd ec et ef , r) = do
-    Exs2 ec' rc FGD.Bol :: ExsExp <- cnv (ec , r)
+    Exs2 ec' rc FG.Bol :: ExsExp <- cnv (ec , r)
     Exs2 et' rt tt      :: ExsExp <- cnv (et , r)
     Exs2 ef' rf tf      :: ExsExp <- cnv (ef , r)
     Rfl <- eqlSin rc rt
     Rfl <- eqlSin rc rf
     Rfl <- eqlSin tt tf
-    return (Exs2 (FGDT.Cnd ec' et' ef') rc tt)
+    return (Exs2 (FGFO.Cnd ec' et' ef') rc tt)
   cnv (FACP.Whl ec eb ei , r) = do 
-    Exs2 ec' rc (FGD.Arr tac FGD.Bol) :: ExsExp <- cnv (ec , r)
-    Exs2 eb' rb (FGD.Arr tab tbb )    :: ExsExp <- cnv (eb , r)
+    Exs2 ec' rc (FG.Arr tac FG.Bol) :: ExsExp <- cnv (ec , r)
+    Exs2 eb' rb (FG.Arr tab tbb )    :: ExsExp <- cnv (eb , r)
     Exs2 ei' ri ti                    :: ExsExp <- cnv (ei , r)
     Rfl <- eqlSin rc rb
     Rfl <- eqlSin rc ri
     Rfl <- eqlSin tac tab
     Rfl <- eqlSin tac tbb
     Rfl <- eqlSin tac ti
-    return (Exs2 (FGDT.Whl ec' eb' ei') rc tac)
+    return (Exs2 (FGFO.Whl ec' eb' ei') rc tac)
   cnv (FACP.Tpl ef es , r)    = do 
     Exs2 ef' rf tf :: ExsExp <- cnv (ef , r)
     Exs2 es' rs ts :: ExsExp <- cnv (es , r)
     Rfl <- eqlSin rf rs
     Rfl <- eqlSin tf ts
-    return (Exs2 (FGDT.Tpl ef' es') rf (FGD.Tpl tf ts))
+    return (Exs2 (FGFO.Tpl ef' es') rf (FG.Tpl tf ts))
   cnv (FACP.Fst e , r)        = do 
-    Exs2 e' r' (FGD.Tpl tf _) :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGDT.Fst e') r' tf)
+    Exs2 e' r' (FG.Tpl tf _) :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Fst e') r' tf)
   cnv (FACP.Snd e , r)        = do 
-    Exs2 e' r' (FGD.Tpl _ ts) :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGDT.Snd e') r' ts)  
+    Exs2 e' r' (FG.Tpl _ ts) :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Snd e') r' ts)  
   cnv (FACP.Ary el ef , r)    = do 
-    Exs2 el' rl FGD.Int              :: ExsExp <- cnv (el , r)
-    Exs2 ef' rf (FGD.Arr FGD.Int ta) :: ExsExp <- cnv (ef , r)
+    Exs2 el' rl FG.Int              :: ExsExp <- cnv (el , r)
+    Exs2 ef' rf (FG.Arr FG.Int ta) :: ExsExp <- cnv (ef , r)
     Rfl <- eqlSin rl rf
-    return (Exs2 (FGDT.Ary el' ef') rl (FGD.Ary ta))
+    return (Exs2 (FGFO.Ary el' ef') rl (FG.Ary ta))
   cnv (FACP.Len e , r)        = do 
-    Exs2 e' r' (FGD.Ary _)  :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGDT.Len e') r' FGD.Int)
+    Exs2 e' r' (FG.Ary _)  :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Len e') r' FG.Int)
   cnv (FACP.Ind ea ei , r)    = do 
-    Exs2 ea' ra (FGD.Ary ta) :: ExsExp <- cnv (ea , r)
-    Exs2 ei' ri FGD.Int      :: ExsExp <- cnv (ei , r)
+    Exs2 ea' ra (FG.Ary ta) :: ExsExp <- cnv (ea , r)
+    Exs2 ei' ri FG.Int      :: ExsExp <- cnv (ei , r)
     Rfl <- eqlSin ra ri
-    return (Exs2 (FGDT.Ind ea' ei') ra ta)
+    return (Exs2 (FGFO.Ind ea' ei') ra ta)
   cnv (FACP.Let el eb , r)    = do 
     Exs2 el' rl tl               :: ExsExp  <- cnv (el , r)
     tl'                          :: FAM.Typ <- cnv tl
     Exs2 eb' (G.Ext  tl'' rb) tb :: ExsExp  <- cnv (eb , tl' : r)
     Rfl <- eqlSin tl tl''
     Rfl <- eqlSin rb rl
-    return (Exs2 (FGDT.Let el' eb') rb tb)
+    return (Exs2 (FGFO.Let tl'' el' eb') rb tb)
 
 instance Cnv t t' => Cnv (FACP.Exp t) (FACP.Exp t') where
-   cnv = traverse cnv
+   cnv = traverse cnv   
+
+---------------------------------------------------------------------------------
+-- Conversion to Higher-Order
+---------------------------------------------------------------------------------
+instance (t ~ t' , r ~ r') => 
+         Cnv (FGFO.Exp r t , G.Env (FGHO.Exp r) r) (FGHO.Exp r' t') where
+  cnv (e , r) = return (cnvGToGHO e r)
+
+
+instance (t ~ t' , r ~ r' , SinEnv r) => 
+         Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
+  cnv e = do r :: G.Env FG.Typ r <- sin 
+             return (cnvGToGHO e (cnvGEnv r))
+ 
+cnvGToGHO :: forall rr tt. FGFO.Exp rr tt -> G.Env (FGHO.Exp rr) rr 
+             -> (FGHO.Exp rr tt)
+cnvGToGHO egdt r = 
+  let c ::  forall t. FGFO.Exp rr t -> FGHO.Exp rr t
+      c e = cnvGToGHO e r in
+  case egdt of  
+       FGFO.ConI i       -> FGHO.ConI i
+       FGFO.ConB b       -> FGHO.ConB b
+       FGFO.Var v        -> G.gets v r
+       FGFO.Abs ta eb    -> FGHO.Abs ta (\ x -> FGHO.prdAll 
+                                              (cnvGToGHO eb 
+                                               (G.wkn FGHO.sucAll (G.Ext x r))))
+       
+       FGFO.App ef ea    -> FGHO.App (c ef) (c ea)
+       FGFO.Cnd ec et ef -> FGHO.Cnd (c ec) (c et) (c ef) 
+       FGFO.Whl ec eb ei -> FGHO.Whl (c ec) (c eb) (c ei)
+
+       FGFO.Tpl ef es    -> FGHO.Tpl (c ef) (c es)
+       FGFO.Ary el ef    -> FGHO.Ary (c el) (c ef)
+       FGFO.Ind ea ei    -> FGHO.Ind (c ea) (c ei)
+       FGFO.Fst e        -> FGHO.Fst (c e)
+       FGFO.Snd e        -> FGHO.Snd (c e)
+       FGFO.Len e        -> FGHO.Len (c e) 
+       FGFO.Let tl el eb -> FGHO.Let tl (c el) 
+                            (\ x -> FGHO.prdAll 
+                                    (cnvGToGHO eb 
+                                     (G.wkn FGHO.sucAll (G.Ext x r))))
+              
+cnvGEnv :: G.Env FG.Typ r -> G.Env (FGHO.Exp r) r  
+cnvGEnv  = undefined 
+
+{-
+-- Having the following
+
+type R = (Integer,(Integer -> Integer,(Integer ,())))
+
+t1 :: G.Env G.Typ R
+t1 = G.Ext G.Int (G.Ext (G.Arr G.Int G.Int)(G.Int `G.Ext` G.Emp))
+
+t2 :: G.Env (G.Var R) R
+t2 = G.Ext G.Zro (G.Ext (G.Suc G.Zro)((G.Suc $ G.Suc G.Zro) `G.Ext` G.Emp))
+ 
+-- We would like to have cnvGEnv t1 == t2
+-}

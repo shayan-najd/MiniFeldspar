@@ -5,9 +5,13 @@ module Examples.Feldspar.Conversion where
 
 import Language.Haskell.TH.Syntax
 import qualified Expression.Feldspar.ADTUntypedMonomorphic as AUM
-import qualified Expression.Feldspar.GADT as G 
+import qualified Expression.Feldspar.GADTFirstOrder        as GFO 
+import qualified Expression.Feldspar.GADTHigherOrder       as GHO
+
 import qualified Type.Feldspar.ADTSimple  as FS
 import qualified Type.Feldspar.GADT       as G
+
+import qualified Variable.GADT as G
 
 import qualified Value.Feldspar.GADT as V
 import Conversion
@@ -20,55 +24,80 @@ import Conversion.Expression.TemplateHaskell ()
 import qualified Environment.ADT  as A
 import qualified Environment.ADTTable  as AT
 import qualified Environment.GADT as G
-import Evaluation.Feldspar.GADT()
+import Evaluation.Feldspar.GADTFirstOrder()
+import Evaluation.Feldspar.GADTHigherOrder()
 import qualified Examples.Feldspar.ADTUntypedMonomorphic  as AUM
 import qualified Examples.Feldspar.ADTUntypedPolymorphic  as AUP
 import qualified Examples.Feldspar.ADTChurchPolymorphic   as ACP
-import qualified Examples.TemplateHaskell             as TH
+import qualified Examples.Feldspar.GADTFirstOrder         as GFO
+import qualified Examples.TemplateHaskell                 as TH
 import Evaluation
 import SingletonEquality
 import ErrorMonad
 import Existential
 import Singleton.Environment ()
 
-type ExsExp = Exs2 G.Exp (G.Env G.Typ) G.Typ
+type ExsExp = Exs2 GFO.Exp (G.Env G.Typ) G.Typ
+type EnvAdd = (Integer -> Integer -> Integer , ())
 
+typAddS :: FS.Typ
+typAddS = FS.Int `FS.Arr` (FS.Int `FS.Arr` FS.Int)
+
+typAddG :: G.Typ (Integer -> Integer -> Integer)
+typAddG = (G.Int `G.Arr` (G.Int `G.Arr` G.Int))
+
+envAddGHO :: G.Env (GHO.Exp EnvAdd) EnvAdd
+envAddGHO = G.Ext (GHO.Var G.Zro) G.Emp 
+
+envAddVal :: EnvAdd
+envAddVal = (V.addV , ())
+
+envAddA :: A.Env FS.Typ
+envAddA = [typAddS] 
+
+envAddG :: G.Env G.Typ EnvAdd
+envAddG =  G.Ext typAddG G.Emp
+
+envAddTHN :: AT.Env Name FS.Typ
+envAddTHN = [( '(+) , typAddS)] 
+
+envAddStr :: AT.Env String FS.Typ
+envAddStr = [("add" , typAddS)]                   
+
+envEmpTHN  :: AT.Env Name AUM.Exp
+envEmpTHN = [] 
+
+envEmpStr  :: AT.Env String AUM.Exp
+envEmpStr = [] 
 
 isFour :: Cnv (e , A.Env FS.Typ) ExsExp => e -> Bool
-isFour e  = case (do Exs2 e' r' G.Int 
-                             :: ExsExp <- cnv (e , [FS.Int `FS.Arr` 
-                                                    (FS.Int `FS.Arr` FS.Int)])
-                     Rfl <- eqlSin r' (G.Ext (G.Int `G.Arr` 
-                                                    (G.Int `G.Arr` G.Int))
-                                                    G.Emp)                    
-                     evl e' (V.addV, ())) of
+isFour e  = case (do Exs2 e' r' G.Int :: ExsExp <- cnv (e, envAddA)
+                     Rfl <- eqlSin r' envAddG                    
+                     evl e' envAddVal) of
               Rgt i -> i == (4 :: Integer)
               Lft s -> error s   
 
 isFour' :: forall ef. (Cnv (ef String, AT.Env String FS.Typ 
                            , AT.Env String AUM.Exp) ExsExp) => 
            ef String -> Bool
-isFour' e  = case (do Exs2 e' r' G.Int 
-                             :: ExsExp <- cnv (e , [("add", FS.Int `FS.Arr` 
-                                                    (FS.Int `FS.Arr` FS.Int))]
-                                                 , [] :: AT.Env String AUM.Exp )
-                      Rfl <- eqlSin r' (G.Ext (G.Int `G.Arr` 
-                                                    (G.Int `G.Arr` G.Int))
-                                                    G.Emp)
-                      evl e' (V.addV, ())) of
-               Rgt i -> i == (4 :: Integer)
-               Lft s -> error s   
+isFour' e = case (do Exs2 e' r' G.Int :: ExsExp <- cnv (e, envAddStr, envEmpStr)
+                     Rfl <- eqlSin r' envAddG
+                     evl e' envAddVal) of
+              Rgt i -> i == (4 :: Integer)
+              Lft s -> error s   
  
 isFourQ :: Q (TExp Integer) -> Bool
-isFourQ e  = case (do e':: G.Exp (Integer -> Integer -> Integer , ())  Integer 
-                           <- cnv (e 
-                                  , [( '(+)
-                                     , FS.Int `FS.Arr` 
-                                       (FS.Int `FS.Arr` FS.Int))] 
-                                  , [] :: AT.Env Name AUM.Exp)
-                      evl e' (V.addV , ())) of
+isFourQ e = case (do e':: GFO.Exp EnvAdd Integer <- cnv (e, envAddTHN, envEmpTHN)
+                     evl e' envAddVal) of
                 Rgt i -> i == (4 :: Integer)
                 Lft s -> error s   
 
+isFourHO :: GFO.Exp EnvAdd Integer -> Bool
+isFourHO e = case (do e' :: GHO.Exp EnvAdd Integer <- cnv (e  , envAddGHO)
+                      evl e' envAddVal) of
+               Rgt i -> i == (4 :: Integer)
+               Lft s -> error s              
+
 test :: Bool              
-test = isFour AUM.four && isFour' AUP.four && isFour ACP.four && isFourQ TH.four
+test = isFour AUM.four && isFour' AUP.four && isFour ACP.four && isFourQ TH.four 
+    && isFourHO GFO.four

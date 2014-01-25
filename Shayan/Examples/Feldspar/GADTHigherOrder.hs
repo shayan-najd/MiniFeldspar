@@ -1,21 +1,26 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs #-}
-module Examples.Feldspar.GADT where
+{-# LANGUAGE GADTs, FlexibleContexts #-}
+module Examples.Feldspar.GADTHigherOrder where
 
-import Expression.Feldspar.GADT
+import Prelude hiding (abs)
+import Expression.Feldspar.GADTHigherOrder
 import Variable.GADT
 import Evaluation as E
-import Evaluation.Feldspar.GADT ()
+import Evaluation.Feldspar.GADTHigherOrder ()
 import qualified Value.Feldspar.GADT as V
+import Singleton
+import Singleton.TypeFeldspar ()
+import Type.Feldspar.GADT
 
 -- An example expression doubling the input number                    
 dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)
-dbl = Abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
+dbl = abs (\ x -> (App (App (Var Zro) x) x))
 
 -- An example expression composing two types
-compose :: Exp r ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
-compose = Abs (Abs (Abs 
-                    (Var (Suc (Suc Zro)) `App` (Var (Suc Zro) `App` Var Zro))))
+compose :: (Sin Typ ta , Sin Typ tb , Sin Typ tc) => 
+           Exp r ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
+compose = abs (\ g -> abs (\ f -> abs 
+                    (\ x -> g `App` (f `App` x))))
 
 -- An example expression representing the Integer 4
 four :: Exp (Integer -> Integer -> Integer , ()) Integer

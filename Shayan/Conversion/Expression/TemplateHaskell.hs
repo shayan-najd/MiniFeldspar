@@ -7,7 +7,7 @@ import qualified Language.Haskell.TH.Syntax            as TH
 
 import qualified Expression.STLC.ADTUntypedPolymorphic as SAUP
 import qualified Expression.STLC.ADTUntypedMonomorphic as SAUM
-import qualified Expression.STLC.GADT                  as SGDT
+import qualified Expression.STLC.GADTFirstOrder        as SGFO
 import qualified Type.STLC.ADTSimple                   as SAS
 import qualified Type.STLC.GADT                        as SG
 import Conversion.Expression.STLC ()
@@ -15,7 +15,7 @@ import Singleton.TypeSTLC ()
 
 import qualified Expression.Feldspar.ADTUntypedPolymorphic as FAUP
 import qualified Expression.Feldspar.ADTUntypedMonomorphic as FAUM
-import qualified Expression.Feldspar.GADT                  as FGDT
+import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
 import qualified Type.Feldspar.ADTSimple                   as FAS
 import qualified Type.Feldspar.GADT                        as FG
 import Conversion.Expression.Feldspar ()
@@ -33,8 +33,8 @@ import Existential
 
 import Prelude hiding (filter)
 
-type ExsFExp = Exs2 FGDT.Exp (G.Env FG.Typ) FG.Typ 
-type ExsSExp = Exs2 SGDT.Exp (G.Env SG.Typ) SG.Typ
+type ExsFExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ 
+type ExsSExp = Exs2 SGFO.Exp (G.Env SG.Typ) SG.Typ
 
 instance TH.Quasi ErrM where
   qNewName    = return . TH.mkName 
@@ -93,7 +93,7 @@ instance Cnv TH.Exp (FAUP.Exp TH.Name) where
 instance (Sin SG.Typ t , Sin (G.Env SG.Typ) r , t ~ t') => 
          Cnv (TH.Q (TH.TExp t) 
              , AT.Env TH.Name SAS.Typ
-             , AT.Env TH.Name SAUM.Exp) (SGDT.Exp r t') where
+             , AT.Env TH.Name SAUM.Exp) (SGFO.Exp r t') where
           cnv (e , rt, rb) = do e'  :: TH.Exp <- (TH.runQ . TH.unTypeQ) e
                                 e'' :: SAUP.Exp TH.Name <- cnv e'
                                 -- normalization here
@@ -102,7 +102,7 @@ instance (Sin SG.Typ t , Sin (G.Env SG.Typ) r , t ~ t') =>
 instance ( Sin FG.Typ t , Sin (G.Env FG.Typ) r , t ~ t') => 
          Cnv (TH.Q (TH.TExp t) 
              , AT.Env TH.Name FAS.Typ
-             , AT.Env TH.Name FAUM.Exp) (FGDT.Exp r t') where
+             , AT.Env TH.Name FAUM.Exp) (FGFO.Exp r t') where
           cnv (e , rt, rb) = do e'  :: TH.Exp <- (TH.runQ . TH.unTypeQ) e
                                 e'' :: FAUP.Exp TH.Name <- cnv e'
                                 -- normalization here

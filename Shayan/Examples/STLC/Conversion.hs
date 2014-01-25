@@ -5,7 +5,8 @@ module Examples.STLC.Conversion where
 
 import Language.Haskell.TH.Syntax
 import qualified Expression.STLC.ADTUntypedMonomorphic as AUM
-import qualified Expression.STLC.GADT as G 
+import qualified Expression.STLC.GADTFirstOrder as GFO 
+import qualified Expression.STLC.GADTHigherOrder as GHO 
 import qualified Type.STLC.ADTSimple  as AS
 import qualified Type.STLC.GADT       as G
 
@@ -19,17 +20,19 @@ import Conversion.Environment ()
 import qualified Environment.ADT  as A
 import qualified Environment.ADTTable  as AT
 import qualified Environment.GADT as G
-import Evaluation.STLC.GADT()
+import Evaluation.STLC.GADTFirstOrder  ()
+import Evaluation.STLC.GADTHigherOrder ()
 import qualified Examples.STLC.ADTUntypedMonomorphic  as AUM
 import qualified Examples.STLC.ADTUntypedPolymorphic  as AUP
 import qualified Examples.STLC.ADTChurchPolymorphic   as ACP
 import qualified Examples.STLC.ADTExplicitPolymorphic as AEP
+import qualified Examples.STLC.GADTFirstOrder         as GFO
 import qualified Examples.TemplateHaskell             as TH
 import Evaluation
 import Singleton.Environment ()
 import ErrorMonad
 import Existential
-type ExsExp = Exs2 G.Exp (G.Env G.Typ) G.Typ
+type ExsExp = Exs2 GFO.Exp (G.Env G.Typ) G.Typ
 
 isFour :: Cnv (e , A.Env AS.Typ) ExsExp => e -> Bool
 isFour e  = case (do Exs2 e' G.Emp G.Int 
@@ -49,13 +52,22 @@ isFour' e  = case (do Exs2 e' G.Emp G.Int
                Lft s -> error s   
 
 isFourQ :: Q (TExp Integer) -> Bool
-isFourQ e  = case (do e':: G.Exp () Integer <- cnv (e 
+isFourQ e  = case (do e':: GFO.Exp () Integer <- cnv (e 
                                                    , [] :: AT.Env Name AS.Typ 
                                                    , [] :: AT.Env Name AUM.Exp)
                       evl e' ()) of
                 Rgt i -> i == (4 :: Integer)
                 Lft s -> error s   
 
+isFourHO :: GFO.Exp () Integer -> Bool
+isFourHO e = case (do e' :: GHO.Exp () Integer <- cnv (e  
+                                               , G.Emp :: G.Env (GHO.Exp ()) ())
+                      evl e' ()) of
+               Rgt i -> i == (4 :: Integer)
+               Lft s -> error s              
+
+
 test :: Bool              
 test = isFour AUM.four && isFour' AUP.four &&  
        isFour ACP.four && isFour  AEP.four && isFourQ TH.four
+    && isFourHO GFO.four

@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, Rank2Types #-}
 module Environment.GADT where
 
 import Variable.GADT
@@ -22,3 +22,9 @@ gets _       Emp          = error "Impossible!"
                             -- the redundant pattern checker cannot guess that
                             -- and instance of Var never lets the environment to
                             -- to be empty.
+
+wkn :: (forall r t'. tf r t' -> tf (t , r) t') -> 
+       Env (tf re) r' -> Env (tf (t , re)) r'
+wkn _      Emp                    = Emp
+wkn sucAll (Ext e Emp)          = Ext (sucAll e) Emp
+wkn sucAll (Ext e es@(Ext _ _)) = Ext (sucAll e) (wkn sucAll es)
