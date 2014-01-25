@@ -16,6 +16,8 @@ import qualified Type.Feldspar.ADTWithMetavariable as FAM
 import qualified Type.Feldspar.GADT                as FG
 
 import qualified Variable.ADT            as A
+import qualified Variable.GADT           as G
+
 
 import qualified Environment.ADT         as A
 import qualified Environment.ADTTable    as AT
@@ -225,11 +227,6 @@ instance Cnv t t' => Cnv (FACP.Exp t) (FACP.Exp t') where
 ---------------------------------------------------------------------------------
 -- Conversion to Higher-Order
 ---------------------------------------------------------------------------------
-instance (t ~ t' , r ~ r') => 
-         Cnv (FGFO.Exp r t , G.Env (FGHO.Exp r) r) (FGHO.Exp r' t') where
-  cnv (e , r) = return (cnvGToGHO e r)
-
-
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
   cnv e = do r :: G.Env FG.Typ r <- sin 
@@ -264,18 +261,8 @@ cnvGToGHO egdt r =
                                      (G.wkn FGHO.sucAll (G.Ext x r))))
               
 cnvGEnv :: G.Env FG.Typ r -> G.Env (FGHO.Exp r) r  
-cnvGEnv  = undefined 
-
-{-
--- Having the following
-
-type R = (Integer,(Integer -> Integer,(Integer ,())))
-
-t1 :: G.Env G.Typ R
-t1 = G.Ext G.Int (G.Ext (G.Arr G.Int G.Int)(G.Int `G.Ext` G.Emp))
-
-t2 :: G.Env (G.Var R) R
-t2 = G.Ext G.Zro (G.Ext (G.Suc G.Zro)((G.Suc $ G.Suc G.Zro) `G.Ext` G.Emp))
+cnvGEnv  =  mapGEnv . G.cnvGEnvtoGVar
  
--- We would like to have cnvGEnv t1 == t2
--}
+mapGEnv :: G.Env (G.Var r) r' -> G.Env (FGHO.Exp r) r'
+mapGEnv G.Emp        = G.Emp
+mapGEnv (G.Ext x xs) = G.Ext (FGHO.Var x) (mapGEnv xs) 

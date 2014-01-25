@@ -28,3 +28,8 @@ wkn :: (forall r t'. tf r t' -> tf (t , r) t') ->
 wkn _      Emp                    = Emp
 wkn sucAll (Ext e Emp)          = Ext (sucAll e) Emp
 wkn sucAll (Ext e es@(Ext _ _)) = Ext (sucAll e) (wkn sucAll es)
+
+
+cnvGEnvtoGVar ::  Env tf r -> Env (Var r) r
+cnvGEnvtoGVar Emp        = Emp
+cnvGEnvtoGVar (Ext _ xs) = Ext Zro (wkn Suc (cnvGEnvtoGVar xs))

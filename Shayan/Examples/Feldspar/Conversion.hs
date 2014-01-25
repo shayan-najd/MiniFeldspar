@@ -1,7 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE GADTs, FlexibleContexts, ScopedTypeVariables, TemplateHaskell #-}
 module Examples.Feldspar.Conversion where
--- import qualified Expression.Existential as W
 
 import Language.Haskell.TH.Syntax
 import qualified Expression.Feldspar.ADTUntypedMonomorphic as AUM
@@ -10,8 +9,6 @@ import qualified Expression.Feldspar.GADTHigherOrder       as GHO
 
 import qualified Type.Feldspar.ADTSimple  as FS
 import qualified Type.Feldspar.GADT       as G
-
-import qualified Variable.GADT as G
 
 import qualified Value.Feldspar.GADT as V
 import Conversion
@@ -45,9 +42,6 @@ typAddS = FS.Int `FS.Arr` (FS.Int `FS.Arr` FS.Int)
 
 typAddG :: G.Typ (Integer -> Integer -> Integer)
 typAddG = (G.Int `G.Arr` (G.Int `G.Arr` G.Int))
-
-envAddGHO :: G.Env (GHO.Exp EnvAdd) EnvAdd
-envAddGHO = G.Ext (GHO.Var G.Zro) G.Emp 
 
 envAddVal :: EnvAdd
 envAddVal = (V.addV , ())
@@ -93,7 +87,7 @@ isFourQ e = case (do e':: GFO.Exp EnvAdd Integer <- cnv (e, envAddTHN, envEmpTHN
                 Lft s -> error s   
 
 isFourHO :: GFO.Exp EnvAdd Integer -> Bool
-isFourHO e = case (do e' :: GHO.Exp EnvAdd Integer <- cnv (e  , envAddGHO)
+isFourHO e = case (do e' :: GHO.Exp EnvAdd Integer <- cnv e
                       evl e' envAddVal) of
                Rgt i -> i == (4 :: Integer)
                Lft s -> error s              

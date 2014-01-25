@@ -60,8 +60,7 @@ isFourQ e  = case (do e':: GFO.Exp () Integer <- cnv (e
                 Lft s -> error s   
 
 isFourHO :: GFO.Exp () Integer -> Bool
-isFourHO e = case (do e' :: GHO.Exp () Integer <- cnv (e  
-                                               , G.Emp :: G.Env (GHO.Exp ()) ())
+isFourHO e = case (do e' :: GHO.Exp () Integer <- cnv e 
                       evl e' ()) of
                Rgt i -> i == (4 :: Integer)
                Lft s -> error s              

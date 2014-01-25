@@ -18,6 +18,7 @@ import qualified Type.STLC.ADTWithMetavariable as SAM
 import qualified Type.STLC.GADT                as G
 
 import qualified Variable.ADT             as A
+import qualified Variable.GADT            as G
 
 import qualified Environment.ADT          as A
 import qualified Environment.ADTTable     as AT
@@ -246,10 +247,6 @@ instance Cnv t t' => Cnv (SAEP.Exp t) (SAEP.Exp t') where
 ---------------------------------------------------------------------------------
 -- Conversion to Higher-Order
 ---------------------------------------------------------------------------------
-instance (t ~ t' , r ~ r') => 
-         Cnv (SGFO.Exp r t , G.Env (SGHO.Exp r) r) (SGHO.Exp r' t') where
-  cnv (e , r) = return (cnvGToGHO e r)
-
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (SGFO.Exp r t) (SGHO.Exp r' t') where
   cnv e = do r :: G.Env G.Typ r <- sin 
@@ -267,20 +264,13 @@ cnvGToGHO egdt r =
                                           (cnvGToGHO eb 
                                            (G.wkn SGHO.sucAll (G.Ext x r))))
     SGFO.Add el er -> SGHO.Add (c el) (c er)
-    SGFO.App ef ea -> SGHO.App (c ef) (c ea)                                      
+    SGFO.App ef ea -> SGHO.App (c ef) (c ea)
+
 cnvGEnv :: G.Env G.Typ r -> G.Env (SGHO.Exp r) r  
-cnvGEnv  = undefined 
-
-{-
--- Having the following
-
-type R = (Integer,(Integer -> Integer,(Integer ,())))
-
-t1 :: G.Env G.Typ R
-t1 = G.Ext G.Int (G.Ext (G.Arr G.Int G.Int)(G.Int `G.Ext` G.Emp))
-
-t2 :: G.Env (G.Var R) R
-t2 = G.Ext G.Zro (G.Ext (G.Suc G.Zro)((G.Suc $ G.Suc G.Zro) `G.Ext` G.Emp))
+cnvGEnv = mapGEnv . G.cnvGEnvtoGVar
  
--- We would like to have cnvGEnv t1 == t2
--}
+
+mapGEnv :: G.Env (G.Var r) r' -> G.Env (SGHO.Exp r) r'
+mapGEnv G.Emp        = G.Emp
+mapGEnv (G.Ext x xs) = G.Ext (SGHO.Var x) (mapGEnv xs) 
+
