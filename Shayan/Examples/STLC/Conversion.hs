@@ -4,7 +4,7 @@ module Examples.STLC.Conversion where
 -- import qualified Expression.Existential as W
 
 import Language.Haskell.TH.Syntax
-import qualified Expression.STLC.ADTUntypedMonomorphic as AUM
+import qualified Expression.STLC.ADTUntypedDebruijn as AUM
 import qualified Expression.STLC.GADTFirstOrder as GFO 
 import qualified Expression.STLC.GADTHigherOrder as GHO 
 import qualified Type.STLC.ADTSimple  as AS
@@ -22,10 +22,10 @@ import qualified Environment.ADTTable  as AT
 import qualified Environment.GADT as G
 import Evaluation.STLC.GADTFirstOrder  ()
 import Evaluation.STLC.GADTHigherOrder ()
-import qualified Examples.STLC.ADTUntypedMonomorphic  as AUM
-import qualified Examples.STLC.ADTUntypedPolymorphic  as AUP
-import qualified Examples.STLC.ADTChurchPolymorphic   as ACP
-import qualified Examples.STLC.ADTExplicitPolymorphic as AEP
+import qualified Examples.STLC.ADTUntypedDebruijn  as AUM
+import qualified Examples.STLC.ADTUntypedNamed  as AUP
+import qualified Examples.STLC.ADTChurch   as ACP
+import qualified Examples.STLC.ADTExplicit as AEP
 import qualified Examples.STLC.GADTFirstOrder         as GFO
 import qualified Examples.TemplateHaskell             as TH
 import Evaluation

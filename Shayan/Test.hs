@@ -1,17 +1,17 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module Test where
  
-import qualified Examples.STLC.ADTUntypedMonomorphic  as SAUM
-import qualified Examples.STLC.ADTUntypedPolymorphic  as SAUP
-import qualified Examples.STLC.ADTChurchPolymorphic   as SACP
-import qualified Examples.STLC.ADTExplicitPolymorphic as SAEP
+import qualified Examples.STLC.ADTUntypedDebruijn     as SAUM
+import qualified Examples.STLC.ADTUntypedNamed        as SAUP
+import qualified Examples.STLC.ADTChurch              as SACP
+import qualified Examples.STLC.ADTExplicit            as SAEP
 import qualified Examples.STLC.GADTFirstOrder         as SGFO
 import qualified Examples.STLC.GADTHigherOrder        as SGHO
 import qualified Examples.STLC.Conversion             as SCNV
 
-import qualified Examples.Feldspar.ADTUntypedMonomorphic  as FAUM
-import qualified Examples.Feldspar.ADTUntypedPolymorphic  as FAUP
-import qualified Examples.Feldspar.ADTChurchPolymorphic   as FACP
+import qualified Examples.Feldspar.ADTUntypedDebruijn  as FAUM
+import qualified Examples.Feldspar.ADTUntypedNamed  as FAUP
+import qualified Examples.Feldspar.ADTChurch   as FACP
 import qualified Examples.Feldspar.GADTFirstOrder         as FGFO
 import qualified Examples.Feldspar.GADTHigherOrder        as FGHO
 import qualified Examples.Feldspar.Conversion             as FCNV

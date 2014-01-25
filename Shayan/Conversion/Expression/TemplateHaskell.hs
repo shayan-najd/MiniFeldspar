@@ -5,16 +5,16 @@
 module Conversion.Expression.TemplateHaskell where
 import qualified Language.Haskell.TH.Syntax            as TH
 
-import qualified Expression.STLC.ADTUntypedPolymorphic as SAUP
-import qualified Expression.STLC.ADTUntypedMonomorphic as SAUM
+import qualified Expression.STLC.ADTUntypedNamed as SAUP
+import qualified Expression.STLC.ADTUntypedDebruijn as SAUM
 import qualified Expression.STLC.GADTFirstOrder        as SGFO
 import qualified Type.STLC.ADTSimple                   as SAS
 import qualified Type.STLC.GADT                        as SG
 import Conversion.Expression.STLC ()
 import Singleton.TypeSTLC () 
 
-import qualified Expression.Feldspar.ADTUntypedPolymorphic as FAUP
-import qualified Expression.Feldspar.ADTUntypedMonomorphic as FAUM
+import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
+import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
 import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
 import qualified Type.Feldspar.ADTSimple                   as FAS
 import qualified Type.Feldspar.GADT                        as FG

@@ -5,9 +5,9 @@
 module Conversion.Expression.Feldspar where
 
 import Prelude hiding (sin)
-import qualified Expression.Feldspar.ADTUntypedPolymorphic as FAUP
-import qualified Expression.Feldspar.ADTUntypedMonomorphic as FAUM
-import qualified Expression.Feldspar.ADTChurchPolymorphic  as FACP
+import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
+import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
+import qualified Expression.Feldspar.ADTChurch  as FACP
 import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
 import qualified Expression.Feldspar.GADTHigherOrder        as FGHO 
 
@@ -33,7 +33,7 @@ import SingletonEquality
 import SingletonEquality.EnvironmentGADT ()
 import SingletonEquality.TypeFeldsparGADT ()
 
-import TypeChecking.Feldspar.ADTChurchPolymorphic ()
+import TypeChecking.Feldspar.ADTChurch ()
 import Unification.Feldspar.ADTWithMetavariable ()
 
 import Inference

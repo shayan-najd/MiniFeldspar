@@ -3,7 +3,7 @@
 module Examples.Feldspar.Conversion where
 
 import Language.Haskell.TH.Syntax
-import qualified Expression.Feldspar.ADTUntypedMonomorphic as AUM
+import qualified Expression.Feldspar.ADTUntypedDebruijn as AUM
 import qualified Expression.Feldspar.GADTFirstOrder        as GFO 
 import qualified Expression.Feldspar.GADTHigherOrder       as GHO
 
@@ -23,9 +23,9 @@ import qualified Environment.ADTTable  as AT
 import qualified Environment.GADT as G
 import Evaluation.Feldspar.GADTFirstOrder()
 import Evaluation.Feldspar.GADTHigherOrder()
-import qualified Examples.Feldspar.ADTUntypedMonomorphic  as AUM
-import qualified Examples.Feldspar.ADTUntypedPolymorphic  as AUP
-import qualified Examples.Feldspar.ADTChurchPolymorphic   as ACP
+import qualified Examples.Feldspar.ADTUntypedDebruijn  as AUM
+import qualified Examples.Feldspar.ADTUntypedNamed  as AUP
+import qualified Examples.Feldspar.ADTChurch   as ACP
 import qualified Examples.Feldspar.GADTFirstOrder         as GFO
 import qualified Examples.TemplateHaskell                 as TH
 import Evaluation

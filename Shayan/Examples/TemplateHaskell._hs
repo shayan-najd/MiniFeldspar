@@ -2,7 +2,7 @@
 module Examples.TemplateHaskell where
 
 import Conversion.TemplateHaskell ()
-import qualified Expression.ADTUntypedMonomorphic as U
+import qualified Expression.ADTUntypedDebruijn as U
 
 tst0THQ = [|| 1 ||]
 

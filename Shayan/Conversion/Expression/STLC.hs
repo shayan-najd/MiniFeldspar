@@ -6,10 +6,10 @@ module Conversion.Expression.STLC where
 
 import Prelude hiding (sin)
 
-import qualified Expression.STLC.ADTUntypedPolymorphic  as SAUP
-import qualified Expression.STLC.ADTUntypedMonomorphic  as SAUM
-import qualified Expression.STLC.ADTChurchPolymorphic   as SACP
-import qualified Expression.STLC.ADTExplicitPolymorphic as SAEP
+import qualified Expression.STLC.ADTUntypedNamed  as SAUP
+import qualified Expression.STLC.ADTUntypedDebruijn  as SAUM
+import qualified Expression.STLC.ADTChurch   as SACP
+import qualified Expression.STLC.ADTExplicit as SAEP
 import qualified Expression.STLC.GADTFirstOrder         as SGFO
 import qualified Expression.STLC.GADTHigherOrder        as SGHO
 
@@ -34,8 +34,8 @@ import SingletonEquality
 import SingletonEquality.TypeSTLCGADT ()
 import SingletonEquality.EnvironmentGADT ()
 
-import TypeChecking.STLC.ADTChurchPolymorphic   ()
-import TypeChecking.STLC.ADTExplicitPolymorphic ()
+import TypeChecking.STLC.ADTChurch   ()
+import TypeChecking.STLC.ADTExplicit ()
 import Unification.STLC.ADTWithMetavariable ()
 
 import Inference
