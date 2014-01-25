@@ -15,7 +15,7 @@ import Conversion.Type.STLC ()
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni AM.Typ where
-  type Mnd AM.Typ     = (State (NN.Nat , [EqlC (EnvIntArr ())]))
+  type Mnd AM.Typ     = (State (NN.Nat , [HerCon (EnvIntArr ())]))
   type TypCons AM.Typ = (EnvIntArr ())
   typCon Zro       Nil                 = return AM.Int
   typCon (Suc Zro) (ta ::: tb ::: Nil) = return (AM.Arr ta tb)

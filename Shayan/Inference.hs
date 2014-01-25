@@ -20,7 +20,7 @@ inf :: ( Chk.Chk e
        , e         ~ ef t
        , Traversable ef
        , Chk.Typ e ~ t
-       , U.Mnd t   ~ (State (Nat , [EqlC r]))  
+       , U.Mnd t   ~ (State (Nat , [HerCon r]))  
        , Uni t        
        , Cnv t       (Typ r)
        , Cnv (Typ r) t) =>

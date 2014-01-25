@@ -16,7 +16,7 @@ import qualified Data.Nat.GADT as N
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni FAM.Typ where
-  type Mnd     FAM.Typ = (State (NN.Nat , [EqlC (EnvFld ())]))
+  type Mnd     FAM.Typ = (State (NN.Nat , [HerCon (EnvFld ())]))
   type TypCons FAM.Typ = (N.Zro, (N.Suc (N.Suc N.Zro), (N.Zro
                          , (N.Suc (N.Suc N.Zro), (N.Suc N.Zro, ())))))
   typCon Zro                         Nil                 = return FAM.Int

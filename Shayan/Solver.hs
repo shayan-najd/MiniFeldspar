@@ -12,7 +12,7 @@ import SingletonEquality.DataNatGADT ()
 import Data.Vector
 
 -- Constraint Solving (Herbrand style constraint solving)
-slv :: [Typ r] -> [EqlC r] -> ErrM [Typ r]
+slv :: [Typ r] -> [HerCon r] -> ErrM [Typ r]
 slv mem []                                   
   = return mem
 -- Optional Optimization (assuming syntactic equlity of types):    
