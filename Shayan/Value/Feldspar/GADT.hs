@@ -11,9 +11,7 @@ conB :: Bool -> ErrM Bool
 conB = return
 
 abs :: (a -> ErrM b) -> ErrM (a -> b)
-abs f = return (\ va -> case f va of 
-                   Rgt vb -> vb
-                   Lft s  -> error s) 
+abs = return . (frmRgt .)
         
 -- Application of two values
 app :: (ta -> tb) -> ta -> ErrM tb
@@ -45,4 +43,4 @@ ind :: Array Integer a -> Integer -> ErrM a
 ind a i = return (a ! i)
 
 whl :: (s -> Bool) -> (s -> s) -> s -> ErrM s
-whl fc fb v = return (head (dropWhile fc (iterate fb v)))
+whl fc fb = return . head . dropWhile fc . iterate fb

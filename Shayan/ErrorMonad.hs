@@ -31,3 +31,7 @@ instance Monad ErrM where
   Lft l >>= _ = Lft l
   Rgt r >>= k = k r
   fail x      = Lft x
+
+frmRgt :: ErrM a -> a
+frmRgt (Rgt x) = x
+frmRgt (Lft s) = error s 

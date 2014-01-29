@@ -1,17 +1,18 @@
-We plan to use the typed quotation facility in Haskell to
-write programs in the domain-specific language Feldspar. Our goal
-is to use the normalization process described in the paper "A
-practical theory of language-integrated query" to generate more
-efficient Feldspar programs, compared to the normal embedding. We
-propose the following steps:
+We plan to use the typed quotation facility in Haskell to write
+programs in the domain-specific language Feldspar. Our goal is to use
+the normalization process described in the paper "A practical theory
+of language-integrated query" to generate Feldspar programs, with the
+same efficiency as the normal embedding. We propose the following
+steps:
 
 (a) The user writes Feldspar programs with typed quotations
 (i.e. "[||...||]") in Template Haskell.
 
 (b) "TExp" (typed quotations in Haskell) is just a wrapper around the
-untyped representation "Exp" and could not be used directly for our
-typed conversion to Feldspar; we also need to have the types of the
-sub-expressions. We first extract the untyped representation:
+untyped representation (called TH, Template Haskell) and could not be
+used directly for our typed conversion to Feldspar; we also need to
+have the types of the sub-expressions. We first extract the untyped
+representation:
 
 > -- from Template Haskell
 > unTypeQ  :: Q (TExp a) -> Q TH.Exp
@@ -33,7 +34,8 @@ names (we use String for testing, and TH.Name in practice):
 > -- our implementation
 > cnvTHtoFAUN :: TH.Exp -> ErrM (FAUN.Exp TH.Name)
 
-(e) We then convert to a version with De Bruijn indices (called FAUD):
+(e) We then convert to a version with De Bruijn indices (called FAUD,
+Feldspar ADT Untyped De bruijn):
 
 > -- our implementation
 > cnvFAUNtoFAUD :: Eq x => [x] -> FAUN.Exp x -> ErrM (FAUD.Exp)
@@ -76,20 +78,22 @@ type (called FAC, Feldspar ADT Church):
   > rpl :: [Typ] -> FAC.Exp Nat -> ErrM (FAC.Exp Typ) 
  
 (g) Conversion to a FOAS with GADT representation (called FGFO,
-Feldspar GADT FOAS), wrapped in an existential type (called ExsFGFO): 
+Feldspar GADT FOAS), wrapped in an existential type (called ExsFGFO,
+Existential FGFO):
 
 > -- our implementation
-> cnvFACtoExsFGFO :: FAC.Exp Typ -> ErrM ExsFGFO
+> cnvFACtoExsFGFO :: FAC.Exp Typ -> ErrM ExsFGFO.Exp
 
-(h) We use type classes (SinTyp and SinEnv) and singletons to cast the
-values wrapped in existential types to GADT expressions of the type,
-under the environment, provided by the context:
+(h) We use type classes (called SinTyp and SinEnv, Singleton for Type
+and Singleton for Environment), providing singletons, to cast the values
+wrapped in existential types to GADT expressions of the type, under
+the environment, provided by the context:
 
 > -- our implementation
-> cast :: (SinEnv e , SinTyp t) => ExsFGFO -> ErrM (FGFO.Exp e t)
+> cast :: (SinEnv e , SinTyp t) => ExsFGFO.Exp -> ErrM (FGFO.Exp e t)
 
 (j) The last step is to convert to Feldspar's HOAS represented by
-GADT (called FGHO):
+GADT (called FGHO, Feldspar GADT HOAS):
 
 > -- our implementation
 > cnvFGFOtoFGHO :: FGFO.Exp r t -> FGHO.Exp r t
