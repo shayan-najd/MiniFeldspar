@@ -19,9 +19,7 @@ conB :: Bool -> ErrM Val
 conB = return . ConB
 
 abs :: (Val -> ErrM Val) -> ErrM Val
-abs f = return (Abs (\ va -> case f va of
-                        Rgt vb -> vb
-                        Lft s  -> error s))
+abs = return . Abs . (frmRgt .)
 
 -- Application of two values
 app :: Val -> Val -> ErrM Val
@@ -37,9 +35,7 @@ add (ConI i) (ConI j) = ConI (i + j)
 add _         _       = error "Type Error!"
 
 cnd :: Val -> Val -> Val -> ErrM Val
-cnd (ConB vc) v1 v2 
-  | vc              = return v1
-  | otherwise       = return v2       
+cnd (ConB vc) v1 v2 = return (if vc then v1 else v2)
 cnd _         _  _  = fail "Type Error!"                
 
 fst :: Val -> ErrM Val

@@ -4,19 +4,19 @@ module Value.STLC.GADT where
 
 import ErrorMonad
 
-con :: Integer -> ErrM Integer
-con = return
+var :: t -> t
+var = id
 
+con :: Integer -> Integer
+con = id
 
-abs :: (a -> ErrM b) -> ErrM (a -> b)
-abs f = return (\ va -> case f va of 
-                         Rgt vb -> vb
-                         Lft s  -> error s)
+abs :: (a -> ErrM b) -> (a -> b)
+abs = (frmRgt .) 
 
 -- Application of two values
-app :: (a -> b) -> a -> ErrM b
-app = (return .) . ($)
+app :: (a -> b) -> a -> b
+app = ($)
 
 -- Addition of two values
-add :: Integer -> Integer -> ErrM Integer
-add = (return .) . (+)
+add :: Integer -> Integer -> Integer
+add = (+)

@@ -1,21 +1,23 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, ScopedTypeVariables #-}
 module Evaluation.STLC.GADTFirstOrder where
 
-import Evaluation 
+import Evaluation as E
+import Evaluation.Variable.GADT ()
 import Expression.STLC.GADTFirstOrder
 import qualified Value.STLC.GADT as V
-import Environment.GADT as E
- 
-instance Evl (Exp e a) where
-  type Val (Exp e a) = a
-  type Env (Exp e a) = e 
-  evl (Con i)     _ = V.con i
-  evl (Var x)     r = return (get x r)
-  evl (Abs _ eb)  r = V.abs (\ va -> evl eb (va , r))
-  evl (App ef ea) r = do vf <- evl ef r 
-                         va <- evl ea r
-                         V.app vf va
-  evl (Add el er) r = do vl <- evl el r  
-                         vr <- evl er r
-                         V.add vl vr
+import Control.Applicative.Recursion 
+import ErrorMonad  
+
+instance Evl (Exp r t) where
+  type Val (Exp r t) = t
+  type Env (Exp r t) = r 
+  evl egfo r = case egfo of
+    Con i     -> V.con <$> pure i
+    Var x     -> V.var <$> evl' x
+    Abs _ eb  -> V.abs <$> pure (\ va -> evl eb (va , r))
+    App ef ea -> V.app <$> evl' ef <*> evl' ea
+    Add el er -> V.add <$> evl' el <*> evl' er
+    where
+      evl' :: (Evl e, E.Env e ~ r) => e -> ErrM (Val e)
+      evl' e = evl e r

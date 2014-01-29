@@ -1,29 +1,28 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies  #-}
+{-# LANGUAGE TypeFamilies,ScopedTypeVariables  #-}
 module Evaluation.STLC.GADTHigherOrder where
 
 import Evaluation 
+import Evaluation.Variable.GADT ()
 import Expression.STLC.GADTHigherOrder
-import qualified Value.STLC.GADT as V
-import Environment.GADT as E
-import ErrorMonad
 import Type.STLC.GADT
+import qualified Value.STLC.GADT as V
+import Control.Applicative.Recursion
+import ErrorMonad
 
 instance Evl (Exp r t) where
   type Val (Exp r t) = t
   type Env (Exp r t) = r 
-  evl (Con i)     _ = V.con i
-  evl (Var x)     r = return (get x r)
-  evl (Abs t eb)  r = V.abs (flip evl r . eb . cnvValExp t r)
-  evl (App ef ea) r = do vf <- evl ef r 
-                         va <- evl ea r
-                         V.app vf va
-  evl (Add el er) r = do vl <- evl el r  
-                         vr <- evl er r
-                         V.add vl vr
+  evl egho r = case egho of
+    Con i     -> V.con <$> pure i
+    Var x     -> V.var <$> evl' x  
+    Abs t  eb -> V.abs <$> pure (flip evl r . eb . cnvValExp t r)
+    App ef ea -> V.app <$> evl' ef <*> evl' ea
+    Add el er -> V.add <$> evl' el <*> evl' er
+    where evl' :: (Evl e , Env e ~ r) => e -> ErrM (Val e)
+          evl' e = evl e r 
 
 cnvValExp :: Typ t -> r -> t -> Exp r t
 cnvValExp Int         _ i = Con i
-cnvValExp (Arr ta tb) r f = Abs ta (\ ea -> case evl ea r of    
-                                       Rgt va -> cnvValExp tb r (f va) 
-                                       Lft s  -> error s) 
+cnvValExp (Arr ta tb) r f = Abs ta (cnvValExp tb r . f . frmRgt . flip evl r)
+                             

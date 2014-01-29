@@ -1,46 +1,50 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module Value.Feldspar.GADT where
 
+import Prelude as P
 import ErrorMonad
 import Data.Array
 
-conI :: Integer -> ErrM Integer
-conI = return
-     
-conB :: Bool -> ErrM Bool
-conB = return
+var :: t -> t
+var = id
 
-abs :: (a -> ErrM b) -> ErrM (a -> b)
-abs = return . (frmRgt .)
+conI :: Integer -> Integer
+conI = id 
+     
+conB :: Bool -> Bool
+conB = id 
+
+abs :: (a -> ErrM b) -> (a -> b)
+abs = (frmRgt .)
         
 -- Application of two values
-app :: (ta -> tb) -> ta -> ErrM tb
-app = (return .) . ($)
+app :: (ta -> tb) -> ta -> tb
+app = ($)
 
 addV :: Integer -> Integer -> Integer
 addV = (+)
  
-cnd :: Bool -> a -> a -> ErrM a
-cnd vc vt vf = return (if vc then vt else vf)
+cnd :: Bool -> a -> a -> a
+cnd vc vt vf = if vc then vt else vf
 
-fst :: (a , b) -> ErrM a
-fst (vf , _ ) = return vf
+fst :: (a , b) -> a
+fst = P.fst 
 
-snd :: (a , b) -> ErrM b
-snd (_  , vs) = return vs
+snd :: (a , b) -> b
+snd = P.snd 
 
-tpl :: a -> b -> ErrM (a , b)
-tpl = (return .) . ((,)) 
+tpl :: a -> b -> (a , b)
+tpl = (,)
  
-arr :: Integer -> (Integer -> a) -> ErrM (Array Integer a)
-arr l vf = return (listArray (0 , l)  
-                   [vf i | i <- [0 .. l]])
+arr :: Integer -> (Integer -> a) -> (Array Integer a)
+arr l vf = listArray (0 , l)  
+           [vf i | i <- [0 .. l]]
 
-len :: Array Integer a -> ErrM Integer
-len a = (return . (1 +) . uncurry (flip (-)) . bounds) a
+len :: Array Integer a -> Integer
+len = (1 +) . uncurry (flip (-)) . bounds
 
-ind :: Array Integer a -> Integer -> ErrM a
-ind a i = return (a ! i)
+ind :: Array Integer a -> Integer -> a
+ind = (!) 
 
-whl :: (s -> Bool) -> (s -> s) -> s -> ErrM s
-whl fc fb = return . head . dropWhile fc . iterate fb
+whl :: (s -> Bool) -> (s -> s) -> s -> s
+whl fc fb = head . dropWhile fc . iterate fb
