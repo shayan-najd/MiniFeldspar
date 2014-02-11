@@ -6,7 +6,6 @@ import Prelude hiding (sin)
 import Variable.GADT
 import Data.Array
 import Type.Feldspar.GADT
-import ErrorMonad
 import Singleton
 
 data Exp r t where 
@@ -27,12 +26,7 @@ data Exp r t where
   --  Any  :: Exp r t           
 
 abs :: Sin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
-abs = case sin of 
-  Rgt ts -> Abs ts
-  Lft _  -> error "Impossible"
-  
+abs = Abs sin  
+
 lett :: Sin Typ tl => Exp r tl -> Exp (tl , r) tb -> Exp r tb  
-lett = case sin of 
-  Rgt ts -> Let ts
-  Lft _  -> error "Impossible"
-   
+lett = Let sin

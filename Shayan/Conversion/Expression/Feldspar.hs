@@ -229,8 +229,7 @@ instance Cnv t t' => Cnv (FACP.Exp t) (FACP.Exp t') where
 ---------------------------------------------------------------------------------
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
-  cnv e = do r :: G.Env FG.Typ r <- sin 
-             return (cnvGToGHO e (cnvGEnv r))
+  cnv e = return (cnvGToGHO e (cnvGEnv (sin :: G.Env FG.Typ r)))
  
 cnvGToGHO :: forall rr tt. FGFO.Exp rr tt -> G.Env (FGHO.Exp rr) rr 
              -> (FGHO.Exp rr tt)

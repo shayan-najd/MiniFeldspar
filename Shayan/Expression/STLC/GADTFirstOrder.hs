@@ -5,7 +5,6 @@ module Expression.STLC.GADTFirstOrder where
 import Prelude hiding (sin)
 import Variable.GADT
 import Type.STLC.GADT
-import ErrorMonad
 import Singleton
 
 -- GADT representation (Debruijn indices) of the simply-typed lambda calculus 
@@ -28,6 +27,4 @@ instance Show (Exp r t) where
   show (Add el er)           = show el ++ " + " ++ show er 
 
 abs :: Sin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
-abs = case sin of 
-  Rgt ts -> Abs ts
-  Lft _  -> error "Impossible"
+abs = Abs sin

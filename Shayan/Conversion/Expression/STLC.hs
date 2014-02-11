@@ -249,8 +249,7 @@ instance Cnv t t' => Cnv (SAEP.Exp t) (SAEP.Exp t') where
 ---------------------------------------------------------------------------------
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (SGFO.Exp r t) (SGHO.Exp r' t') where
-  cnv e = do r :: G.Env G.Typ r <- sin 
-             return (cnvGToGHO e (cnvGEnv r))
+  cnv e = return (cnvGToGHO e (cnvGEnv (sin :: G.Env G.Typ r )))
  
 cnvGToGHO :: forall rr tt. SGFO.Exp rr tt -> G.Env (SGHO.Exp rr) rr 
              -> SGHO.Exp rr tt

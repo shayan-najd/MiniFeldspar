@@ -7,7 +7,6 @@ import Variable.GADT
 import Data.Array
 import qualified Type.Feldspar.GADT as G
 import Singleton
-import ErrorMonad
 
 data Exp r t where 
   ConI :: Integer  -> Exp r Integer 
@@ -26,9 +25,7 @@ data Exp r t where
   Let  :: G.Typ tl -> Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb  
   
 abs :: Sin G.Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
-abs = case sin of 
-  Rgt ts -> Abs ts
-  Lft _  -> error "Impossible"
+abs = Abs sin 
 
 sucAll :: Exp r t' -> Exp (t , r) t' 
 sucAll (ConI i)       = ConI i

@@ -5,7 +5,6 @@ module Expression.STLC.GADTHigherOrder(Exp(..),abs,sucAll,prdAll) where
 import Prelude hiding (sin,abs)
 import Variable.GADT
 import Type.STLC.GADT
-import ErrorMonad
 import Singleton
 import Singleton.TypeSTLC as S () 
 
@@ -20,9 +19,7 @@ data Exp r t where
   App :: Exp r (ta -> tb) -> Exp r ta -> Exp r tb 
                         
 abs :: Sin Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
-abs = case sin of 
-  Rgt ts -> Abs ts
-  Lft _  -> error "Impossible"
+abs = Abs sin 
 
 sucAll :: Exp r t' -> Exp (t , r) t' 
 sucAll (Con i)     = Con i
