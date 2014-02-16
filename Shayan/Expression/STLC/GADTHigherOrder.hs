@@ -18,7 +18,7 @@ data Exp r t where
   Abs :: Typ ta -> (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
   App :: Exp r (ta -> tb) -> Exp r ta -> Exp r tb 
                         
-abs :: Sin Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
+abs :: HasSin Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
 abs = Abs sin 
 
 sucAll :: Exp r t' -> Exp (t , r) t' 

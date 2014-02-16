@@ -7,17 +7,17 @@ import qualified Type.Feldspar.GADT as G
 import Singleton
 import Data.Array (Array)
 
-instance Sin G.Typ Integer where
+instance HasSin G.Typ Integer where
   sin = G.Int 
  
-instance Sin G.Typ Bool where
+instance HasSin G.Typ Bool where
   sin = G.Bol 
 
-instance (Sin G.Typ ta , Sin G.Typ tb) => Sin G.Typ (ta -> tb) where
+instance (HasSin G.Typ ta , HasSin G.Typ tb) => HasSin G.Typ (ta -> tb) where
   sin = G.Arr sin sin
   
-instance (Sin G.Typ tf , Sin G.Typ ts) => Sin G.Typ (tf , ts) where
+instance (HasSin G.Typ tf , HasSin G.Typ ts) => HasSin G.Typ (tf , ts) where
   sin = G.Tpl sin sin  
   
-instance Sin G.Typ ta => Sin G.Typ (Array Integer ta) where
+instance HasSin G.Typ ta => HasSin G.Typ (Array Integer ta) where
   sin = G.Ary sin  

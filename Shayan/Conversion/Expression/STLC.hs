@@ -48,8 +48,8 @@ import Data.Traversable (traverse)
 
 type ExsExp = Exs2 SGFO.Exp (G.Env G.Typ) G.Typ
 type ExsTyp = ExsSin G.Typ
-type SinTyp = Sin G.Typ
-type SinEnv = Sin (G.Env G.Typ)
+type SinTyp = HasSin G.Typ
+type SinEnv = HasSin (G.Env G.Typ)
 
 ---------------------------------------------------------------------------------
 -- Conversion from SAUP.Exp

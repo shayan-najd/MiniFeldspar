@@ -7,8 +7,8 @@ import Singleton
 
 import Prelude ()
 
-instance Sin (Env tf) () where
+instance HasSin (Env tf) () where
   sin = Emp
   
-instance (Sin tf t , Sin (Env tf) ts) => Sin (Env tf) (t , ts) where
+instance (HasSin tf t , HasSin (Env tf) ts) => HasSin (Env tf) (t , ts) where
   sin = Ext sin sin

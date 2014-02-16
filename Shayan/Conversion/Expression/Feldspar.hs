@@ -45,8 +45,8 @@ import Data.Traversable(traverse)
 
 type ExsTyp = ExsSin FG.Typ
 type ExsExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ
-type SinTyp = Sin FG.Typ
-type SinEnv = Sin (G.Env FG.Typ)
+type SinTyp = HasSin FG.Typ
+type SinEnv = HasSin (G.Env FG.Typ)
   
 ---------------------------------------------------------------------------------
 -- Conversion from FAUP

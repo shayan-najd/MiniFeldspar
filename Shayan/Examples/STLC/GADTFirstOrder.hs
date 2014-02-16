@@ -16,7 +16,7 @@ dbl :: Exp () (Integer -> Integer)
 dbl = abs (Var Zro `Add` Var Zro)
 
 -- An example expression composing two types
-compose :: (Sin Typ ta , Sin Typ tb , Sin Typ tc) => 
+compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) => 
            Exp () ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
 compose = abs (abs (abs
                     (Var (Suc (Suc Zro)) `App` (Var (Suc Zro) `App` Var Zro))))

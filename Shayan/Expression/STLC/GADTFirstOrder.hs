@@ -26,5 +26,5 @@ instance Show (Exp r t) where
   show (Add el@(Add _ _) er) = "(" ++ show el ++ ") + " ++ show er 
   show (Add el er)           = show el ++ " + " ++ show er 
 
-abs :: Sin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
+abs :: HasSin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
 abs = Abs sin

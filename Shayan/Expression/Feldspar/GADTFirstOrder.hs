@@ -25,8 +25,8 @@ data Exp r t where
   Let  :: Typ tl -> Exp r tl -> Exp (tl , r) tb -> Exp r tb  
   --  Any  :: Exp r t           
 
-abs :: Sin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
+abs :: HasSin Typ ta => Exp (ta , r) tb -> Exp r (ta -> tb) 
 abs = Abs sin  
 
-lett :: Sin Typ tl => Exp r tl -> Exp (tl , r) tb -> Exp r tb  
+lett :: HasSin Typ tl => Exp r tl -> Exp (tl , r) tb -> Exp r tb  
 lett = Let sin

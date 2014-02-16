@@ -24,7 +24,7 @@ data Exp r t where
   Ind  :: Exp r (Array Integer t) -> Exp r Integer -> Exp r t 
   Let  :: G.Typ tl -> Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb  
   
-abs :: Sin G.Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
+abs :: HasSin G.Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
 abs = Abs sin 
 
 sucAll :: Exp r t' -> Exp (t , r) t' 

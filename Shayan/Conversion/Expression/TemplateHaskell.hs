@@ -90,7 +90,7 @@ instance Cnv TH.Exp (FAUP.Exp TH.Name) where
                                 = FAUP.Let x <$> cnv el <*> cnv eb
   cnv _                         = fail "Syntax Error!"
  
-instance (Sin SG.Typ t , Sin (G.Env SG.Typ) r , t ~ t') => 
+instance (HasSin SG.Typ t , HasSin (G.Env SG.Typ) r , t ~ t') => 
          Cnv (TH.Q (TH.TExp t) 
              , AT.Env TH.Name SAS.Typ
              , AT.Env TH.Name SAUM.Exp) (SGFO.Exp r t') where
@@ -99,7 +99,7 @@ instance (Sin SG.Typ t , Sin (G.Env SG.Typ) r , t ~ t') =>
                                 -- normalization here
                                 cnv (e'' , rt ,rb)            
 
-instance ( Sin FG.Typ t , Sin (G.Env FG.Typ) r , t ~ t') => 
+instance (HasSin FG.Typ t , HasSin (G.Env FG.Typ) r , t ~ t') => 
          Cnv (TH.Q (TH.TExp t) 
              , AT.Env TH.Name FAS.Typ
              , AT.Env TH.Name FAUM.Exp) (FGFO.Exp r t') where

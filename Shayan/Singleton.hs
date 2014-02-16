@@ -2,7 +2,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module Singleton where
   
-class Sin s t where
-  sin :: s t
-  
-  
+class HasSin tf t where
+  sin :: tf t
+ 

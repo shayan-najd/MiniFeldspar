@@ -17,7 +17,7 @@ dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)
 dbl = abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
 
 -- An example expression composing two types
-compose :: (Sin Typ ta , Sin Typ tb , Sin Typ tc) =>
+compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) =>
            Exp r ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
 compose = abs (abs (abs 
                     (Var (Suc (Suc Zro)) `App` (Var (Suc Zro) `App` Var Zro))))
