@@ -4,7 +4,7 @@ module Data.Nat where
 data Nat =
     Zro
   | Suc Nat
-  deriving Eq
+  deriving (Eq , Ord)
 
 instance Enum Nat where
   fromEnum = cnvVarInt
