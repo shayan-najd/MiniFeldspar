@@ -1,13 +1,22 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, FlexibleContexts 
+           , GADTs #-}
 module Singleton.TypeSTLC where
 
 import Prelude hiding (sin)
-import qualified Type.STLC.GADT as G
 import Singleton
 
-instance HasSin G.Typ Integer where
-  sin = G.Int 
+data Typ t where
+  Int :: Typ Integer
+  Arr :: Typ ta -> Typ tb -> Typ (ta -> tb)
+  
+instance HasSin Typ Integer where
+  sin = Int 
  
-instance (HasSin G.Typ ta , HasSin G.Typ tb) => HasSin G.Typ (ta -> tb) where
-  sin = G.Arr sin sin
+instance (HasSin Typ ta , HasSin Typ tb) => HasSin Typ (ta -> tb) where
+  sin = Arr sin sin
+    
+instance Show (Typ t) where                  
+  show Int                        = "Int"
+  show (t1@(_  `Arr` _) `Arr` t2) = "(" ++ show t1 ++ ") -> " ++ show t2 
+  show (t1  `Arr` t2)             = show t1 ++ " -> " ++ show t2 

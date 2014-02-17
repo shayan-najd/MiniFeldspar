@@ -7,7 +7,7 @@ import Unification as U
 import Environment.ADT as E
 import TypeChecking 
 import Data.Vector
-import Data.Nat.GADT
+import Singleton.Nat
 
 instance (TypCons a ~ (Zro, (Suc (Suc Zro), r0)), Uni a) => 
          Chk (Exp a) where

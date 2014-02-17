@@ -15,7 +15,7 @@ import qualified Expression.STLC.GADTHigherOrder        as SGHO
 
 import qualified Type.STLC.ADTSimple           as SAS
 import qualified Type.STLC.ADTWithMetavariable as SAM
-import qualified Type.STLC.GADT                as G
+import qualified Singleton.TypeSTLC            as G
 
 import qualified Variable.ADT             as A
 import qualified Variable.GADT            as G

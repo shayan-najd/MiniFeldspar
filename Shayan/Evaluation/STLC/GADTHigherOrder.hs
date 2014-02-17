@@ -5,7 +5,7 @@ module Evaluation.STLC.GADTHigherOrder where
 import Evaluation 
 import Evaluation.Variable.GADT ()
 import Expression.STLC.GADTHigherOrder
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 import qualified Value.STLC.GADT as V
 import Control.Applicative.Recursion
 import ErrorMonad

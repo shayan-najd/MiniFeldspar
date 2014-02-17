@@ -8,9 +8,8 @@ import Variable.GADT
 import Evaluation as E
 import Evaluation.Feldspar.GADTFirstOrder ()
 import qualified Value.Feldspar.GADT as V
-import Type.Feldspar.GADT
 import Singleton
-import Singleton.TypeFeldspar ()
+import Singleton.TypeFeldspar 
 
 -- An example expression doubling the input number                    
 dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)

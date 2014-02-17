@@ -4,7 +4,7 @@ module Expression.STLC.GADTHigherOrder(Exp(..),abs,sucAll,prdAll) where
  
 import Prelude hiding (sin,abs)
 import Variable.GADT
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 import Singleton
 import Singleton.TypeSTLC as S () 
 

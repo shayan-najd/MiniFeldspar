@@ -5,7 +5,7 @@ module Conversion.Type.STLC where
 
 import qualified Type.STLC.ADTSimple as AS
 import qualified Type.STLC.ADTWithMetavariable as AM
-import qualified Type.STLC.GADT as T
+import qualified Singleton.TypeSTLC as T
 import qualified Type.Herbrand as H
 import qualified Variable.GADT as G
 import Data.Vector

@@ -8,8 +8,7 @@ import Variable.GADT
 import Evaluation as E
 import Evaluation.STLC.GADTFirstOrder ()
 import Singleton
-import Singleton.TypeSTLC ()
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 
 -- An example expression doubling the input number                    
 dbl :: Exp () (Integer -> Integer)

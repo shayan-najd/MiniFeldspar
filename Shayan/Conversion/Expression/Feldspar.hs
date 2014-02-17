@@ -13,7 +13,7 @@ import qualified Expression.Feldspar.GADTHigherOrder        as FGHO
 
 import qualified Type.Feldspar.ADTSimple           as FAS
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
-import qualified Type.Feldspar.GADT                as FG
+import qualified Singleton.TypeFeldspar            as FG
 
 import qualified Variable.ADT            as A
 import qualified Variable.GADT           as G

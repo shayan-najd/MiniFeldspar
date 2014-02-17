@@ -7,7 +7,7 @@ import Unification
 import ErrorMonad
 import Variable.GADT 
 import Data.Vector
-import qualified Data.Nat.GADT as N
+import qualified Singleton.Nat as N
 
 instance Uni FS.Typ where
   type Mnd FS.Typ = ErrM

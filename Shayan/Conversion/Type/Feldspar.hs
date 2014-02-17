@@ -5,7 +5,7 @@ module Conversion.Type.Feldspar where
 
 import qualified Type.Feldspar.ADTSimple           as FAS
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
-import qualified Type.Feldspar.GADT                as FT
+import qualified Singleton.TypeFeldspar            as FT
 import qualified Type.Herbrand                     as H
 
 import qualified Variable.GADT                     as G

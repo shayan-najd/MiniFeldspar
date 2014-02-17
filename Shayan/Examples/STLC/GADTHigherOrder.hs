@@ -6,7 +6,7 @@ import Prelude hiding (sin,abs)
 import Expression.STLC.GADTHigherOrder
 import Evaluation as E
 import Evaluation.STLC.GADTHigherOrder ()
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 import Singleton
  
 -- An example expression doubling the input number                    

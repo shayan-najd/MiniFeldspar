@@ -5,7 +5,7 @@ module Expression.Feldspar.GADTHigherOrder where
 import Prelude hiding (sin)
 import Variable.GADT
 import Data.Array
-import qualified Type.Feldspar.GADT as G
+import qualified Singleton.TypeFeldspar as G
 import Singleton
 
 data Exp r t where 

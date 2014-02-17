@@ -4,7 +4,7 @@ module Expression.STLC.GADTFirstOrder where
 
 import Prelude hiding (sin)
 import Variable.GADT
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 import Singleton
 
 -- GADT representation (Debruijn indices) of the simply-typed lambda calculus 

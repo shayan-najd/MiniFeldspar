@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module Data.Nat where
 
 -- Natural numbers

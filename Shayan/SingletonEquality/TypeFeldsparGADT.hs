@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs #-}
 module SingletonEquality.TypeFeldsparGADT where
 
-import Type.Feldspar.GADT
+import Singleton.TypeFeldspar 
 import SingletonEquality
 
 instance EqlSin Typ where

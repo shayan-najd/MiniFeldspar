@@ -10,7 +10,7 @@ import Evaluation.Feldspar.GADTHigherOrder ()
 import qualified Value.Feldspar.GADT as V
 import Singleton
 import Singleton.TypeFeldspar ()
-import Type.Feldspar.GADT
+import Singleton.TypeFeldspar
 
 -- An example expression doubling the input number                    
 dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)

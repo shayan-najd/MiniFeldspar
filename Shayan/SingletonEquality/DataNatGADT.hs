@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs #-}
 module SingletonEquality.DataNatGADT where
 
-import Data.Nat.GADT 
+import Singleton.Nat 
 import SingletonEquality
 
 instance EqlSin Nat where

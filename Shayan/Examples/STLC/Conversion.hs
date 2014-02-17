@@ -8,7 +8,7 @@ import qualified Expression.STLC.ADTUntypedDebruijn as AUM
 import qualified Expression.STLC.GADTFirstOrder as GFO 
 import qualified Expression.STLC.GADTHigherOrder as GHO 
 import qualified Type.STLC.ADTSimple  as AS
-import qualified Type.STLC.GADT       as G
+import qualified Singleton.TypeSTLC   as G
 
 import Conversion
 import Conversion.Expression.STLC ()

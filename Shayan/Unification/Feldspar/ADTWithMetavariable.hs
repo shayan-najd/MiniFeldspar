@@ -12,7 +12,7 @@ import Conversion.Type.Feldspar ()
 import Data.Vector
 import Variable.GADT
 import qualified Data.Nat as NN
-import qualified Data.Nat.GADT as N
+import qualified Singleton.Nat as N
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni FAM.Typ where

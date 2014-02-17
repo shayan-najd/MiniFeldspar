@@ -4,7 +4,7 @@ module Data.Vector where
 
 import Data.Foldable
 import Data.Monoid
-import Data.Nat.GADT
+import Singleton.Nat
 
 infixr 5 :::
 data Vec n a where   

@@ -5,7 +5,7 @@ module Unification.STLC.ADTSimple where
 import qualified Type.STLC.ADTSimple as AS
 import ErrorMonad
 import Unification
-import Data.Nat.GADT 
+import Singleton.Nat 
 import Data.Vector
 import qualified Variable.GADT as V
 

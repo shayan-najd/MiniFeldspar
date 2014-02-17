@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs #-}
 module SingletonEquality.TypeSTLCGADT where
 
-import Type.STLC.GADT
+import Singleton.TypeSTLC
 import SingletonEquality
 
 instance EqlSin Typ where

@@ -8,7 +8,7 @@ import qualified Expression.Feldspar.GADTFirstOrder        as GFO
 import qualified Expression.Feldspar.GADTHigherOrder       as GHO
 
 import qualified Type.Feldspar.ADTSimple  as FS
-import qualified Type.Feldspar.GADT       as G
+import qualified Singleton.TypeFeldspar   as G
 
 import qualified Value.Feldspar.GADT as V
 import Conversion

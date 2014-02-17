@@ -6,7 +6,7 @@ import qualified Variable.GADT as G
 import qualified Data.Nat as N
 import Data.Vector
 import Data.Foldable
-import Data.Nat.GADT  
+import Singleton.Nat  
 
 data Typ r where 
    App :: G.Var r n -> Vec n (Typ r) -> Typ r
