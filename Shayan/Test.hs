@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
+{-# LANGUAGE PolyKinds #-}
 module Test where
  
 import qualified Examples.STLC.ADTUntypedDebruijn     as SAUM

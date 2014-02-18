@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, DataKinds, TypeOperators #-}
 module TypeChecking.STLC.ADTExplicit where
 
 import Expression.STLC.ADTExplicit
@@ -7,9 +7,9 @@ import Unification as U
 import Environment.ADT as E
 import TypeChecking 
 import Data.Vector
-import Singleton.Nat
+import Data.Nat
 
-instance (TypCons a ~ (Zro, (Suc (Suc Zro), r0)), Uni a) => 
+instance (TypCons a ~ (Zro ': Suc (Suc Zro) ': r0), Uni a) => 
          Chk (Exp a) where
   type Env (Exp a)   = E.Env a
   type Typ (Exp a)   = a

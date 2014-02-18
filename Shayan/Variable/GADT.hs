@@ -1,13 +1,14 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, StandaloneDeriving #-}
+{-# LANGUAGE GADTs, StandaloneDeriving, PolyKinds #-}
+{-# LANGUAGE TypeOperators, DataKinds, PolyKinds #-}
 module Variable.GADT where
 
 import qualified Data.Nat as N
 
 -- Variables
-data Var r t where
-  Zro :: Var (t , r) t
-  Suc :: Var r tp -> Var (t , r) tp
+data Var :: [k] -> k -> * where
+  Zro :: Var (t ': r) t
+  Suc :: Var r tp -> Var (t ': r) tp
 
 deriving instance Eq (Var e t)
   

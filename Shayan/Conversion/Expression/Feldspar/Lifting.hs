@@ -1,15 +1,15 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
            , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
+           , ImplicitParams, ConstraintKinds, DataKinds, TypeOperators #-}
 module Conversion.Expression.Feldspar.Lifting where
 
 import Prelude hiding (sin)
 import qualified Expression.Feldspar.GADTFirstOrder  as FGFO
 import qualified Expression.Feldspar.GADTHigherOrder as FGHO 
 
-import qualified Type.Feldspar.GADT      as FG
-import qualified Environment.GADT        as G
+import qualified Singleton.TypeFeldspar as FG
+import qualified Singleton.Environment  as G
 
 import Conversion hiding ((<$@>),(<*@>))
 import Conversion.Type.Feldspar ()
@@ -19,8 +19,8 @@ import Conversion.Existential ()
 import ErrorMonad
 import Singleton
  
-type SinTyp = Sin FG.Typ
-type SinEnv = Sin (G.Env FG.Typ)
+type SinTyp = HasSin FG.Typ
+type SinEnv = HasSin (G.Env FG.Typ)
 
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
@@ -61,7 +61,7 @@ instance (t ~ t' , r ~ r') =>
         el <*@> er = el <*> c er      
   
 instance (ta ~ ta' , tb ~ tb' , r ~ r') => 
-         Cnv (FGFO.Exp (ta , r) tb , G.Env (FGHO.Exp r) r) 
+         Cnv (FGFO.Exp (ta ': r) tb , G.Env (FGHO.Exp r) r) 
              (FGHO.Exp r' ta' -> FGHO.Exp r' tb') where
    cnv (eb , r) = return (FGHO.prdAll . frmRgt . cnv' eb .
                           G.wkn FGHO.sucAll . flip G.Ext r) 

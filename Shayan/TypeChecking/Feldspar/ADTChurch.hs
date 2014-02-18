@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE TypeFamilies, TypeOperators , DataKinds #-}
 module TypeChecking.Feldspar.ADTChurch where
  
 import Expression.Feldspar.ADTChurch  
@@ -7,10 +7,10 @@ import Unification as U
 import Environment.ADT as E
 import TypeChecking
 import Data.Vector 
-import Singleton.Nat  
+import Data.Nat  
 
-instance (TypCons a ~ (Zro, (Suc (Suc Zro), (Zro, (Suc (Suc Zro), 
-                       (Suc Zro, r'))))) , Uni a) => 
+instance (TypCons a ~ (Zro ': Suc (Suc Zro) ': Zro ': Suc (Suc Zro) ': 
+                       Suc Zro ': r') , Uni a) => 
          Chk (Exp a) where
   type Env (Exp a) = E.Env a
   type Typ (Exp a) = a

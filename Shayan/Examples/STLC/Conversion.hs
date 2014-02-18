@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs, FlexibleContexts, ScopedTypeVariables #-}
+{-# LANGUAGE GADTs, FlexibleContexts, ScopedTypeVariables, DataKinds 
+           , TypeOperators #-}
 module Examples.STLC.Conversion where
 -- import qualified Expression.Existential as W
 
@@ -19,7 +20,7 @@ import Conversion.Environment ()
 
 import qualified Environment.ADT  as A
 import qualified Environment.ADTTable  as AT
-import qualified Environment.GADT as G
+import qualified Singleton.Environment as G
 import Evaluation.STLC.GADTFirstOrder  ()
 import Evaluation.STLC.GADTHigherOrder ()
 import qualified Examples.STLC.ADTUntypedDebruijn  as AUM
@@ -52,20 +53,19 @@ isFour' e  = case (do Exs2 e' G.Emp G.Int
                Lft s -> error s   
 
 isFourQ :: Q (TExp Integer) -> Bool
-isFourQ e  = case (do e':: GFO.Exp () Integer <- cnv (e 
-                                                   , [] :: AT.Env Name AS.Typ 
-                                                   , [] :: AT.Env Name AUM.Exp)
+isFourQ e  = case (do e':: GFO.Exp '[] AS.Int <- cnv (e 
+                           , [] :: AT.Env Name AS.Typ 
+                           , [] :: AT.Env Name AUM.Exp)
                       evl e' ()) of
                 Rgt i -> i == (4 :: Integer)
                 Lft s -> error s   
 
-isFourHO :: GFO.Exp () Integer -> Bool
-isFourHO e = case (do e' :: GHO.Exp () Integer <- cnv e 
+isFourHO :: GFO.Exp '[] AS.Int -> Bool
+isFourHO e = case (do e' :: GHO.Exp '[] AS.Int <- cnv e 
                       evl e' ()) of
                Rgt i -> i == (4 :: Integer)
                Lft s -> error s              
-
-
+ 
 test :: Bool              
 test = isFour AUM.four && isFour' AUP.four &&  
        isFour ACP.four && isFour  AEP.four && isFourQ TH.four

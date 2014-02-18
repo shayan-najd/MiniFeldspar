@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, GADTs, ImplicitParams 
            , ScopedTypeVariables #-}
+{-# LANGUAGE DataKinds, TypeOperators #-}
 module Conversion.Type.STLC where
 
 import qualified Type.STLC.ADTSimple as AS
@@ -33,7 +34,7 @@ instance Cnv AS.Typ AS.Typ where
 -- Conversion from AM.Typ
 ---------------------------------------------------------------------------------
  
-instance Cnv AM.Typ (H.Typ (H.EnvIntArr ())) where
+instance Cnv AM.Typ (H.Typ (H.EnvIntArr '[])) where
   cnv AM.Int         = return H.int
   cnv (AM.Arr ta tb) = do ta' <- cnv ta
                           tb' <- cnv tb
@@ -57,7 +58,7 @@ instance Cnv AM.Typ AM.Typ where
 ---------------------------------------------------------------------------------
 -- Conversion from AM.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (H.Typ (H.EnvIntArr ())) AM.Typ where
+instance Cnv (H.Typ (H.EnvIntArr '[])) AM.Typ where
   cnv (H.App G.Zro Nil)  = pure AM.Int
   cnv (H.App (G.Suc G.Zro) (ta ::: tr ::: Nil)) 
                          = let ?cnv = cnv in 

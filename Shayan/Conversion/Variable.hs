@@ -1,11 +1,12 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts #-}
+{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
+           , PolyKinds #-}
 module Conversion.Variable where
 
-import qualified Variable.ADT     as A
-import qualified Variable.GADT    as G
-import qualified Environment.ADT  as A
-import qualified Environment.GADT as G
+import qualified Variable.ADT          as A
+import qualified Variable.GADT         as G
+import qualified Environment.ADT       as A
+import qualified Singleton.Environment as G
 import Conversion.Environment ()
 import Existential
 import Conversion

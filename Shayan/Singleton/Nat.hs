@@ -1,21 +1,23 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleContexts #-}
+{-# LANGUAGE GADTs, MultiParamTypeClasses, FlexibleContexts, TypeFamilies
+           , DataKinds, TypeOperators #-}
 module Singleton.Nat where
  
-import Prelude ()
+import Prelude (Maybe)
 import Singleton
-
-data Zro  
-data Suc n
-
-data Nat n where
-  Zro :: Nat Zro
-  Suc :: Nat n -> Nat (Suc n)  
+import qualified Data.Nat as N
   
-instance HasSin Nat Zro where  
+data Nat n where
+  Zro :: Nat 'N.Zro
+  Suc :: Nat n -> Nat ('N.Suc n)  
+  
+type instance Trm (Nat 'N.Zro)     = Maybe ()  
+type instance Trm (Nat ('N.Suc n)) = Maybe (Trm (Nat n))
+  
+instance HasSin Nat 'N.Zro where  
   sin = Zro
   
-instance (HasSin Nat n) => HasSin Nat (Suc n) where  
+instance (HasSin Nat n) => HasSin Nat ('N.Suc n) where  
   sin = Suc sin
   
   

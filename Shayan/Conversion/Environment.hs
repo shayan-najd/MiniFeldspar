@@ -1,16 +1,18 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleContexts, FlexibleInstances
-           , GADTs #-}
+           , GADTs, DataKinds , TypeFamilies, PolyKinds #-}
 module Conversion.Environment where
 
 import qualified Environment.ADT       as A
 import qualified Environment.ADTTable  as AT
-import qualified Environment.GADT      as G
+import qualified Singleton.Environment as G
 
 import Conversion
 import SingletonEquality
 import Existential
 import ErrorMonad
+import Singleton
+import Singleton.Environment ()
  
 instance Cnv a (ExsSin b) => Cnv (A.Env a) (ExsSin (G.Env b)) where
   cnv []      = return (ExsSin G.Emp)
@@ -20,12 +22,13 @@ instance Cnv a (ExsSin b) => Cnv (A.Env a) (ExsSin (G.Env b)) where
  
 instance Cnv a b => Cnv (A.Env a) (A.Env b)  where
   cnv = mapM cnv
-  
-instance (EqlSin tf , e ~ e') => Cnv (G.Env tf e , A.Env (Exs0 tf)) e' where  
+ 
+instance (EqlSin tf, Trm r ~ r' ) => 
+         Cnv (G.Env tf r , A.Env (ExsTrm tf)) r' where 
   cnv (G.Emp        , [])                = return ()
-  cnv (t `G.Ext` ts , (Exs0 x tv) : vs)  = do ts' <- cnv (ts , vs)
-                                              Rfl <- eqlSin t tv 
-                                              return (x,ts')
+  cnv (t `G.Ext` ts , (ExsTrm x tv) : vs)  = do ts' <- cnv (ts , vs)
+                                                Rfl <- eqlSin t tv 
+                                                return (x,ts')
   cnv (_            , _)                 = fail "Scope Error!"  
  
 cnvEnvAMAS :: Cnv a b => AT.Env x a -> ErrM (AT.Env x b)

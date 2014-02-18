@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , GADTs, ScopedTypeVariables #-}
+           , GADTs, ScopedTypeVariables, PolyKinds #-}
 module Conversion.Existential where
 
 import Prelude hiding (sin)

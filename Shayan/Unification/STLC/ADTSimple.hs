@@ -1,17 +1,18 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses , TypeFamilies #-}
+{-# LANGUAGE TypeOperators, DataKinds #-}
 module Unification.STLC.ADTSimple where
 
 import qualified Type.STLC.ADTSimple as AS
 import ErrorMonad
 import Unification
-import Singleton.Nat 
+import Data.Nat 
 import Data.Vector
 import qualified Variable.GADT as V
 
 instance Uni AS.Typ where
   type Mnd     AS.Typ = ErrM 
-  type TypCons AS.Typ = (Zro,(Suc (Suc Zro),()))
+  type TypCons AS.Typ = Zro ': Suc (Suc Zro) ': '[]
   
   typCon V.Zro          Nil                 = return AS.Int 
   typCon (V.Suc V.Zro)  (ta ::: tb ::: Nil) = return (AS.Arr ta tb)

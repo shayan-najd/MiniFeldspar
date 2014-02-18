@@ -11,10 +11,10 @@ import qualified Expression.STLC.ADTExplicit as SAEP
 import qualified Expression.STLC.GADTFirstOrder         as SGFO
  
 import qualified Type.STLC.ADTWithMetavariable as SAM
-import qualified Type.STLC.GADT                as G
+import qualified Singleton.TypeSTLC            as G
  
 import qualified Environment.ADT          as A
-import qualified Environment.GADT         as G
+import qualified Singleton.Environment    as G
 
 import Conversion
 import Conversion.Type.STLC ()
@@ -35,8 +35,8 @@ import Singleton.TypeSTLC ()
 
 type ExsExp = Exs2 SGFO.Exp (G.Env G.Typ) G.Typ
 type ExsTyp = ExsSin G.Typ
-type SinTyp = Sin G.Typ
-type SinEnv = Sin (G.Env G.Typ)
+type SinTyp = HasSin G.Typ
+type SinEnv = HasSin (G.Env G.Typ)
 
 instance Cnv (SACP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where  
   cnv (SACP.Con i     , r) = do 

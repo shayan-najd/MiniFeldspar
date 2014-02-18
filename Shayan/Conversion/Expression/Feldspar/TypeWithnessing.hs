@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
+           , ScopedTypeVariables, GADTs
+           , ImplicitParams, PolyKinds #-}
 module Conversion.Expression.Feldspar.TypeWithnessing where
 
 import Prelude hiding (sin)
@@ -9,28 +9,26 @@ import qualified Expression.Feldspar.ADTChurch  as FACP
 import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
 
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
-import qualified Type.Feldspar.GADT                as FG
+import qualified Singleton.TypeFeldspar            as FG
  
 import qualified Environment.ADT         as A
-import qualified Environment.GADT        as G
+import qualified Singleton.Environment   as G
 
 import Conversion
 import Conversion.Type.Feldspar ()
 import Conversion.Variable ()
 import Conversion.Existential ()
+import Conversion.Environment ()
 
 import SingletonEquality
 import SingletonEquality.EnvironmentGADT ()
 import SingletonEquality.TypeFeldsparGADT ()
 
 import Existential
-import Singleton
 
 type ExsTyp = ExsSin FG.Typ
 type ExsExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ
-type SinTyp = Sin FG.Typ
-type SinEnv = Sin (G.Env FG.Typ)
-
+ 
 instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
   cnv (FACP.ConI i , r)       = do 
     ExsSin r' <- cnv r
@@ -48,7 +46,7 @@ instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
     return (Exs2 (FGFO.Abs ta' eb') r' (FG.Arr ta' tb))
   cnv (FACP.App ef ea , r)    = do 
     Exs2 ef' rf (FG.Arr ta tb) :: ExsExp <- cnv (ef , r)
-    Exs2 ea' ra ta'             :: ExsExp <- cnv (ea , r)
+    Exs2 ea' ra ta'            :: ExsExp <- cnv (ea , r)
     Rfl <- eqlSin rf ra
     Rfl <- eqlSin ta ta'
     return (Exs2 (FGFO.App ef' ea') rf tb)

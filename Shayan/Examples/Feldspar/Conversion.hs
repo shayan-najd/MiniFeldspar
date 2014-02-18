@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE GADTs, FlexibleContexts, ScopedTypeVariables, TemplateHaskell #-}
+{-# LANGUAGE PolyKinds, DataKinds, TypeOperators #-}
 module Examples.Feldspar.Conversion where
 
 import Language.Haskell.TH.Syntax
@@ -8,7 +9,7 @@ import qualified Expression.Feldspar.GADTFirstOrder        as GFO
 import qualified Expression.Feldspar.GADTHigherOrder       as GHO
 
 import qualified Type.Feldspar.ADTSimple  as FS
-import qualified Singleton.TypeFeldspar   as G
+import qualified Singleton.TypeFeldspar   as G 
 
 import qualified Value.Feldspar.GADT as V
 import Conversion
@@ -20,7 +21,7 @@ import Conversion.Existential ()
 import Conversion.Expression.TemplateHaskell ()
 import qualified Environment.ADT  as A
 import qualified Environment.ADTTable  as AT
-import qualified Environment.GADT as G
+import qualified Singleton.Environment as G
 import Evaluation.Feldspar.GADTFirstOrder()
 import Evaluation.Feldspar.GADTHigherOrder()
 import qualified Examples.Feldspar.ADTUntypedDebruijn  as AUM
@@ -33,17 +34,19 @@ import SingletonEquality
 import ErrorMonad
 import Existential
 import Singleton.Environment ()
+import Singleton
 
+type Add    = FS.Arr FS.Int (FS.Arr FS.Int FS.Int)
 type ExsExp = Exs2 GFO.Exp (G.Env G.Typ) G.Typ
-type EnvAdd = (Integer -> Integer -> Integer , ())
+type EnvAdd = Add ': '[]
 
 typAddS :: FS.Typ
 typAddS = FS.Int `FS.Arr` (FS.Int `FS.Arr` FS.Int)
 
-typAddG :: G.Typ (Integer -> Integer -> Integer)
+typAddG :: G.Typ Add
 typAddG = (G.Int `G.Arr` (G.Int `G.Arr` G.Int))
 
-envAddVal :: EnvAdd
+envAddVal :: Trm EnvAdd
 envAddVal = (V.addV , ())
 
 envAddA :: A.Env FS.Typ
@@ -81,13 +84,13 @@ isFour' e = case (do Exs2 e' r' G.Int :: ExsExp <- cnv (e, envAddStr, envEmpStr)
               Lft s -> error s   
  
 isFourQ :: Q (TExp Integer) -> Bool
-isFourQ e = case (do e':: GFO.Exp EnvAdd Integer <- cnv (e, envAddTHN, envEmpTHN)
+isFourQ e = case (do e':: GFO.Exp EnvAdd FS.Int <- cnv (e, envAddTHN, envEmpTHN)
                      evl e' envAddVal) of
                 Rgt i -> i == (4 :: Integer)
                 Lft s -> error s   
 
-isFourHO :: GFO.Exp EnvAdd Integer -> Bool
-isFourHO e = case (do e' :: GHO.Exp EnvAdd Integer <- cnv e
+isFourHO :: GFO.Exp EnvAdd FS.Int -> Bool
+isFourHO e = case (do e' :: GHO.Exp EnvAdd FS.Int <- cnv e
                       evl e' envAddVal) of
                Rgt i -> i == (4 :: Integer)
                Lft s -> error s              

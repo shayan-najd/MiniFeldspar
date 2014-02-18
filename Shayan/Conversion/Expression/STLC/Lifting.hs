@@ -9,9 +9,8 @@ import Prelude hiding (sin)
 import qualified Expression.STLC.GADTFirstOrder         as SGFO
 import qualified Expression.STLC.GADTHigherOrder        as SGHO
 
-import qualified Type.STLC.GADT                as G
-
-import qualified Environment.GADT         as G
+import qualified Singleton.TypeSTLC    as G
+import qualified Singleton.Environment as G
 
 import Conversion
 import Conversion.Type.STLC ()
@@ -25,8 +24,8 @@ import Unification.STLC.ADTWithMetavariable ()
 import Singleton
 import Singleton.TypeSTLC ()
 
-type SinTyp = Sin G.Typ
-type SinEnv = Sin (G.Env G.Typ)
+type SinTyp = HasSin G.Typ
+type SinEnv = HasSin (G.Env G.Typ)
 
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (SGFO.Exp r t) (SGHO.Exp r' t') where

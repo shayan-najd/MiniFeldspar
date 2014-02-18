@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeFamilies  #-}
+{-# LANGUAGE DataKinds, TypeOperators #-}
 module Unification.Feldspar.ADTSimple where
 
 import qualified Type.Feldspar.ADTSimple as FS
@@ -7,12 +8,12 @@ import Unification
 import ErrorMonad
 import Variable.GADT 
 import Data.Vector
-import qualified Singleton.Nat as N
+import qualified Data.Nat as N
 
 instance Uni FS.Typ where
   type Mnd FS.Typ = ErrM
-  type TypCons FS.Typ = (N.Zro, (N.Suc (N.Suc N.Zro), (N.Zro
-                         , (N.Suc (N.Suc N.Zro), (N.Suc N.Zro, ())))))
+  type TypCons FS.Typ = (N.Zro ': N.Suc (N.Suc N.Zro) ': N.Zro ': 
+                         N.Suc (N.Suc N.Zro) ': N.Suc N.Zro ': '[])
   typCon Zro                         Nil                 = return FS.Int
   typCon (Suc Zro)                   (ta ::: tb ::: Nil) = return (FS.Arr ta tb)
   typCon (Suc (Suc Zro))             Nil                 = return FS.Bol

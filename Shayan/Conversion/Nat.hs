@@ -3,7 +3,7 @@
 module Conversion.Nat where
 
 import qualified Data.Nat as A
-import qualified Data.Nat.GADT as G
+import qualified Singleton.Nat  as G
 
 import Existential
 import Conversion

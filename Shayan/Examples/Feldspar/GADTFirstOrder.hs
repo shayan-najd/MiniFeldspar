@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts #-}
+{-# LANGUAGE GADTs, FlexibleContexts, DataKinds, TypeOperators #-}
 module Examples.Feldspar.GADTFirstOrder where
 
 import Prelude hiding (abs)
@@ -10,19 +10,21 @@ import Evaluation.Feldspar.GADTFirstOrder ()
 import qualified Value.Feldspar.GADT as V
 import Singleton
 import Singleton.TypeFeldspar 
+import qualified Type.Feldspar.ADTSimple as A
 
 -- An example expression doubling the input number                    
-dbl :: Exp (Integer -> Integer -> Integer , ()) (Integer -> Integer)
+dbl :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) (A.Int `A.Arr` A.Int)
 dbl = abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
 
 -- An example expression composing two types
 compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) =>
-           Exp r ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
+           Exp r ((tb `A.Arr` tc) `A.Arr` ((ta `A.Arr` tb) 
+                  `A.Arr` (ta `A.Arr` tc)))
 compose = abs (abs (abs 
                     (Var (Suc (Suc Zro)) `App` (Var (Suc Zro) `App` Var Zro))))
 
--- An example expression representing the Integer 4
-four :: Exp (Integer -> Integer -> Integer , ()) Integer
+-- An example expression representing the integer 4
+four :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) A.Int
 four = (compose `App` dbl `App` dbl) `App` (ConI 1)
  
 -- Two simple test cases

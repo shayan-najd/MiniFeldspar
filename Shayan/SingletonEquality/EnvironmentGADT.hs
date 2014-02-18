@@ -1,8 +1,8 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, PolyKinds #-}
 module SingletonEquality.EnvironmentGADT where
 
-import Environment.GADT                                              
+import Singleton.Environment
 import SingletonEquality
 
 instance EqlSin tf => EqlSin (Env tf) where 

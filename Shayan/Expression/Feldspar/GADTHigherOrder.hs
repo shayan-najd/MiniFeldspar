@@ -1,33 +1,34 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs, FlexibleContexts #-}
+{-# LANGUAGE FlexibleContexts, GADTs #-}
+{-# LANGUAGE TypeOperators, DataKinds, PolyKinds #-}
 module Expression.Feldspar.GADTHigherOrder where
  
 import Prelude hiding (sin)
 import Variable.GADT
-import Data.Array
 import qualified Singleton.TypeFeldspar as G
 import Singleton
+import qualified Type.Feldspar.ADTSimple as A
 
-data Exp r t where 
-  ConI :: Integer  -> Exp r Integer 
-  ConB :: Bool     -> Exp r Bool
+data Exp :: [A.Typ] -> A.Typ -> * where 
+  ConI :: Integer  -> Exp r A.Int 
+  ConB :: Bool     -> Exp r A.Bol
   Var  :: Var r t  -> Exp r t  
-  Abs  :: G.Typ ta -> (Exp r ta -> Exp r tb) -> Exp r (ta -> tb) 
-  App  :: Exp r (ta -> tb) -> Exp r ta -> Exp r tb     
-  Cnd  :: Exp r Bool ->  Exp r t -> Exp r t -> Exp r t 
-  Whl  :: Exp r (t -> Bool) -> Exp r (t -> t) -> Exp r t -> Exp r t  
-  Tpl  :: Exp r tf -> Exp r ts -> Exp r (tf , ts) 
-  Fst  :: Exp r (tf , ts) -> Exp r tf 
-  Snd  :: Exp r (tf , ts) -> Exp r ts 
-  Ary  :: Exp r Integer -> Exp r (Integer -> t) -> Exp r (Array Integer t)
-  Len  :: Exp r (Array Integer t) -> Exp r Integer 
-  Ind  :: Exp r (Array Integer t) -> Exp r Integer -> Exp r t 
+  Abs  :: G.Typ ta -> (Exp r ta -> Exp r tb) -> Exp r (ta `A.Arr` tb) 
+  App  :: Exp r (ta `A.Arr` tb) -> Exp r ta -> Exp r tb     
+  Cnd  :: Exp r A.Bol ->  Exp r t -> Exp r t -> Exp r t 
+  Whl  :: Exp r (t `A.Arr` A.Bol) -> Exp r (t `A.Arr` t) -> Exp r t -> Exp r t  
+  Tpl  :: Exp r tf -> Exp r ts -> Exp r (A.Tpl tf ts) 
+  Fst  :: Exp r (A.Tpl tf ts) -> Exp r tf 
+  Snd  :: Exp r (A.Tpl tf ts) -> Exp r ts 
+  Ary  :: Exp r A.Int -> Exp r (A.Int `A.Arr` t) -> Exp r (A.Ary t)
+  Len  :: Exp r (A.Ary t) -> Exp r A.Int 
+  Ind  :: Exp r (A.Ary t) -> Exp r A.Int -> Exp r t 
   Let  :: G.Typ tl -> Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb  
   
-abs :: HasSin G.Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta -> tb)
+abs :: HasSin G.Typ ta => (Exp r ta -> Exp r tb) -> Exp r (ta `A.Arr` tb)
 abs = Abs sin 
 
-sucAll :: Exp r t' -> Exp (t , r) t' 
+sucAll :: Exp r t' -> Exp (t ': r) t' 
 sucAll (ConI i)       = ConI i
 sucAll (ConB i)       = ConB i
 sucAll (Var v)        = Var (Suc v)
@@ -44,7 +45,7 @@ sucAll (Ind ea ei)    = Ind (sucAll ea) (sucAll ei)
 sucAll (Let t el eb)  = Let t (sucAll el) (sucAll . eb . prdAll)
 
 -- Should not contain variable zro
-prdAll :: Exp (t , r) t' -> Exp r t' 
+prdAll :: Exp (t ': r) t' -> Exp r t' 
 prdAll (ConI i)       = ConI i
 prdAll (ConB i)       = ConB i
 prdAll (Var (Suc v))  = Var v

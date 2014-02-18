@@ -4,13 +4,12 @@ module Examples.Feldspar.Mini where
 
 import Prelude hiding (abs,sum)
 import Expression.Feldspar.Mini
-import Variable.GADT
+-- import Variable.GADT
 import Evaluation as E
 import Evaluation.Feldspar.Mini ()
-import qualified Value.Feldspar.GADT as V
-import Singleton
-import Singleton.TypeFeldspar ()
-import Type.Feldspar.GADT hiding (Tpl)
+-- import qualified Value.Feldspar.GADT as V
+-- import Singleton
+-- import Singleton.TypeFeldspar hiding (Tpl)
 
 -- An example expression doubling the input number                    
 dbl :: Exp (Integer -> Integer)

@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GADTs, PolyKinds #-}
 module SingletonEquality where
 
 import ErrorMonad

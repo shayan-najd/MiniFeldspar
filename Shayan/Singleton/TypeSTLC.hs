@@ -1,19 +1,28 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, FlexibleContexts 
            , GADTs #-}
+{-# LANGUAGE TypeOperators, DataKinds, PolyKinds, TypeFamilies #-}
 module Singleton.TypeSTLC where
 
 import Prelude hiding (sin)
 import Singleton
+import qualified Type.STLC.ADTSimple as A
 
 data Typ t where
-  Int :: Typ Integer
-  Arr :: Typ ta -> Typ tb -> Typ (ta -> tb)
+  Int :: Typ A.Int
+  Arr :: Typ ta -> Typ tb -> Typ (A.Arr ta tb)
   
-instance HasSin Typ Integer where
+type instance Trm A.Int         = Integer   
+type instance Trm (A.Arr ta tb) = Trm ta -> Trm tb
+  
+type instance RevTrm Integer    = A.Int 
+type instance RevTrm (ta -> tb) = RevTrm ta `A.Arr` RevTrm tb
+
+
+instance HasSin Typ A.Int where
   sin = Int 
  
-instance (HasSin Typ ta , HasSin Typ tb) => HasSin Typ (ta -> tb) where
+instance (HasSin Typ ta , HasSin Typ tb) => HasSin Typ (A.Arr ta tb) where
   sin = Arr sin sin
     
 instance Show (Typ t) where                  

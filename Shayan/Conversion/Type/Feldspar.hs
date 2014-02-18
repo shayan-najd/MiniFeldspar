@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, GADTs
-           , ScopedTypeVariables, ImplicitParams #-}
+           , ScopedTypeVariables, ImplicitParams, DataKinds, PolyKinds #-}
 module Conversion.Type.Feldspar where
 
 import qualified Type.Feldspar.ADTSimple           as FAS
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
-import qualified Singleton.TypeFeldspar            as FT
+import qualified Singleton.TypeFeldspar            as FG
 import qualified Type.Herbrand                     as H
 
 import qualified Variable.GADT                     as G
@@ -16,21 +16,21 @@ import Existential
 import Unification
 import ErrorMonad
 
-type ExsTyp = ExsSin FT.Typ                
+type ExsTyp = ExsSin FG.Typ                
 ---------------------------------------------------------------------------------
 --  Conversion from FAS.Typ
 ---------------------------------------------------------------------------------
 instance Cnv FAS.Typ ExsTyp where  
-  cnv FAS.Int         = return (ExsSin FT.Int)
-  cnv FAS.Bol         = return (ExsSin FT.Bol)
+  cnv FAS.Int         = return (ExsSin FG.Int)
+  cnv FAS.Bol         = return (ExsSin FG.Bol)
   cnv (FAS.Arr ta tr) = do ExsSin ta' <- cnv ta
                            ExsSin tr' <- cnv tr
-                           return (ExsSin (FT.Arr ta' tr'))
+                           return (ExsSin (FG.Arr ta' tr'))
   cnv (FAS.Tpl tf ts) = do ExsSin tf' <- cnv tf
                            ExsSin ts' <- cnv ts
-                           return (ExsSin (FT.Tpl tf' ts'))
+                           return (ExsSin (FG.Tpl tf' ts'))
   cnv (FAS.Ary t)     = do ExsSin t' <- cnv t
-                           return (ExsSin (FT.Ary t'))
+                           return (ExsSin (FG.Ary t'))
 
 instance Cnv FAS.Typ FAM.Typ where
   cnv = cnv'
@@ -49,7 +49,7 @@ instance Cnv FAS.Typ FAS.Typ where
 ---------------------------------------------------------------------------------
 --  Conversion from FAM.Typ
 ---------------------------------------------------------------------------------
-instance Cnv FAM.Typ (H.Typ (EnvFld ())) where
+instance Cnv FAM.Typ (H.Typ (EnvFld '[])) where
   cnv = cnv' 
      where 
        cnv' tam = case tam of 
@@ -83,41 +83,41 @@ instance Cnv FAM.Typ FAM.Typ where
 ---------------------------------------------------------------------------------
 --  Conversion from FG.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (FT.Typ a) FAS.Typ where
+instance Cnv (FG.Typ a) FAS.Typ where
   cnv = cnv' 
     where
-      cnv' :: FT.Typ t -> ErrM FAS.Typ
+      cnv' :: FG.Typ t -> ErrM FAS.Typ
       cnv' tg = case tg of
-        FT.Int         -> return FAS.Int
-        FT.Bol         -> return FAS.Bol
-        FT.Arr ta tb   -> do ta' <- cnv' ta
+        FG.Int         -> return FAS.Int
+        FG.Bol         -> return FAS.Bol
+        FG.Arr ta tb   -> do ta' <- cnv' ta
                              tb' <- cnv' tb
                              return (FAS.Arr ta' tb')
-        FT.Tpl tf ts   -> do tf' <- cnv' tf
+        FG.Tpl tf ts   -> do tf' <- cnv' tf
                              ts' <- cnv' ts
                              return (FAS.Tpl tf' ts')
-        FT.Ary ta      -> do ta' <- cnv' ta
+        FG.Ary ta      -> do ta' <- cnv' ta
                              return (FAS.Ary ta')
  
-instance Cnv (FT.Typ a) FAM.Typ where
-  cnv FT.Int         = return FAM.Int
-  cnv FT.Bol         = return FAM.Bol
-  cnv (FT.Arr ta tb) = do ta' <- cnv ta
+instance Cnv (FG.Typ a) FAM.Typ where
+  cnv FG.Int         = return FAM.Int
+  cnv FG.Bol         = return FAM.Bol
+  cnv (FG.Arr ta tb) = do ta' <- cnv ta
                           tb' <- cnv tb
                           return (FAM.Arr ta' tb')
-  cnv (FT.Tpl tf ts) = do tf' <- cnv tf
+  cnv (FG.Tpl tf ts) = do tf' <- cnv tf
                           ts' <- cnv ts
                           return (FAM.Tpl tf' ts')
-  cnv (FT.Ary t)     = do t' <- cnv t
+  cnv (FG.Ary t)     = do t' <- cnv t
                           return (FAM.Ary t')
 
-instance a ~ a' => Cnv (FT.Typ a) (FT.Typ a') where
+instance a ~ a' => Cnv (FG.Typ a) (FG.Typ a') where
   cnv = return . id
 
 ---------------------------------------------------------------------------------
 --  Conversion from H.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (H.Typ (EnvFld ())) FAM.Typ where
+instance Cnv (H.Typ (EnvFld '[])) FAM.Typ where
   cnv = cnv' 
     where
       cnv' th = case th of 

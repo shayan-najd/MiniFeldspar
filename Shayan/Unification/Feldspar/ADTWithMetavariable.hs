@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, TypeFamilies  #-}
+{-# LANGUAGE DataKinds, TypeOperators #-}
 module Unification.Feldspar.ADTWithMetavariable where
 
 import qualified Type.Feldspar.ADTWithMetavariable as FAM
@@ -11,14 +12,13 @@ import InferenceMonad
 import Conversion.Type.Feldspar ()
 import Data.Vector
 import Variable.GADT
-import qualified Data.Nat as NN
-import qualified Singleton.Nat as N
+import qualified Data.Nat as N
 
 -- Setting the checker to collect constraints wherever types are unified  
 instance Uni FAM.Typ where
-  type Mnd     FAM.Typ = (State (NN.Nat , [HerCon (EnvFld ())]))
-  type TypCons FAM.Typ = (N.Zro, (N.Suc (N.Suc N.Zro), (N.Zro
-                         , (N.Suc (N.Suc N.Zro), (N.Suc N.Zro, ())))))
+  type Mnd     FAM.Typ = (State (N.Nat , [HerCon (EnvFld '[])]))
+  type TypCons FAM.Typ = N.Zro ': N.Suc (N.Suc N.Zro) ': N.Zro
+                         ': N.Suc (N.Suc N.Zro) ': N.Suc N.Zro ': '[]
   typCon Zro                         Nil                 = return FAM.Int
   typCon (Suc Zro)                   (ta ::: tb ::: Nil) = return (FAM.Arr ta tb)
   typCon (Suc (Suc Zro))             Nil                 = return FAM.Bol

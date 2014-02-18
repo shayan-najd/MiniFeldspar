@@ -3,7 +3,7 @@
 module PrettyPrinter.Feldspar.GADTFirstOrder where
  
 import Expression.Feldspar.GADTFirstOrder
-import qualified Type.Feldspar.GADT as G
+import qualified Singleton.TypeFeldspar as G
 
 instance Show (G.Typ t) => Show (Exp r t) where 
   show (ConI i)              = show i 
