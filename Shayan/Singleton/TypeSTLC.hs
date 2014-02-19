@@ -6,7 +6,7 @@ module Singleton.TypeSTLC where
 
 import Prelude hiding (sin)
 import Singleton
-import qualified Type.STLC.ADTSimple as A
+import qualified Type.STLC as A
 
 data Typ t where
   Int :: Typ A.Int

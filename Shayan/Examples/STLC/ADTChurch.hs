@@ -7,10 +7,10 @@ import qualified Value.STLC.ADT as V
 import ErrorMonad
 import Evaluation 
 import Evaluation.STLC.ADTChurch ()
-import qualified Type.STLC.ADTSimple as AS
+import qualified Type.STLC as AS
 import TypeChecking.STLC.ADTChurch ()
-import TypeChecking 
-import Unification.STLC.ADTSimple () 
+import Inference
+import Conversion.Type.STLC ()
 
 -- An example expression doubling the input number
 dbl :: Exp AS.Typ
@@ -32,4 +32,4 @@ test :: Bool
 test = (case evl four [] of 
           Rgt (V.Con 4) -> True
           _             -> False) 
-       && (chk four [] == Rgt AS.Int)
+       && (typChk four [] == Rgt AS.Int)

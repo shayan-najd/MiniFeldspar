@@ -1,14 +1,15 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 {-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
            , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
+           , ImplicitParams, ConstraintKinds, DataKinds, PolyKinds #-}
 module Conversion.Expression.STLC.TypeInference where
 
 import qualified Expression.STLC.ADTUntypedDebruijn  as SAUM
 import qualified Expression.STLC.ADTChurch   as SACP
 import qualified Expression.STLC.ADTExplicit as SAEP
  
-import qualified Type.STLC.ADTWithMetavariable as SAM
+import qualified Type.STLC as SAS
+import qualified Type.Herbrand as H
 
 import qualified Environment.ADT          as A
  
@@ -19,39 +20,45 @@ import Conversion.Existential ()
  
 import TypeChecking.STLC.ADTChurch   ()
 import TypeChecking.STLC.ADTExplicit ()
-import Unification.STLC.ADTWithMetavariable ()
 
 import Inference
-import InferenceMonad
  
 import Data.Traversable (traverse)
 
-instance (Cnv t SAM.Typ , Cnv SAM.Typ t') => 
-         Cnv (SAUM.Exp , A.Env t) (SACP.Exp t') where
-  cnv = \ (e , r) -> do r' :: A.Env SAM.Typ    <- cnv r
-                        e' :: SACP.Exp SAM.Typ <- inf cnvExpUToACPAM (e , r')
-                        traverse cnv e'
-   where
-     cnvExpUToACPAM eaum = case eaum of
+instance Cnv (SAUM.Exp, A.Env SAS.Typ) (SACP.Exp SAS.Typ) where
+  cnv (e , r) = do e' :: SACP.Exp () <- cnv e
+                   cnv (e' , r)
+
+instance Cnv (SAUM.Exp, A.Env SAS.Typ) (SAEP.Exp SAS.Typ) where
+  cnv (e , r) = do e' :: SAEP.Exp () <- cnv e
+                   cnv (e' , r)
+
+instance Cnv SAUM.Exp (SACP.Exp ()) where
+  cnv eaum = case eaum of
        SAUM.Con i     -> SACP.Con <$> pure i
        SAUM.Var v     -> SACP.Var <$> pure v
-       SAUM.Abs eb    -> SACP.Abs <$> newMta <*@> eb
+       SAUM.Abs eb    -> SACP.Abs <$> pure () <*@> eb
        SAUM.App ef ea -> SACP.App <$@> ef <*@> ea
        SAUM.Add el er -> SACP.Add <$@> el <*@> er 
        where
-           ?cnv = cnvExpUToACPAM
+         ?cnv = cnv
 
-instance (Cnv t SAM.Typ , Cnv SAM.Typ t') => 
-         Cnv (SAUM.Exp , A.Env t) (SAEP.Exp t') where
-  cnv = \ (e , r) -> do r' :: A.Env SAM.Typ    <- cnv r
-                        e' :: SAEP.Exp SAM.Typ <- inf cnvExpUToAEPAM (e , r')
-                        traverse cnv e'
-   where
-    cnvExpUToAEPAM eaum = case eaum of
-       SAUM.Con i     -> SAEP.Con <$> newMta <*> pure i
-       SAUM.Var v     -> SAEP.Var <$> newMta <*> pure v
-       SAUM.Abs eb    -> SAEP.Abs <$> newMta <*@> eb
-       SAUM.App ef ea -> SAEP.App <$> newMta <*@> ef <*@> ea
-       SAUM.Add el er -> SAEP.Add <$> newMta <*@> el <*@> er 
+instance Cnv SAUM.Exp (SAEP.Exp ()) where
+  cnv eaum = case eaum of
+       SAUM.Con i     -> SAEP.Con <$> pure () <*> pure i
+       SAUM.Var v     -> SAEP.Var <$> pure () <*> pure v
+       SAUM.Abs eb    -> SAEP.Abs <$> pure () <*@> eb
+       SAUM.App ef ea -> SAEP.App <$> pure () <*@> ef <*@> ea
+       SAUM.Add el er -> SAEP.Add <$> pure () <*@> el <*@> er 
        where
-         ?cnv = cnvExpUToAEPAM
+         ?cnv = cnv
+
+instance Cnv (SACP.Exp (), A.Env SAS.Typ) (SACP.Exp SAS.Typ) where
+  cnv (e , r) = do r' :: A.Env (H.Typ (H.EnvIntArr '[])) <- cnv r
+                   e' <- typInf e r'                    
+                   traverse cnv e'
+
+instance Cnv (SAEP.Exp (), A.Env SAS.Typ) (SAEP.Exp SAS.Typ) where
+  cnv (e , r) = do r' :: A.Env (H.Typ (H.EnvIntArr '[])) <- cnv r
+                   e' <- typInf e r'                    
+                   traverse cnv e'

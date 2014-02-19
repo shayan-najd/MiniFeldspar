@@ -7,16 +7,14 @@ module Conversion.Expression.Feldspar.NameResolution where
 import Prelude hiding (sin)
 import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
 import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
-import qualified Type.Feldspar.ADTWithMetavariable as FAM
+import qualified Type.Feldspar as FAS
 import qualified Variable.ADT            as A
 import qualified Environment.ADTTable    as AT
 import Conversion
-import Conversion.Environment (cnvEnvAMAS)
  
-instance (Eq x , Cnv t FAM.Typ) => 
-         Cnv (FAUP.Exp x , AT.Env x t , AT.Env x FAUM.Exp) FAUM.Exp where
-  cnv = \ (e , rt , rf) -> do rt' :: AT.Env x FAM.Typ <- cnvEnvAMAS rt 
-                              cnvExpUUToU e (zip (map fst rt') [A.Zro ..]) rf
+instance Eq x => 
+         Cnv (FAUP.Exp x , AT.Env x FAS.Typ , AT.Env x FAUM.Exp) FAUM.Exp where
+  cnv = \ (e , rt , rf) -> cnvExpUUToU e (zip (map fst rt) [A.Zro ..]) rf
     where
       cnvExpUUToU eaup rb rf = case eaup of
         FAUP.ConI i       -> FAUM.ConI <$> pure i

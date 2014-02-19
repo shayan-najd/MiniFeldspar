@@ -7,7 +7,7 @@ import Prelude hiding (sin)
 import Variable.GADT
 import Singleton.TypeSTLC
 import Singleton
-import qualified Type.STLC.ADTSimple as A
+import qualified Type.STLC as A
  
 data Exp :: [A.Typ] -> A.Typ -> * where
   Con :: Integer -> Exp r A.Int

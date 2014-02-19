@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-module Type.Feldspar.ADTSimple where
+module Type.Feldspar where
 
 import Control.Monad(unless)
 

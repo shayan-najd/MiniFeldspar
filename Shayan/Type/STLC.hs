@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-module Type.STLC.ADTSimple where
+module Type.STLC where
 
 import Control.Monad(unless)
 

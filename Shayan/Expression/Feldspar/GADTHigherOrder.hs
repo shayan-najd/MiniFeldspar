@@ -7,7 +7,7 @@ import Prelude hiding (sin)
 import Variable.GADT
 import qualified Singleton.TypeFeldspar as G
 import Singleton
-import qualified Type.Feldspar.ADTSimple as A
+import qualified Type.Feldspar as A
 
 data Exp :: [A.Typ] -> A.Typ -> * where 
   ConI :: Integer  -> Exp r A.Int 

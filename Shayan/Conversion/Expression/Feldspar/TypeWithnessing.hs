@@ -8,8 +8,8 @@ import Prelude hiding (sin)
 import qualified Expression.Feldspar.ADTChurch  as FACP
 import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
 
-import qualified Type.Feldspar.ADTWithMetavariable as FAM
 import qualified Singleton.TypeFeldspar            as FG
+import qualified Type.Feldspar as FAS
  
 import qualified Environment.ADT         as A
 import qualified Singleton.Environment   as G
@@ -29,7 +29,7 @@ import Existential
 type ExsTyp = ExsSin FG.Typ
 type ExsExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ
  
-instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
+instance Cnv (FACP.Exp FAS.Typ , A.Env FAS.Typ) ExsExp where
   cnv (FACP.ConI i , r)       = do 
     ExsSin r' <- cnv r
     return (Exs2 (FGFO.ConI i) r' FG.Int)
@@ -95,7 +95,7 @@ instance Cnv (FACP.Exp FAM.Typ , A.Env FAM.Typ) ExsExp where
     return (Exs2 (FGFO.Ind ea' ei') ra ta)
   cnv (FACP.Let el eb , r)    = do 
     Exs2 el' rl tl               :: ExsExp  <- cnv (el , r)
-    tl'                          :: FAM.Typ <- cnv tl
+    tl'                          :: FAS.Typ <- cnv tl
     Exs2 eb' (G.Ext  tl'' rb) tb :: ExsExp  <- cnv (eb , tl' : r)
     Rfl <- eqlSin tl tl''
     Rfl <- eqlSin rb rl

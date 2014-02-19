@@ -4,8 +4,7 @@
 {-# LANGUAGE DataKinds, TypeOperators #-}
 module Conversion.Type.STLC where
 
-import qualified Type.STLC.ADTSimple as AS
-import qualified Type.STLC.ADTWithMetavariable as AM
+import qualified Type.STLC as AS
 import qualified Singleton.TypeSTLC as T
 import qualified Type.Herbrand as H
 import qualified Variable.GADT as G
@@ -22,46 +21,18 @@ instance Cnv AS.Typ (ExsSin T.Typ) where
                           ExsSin tr' <- cnv tr
                           return (ExsSin (T.Arr ta' tr'))
 
-instance Cnv AS.Typ AM.Typ where
-  cnv AS.Int         = return AM.Int
-  cnv (AS.Arr ta tb) = let ?cnv = cnv in 
-                       AM.Arr <$@> ta <*@> tb
-
-instance Cnv AS.Typ AS.Typ where                          
-  cnv = return
-
+instance Cnv AS.Typ (H.Typ (H.EnvIntArr '[])) where
+  cnv AS.Int         = pure (H.App G.Zro Nil)
+  cnv (AS.Arr ta tr) = do ta' <- cnv ta
+                          tr' <- cnv tr
+                          return (H.App (G.Suc G.Zro) (ta' ::: tr' ::: Nil))
 ---------------------------------------------------------------------------------
--- Conversion from AM.Typ
+-- Conversion from H.Typ
 ---------------------------------------------------------------------------------
- 
-instance Cnv AM.Typ (H.Typ (H.EnvIntArr '[])) where
-  cnv AM.Int         = return H.int
-  cnv (AM.Arr ta tb) = do ta' <- cnv ta
-                          tb' <- cnv tb
-                          return (H.arr ta' tb')
-  cnv (AM.Mta i)     = return (H.Mta i)                           
- 
-instance Cnv AM.Typ (ExsSin T.Typ) where
-  cnv t = do t' :: AS.Typ <- cnv t
-             cnv t' 
- 
-instance Cnv AM.Typ AS.Typ where
-  cnv AM.Int         = return AS.Int
-  cnv (AM.Arr ta tr) = let ?cnv = cnv in 
-                       AS.Arr <$@> ta <*@> tr
-  cnv _              = fail "Type Error!"                          
-  
-  
-instance Cnv AM.Typ AM.Typ where                          
-  cnv = return  
-  
----------------------------------------------------------------------------------
--- Conversion from AM.Typ
----------------------------------------------------------------------------------
-instance Cnv (H.Typ (H.EnvIntArr '[])) AM.Typ where
-  cnv (H.App G.Zro Nil)  = pure AM.Int
+instance Cnv (H.Typ (H.EnvIntArr '[])) AS.Typ where
+  cnv (H.App G.Zro Nil)  = pure AS.Int
   cnv (H.App (G.Suc G.Zro) (ta ::: tr ::: Nil)) 
-                         = let ?cnv = cnv in 
-                            AM.Arr <$@> ta <*@> tr
-  cnv (H.App _  _)       = fail "Type Error!"
-  cnv (H.Mta i)          = AM.Mta <$> pure i                           
+                         = do ta' <- cnv ta
+                              tr' <- cnv tr
+                              return (AS.Arr ta' tr')
+  cnv _                  = fail "Type Error!"                   

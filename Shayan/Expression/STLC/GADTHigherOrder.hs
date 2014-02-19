@@ -8,7 +8,7 @@ import Variable.GADT
 import Singleton.TypeSTLC
 import Singleton
 import Singleton.TypeSTLC as S () 
-import qualified Type.STLC.ADTSimple as A
+import qualified Type.STLC as A
 
 data Exp :: [A.Typ] -> A.Typ -> * where
   Var :: Var r t -> Exp r t

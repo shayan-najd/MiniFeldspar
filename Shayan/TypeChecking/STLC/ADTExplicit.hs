@@ -3,34 +3,36 @@
 module TypeChecking.STLC.ADTExplicit where
 
 import Expression.STLC.ADTExplicit
-import Unification as U
 import Environment.ADT as E
 import TypeChecking 
-import Data.Vector
 import Data.Nat
+import Type.Herbrand hiding (App)
+import InferenceMonad
 
-instance (TypCons a ~ (Zro ': Suc (Suc Zro) ': r0), Uni a) => 
-         Chk (Exp a) where
-  type Env (Exp a)   = E.Env a
-  type Typ (Exp a)   = a
-  chk (Con t _)     _ = do _ <- eqlCon intVar t 
+instance Chk Exp where
+  type Cns Exp        = Zro ': Suc (Suc Zro) ': '[]
+  chk (Con t _)     _ = do addC (t :~: int)
                            return t
   chk (Var t x)     r = do t' <- get x r
-                           eql t t'
+                           addC (t :~: t')
                            return t
-  chk (Abs t eb)    r = do ta ::: tb ::: Nil <- eqlCon arrVar t    
-                           tb'               <- chk eb (ta : r)
-                           eql tb tb'
+  chk (Abs t eb)    r = do taa <- newMT
+                           tbb <- newMT
+                           tb  <- chk eb (taa : r)
+                           addC (t  :~: arr taa tbb)  
+                           addC (tb :~: tbb)
                            return t
-  chk (App t ef ea) r = do tf                  <- chk ef r
-                           ta'                 <- chk ea r
-                           (ta ::: tb ::: Nil) <- eqlCon arrVar tf
-                           eql ta ta' 
-                           eql t  tb
+  chk (App t ef ea) r = do tf  <- chk ef r
+                           ta  <- chk ea r
+                           tfa <- newMT
+                           tfb <- newMT
+                           addC (tf :~: arr tfa tfb) 
+                           addC (ta :~: tfa)
+                           addC (t  :~: tfb)
                            return t
   chk (Add t el er) r = do tl <- chk el r
                            tr <- chk er r
-                           _ <- eqlCon intVar tl 
-                           _ <- eqlCon intVar tr 
-                           _ <- eqlCon intVar t 
+                           addC (tl :~: int)
+                           addC (tr :~: int)
+                           addC (t  :~: int)
                            return t

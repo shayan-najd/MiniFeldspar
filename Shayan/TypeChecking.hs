@@ -1,10 +1,13 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies, FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies, FlexibleContexts, DataKinds, PolyKinds #-}
 module TypeChecking where
 
-import Unification
+import Type.Herbrand
+import InferenceMonad
+import Data.Nat
+import Environment.ADT
 
-class Uni (Typ e) => Chk (e :: *) where
-  type Env e :: *
-  type Typ e :: *
-  chk :: e -> Env e -> Mnd (Typ e) (Typ e)
+class Chk (ef :: * -> *) where
+  type Cns ef :: [Nat]    
+  chk :: ef (Typ (Cns ef)) -> Env (Typ (Cns ef))-> InfM (Cns ef) (Typ (Cns ef))
+  

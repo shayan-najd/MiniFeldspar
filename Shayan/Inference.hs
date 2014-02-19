@@ -1,39 +1,59 @@
 {-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs , FlexibleContexts #-}
+{-# LANGUAGE GADTs , FlexibleContexts, ScopedTypeVariables #-}
 module Inference where
 
 import qualified TypeChecking as Chk
 import ErrorMonad
-import qualified Unification as U
-import Unification (Uni)
-import Conversion 
-import InferenceMonad
-import Variable.ADT
+import Data.Nat
 import Type.Herbrand
-import Solver
+import Solver (slv)
+import Data.Traversable (Traversable,traverse)
+import Control.Monad.State (runState,put,get,execState,evalState)
+import Conversion
+import Environment.ADT hiding (get)
+import Data.Foldable(toList)
 
-import Prelude hiding (mapM)
-import Data.Traversable
-import Control.Monad.State (State,runState)
+mxm :: [Nat] -> Nat
+mxm [] = Zro
+mxm l  = maximum l
 
-inf :: ( Chk.Chk e
-       , e         ~ ef t
-       , Traversable ef
-       , Chk.Typ e ~ t
-       , U.Mnd t   ~ (State (Nat , [HerCon r]))  
-       , Uni t        
-       , Cnv t       (Typ r)
-       , Cnv (Typ r) t) =>
-       (eu -> InfM r e) -> (eu , Chk.Env e) -> ErrM e
-inf frmUExp (eu , r) = do 
-  let (e' , (i , cs)) = runState 
-                        (do e <- frmUExp eu -- conversion to an expression type
-                                            -- with explicit fresh skolem vars 
-                            _ <- Chk.chk e r
-                            return e) 
-                        (Zro , [])  
-  mTs <- slv (map Mta [Zro .. pred i]) cs
-  let ttas = zip [Zro ..] mTs -- substituitions
-  e'' <- mapM cnv e'
-  mapM cnv (appTtas ttas `fmap` e'')  
+ind :: Traversable ef => 
+       ef () -> ef Nat
+ind = flip evalState Zro .  
+      traverse (const (do i <- get
+                          put (Suc i)
+                          return i))
 
+typInf :: (Chk.Chk ef , Traversable ef , r ~ Chk.Cns ef) => 
+       ef () -> [Typ r] -> ErrM (ef (Typ r))       
+typInf e r = let en = ind e
+                 et = fmap Mta en
+             in inf et r
+  
+inf :: (Chk.Chk ef , Traversable ef , r ~ Chk.Cns ef) => 
+       ef (Typ r) -> [Typ r] -> ErrM (ef (Typ r))
+inf e r = do let mts = (mxm . concat) [mtas x | x <- toList e]
+                 (i' , cs) = execState (Chk.chk e r) (mts , [])
+             mTs <- slv (map Mta [Zro .. pred i']) cs
+             let ttas = zip [Zro ..] mTs -- substituitions
+             return (appTtas ttas `fmap` e)
+  
+chk :: (Chk.Chk ef , Traversable ef , r ~ Chk.Cns ef) => 
+       ef (Typ r) -> [Typ r] -> ErrM (Typ r)
+chk e r = do let mts = (mxm . concat) [mtas x | x <- toList e]
+                 (t , (i' , cs)) = runState (Chk.chk e r) (mts , [])
+             mTs <- slv (map Mta [Zro .. pred i']) cs
+             let ttas = zip [Zro ..] mTs -- substituitions
+             if length [() | Mta _ <- mTs] == 0
+               then return (appTtas ttas t)
+               else fail "Type Error!"   
+
+
+typChk :: forall ef t. 
+          (Chk.Chk ef , Traversable ef, Cnv t (Typ (Chk.Cns ef))
+          , Cnv (Typ (Chk.Cns ef)) t)  => 
+          ef t -> Env t-> ErrM t
+typChk e r = do r' :: Env (Typ (Chk.Cns ef)) <- traverse cnv r          
+                e' :: ef  (Typ (Chk.Cns ef)) <- traverse cnv e
+                t <- chk e' r'
+                cnv t

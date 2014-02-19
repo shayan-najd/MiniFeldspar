@@ -8,7 +8,7 @@ import Evaluation as E
 import Evaluation.STLC.GADTHigherOrder ()
 import Singleton.TypeSTLC
 import Singleton
-import qualified Type.STLC.ADTSimple as A
+import qualified Type.STLC as A
  
 -- An example expression doubling the input number                    
 dbl :: Exp '[] (A.Arr A.Int A.Int)

@@ -10,8 +10,8 @@ import qualified Expression.STLC.ADTChurch   as SACP
 import qualified Expression.STLC.ADTExplicit as SAEP
 import qualified Expression.STLC.GADTFirstOrder         as SGFO
  
-import qualified Type.STLC.ADTWithMetavariable as SAM
-import qualified Singleton.TypeSTLC            as G
+import qualified Type.STLC                as SAS
+import qualified Singleton.TypeSTLC       as G
  
 import qualified Environment.ADT          as A
 import qualified Singleton.Environment    as G
@@ -27,7 +27,6 @@ import SingletonEquality.EnvironmentGADT ()
 
 import TypeChecking.STLC.ADTChurch   ()
 import TypeChecking.STLC.ADTExplicit ()
-import Unification.STLC.ADTWithMetavariable ()
 
 import Existential
 import Singleton
@@ -38,7 +37,7 @@ type ExsTyp = ExsSin G.Typ
 type SinTyp = HasSin G.Typ
 type SinEnv = HasSin (G.Env G.Typ)
 
-instance Cnv (SACP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where  
+instance Cnv (SACP.Exp SAS.Typ , A.Env SAS.Typ) ExsExp where  
   cnv (SACP.Con i     , r) = do 
     ExsSin r' <- cnv r
     return (Exs2 (SGFO.Con i) r' G.Int)
@@ -62,7 +61,7 @@ instance Cnv (SACP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where
     Rfl <- eqlSin rl rr
     return (Exs2 (SGFO.Add el' er') rl G.Int)
 
-instance Cnv (SAEP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where  
+instance Cnv (SAEP.Exp SAS.Typ , A.Env SAS.Typ) ExsExp where  
   cnv (SAEP.Con _ i     , r) = do 
     ExsSin r' <- cnv r
     return (Exs2 (SGFO.Con i) r' G.Int)
@@ -70,7 +69,7 @@ instance Cnv (SAEP.Exp SAM.Typ , A.Env SAM.Typ) ExsExp where
     Exs2 x' r' t' <- cnv (x , r)
     return (Exs2 (SGFO.Var x') r' t')
   cnv (SAEP.Abs t eb , r) = do 
-    let SAM.Arr ta _ = t
+    let SAS.Arr ta _ = t
     ExsSin ta'                    :: ExsTyp <- cnv ta
     Exs2 eb' (ta'' `G.Ext` r') tb :: ExsExp <- cnv (eb , ta : r)
     Rfl <- eqlSin ta' ta''

@@ -19,7 +19,6 @@ import Conversion.Existential ()
 
 import TypeChecking.STLC.ADTChurch   ()
 import TypeChecking.STLC.ADTExplicit ()
-import Unification.STLC.ADTWithMetavariable ()
  
 import Singleton
 import Singleton.TypeSTLC ()

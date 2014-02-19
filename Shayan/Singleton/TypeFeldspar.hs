@@ -6,7 +6,7 @@ module Singleton.TypeFeldspar where
 
 import Prelude hiding (sin)
 import Singleton
-import qualified Type.Feldspar.ADTSimple as A
+import qualified Type.Feldspar as A
 import Data.Array
   
 data Typ t where

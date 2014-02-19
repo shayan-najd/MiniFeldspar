@@ -7,11 +7,7 @@ import Conversion
 import Type.Herbrand
 import ErrorMonad
 import Variable.ADT
-
--- Type equality constraint
-infixr 6 :~:
-data HerCon r = Typ r :~: Typ r 
-
+ 
 -- Subtitution of a metavariable ([i := t]) in a type equality constraint
 appC :: Nat -> Typ r -> HerCon r -> HerCon r
 appC i t (t1 :~: t2) = appT i t t1 :~: appT i t t2

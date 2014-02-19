@@ -8,17 +8,15 @@ import Prelude hiding (sin)
 
 import qualified Expression.STLC.ADTUntypedNamed    as SAUP
 import qualified Expression.STLC.ADTUntypedDebruijn as SAUM
-import qualified Type.STLC.ADTWithMetavariable      as SAM
+import qualified Type.STLC      as SAS
 import qualified Variable.ADT             as A
 import qualified Environment.ADTTable     as AT
 
 import Conversion
-import Conversion.Environment (cnvEnvAMAS)
  
-instance (Eq x , Cnv t SAM.Typ) => 
-         Cnv (SAUP.Exp x , AT.Env x t , AT.Env x SAUM.Exp) SAUM.Exp where
-  cnv = \ (e , rt , rf) -> do rt' :: AT.Env x SAM.Typ <- cnvEnvAMAS rt 
-                              cnvExpUUToU e (zip (map fst rt') [A.Zro ..]) rf
+instance Eq x => 
+         Cnv (SAUP.Exp x , AT.Env x SAS.Typ , AT.Env x SAUM.Exp) SAUM.Exp where
+  cnv = \ (e , rt , rf) -> cnvExpUUToU e (zip (map fst rt) [A.Zro ..]) rf
     where
       cnvExpUUToU eaup rb rf = case eaup of      
         SAUP.Con i     -> return (SAUM.Con i)

@@ -7,10 +7,10 @@ import qualified Value.Feldspar.ADT as V
 import ErrorMonad
 import Evaluation 
 import Evaluation.Feldspar.ADTChurch ()
-import qualified Type.Feldspar.ADTSimple as FS
+import qualified Type.Feldspar as FS
 import TypeChecking.Feldspar.ADTChurch ()
-import TypeChecking 
-import Unification.Feldspar.ADTSimple () 
+import Inference
+import Conversion.Type.Feldspar ()
 
 -- An example expression doubling the input number
 dbl :: Exp FS.Typ
@@ -31,5 +31,7 @@ four = (compose FS.Int FS.Int FS.Int `App` dbl `App` dbl) `App` (ConI 1)
 test :: Bool
 test = (case evl four [V.addV] of 
           Rgt (V.ConI 4) -> True
-          _             -> False) 
-       && (chk four [FS.Int `FS.Arr` (FS.Int `FS.Arr` FS.Int)] == Rgt FS.Int)
+          _              -> False) 
+       && (typChk four [FS.Int `FS.Arr` (FS.Int `FS.Arr` FS.Int)]
+           == 
+           Rgt FS.Int)

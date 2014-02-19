@@ -11,6 +11,11 @@ data Typ r where
    App :: G.Var r n -> Vec n (Typ r) -> Typ r
    Mta :: Nat -> Typ r  
 
+-- Type equality constraint
+infixr 6 :~:
+data HerCon r = Typ r :~: Typ r 
+
+
 -- Collecting metavariables in a typ
 mtas :: Typ r -> [Nat]
 mtas (Mta i)    = [i]
