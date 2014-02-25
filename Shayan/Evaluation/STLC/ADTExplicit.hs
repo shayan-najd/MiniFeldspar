@@ -5,13 +5,14 @@ module Evaluation.STLC.ADTExplicit where
 import Evaluation 
 import Expression.STLC.ADTExplicit
 import qualified Value.STLC.ADT as V
-import Environment.ADT as E
+import qualified Environment.ADT as E
  
+type instance Val (Exp a) = V.Val
+type instance Env (Exp a) = E.Env V.Val 
+
 instance Evl (Exp a) where
-  type Val (Exp a) = V.Val
-  type Env (Exp a) = E.Env V.Val 
   evl (Con _ i)     _ = V.con i
-  evl (Var _ x)     r = get x r
+  evl (Var _ x)     r = E.get x r
   evl (Abs _ eb)    r = V.abs (\ va -> evl eb (va : r))
   evl (App _ ef ea) r = do vf <- evl ef r
                            va <- evl ea r

@@ -4,7 +4,8 @@ module Evaluation where
 
 import ErrorMonad
 
+type family Val e
+type family Env e
+
 class Evl e where
-  type Val e
-  type Env e
   evl :: e -> Env e -> ErrM (Val e)

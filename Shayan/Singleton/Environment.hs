@@ -6,6 +6,7 @@ module Singleton.Environment where
 
 import Singleton
 import Prelude (error)
+import Control.Applicative (Applicative,pure,(<$>),(<*>))
 import Variable.GADT
 
 -- Environment (Singleton)
@@ -16,6 +17,10 @@ data Env :: (k -> *) -> [k] -> * where
 type instance Trm '[]        = ()
 type instance Trm (tf ': ts) = (Trm tf , Trm ts)
 
+type instance RevTrm ()        = '[]                   
+type instance RevTrm (tf , ts) = (RevTrm tf ': RevTrm ts)                    
+                   
+                   
 -- Extraction of values from environment
 get :: Var r t -> Trm r -> Trm t
 get Zro     (x , _ ) = x
@@ -51,3 +56,7 @@ map :: (forall t. tfa t -> tfb t) -> Env tfa r -> Env tfb r
 map _ Emp        = Emp
 map f (Ext x xs) = Ext (f x) (map f xs)   
   
+mapM :: Applicative m => 
+        (forall t. tfa t -> m (tfb t)) -> Env tfa r -> m (Env tfb r)
+mapM _ Emp        = pure Emp
+mapM f (Ext x xs) = Ext <$> f x <*> mapM f xs

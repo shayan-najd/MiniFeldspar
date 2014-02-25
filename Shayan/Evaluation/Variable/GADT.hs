@@ -4,10 +4,11 @@ module Evaluation.Variable.GADT where
 
 import Evaluation 
 import Variable.GADT
-import Singleton.Environment
+import Singleton.Environment hiding (Env)
 import Singleton
 
+type instance Val (Var r t) = Trm t
+type instance Env (Var r t) = Trm r 
+
 instance Evl (Var r t) where
-  type Val (Var r t) = Trm t
-  type Env (Var r t) = Trm r 
   evl = (return .) . get

@@ -42,24 +42,31 @@ sbs ebb v eaa = case ebb of
   Let el eb     -> Let (s el) (sbs eb (Suc v) (sucAll eaa)) 
   where
     s e = sbs e v eaa 
-    
-sucAll :: Exp t -> Exp t
-sucAll ebb = case ebb of  
+
+sucAll :: Exp t -> Exp t    
+sucAll = mapVar Suc
+
+inc :: (Var -> Var) -> Var -> Var
+inc _ Zro     = Zro
+inc f (Suc x) = Suc (f x)
+
+mapVar :: (Var -> Var) -> Exp t -> Exp t
+mapVar f ebb = case ebb of  
   ConI i        -> ConI i
   ConB b        -> ConB b
-  Var x         -> Var (Suc x)
-  App ef ea     -> App (sucAll ef) (sucAll ea)    
-  Abs t eb      -> Abs t      (sucAll eb)
-  Cnd ec et ef  -> Cnd (sucAll ec) (sucAll et) (sucAll ef)
-  Tpl ef es     -> Tpl (sucAll ef) (sucAll es)
-  Fst e         -> Fst (sucAll e )
-  Snd e         -> Snd (sucAll e )                      
-  Ary el ef     -> Ary (sucAll el) (sucAll ef)
-  Len e         -> Len (sucAll e )                         
-  Ind ea ei     -> Ind (sucAll ea) (sucAll ei)                         
-  Whl ec eb ei  -> Whl (sucAll ec) (sucAll eb) (sucAll ei)
-  Let el eb     -> Let (sucAll el) (sucAll eb) 
-                    
+  Var v         -> Var (f v)
+  App ef ea     -> App (mapVar f ef) (mapVar f ea)    
+  Abs t eb      -> Abs t (mapVar (inc f) eb)
+  Cnd ec et ef  -> Cnd (mapVar f ec) (mapVar f et) (mapVar f ef)
+  Tpl ef es     -> Tpl (mapVar f ef) (mapVar f es)
+  Fst e         -> Fst (mapVar f e )
+  Snd e         -> Snd (mapVar f e )                      
+  Ary el ef     -> Ary (mapVar f el) (mapVar f ef)
+  Len e         -> Len (mapVar f e )                         
+  Ind ea ei     -> Ind (mapVar f ea) (mapVar f ei)                         
+  Whl ec eb ei  -> Whl (mapVar f ec) (mapVar f eb) (mapVar f ei)
+  Let el eb     -> Let (mapVar f el) (mapVar (inc f) eb) 
+                     
 fre :: Exp t -> [Var]
 fre = flip fre' Zro
 

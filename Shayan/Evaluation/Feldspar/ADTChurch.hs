@@ -5,14 +5,15 @@ module Evaluation.Feldspar.ADTChurch where
 import Evaluation 
 import Expression.Feldspar.ADTChurch
 import qualified Value.Feldspar.ADT as V
-import Environment.ADT as E
+import qualified Environment.ADT as E
  
+type instance Val (Exp v)  = V.Val
+type instance Env (Exp v)  = E.Env V.Val 
+
 instance Evl (Exp v) where
-  type Val (Exp v)  = V.Val
-  type Env (Exp v)  = E.Env V.Val 
   evl (ConI i)    _ = V.conI i
   evl (ConB b)    _ = V.conB b
-  evl (Var x)     r = get x r
+  evl (Var x)     r = E.get x r
   evl (Abs _ eb)  r = V.abs (\ va -> evl eb (va : r))
   evl (App ef ea) r = do vf <- evl ef r 
                          va <- evl ea r      

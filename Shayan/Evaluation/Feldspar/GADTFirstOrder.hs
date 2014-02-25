@@ -8,15 +8,17 @@ import Expression.Feldspar.GADTFirstOrder
 import qualified Value.Feldspar.GADT as V
 import Control.Applicative.Recursion
 import Singleton 
-import Singleton.Environment (get)
+import qualified Singleton.Environment as E
+import Evaluation.Variable.GADT ()
   
+type instance Val (Exp r t) = Trm t
+type instance Env (Exp r t) = Trm r
+
 instance Evl (Exp r t) where
-  type Val (Exp r t) = Trm t
-  type Env (Exp r t) = Trm r
   evl egfo r = case egfo of 
        ConI i       -> V.conI <$> pure i
        ConB b       -> V.conB <$> pure b
-       Var x        -> return (get x r)
+       Var x        -> return (E.get x r)
        Abs _ eb     -> V.abs  <$> pure (\ va -> evl eb (va , r))
        App ef ea    -> V.app  <$> evl ef r <*> evl ea r
        Cnd ec et ef -> V.cnd  <$> evl ec r <*> evl et r <*> evl ef r

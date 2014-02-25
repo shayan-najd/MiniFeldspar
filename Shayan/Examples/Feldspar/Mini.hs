@@ -1,31 +1,12 @@
 {-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts, NoMonomorphismRestriction #-}
+{-# LANGUAGE GADTs, FlexibleContexts #-}
 module Examples.Feldspar.Mini where
 
 import Prelude hiding (abs,sum)
 import Expression.Feldspar.Mini
--- import Variable.GADT
 import Evaluation as E
 import Evaluation.Feldspar.Mini ()
--- import qualified Value.Feldspar.GADT as V
--- import Singleton
--- import Singleton.TypeFeldspar hiding (Tpl)
-
--- An example expression doubling the input number                    
-dbl :: Exp (Integer -> Integer)
-dbl =  undefined -- \ x ->  Var "+" (+)   
-
--- An example expression composing two types
-compose :: Exp ((tb -> tc) -> (ta -> tb) -> (ta -> tc))
-compose =  undefined
-  
--- An example expression representing the Integer 4
-four :: Exp Integer
-four = undefined -- (compose `App` dbl `App` dbl) `App` (ConI 1)
- 
--- Two simple test cases
-test :: Bool
-test = evl four () == return 4
+import ErrorMonad  
 
 type Vector a = (Exp Integer -> a, Exp Integer)
 
@@ -60,3 +41,8 @@ scalarProd vecA vecB = sumv (zipWithv (*.) vecA vecB)
 
 axpy :: Num a => Exp a -> Vector (Exp a) -> Vector (Exp a) -> Vector (Exp a)
 axpy a x y = zipWithv (+.) (mapv (a*.) x) y
+
+test :: Bool
+test = case evl (scalarProd  (id,ConI 2) (((+.) (ConI 1)),ConI 2)) () of 
+  Rgt x -> x == 2
+  Lft _ -> False

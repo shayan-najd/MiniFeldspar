@@ -12,9 +12,10 @@ import ErrorMonad
 import Singleton
 import Singleton.Environment hiding (Env)
 
+type instance Val (Exp r t) = Trm t
+type instance Env (Exp r t) = Trm r 
+
 instance Evl (Exp r t) where
-  type Val (Exp r t) = Trm t
-  type Env (Exp r t) = Trm r 
   evl egho r = case egho of
     Con i     -> V.con <$> pure i
     Var x     -> return (get x r)  

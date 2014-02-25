@@ -4,10 +4,9 @@
            , NoMonomorphismRestriction #-}
 module Conversion.Type.Feldspar where
 
-import qualified Type.Feldspar           as FAS
+import qualified Type.Feldspar                     as FAS
 import qualified Singleton.TypeFeldspar            as FG
 import qualified Type.Herbrand                     as H
-
 import qualified Variable.GADT                     as G
 
 import Data.Vector

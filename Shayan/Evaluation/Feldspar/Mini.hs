@@ -8,9 +8,10 @@ import qualified Value.Feldspar.GADT as V
 import ErrorMonad 
 import Control.Applicative.Recursion
 
+type instance Val (Exp t) = t
+type instance Env (Exp t) = ()
+
 instance Evl (Exp t) where
-  type Val (Exp t) = t
-  type Env (Exp t) = ()
   evl egfo r = case egfo of 
        ConI i          -> V.conI <$> pure i
        ConB b          -> V.conB <$> pure b
@@ -32,7 +33,8 @@ instance Evl (Exp t) where
          evl' :: (Evl t, Env t ~ ()) => t-> ErrM (Val t)
          evl' e  = evl e r 
  
+type instance Val (Exp ta -> Exp tb) = ta -> tb
+type instance Env (Exp ta -> Exp tb) = ()
 instance Evl (Exp ta -> Exp tb) where
-  type Val (Exp ta -> Exp tb) = ta -> tb
-  type Env (Exp ta -> Exp tb) = ()
+
   evl f r = return (frmRgt . flip evl r . f . Val) 

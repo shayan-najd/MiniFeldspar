@@ -48,3 +48,6 @@ ind = (!)
 
 whl :: (s -> Bool) -> (s -> s) -> s -> s
 whl fc fb = head . dropWhile fc . iterate fb
+
+lett :: tl -> (tl -> tb) -> tb
+lett = flip ($)
