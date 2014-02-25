@@ -21,7 +21,7 @@ import qualified Singleton.TypeFeldspar                 as FG
 import Conversion.Expression.Feldspar ()
 import Singleton.TypeFeldspar () 
 
-import Value.Feldspar.GADT (ind,len,arr)
+import Expression.Feldspar.GADTValue (ind,len,arr)
 
 import qualified Environment.ADTTable                  as AT
 import qualified Singleton.Environment                 as G

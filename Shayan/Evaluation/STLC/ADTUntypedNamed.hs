@@ -4,7 +4,7 @@ module Evaluation.STLC.ADTUntypedNamed where
 
 import Evaluation 
 import Expression.STLC.ADTUntypedNamed
-import qualified Value.STLC.ADT as V
+import qualified Expression.STLC.ADTValue as V
 import qualified Environment.ADTTable as E
  
 type instance Val (Exp v)  = V.Val

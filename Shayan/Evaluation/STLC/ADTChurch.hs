@@ -4,7 +4,7 @@ module Evaluation.STLC.ADTChurch where
 
 import Evaluation 
 import Expression.STLC.ADTChurch
-import qualified Value.STLC.ADT as V
+import qualified Expression.STLC.ADTValue as V
 import qualified Environment.ADT as E
   
 type instance Val (Exp a) = V.Val

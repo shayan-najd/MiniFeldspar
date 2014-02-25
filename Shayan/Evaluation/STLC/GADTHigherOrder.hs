@@ -6,7 +6,7 @@ import Evaluation
 import Evaluation.Variable.GADT ()
 import Expression.STLC.GADTHigherOrder
 import Singleton.TypeSTLC
-import qualified Value.STLC.GADT as V
+import qualified Expression.STLC.GADTValue as V
 import Control.Applicative.Recursion
 import ErrorMonad
 import Singleton

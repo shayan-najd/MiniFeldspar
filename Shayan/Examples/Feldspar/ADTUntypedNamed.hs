@@ -2,7 +2,7 @@
 module Examples.Feldspar.ADTUntypedNamed where
  
 import Expression.Feldspar.ADTUntypedNamed 
-import qualified Value.Feldspar.ADT as V
+import qualified Expression.Feldspar.ADTValue as V
 import ErrorMonad
 import Evaluation  
 import Evaluation.Feldspar.ADTUntypedNamed ()

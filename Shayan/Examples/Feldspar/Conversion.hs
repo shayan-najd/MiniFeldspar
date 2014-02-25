@@ -11,7 +11,7 @@ import qualified Expression.Feldspar.GADTHigherOrder       as GHO
 import qualified Type.Feldspar  as FS
 import qualified Singleton.TypeFeldspar   as G 
 
-import qualified Value.Feldspar.GADT as V
+import qualified Expression.Feldspar.GADTValue as V
 import Conversion
 import Conversion.Expression.Feldspar ()
 import Conversion.Type.Feldspar ()

@@ -3,7 +3,7 @@ module Examples.STLC.ADTExplicit where
 
 import Expression.STLC.ADTExplicit
 import Variable.ADT
-import qualified Value.STLC.ADT as V
+import qualified Expression.STLC.ADTValue as V
 import ErrorMonad
 import Evaluation
 import Evaluation.STLC.ADTExplicit ()

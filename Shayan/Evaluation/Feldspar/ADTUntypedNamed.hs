@@ -4,7 +4,7 @@ module Evaluation.Feldspar.ADTUntypedNamed where
 
 import Evaluation 
 import Expression.Feldspar.ADTUntypedNamed
-import qualified Value.Feldspar.ADT as V
+import qualified Expression.Feldspar.ADTValue as V
 import qualified Environment.ADTTable as E
  
 type instance Val (Exp v)  = V.Val

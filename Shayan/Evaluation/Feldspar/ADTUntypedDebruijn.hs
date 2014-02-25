@@ -4,7 +4,7 @@ module Evaluation.Feldspar.ADTUntypedDebruijn where
 
 import Evaluation 
 import Expression.Feldspar.ADTUntypedDebruijn
-import qualified Value.Feldspar.ADT as V
+import qualified Expression.Feldspar.ADTValue as V
 import qualified Environment.ADT as E
  
 type instance Val Exp  = V.Val

@@ -7,7 +7,7 @@ import Expression.Feldspar.GADTFirstOrder
 import Variable.GADT
 import Evaluation as E
 import Evaluation.Feldspar.GADTFirstOrder ()
-import qualified Value.Feldspar.GADT as V
+import qualified Expression.Feldspar.GADTValue as V
 import Singleton
 import Singleton.TypeFeldspar 
 import qualified Type.Feldspar as A

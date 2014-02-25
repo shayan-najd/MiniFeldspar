@@ -4,7 +4,7 @@ module Evaluation.Feldspar.Mini where
 
 import Evaluation 
 import Expression.Feldspar.Mini
-import qualified Value.Feldspar.GADT as V
+import qualified Expression.Feldspar.GADTValue as V
 import ErrorMonad 
 import Control.Applicative.Recursion
 

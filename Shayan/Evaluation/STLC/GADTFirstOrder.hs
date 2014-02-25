@@ -5,7 +5,7 @@ module Evaluation.STLC.GADTFirstOrder where
 import Evaluation as E
 import Evaluation.Variable.GADT ()
 import Expression.STLC.GADTFirstOrder
-import qualified Value.STLC.GADT as V
+import qualified Expression.STLC.GADTValue as V
 import Control.Applicative.Recursion 
 import Singleton
 import Singleton.TypeSTLC ()

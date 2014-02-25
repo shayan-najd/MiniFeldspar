@@ -5,7 +5,7 @@ module Evaluation.Feldspar.GADTHigherOrder where
 import Evaluation 
 import Evaluation.Variable.GADT ()
 import Expression.Feldspar.GADTHigherOrder
-import qualified Value.Feldspar.GADT as V
+import qualified Expression.Feldspar.GADTValue as V
 import Control.Applicative.Recursion
 import ErrorMonad
 import Data.Array

@@ -3,7 +3,7 @@ module Examples.Feldspar.ADTChurch where
  
 import Expression.Feldspar.ADTChurch  
 import Variable.ADT
-import qualified Value.Feldspar.ADT as V
+import qualified Expression.Feldspar.ADTValue as V
 import ErrorMonad
 import Evaluation 
 import Evaluation.Feldspar.ADTChurch ()

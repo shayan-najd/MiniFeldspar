@@ -12,10 +12,10 @@ import Control.Applicative.Recursion
 import Data.Array
 import Data.Maybe(fromJust)
 
-import qualified Type.Feldspar          as A
-import qualified Singleton.Environment  as G
-import qualified Singleton.TypeFeldspar as F
-import qualified Value.Feldspar.GADT    as V
+import qualified Type.Feldspar                 as A
+import qualified Singleton.Environment         as G
+import qualified Singleton.TypeFeldspar        as F
+import qualified Expression.Feldspar.GADTValue as V
 
 type instance Val (Exp r t) = Trm t
 type instance Env (Exp r t) = Trm r

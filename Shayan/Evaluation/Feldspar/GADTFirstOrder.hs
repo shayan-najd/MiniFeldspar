@@ -5,7 +5,7 @@ module Evaluation.Feldspar.GADTFirstOrder where
 import Evaluation 
 import Evaluation.Variable.GADT ()
 import Expression.Feldspar.GADTFirstOrder
-import qualified Value.Feldspar.GADT as V
+import qualified Expression.Feldspar.GADTValue as V
 import Control.Applicative.Recursion
 import Singleton 
 import qualified Singleton.Environment as E

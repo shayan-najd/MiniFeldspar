@@ -4,7 +4,7 @@ module Evaluation.Feldspar.ADTChurch where
 
 import Evaluation 
 import Expression.Feldspar.ADTChurch
-import qualified Value.Feldspar.ADT as V
+import qualified Expression.Feldspar.ADTValue as V
 import qualified Environment.ADT as E
  
 type instance Val (Exp v)  = V.Val
