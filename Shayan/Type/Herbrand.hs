@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs, PolyKinds, TypeOperators, DataKinds #-}
 module Type.Herbrand where
 
-import qualified Variable.GADT as G
+import qualified Variable as G
 import Data.Nat 
 import Data.Vector
 import Data.Foldable

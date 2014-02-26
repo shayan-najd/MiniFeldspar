@@ -7,7 +7,7 @@ module Singleton.Environment where
 import Singleton
 import Prelude (error)
 import Control.Applicative (Applicative,pure,(<$>),(<*>))
-import Variable.GADT
+import Variable
 
 -- Environment (Singleton)
 data Env :: (k -> *) -> [k] -> * where

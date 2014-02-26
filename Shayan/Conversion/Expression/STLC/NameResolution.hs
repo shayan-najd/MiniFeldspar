@@ -8,9 +8,9 @@ import Prelude hiding (sin)
 
 import qualified Expression.STLC.ADTUntypedNamed    as SAUP
 import qualified Expression.STLC.ADTUntypedDebruijn as SAUM
-import qualified Type.STLC      as SAS
-import qualified Variable.ADT             as A
-import qualified Environment.ADTTable     as AT
+import qualified Type.STLC            as SAS
+import qualified Data.Nat             as A
+import qualified Environment.ADTTable as AT
 
 import Conversion
  

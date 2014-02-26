@@ -10,14 +10,14 @@ import qualified Examples.STLC.GADTFirstOrder         as SGFO
 import qualified Examples.STLC.GADTHigherOrder        as SGHO
 import qualified Examples.STLC.Conversion             as SCNV
 
-import qualified Examples.Feldspar.ADTUntypedDebruijn  as FAUM
-import qualified Examples.Feldspar.ADTUntypedNamed  as FAUP
-import qualified Examples.Feldspar.ADTChurch   as FACP
-import qualified Examples.Feldspar.GADTFirstOrder         as FGFO
-import qualified Examples.Feldspar.GADTHigherOrder        as FGHO
-import qualified Examples.Feldspar.Mini                   as Mini
-import qualified Examples.Feldspar.MiniWellScoped         as MiWS
-import qualified Examples.Feldspar.Conversion             as FCNV
+import qualified Examples.Feldspar.ADTUntypedDebruijn as FAUM
+import qualified Examples.Feldspar.ADTUntypedNamed    as FAUP
+import qualified Examples.Feldspar.ADTChurch          as FACP
+import qualified Examples.Feldspar.GADTFirstOrder     as FGFO
+import qualified Examples.Feldspar.GADTHigherOrder    as FGHO
+import qualified Examples.Feldspar.Mini               as Mini
+import qualified Examples.Feldspar.MiniWellScoped     as MiWS
+import qualified Examples.Feldspar.Conversion         as FCNV
 
 main :: IO ()
 main = print (if SAUM.test && SACP.test && SAEP.test && 

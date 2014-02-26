@@ -4,7 +4,7 @@ module Examples.Feldspar.GADTFirstOrder where
 
 import Prelude hiding (abs)
 import Expression.Feldspar.GADTFirstOrder
-import Variable.GADT
+import Variable
 import Evaluation as E
 import Evaluation.Feldspar.GADTFirstOrder ()
 import qualified Expression.Feldspar.GADTValue as V

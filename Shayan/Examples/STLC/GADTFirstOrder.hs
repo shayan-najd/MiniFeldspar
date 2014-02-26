@@ -4,7 +4,7 @@ module Examples.STLC.GADTFirstOrder where
 
 import Prelude hiding (abs)
 import Expression.STLC.GADTFirstOrder
-import Variable.GADT
+import Variable
 import Evaluation as E
 import Evaluation.STLC.GADTFirstOrder ()
 import Singleton

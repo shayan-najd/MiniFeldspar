@@ -8,7 +8,7 @@ import Prelude hiding (sin)
 import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
 import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
 import qualified Type.Feldspar as FAS
-import qualified Variable.ADT            as A
+import qualified Data.Nat               as A
 import qualified Environment.ADTTable    as AT
 import Conversion
  

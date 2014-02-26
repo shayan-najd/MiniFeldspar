@@ -7,7 +7,7 @@ import Expression.Feldspar.MiniWellScoped
 import Evaluation hiding (Env)
 import Evaluation.Feldspar.MiniWellScoped ()
 import Singleton.Environment hiding (Env)
-import Variable.GADT
+import Variable
 import ErrorMonad 
 import qualified Type.Feldspar as A
 import Singleton

@@ -4,7 +4,7 @@
 module Expression.STLC.GADTFirstOrder where
 
 import Prelude hiding (sin)
-import Variable.GADT
+import Variable
 import Singleton.TypeSTLC
 import Singleton
 import qualified Type.STLC as A

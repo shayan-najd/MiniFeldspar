@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
 module Expression.Feldspar.ADTUntypedDebruijn where
  
-import Variable.ADT 
+import Data.Nat
 
 data Exp = ConI Integer 
          | ConB Bool 
-         | Var Var  
+         | Var Nat  
          | Abs Exp
          | App Exp Exp  
          | Cnd Exp Exp Exp 

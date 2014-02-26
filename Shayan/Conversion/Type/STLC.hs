@@ -7,7 +7,7 @@ module Conversion.Type.STLC where
 import qualified Type.STLC as AS
 import qualified Singleton.TypeSTLC as T
 import qualified Type.Herbrand as H
-import qualified Variable.GADT as G
+import qualified Variable      as G
 import Data.Vector
 import Conversion
 import Existential

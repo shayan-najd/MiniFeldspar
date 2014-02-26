@@ -5,7 +5,7 @@ module Expression.Feldspar.MiniWellScoped where
 
 import Prelude (Integer , Bool)
 import Singleton
-import qualified Variable.GADT          as V 
+import qualified Variable               as V 
 import qualified Type.Feldspar          as F
 import qualified Singleton.TypeFeldspar as FG
 import qualified Singleton.Environment  as G

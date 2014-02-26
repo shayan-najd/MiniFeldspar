@@ -1,11 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
 module Expression.STLC.ADTUntypedDebruijn where
 
-import Variable.ADT
+import Data.Nat
  
 data Exp =
     Con Integer
-  | Var Var
+  | Var Nat
   | Abs Exp 
   | App Exp Exp 
   | Add Exp Exp 

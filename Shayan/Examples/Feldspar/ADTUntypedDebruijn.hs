@@ -2,7 +2,7 @@
 module Examples.Feldspar.ADTUntypedDebruijn where
  
 import Expression.Feldspar.ADTUntypedDebruijn
-import Variable.ADT
+import Data.Nat
 import qualified Expression.Feldspar.ADTValue as V
 import ErrorMonad
 import Evaluation  

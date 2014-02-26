@@ -4,7 +4,7 @@ module Examples.Feldspar.GADTHigherOrder where
 
 import Prelude hiding (abs)
 import Expression.Feldspar.GADTHigherOrder
-import Variable.GADT
+import Variable
 import Evaluation as E
 import Evaluation.Feldspar.GADTHigherOrder ()
 import qualified Expression.Feldspar.GADTValue as V

@@ -3,15 +3,15 @@
            , PolyKinds #-}
 module Conversion.Variable where
 
-import qualified Variable.ADT          as A
-import qualified Variable.GADT         as G
+import qualified Data.Nat              as A
+import qualified Variable              as G
 import qualified Environment.ADT       as A
 import qualified Singleton.Environment as G
 import Conversion.Environment ()
 import Existential
 import Conversion
  
-instance Cnv a (ExsSin b) => Cnv (A.Var , A.Env a) (Exs2 G.Var (G.Env b) b) where
+instance Cnv a (ExsSin b) => Cnv (A.Nat , A.Env a) (Exs2 G.Var (G.Env b) b) where
  cnv (A.Zro   , t : r) = do ExsSin r' <- cnv r 
                             ExsSin t' <- cnv t  
                             return (Exs2 G.Zro (t' `G.Ext` r') t')

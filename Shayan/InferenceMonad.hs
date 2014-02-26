@@ -6,7 +6,7 @@ import Control.Monad.State (State,get,put,modify)
 import Conversion
 import Type.Herbrand
 import ErrorMonad
-import Variable.ADT
+import Data.Nat
  
 -- Subtitution of a metavariable ([i := t]) in a type equality constraint
 appC :: Nat -> Typ r -> HerCon r -> HerCon r

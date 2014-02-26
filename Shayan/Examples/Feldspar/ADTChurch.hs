@@ -2,7 +2,7 @@
 module Examples.Feldspar.ADTChurch where
  
 import Expression.Feldspar.ADTChurch  
-import Variable.ADT
+import Data.Nat
 import qualified Expression.Feldspar.ADTValue as V
 import ErrorMonad
 import Evaluation 

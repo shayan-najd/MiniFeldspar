@@ -4,7 +4,9 @@ module Expression.Feldspar.ADTChurch where
  
 import Data.Traversable
 import Data.Foldable
-import Variable.ADT
+import Data.Nat 
+
+type Var = Nat
 
 data Exp t = ConI Integer 
            | ConB Bool 

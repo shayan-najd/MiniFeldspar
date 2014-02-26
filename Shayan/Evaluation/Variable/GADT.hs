@@ -3,7 +3,7 @@
 module Evaluation.Variable.GADT where
 
 import Evaluation 
-import Variable.GADT
+import Variable
 import Singleton.Environment hiding (Env)
 import Singleton
 

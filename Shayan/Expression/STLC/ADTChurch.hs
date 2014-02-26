@@ -2,13 +2,13 @@
 {-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 module Expression.STLC.ADTChurch where
 
-import Variable.ADT
+import Data.Nat
 import Data.Foldable(Foldable(..))
 import Data.Traversable(Traversable(..))
 
 data Exp t =
     Con Integer
-  | Var Var
+  | Var Nat
   | Abs t       (Exp t) 
   | App (Exp t) (Exp t) 
   | Add (Exp t) (Exp t) 
