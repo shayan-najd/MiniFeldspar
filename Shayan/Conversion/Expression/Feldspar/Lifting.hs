@@ -11,7 +11,7 @@ import qualified Expression.Feldspar.GADTHigherOrder as FGHO
 import qualified Singleton.TypeFeldspar as FG
 import qualified Singleton.Environment  as G
 
-import Conversion hiding ((<$@>),(<*@>))
+import Conversion hiding ((<$@>),(<*@>),pure)
 import Conversion.Type.Feldspar ()
 import Conversion.Variable ()
 import Conversion.Existential ()
@@ -21,6 +21,9 @@ import Singleton
  
 type SinTyp = HasSin FG.Typ
 type SinEnv = HasSin (G.Env FG.Typ)
+
+pur :: a -> ErrM a
+pur = return
 
 instance (t ~ t' , r ~ r' , SinEnv r) => 
          Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
@@ -35,20 +38,20 @@ instance (t ~ t' , r ~ r') =>
                  FGFO.Exp rr tt -> G.Env (FGHO.Exp rr) rr 
                  -> ErrM (FGHO.Exp rr tt)
    cnvGToGHO egdt r = case egdt of  
-      FGFO.ConI i       -> FGHO.ConI <$> pure i
-      FGFO.ConB b       -> FGHO.ConB <$> pure b
-      FGFO.Var v        -> pure (G.gets v r)
-      FGFO.Abs ta eb    -> FGHO.Abs ta <$@> eb
-      FGFO.App ef ea    -> FGHO.App <$@> ef <*@> ea
+      FGFO.ConI i       -> FGHO.ConI <$> pur i
+      FGFO.ConB b       -> FGHO.ConB <$> pur b
+      FGFO.Var v        -> pur (G.gets v r)
+      FGFO.Abs eb       -> FGHO.Abs <$@> eb
+      FGFO.App ta ef ea -> FGHO.App <$> pur ta <*@> ef <*@> ea
       FGFO.Cnd ec et ef -> FGHO.Cnd <$@> ec <*@> et <*@> ef
       FGFO.Whl ec eb ei -> FGHO.Whl <$@> ec <*@> eb <*@> ei
       FGFO.Tpl ef es    -> FGHO.Tpl <$@> ef <*@> es
       FGFO.Ary el ef    -> FGHO.Ary <$@> el <*@> ef
       FGFO.Ind ea ei    -> FGHO.Ind <$@> ea <*@> ei
-      FGFO.Fst e        -> FGHO.Fst <$@> e
-      FGFO.Snd e        -> FGHO.Snd <$@> e
-      FGFO.Len e        -> FGHO.Len <$@> e 
-      FGFO.Let tl el eb -> FGHO.Let tl <$@> el <*@> eb 
+      FGFO.Fst ts e     -> FGHO.Fst <$> pur ts <*@> e
+      FGFO.Snd tf e     -> FGHO.Snd <$> pur tf <*@> e
+      FGFO.Len ta e     -> FGHO.Len <$> pur ta <*@> e 
+      FGFO.Let tl el eb -> FGHO.Let <$> pur tl <*@> el <*@> eb 
       where     
         c :: Cnv (a , G.Env (FGHO.Exp rr) rr) b => a -> ErrM b
         c e = cnv (e , r)

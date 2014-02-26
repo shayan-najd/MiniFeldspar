@@ -15,17 +15,17 @@ import qualified Type.Feldspar as A
 
 -- An example expression doubling the input number                    
 dbl :: Exp (A.Arr A.Int (A.Arr A.Int A.Int) ': '[]) (A.Arr A.Int A.Int)
-dbl = abs (\ x -> (App (App (Var Zro) x) x))
+dbl = Abs (\ x -> (app (app (Var Zro) x) x))
 
 -- An example expression composing two types
 compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) => 
            Exp r (A.Arr (A.Arr tb tc) (A.Arr (A.Arr ta tb) (A.Arr ta tc)))
-compose = abs (\ g -> abs (\ f -> abs 
-                    (\ x -> g `App` (f `App` x))))
+compose = Abs (\ g -> Abs (\ f -> Abs 
+                    (\ x -> g `app` (f `app` x))))
 
 -- An example expression representing the Integer 4
 four :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) A.Int
-four = (compose `App` dbl `App` dbl) `App` (ConI 1)
+four = (compose `app` dbl `app` dbl) `app` (ConI 1)
  
 -- Two simple test cases
 test :: Bool

@@ -43,13 +43,13 @@ instance Cnv (FACP.Exp FAS.Typ , A.Env FAS.Typ) ExsExp where
     ExsSin ta'                    :: ExsTyp <- cnv ta
     Exs2 eb' (ta'' `G.Ext` r') tb :: ExsExp <- cnv(eb , ta : r)
     Rfl <- eqlSin ta' ta''
-    return (Exs2 (FGFO.Abs ta' eb') r' (FG.Arr ta' tb))
+    return (Exs2 (FGFO.Abs eb') r' (FG.Arr ta' tb))
   cnv (FACP.App ef ea , r)    = do 
     Exs2 ef' rf (FG.Arr ta tb) :: ExsExp <- cnv (ef , r)
     Exs2 ea' ra ta'            :: ExsExp <- cnv (ea , r)
     Rfl <- eqlSin rf ra
     Rfl <- eqlSin ta ta'
-    return (Exs2 (FGFO.App ef' ea') rf tb)
+    return (Exs2 (FGFO.App ta ef' ea') rf tb)
   cnv (FACP.Cnd ec et ef , r) = do
     Exs2 ec' rc FG.Bol :: ExsExp <- cnv (ec , r)
     Exs2 et' rt tt      :: ExsExp <- cnv (et , r)
@@ -75,19 +75,19 @@ instance Cnv (FACP.Exp FAS.Typ , A.Env FAS.Typ) ExsExp where
     Rfl <- eqlSin tf ts
     return (Exs2 (FGFO.Tpl ef' es') rf (FG.Tpl tf ts))
   cnv (FACP.Fst e , r)        = do 
-    Exs2 e' r' (FG.Tpl tf _) :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGFO.Fst e') r' tf)
+    Exs2 e' r' (FG.Tpl tf ts) :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Fst ts e') r' tf)
   cnv (FACP.Snd e , r)        = do 
-    Exs2 e' r' (FG.Tpl _ ts) :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGFO.Snd e') r' ts)  
+    Exs2 e' r' (FG.Tpl tf ts) :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Snd tf e') r' ts)  
   cnv (FACP.Ary el ef , r)    = do 
     Exs2 el' rl FG.Int             :: ExsExp <- cnv (el , r)
     Exs2 ef' rf (FG.Arr FG.Int ta) :: ExsExp <- cnv (ef , r)
     Rfl <- eqlSin rl rf
     return (Exs2 (FGFO.Ary el' ef') rl (FG.Ary ta))
   cnv (FACP.Len e , r)        = do 
-    Exs2 e' r' (FG.Ary _)  :: ExsExp <- cnv (e , r)
-    return (Exs2 (FGFO.Len e') r' FG.Int)
+    Exs2 e' r' (FG.Ary ta)  :: ExsExp <- cnv (e , r)
+    return (Exs2 (FGFO.Len ta e') r' FG.Int)
   cnv (FACP.Ind ea ei , r)    = do 
     Exs2 ea' ra (FG.Ary ta) :: ExsExp <- cnv (ea , r)
     Exs2 ei' ri FG.Int      :: ExsExp <- cnv (ei , r)
