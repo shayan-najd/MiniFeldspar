@@ -24,20 +24,27 @@ data Exp :: [F.Typ] -> F.Typ -> * where
   AppV  :: FG.Typ t ->
            V.Var r t -> G.Env (Exp r) (Arg t) -> Exp r (Out t)
   Cnd   :: Exp r F.Bol -> Exp r t -> Exp r t -> Exp r t
-  Whl   :: FG.Typ t -> (Exp r t -> Exp r F.Bol) -> (Exp r t -> Exp r t) -> 
+  Whl   :: (Exp r t -> Exp r F.Bol) -> (Exp r t -> Exp r t) -> 
            Exp r t -> Exp r t
   Tpl   :: Exp r tf -> Exp r ts -> Exp r (F.Tpl tf ts)
-  Fst   :: Exp r (F.Tpl tf ts) -> Exp r tf
-  Snd   :: Exp r (F.Tpl tf ts) -> Exp r ts
+  Fst   :: FG.Typ ts -> Exp r (F.Tpl tf ts) -> Exp r tf
+  Snd   :: FG.Typ tf -> Exp r (F.Tpl tf ts) -> Exp r ts
   Ary   :: Exp r F.Int -> (Exp r F.Int -> Exp r t) -> Exp r (F.Ary t)
-  Len   :: Exp r (F.Ary t) -> Exp r F.Int
-  Ind   :: Exp r (F.Ary t) -> Exp r F.Int -> Exp r t
+  Len   :: FG.Typ ta -> Exp r (F.Ary ta) -> Exp r F.Int
+  Ind   :: Exp r (F.Ary ta) -> Exp r F.Int -> Exp r ta
   Let   :: FG.Typ tl -> Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
 
 appV :: HasSin FG.Typ t => V.Var r t -> G.Env (Exp r) (Arg t) -> Exp r (Out t)
 appV = AppV sin
+ 
+fst :: HasSin FG.Typ ts => Exp r (F.Tpl tf ts) -> Exp r tf  
+fst = Fst sin
 
-whl ::  HasSin FG.Typ t => (Exp r t -> Exp r F.Bol) -> (Exp r t -> Exp r t) -> 
-        Exp r t -> Exp r t
-whl = Whl sin
-  
+snd :: HasSin FG.Typ tf => Exp r (F.Tpl tf ts) -> Exp r ts
+snd = Snd sin
+
+len :: HasSin FG.Typ ta => Exp r (F.Ary ta) -> Exp r F.Int
+len = Len sin
+
+lett :: HasSin FG.Typ tl => Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
+lett = Let sin

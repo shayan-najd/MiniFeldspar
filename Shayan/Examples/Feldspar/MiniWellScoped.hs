@@ -2,7 +2,7 @@
 {-# LANGUAGE GADTs, FlexibleContexts, DataKinds, PolyKinds, TypeOperators #-}
 module Examples.Feldspar.MiniWellScoped where
 
-import Prelude hiding (abs,sum)
+import Prelude hiding (abs,sum,snd,fst)
 import Expression.Feldspar.MiniWellScoped
 import Evaluation hiding (Env)
 import Evaluation.Feldspar.MiniWellScoped ()
@@ -42,9 +42,9 @@ minF :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Int
 minF e1 e2 = appV (Suc (Suc (Suc (Suc Zro)))) (e1 `Ext` (e2 `Ext` Emp))  
 
 sumv :: Vector (Exp Env A.Int) -> Exp Env A.Int
-sumv (ixf,l) = Fst $
-               whl ((/== l) . Snd) 
-               (\s -> Tpl (ixf (Snd s) +. (Fst s)) (Snd s +. ConI 1)) 
+sumv (ixf,l) = fst $
+               Whl ((/== l) . snd) 
+               (\s -> Tpl (ixf (snd s) +. (fst s)) (snd s +. ConI 1)) 
                (Tpl (ConI 0) (ConI 0))
 
 mapv :: (a -> b) -> Vector a -> Vector b
