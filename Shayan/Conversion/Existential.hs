@@ -1,13 +1,9 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , GADTs, ScopedTypeVariables, PolyKinds #-}
 module Conversion.Existential where
 
 import Prelude hiding (sin)
 import Conversion
 import Existential
 import Singleton
-import SingletonEquality
 
 ---------------------------------------------------------------------------------
 -- Conversion from Existentials

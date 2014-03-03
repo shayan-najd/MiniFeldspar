@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, DataKinds, PolyKinds #-}
 module Conversion.Expression.Feldspar.TypeInference where
 
 import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM

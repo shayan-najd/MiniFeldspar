@@ -1,10 +1,8 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE DeriveFunctor, ScopedTypeVariables,GADTs, ImplicitParams #-}
 module Normalization.Feldspar.ADTChurch where
 
 import Expression.Feldspar.ADTChurch
 import Control.Applicative.Recursion
-import Variable.ADT
+import Data.Nat
 import ChangeMonad
 
 nrm :: Exp t-> Exp t

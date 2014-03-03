@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts , NoMonomorphismRestriction #-}
-{-# LANGUAGE TypeOperators, DataKinds, PolyKinds #-}
 module Expression.STLC.GADTHigherOrder(Exp(..),abs,sucAll,prdAll) where
  
 import Prelude hiding (sin,abs)

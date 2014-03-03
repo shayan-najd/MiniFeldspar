@@ -1,14 +1,9 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies,FlexibleInstances, ScopedTypeVariables
-           , TypeOperators, DataKinds, PolyKinds, FlexibleContexts #-}
 module Evaluation.Feldspar.MiniWellScoped where
 
 import Prelude hiding (sin)
 import Expression.Feldspar.MiniWellScoped
 import Evaluation 
-import ErrorMonad 
 import Singleton
-import Control.Applicative.Recursion
 
 import Data.Array
 import Data.Maybe(fromJust)

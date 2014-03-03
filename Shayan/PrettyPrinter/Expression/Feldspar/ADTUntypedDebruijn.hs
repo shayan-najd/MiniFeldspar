@@ -1,8 +1,8 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.Feldspar.ADTUntypedDebruijn where
  
 import Expression.Feldspar.ADTUntypedDebruijn 
-                                              
+import PrettyPrinter.Nat ()                                              
+
 instance Show Exp where 
   show (ConI i)              = show i 
   show (ConB b)              = show b
@@ -20,7 +20,6 @@ instance Show Exp where
   show (Fst e)               = "fst " ++ show e                              
   show (Snd e)               = "snd " ++ show e                              
   show (Ary el ef)           = "mkArr " ++ show el ++ " " ++ show ef
---  show Any                   = "undefined"
   show (Len e)               = "len " ++ show e
   show (Ind ea ei)           = show ea ++ " ! " ++ show ei
   show (Let el eb)           = "let " ++ show el ++ 

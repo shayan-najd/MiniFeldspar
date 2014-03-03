@@ -1,7 +1,4 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TemplateHaskell, ScopedTypeVariables, GADTs, FlexibleInstances
-           , NoMonomorphismRestriction, MultiParamTypeClasses, TypeOperators 
-           , FlexibleContexts #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Conversion.Expression.TemplateHaskell where
 import qualified Language.Haskell.TH.Syntax             as TH
 
@@ -27,7 +24,6 @@ import qualified Environment.ADTTable                  as AT
 import qualified Singleton.Environment                 as G
 
 import Conversion   
-import ErrorMonad
 import Singleton
 import Existential
 

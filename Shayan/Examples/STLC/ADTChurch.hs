@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Examples.STLC.ADTChurch where
  
 import Expression.STLC.ADTChurch  

@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Environment.ADTTable where
  
 type Env a b = [(a , b)]

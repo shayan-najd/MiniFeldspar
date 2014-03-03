@@ -1,16 +1,15 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs , StandaloneDeriving, DataKinds #-}
 module Data.Vector where
 
 import Data.Foldable
 import Data.Monoid
 import Singleton.Nat
 import qualified Data.Nat as N
+import qualified Data.Fin as F
 
 infixr 5 :::
-data Vec n a where   
-  Nil   :: Vec 'N.Zro a
-  (:::) :: a -> Vec n a -> Vec ('N.Suc n) a
+data Vec :: N.Nat -> * -> * where   
+  Nil   :: Vec N.Zro t
+  (:::) :: t -> Vec n t -> Vec (N.Suc n) t
            
 deriving instance Eq a => Eq (Vec n a)
 
@@ -25,3 +24,8 @@ instance Foldable (Vec n) where
 len :: Vec n a -> Nat n
 len Nil        = Zro
 len (_ ::: xs) = Suc (len xs)
+
+get :: F.Nat n -> Vec n t -> t
+get F.Zro     (x ::: _) = x
+get (F.Suc n) (_ ::: r) = get n r
+get _         _         = error "Impossible!"

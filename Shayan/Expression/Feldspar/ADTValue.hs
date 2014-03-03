@@ -1,16 +1,14 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module Expression.Feldspar.ADTValue where
 
 import ErrorMonad
 import Data.Array
 
 -- Values
-data Val =
-    ConI Integer
-  | ConB Bool  
-  | Abs (Val -> Val)
-  | Tpl (Val , Val)  
-  | Arr (Array Integer Val)  
+data Val = ConI Integer
+         | ConB Bool  
+         | Abs (Val -> Val)
+         | Tpl (Val , Val)  
+         | Arr (Array Integer Val)  
     
 conI :: Integer -> ErrM Val
 conI = return . ConI
@@ -18,8 +16,8 @@ conI = return . ConI
 conB :: Bool -> ErrM Val
 conB = return . ConB
 
-abs :: (Val -> ErrM Val) -> ErrM Val
-abs = return . Abs . (frmRgt .)
+abs :: (Val -> Val) -> ErrM Val
+abs = return . Abs 
 
 -- Application of two values
 app :: Val -> Val -> ErrM Val

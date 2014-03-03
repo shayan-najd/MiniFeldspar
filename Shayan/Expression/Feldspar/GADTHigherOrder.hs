@@ -1,6 +1,4 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleContexts, GADTs, Rank2Types #-}
-{-# LANGUAGE TypeOperators, DataKinds, PolyKinds, TypeHoles #-}
+{-# LANGUAGE Rank2Types #-}
 module Expression.Feldspar.GADTHigherOrder where
  
 import Prelude hiding (sin)

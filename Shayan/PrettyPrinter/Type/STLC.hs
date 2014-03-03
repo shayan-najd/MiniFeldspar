@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Type.STLC where
 
 import Type.STLC

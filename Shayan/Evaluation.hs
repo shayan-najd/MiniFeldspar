@@ -1,8 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies #-}
-module Evaluation where
+module Evaluation (Val,Env,Evl(..),ErrM,frmRgt,module C) where
 
 import ErrorMonad
+import Control.Applicative.Recursion as C
 
 type family Val e
 type family Env e

@@ -1,7 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.STLC.ADTChurch where
 
 import Expression.STLC.ADTChurch
+import PrettyPrinter.Nat ()
 
 instance Show a => Show (Exp a) where 
   show (Con i)               = show i 

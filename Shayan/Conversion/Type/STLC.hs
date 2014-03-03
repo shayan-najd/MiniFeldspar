@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, GADTs, ImplicitParams 
-           , ScopedTypeVariables #-}
-{-# LANGUAGE DataKinds, TypeOperators #-}
 module Conversion.Type.STLC where
 
 import qualified Type.STLC as AS

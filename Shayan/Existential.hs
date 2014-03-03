@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs, PolyKinds #-}
 module Existential where 
 
 import Singleton

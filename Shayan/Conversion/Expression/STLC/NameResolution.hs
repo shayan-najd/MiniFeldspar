@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.STLC.NameResolution where
 
 import Prelude hiding (sin)
@@ -13,6 +9,7 @@ import qualified Data.Nat             as A
 import qualified Environment.ADTTable as AT
 
 import Conversion
+import Conversion.Nat ()
  
 instance Eq x => 
          Cnv (SAUP.Exp x , AT.Env x SAS.Typ , AT.Env x SAUM.Exp) SAUM.Exp where

@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.STLC.ADTUntypedNamed where
  
 import Expression.STLC.ADTUntypedNamed 

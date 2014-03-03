@@ -30,7 +30,6 @@ import qualified Examples.Feldspar.ADTChurch   as ACP
 import qualified Examples.Feldspar.GADTFirstOrder         as GFO
 import qualified Examples.TemplateHaskell                 as TH
 import Evaluation
-import SingletonEquality
 import ErrorMonad
 import Existential
 import Singleton.Environment ()

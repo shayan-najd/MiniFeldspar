@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE DeriveFunctor, DeriveFoldable, DeriveTraversable #-}
 module Expression.STLC.ADTExplicit where
 
 import Data.Nat

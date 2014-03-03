@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Examples.STLC.ADTExplicit where
 
 import Expression.STLC.ADTExplicit

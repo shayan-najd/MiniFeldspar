@@ -1,8 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE DeriveFunctor, DeriveTraversable, DeriveFoldable #-}
 module PrettyPrinter.Expression.Feldspar.ADTChurch where
  
 import Expression.Feldspar.ADTChurch 
+import PrettyPrinter.Nat ()
 
 instance Show x => Show (Exp x) where 
   show (ConI i)              = show i 

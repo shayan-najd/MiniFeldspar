@@ -1,8 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE ImplicitParams #-}
-module Control.Applicative.Recursion ((<$>),(<$@>),(<*>),(<*@>),pure) where
+module Control.Applicative.Recursion ((<$>),(<$@>),(<*>),(<*@>),pure,join) where
 
 import Control.Applicative (Applicative,(<$>),(<*>),pure)
+import Control.Monad (join)
 
 infixl 4 <$@>
 (<$@>) :: (Applicative m , ?cnv :: a -> m a') => (a' -> b) -> a -> m b          

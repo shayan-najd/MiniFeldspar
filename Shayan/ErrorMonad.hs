@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module ErrorMonad where
 
 import Control.Applicative (Applicative(..))

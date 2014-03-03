@@ -1,15 +1,10 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies,ScopedTypeVariables, FlexibleInstances, DataKinds
-           , FlexibleContexts #-}
 module Evaluation.Feldspar.GADTHigherOrder where
 
 import Prelude hiding (sin)
 import Evaluation 
-import Evaluation.Variable.GADT ()
+import Evaluation.Variable ()
 import Expression.Feldspar.GADTHigherOrder hiding (fst,snd)
 import qualified Expression.Feldspar.GADTValue as V
-import Control.Applicative.Recursion
-import ErrorMonad
 import Data.Array
 import Data.Maybe(fromJust)
 import Singleton 

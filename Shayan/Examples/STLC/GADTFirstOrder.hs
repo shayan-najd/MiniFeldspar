@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs , FlexibleContexts, DataKinds, TypeOperators #-}
 module Examples.STLC.GADTFirstOrder where
 
 import Prelude hiding (abs)

@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.STLC.Lifting where
 
 import Prelude hiding (sin)

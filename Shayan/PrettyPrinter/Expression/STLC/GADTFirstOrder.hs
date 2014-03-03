@@ -1,8 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs #-}
 module PrettyPrinter.Expression.STLC.GADTFirstOrder where
 
 import Expression.STLC.GADTFirstOrder
+import PrettyPrinter.Variable ()
 
 instance Show (Exp r t) where 
   show (Con i)               = show i 

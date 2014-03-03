@@ -1,12 +1,9 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies, ScopedTypeVariables #-}
 module Evaluation.STLC.GADTFirstOrder where
 
 import Evaluation as E
-import Evaluation.Variable.GADT ()
+import Evaluation.Variable ()
 import Expression.STLC.GADTFirstOrder
 import qualified Expression.STLC.GADTValue as V
-import Control.Applicative.Recursion 
 import Singleton
 import Singleton.TypeSTLC ()
 import qualified Singleton.Environment as E

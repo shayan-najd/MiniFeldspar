@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, DataKinds, PolyKinds #-}
 module Conversion.Expression.STLC.TypeInference where
 
 import qualified Expression.STLC.ADTUntypedDebruijn  as SAUM

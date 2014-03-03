@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, StandaloneDeriving, PolyKinds #-}
-{-# LANGUAGE TypeOperators, DataKinds, PolyKinds #-}
 module Variable where
 
 data Var :: [k] -> k -> * where

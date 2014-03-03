@@ -1,55 +1,31 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies #-}
 module Evaluation.Feldspar.ADTChurch where
 
 import Evaluation 
 import Expression.Feldspar.ADTChurch
 import qualified Expression.Feldspar.ADTValue as V
-import qualified Environment.ADT as E
+import qualified Environment.ADT              as A
  
 type instance Val (Exp v)  = V.Val
-type instance Env (Exp v)  = E.Env V.Val 
+type instance Env (Exp v)  = A.Env V.Val 
 
 instance Evl (Exp v) where
-  evl (ConI i)    _ = V.conI i
-  evl (ConB b)    _ = V.conB b
-  evl (Var x)     r = E.get x r
-  evl (Abs _ eb)  r = V.abs (\ va -> evl eb (va : r))
-  evl (App ef ea) r = do vf <- evl ef r 
-                         va <- evl ea r      
-                         V.app vf va
- 
-  evl (Cnd ec et ef) r = do vc <- evl ec r 
-                            vt <- evl et r      
-                            vf <- evl ef r      
-                            V.cnd vc vt vf
- 
-  evl (Tpl ef es) r = do vf <- evl ef r 
-                         vs <- evl es r      
-                         V.tpl vf vs
-  
-  evl (Fst e)     r = do v <- evl e r                         
-                         V.fst v
-  
-  evl (Snd e)     r = do v <- evl e r                         
-                         V.snd v                       
-  
-  evl (Ary el ef) r = do vl <- evl el r
-                         vf <- evl ef r
-                         V.arr vl vf 
-
-  evl (Len e)     r = do e' <- evl e r
-                         V.len e'
-                         
-  evl (Ind ea ei) r = do va <- evl ea r                       
-                         vi <- evl ei r
-                         V.ind va vi
-                         
-  evl (Whl ec eb ei) r = do vc <- evl ec r
-                            vb <- evl eb r
-                            vi <- evl ei r
-                            V.whl vc vb vi
-  
-  evl (Let el eb)  r = do vl <- evl el r                          
-                          vf <- evl (Abs undefined eb) r
-                          V.app vf vl 
+  evl ee r = let ?cnv = evlr in join $ case ee of        
+    ConI i       -> V.conI <$> pure i
+    ConB b       -> V.conB <$> pure b 
+    Var x        -> return (A.get x r)
+    Abs _ eb     -> V.abs <$> pure (frmRgt . evl eb . (: r))
+    App ef ea    -> V.app <$@> ef <*@> ea 
+    Cnd ec et ef -> V.cnd <$@> ec <*@> et <*@> ef      
+    Tpl ef es    -> V.tpl <$@> ef <*@> es 
+    Fst e        -> V.fst <$@> e
+    Snd e        -> V.snd <$@> e 
+    Ary el ef    -> V.arr <$@> el <*@> ef
+    Len e        -> V.len <$@> e                         
+    Ind ea ei    -> V.ind <$@> ea <*@> ei                         
+    Whl ec eb ei -> V.whl <$@> ec <*@> eb <*@> ei
+    Let el eb    -> return (evlr (App (Abs undefined eb) el))
+    where 
+      evlr :: Exp v -> ErrM V.Val
+      evlr e = evl e r
+      
+      

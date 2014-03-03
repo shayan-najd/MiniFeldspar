@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Expression.STLC.ADTUntypedDebruijn where
 
 import Data.Nat

@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall #-}
 module Environment.ADT where
 
 import Data.Nat

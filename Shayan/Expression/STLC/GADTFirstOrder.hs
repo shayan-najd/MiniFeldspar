@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs, FlexibleContexts #-}
-{-# LANGUAGE TypeOperators, DataKinds, PolyKinds #-}
 module Expression.STLC.GADTFirstOrder where
 
 import Prelude hiding (sin)

@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE FlexibleContexts #-}
 module InferenceMonad where
 
 import Control.Monad.State (State,get,put,modify)
@@ -28,7 +26,7 @@ newMta = do t <- newMT
 -- Generating fresh metavariables using fresh names
 newMT :: InfM r (Typ r)
 newMT = do (i , x) <- get
-           put (succ i , x)
+           put (Suc i , x)
            return (Mta i)         
           
 -- Adding a type equality constraint to the state

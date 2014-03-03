@@ -1,14 +1,10 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies,ScopedTypeVariables  #-}
 module Evaluation.STLC.GADTHigherOrder where
 
 import Evaluation 
-import Evaluation.Variable.GADT ()
+import Evaluation.Variable ()
 import Expression.STLC.GADTHigherOrder
 import Singleton.TypeSTLC
 import qualified Expression.STLC.GADTValue as V
-import Control.Applicative.Recursion
-import ErrorMonad
 import Singleton
 import Singleton.Environment hiding (Env)
 

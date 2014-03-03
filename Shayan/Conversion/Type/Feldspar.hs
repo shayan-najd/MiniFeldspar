@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, GADTs
-           , ScopedTypeVariables, ImplicitParams, DataKinds, PolyKinds 
-           , NoMonomorphismRestriction #-}
 module Conversion.Type.Feldspar where
 
 import qualified Type.Feldspar                     as FAS
@@ -12,7 +8,6 @@ import qualified Variable                          as G
 import Data.Vector
 import Conversion
 import Existential
-import ErrorMonad
 
 type ExsTyp = ExsSin FG.Typ                
 ---------------------------------------------------------------------------------

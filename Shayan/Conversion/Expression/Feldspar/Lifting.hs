@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, DataKinds, TypeOperators #-}
 module Conversion.Expression.Feldspar.Lifting where
 
 import Prelude hiding (sin)
@@ -16,7 +12,6 @@ import Conversion.Type.Feldspar ()
 import Conversion.Variable ()
 import Conversion.Existential ()
 
-import ErrorMonad
 import Singleton
  
 type SinTyp = HasSin FG.Typ

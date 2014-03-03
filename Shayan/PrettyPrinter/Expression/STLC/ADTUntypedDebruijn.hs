@@ -1,7 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.STLC.ADTUntypedDebruijn where
 
 import Expression.STLC.ADTUntypedDebruijn
+import PrettyPrinter.Nat ()
 
 instance Show Exp where 
   show (Con i)               = show i 

@@ -1,28 +1,20 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, DataKinds, TypeOperators
-           , TypeHoles, PolyKinds, TypeFamilies #-}
 module Conversion.Expression.Feldspar.Normalization where
 
 import Prelude hiding (sin)
+
 import qualified Expression.Feldspar.MiniWellScoped  as MiWS
 import qualified Expression.Feldspar.GADTHigherOrder as FGHO 
 
-import qualified Variable as V
-import qualified Type.Feldspar as A
+import qualified Variable               as V
+import qualified Type.Feldspar          as A
 import qualified Singleton.TypeFeldspar as FG
 import qualified Singleton.Environment  as G
 
-import Conversion hiding ((<$@>),(<*@>))
-import Conversion.Type.Feldspar ()
-import Conversion.Variable ()
-import Conversion.Existential ()
-import SingletonEquality 
-import SingletonEquality.TypeFeldsparGADT ()
-import SingletonEquality.EnvironmentGADT ()
+import Conversion 
+import Conversion.Type.Feldspar      ()
+import Conversion.Variable           ()
+import Conversion.Existential        ()
 import Existential
-import ErrorMonad
 import Singleton
  
 type SinTyp = HasSin FG.Typ

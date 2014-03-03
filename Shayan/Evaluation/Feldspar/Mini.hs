@@ -1,13 +1,9 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies,FlexibleInstances #-}
 module Evaluation.Feldspar.Mini where
 
 import Evaluation 
 import Expression.Feldspar.Mini
 import qualified Expression.Feldspar.GADTValue as V
-import ErrorMonad 
-import Control.Applicative.Recursion
-
+ 
 type instance Val (Exp t) = t
 type instance Env (Exp t) = ()
 
@@ -30,7 +26,7 @@ instance Evl (Exp t) where
        Undef           -> undefined                                
        Var _           -> undefined                             
        where
-         evl' :: (Evl t, Env t ~ ()) => t-> ErrM (Val t)
+         evl' :: (Evl e, Env e ~ ()) => e -> ErrM (Val e)
          evl' e  = evl e r 
  
 type instance Val (Exp ta -> Exp tb) = ta -> tb

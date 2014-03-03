@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleContexts, FlexibleInstances
-           , GADTs, DataKinds , TypeFamilies, PolyKinds #-}
 module Conversion.Environment where
 
 import qualified Environment.ADT       as A
@@ -8,9 +5,7 @@ import qualified Environment.ADTTable  as AT
 import qualified Singleton.Environment as G
 
 import Conversion
-import SingletonEquality
 import Existential
-import ErrorMonad
 import Singleton
 import Singleton.Environment ()
  
@@ -25,11 +20,11 @@ instance Cnv a b => Cnv (A.Env a) (A.Env b)  where
  
 instance (EqlSin tf, Trm r ~ r' ) => 
          Cnv (G.Env tf r , A.Env (ExsTrm tf)) r' where 
-  cnv (G.Emp        , [])                = return ()
+  cnv (G.Emp        , [])                  = return ()
   cnv (t `G.Ext` ts , (ExsTrm x tv) : vs)  = do ts' <- cnv (ts , vs)
                                                 Rfl <- eqlSin t tv 
                                                 return (x,ts')
-  cnv (_            , _)                 = fail "Scope Error!"  
+  cnv (_            , _)                   = fail "Scope Error!"  
  
 cnvEnvAMAS :: Cnv a b => AT.Env x a -> ErrM (AT.Env x b)
 cnvEnvAMAS = mapM (\(x , y) -> do y' <- cnv y

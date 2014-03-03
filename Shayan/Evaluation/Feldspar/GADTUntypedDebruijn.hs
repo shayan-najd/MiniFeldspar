@@ -1,19 +1,19 @@
-module Evaluation.Feldspar.ADTUntypedNamed where
+module Evaluation.Feldspar.GADTUntypedDebruijn where
 
 import Evaluation 
-import Expression.Feldspar.ADTUntypedNamed
+import Expression.Feldspar.GADTUntypedDebruijn
 import qualified Expression.Feldspar.ADTValue as V
-import qualified Environment.ADTTable as E
-  
-type instance Val (Exp v)  = V.Val
-type instance Env (Exp v)  = E.Env v V.Val 
+import qualified Data.Vector                  as E
 
-instance Eq v => Evl (Exp v) where
+type instance Val (Exp n)  = V.Val
+type instance Env (Exp n)  = E.Vec n V.Val 
+
+instance Evl (Exp n) where
   evl ee r = let ?cnv = evlr in join $ case ee of        
     ConI i       -> V.conI <$> pure i
     ConB b       -> V.conB <$> pure b 
-    Var x        -> return (E.get x r)
-    Abs x eb     -> V.abs <$> pure (frmRgt . evl eb . (: r) . (,) x)
+    Var x        -> (return . return) (E.get x r)
+    Abs eb       -> V.abs <$> pure (frmRgt . evl eb . (E.::: r))
     App ef ea    -> V.app <$@> ef <*@> ea 
     Cnd ec et ef -> V.cnd <$@> ec <*@> et <*@> ef      
     Tpl ef es    -> V.tpl <$@> ef <*@> es 
@@ -23,7 +23,9 @@ instance Eq v => Evl (Exp v) where
     Len e        -> V.len <$@> e                         
     Ind ea ei    -> V.ind <$@> ea <*@> ei                         
     Whl ec eb ei -> V.whl <$@> ec <*@> eb <*@> ei
-    Let x el eb  -> return (evlr (App (Abs x eb) el))
+    Let el eb    -> return (evlr (App (Abs eb) el))
     where 
-      evlr :: Exp v -> ErrM V.Val
+      evlr :: Exp n -> ErrM V.Val
       evlr e = evl e r
+      
+      

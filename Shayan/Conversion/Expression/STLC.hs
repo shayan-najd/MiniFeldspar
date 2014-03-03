@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, PolyKinds #-}
 module Conversion.Expression.STLC where
 
 import Prelude hiding (sin)
@@ -28,10 +24,7 @@ import Conversion.Expression.STLC.NameResolution ()
 import Conversion.Expression.STLC.Lifting ()
 import Conversion.Expression.STLC.TypeWithnessing ()
 import Conversion.Expression.STLC.TypeInference ()
-
-import SingletonEquality.TypeSTLCGADT ()
-import SingletonEquality.EnvironmentGADT ()
-
+ 
 import TypeChecking.STLC.ADTChurch   ()
 import TypeChecking.STLC.ADTExplicit ()
  

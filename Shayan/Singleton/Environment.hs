@@ -5,7 +5,7 @@
 module Singleton.Environment where
 
 import Singleton
-import Prelude (error)
+import Prelude (error,return,fail)
 import Control.Applicative (Applicative,pure,(<$>),(<*>))
 import Variable
 
@@ -19,8 +19,20 @@ type instance Trm (tf ': ts) = (Trm tf , Trm ts)
 
 type instance RevTrm ()        = '[]                   
 type instance RevTrm (tf , ts) = (RevTrm tf ': RevTrm ts)                    
-                   
-                   
+                                                     
+instance HasSin (Env tf) '[] where
+  sin = Emp
+  
+instance (HasSin tf t , HasSin (Env tf) ts) => HasSin (Env tf) (t ': ts) where
+  sin = Ext sin sin
+  
+instance EqlSin tf => EqlSin (Env tf) where 
+  eqlSin Emp       Emp         = return Rfl
+  eqlSin (Ext t e) (Ext t' e') = do Rfl <- eqlSin e e'
+                                    Rfl <- eqlSin t t'
+                                    return Rfl
+  eqlSin  _           _        = fail "Scope Error!"     
+ 
 -- Extraction of values from environment
 get :: Var r t -> Trm r -> Trm t
 get Zro     (x , _ ) = x
@@ -46,11 +58,7 @@ cnvGEnvtoGVar ::  Env tf r -> Env (Var r) r
 cnvGEnvtoGVar Emp        = Emp
 cnvGEnvtoGVar (Ext _ xs) = Ext Zro (wkn Suc (cnvGEnvtoGVar xs))
 
-instance HasSin (Env tf) '[] where
-  sin = Emp
   
-instance (HasSin tf t , HasSin (Env tf) ts) => HasSin (Env tf) (t ': ts) where
-  sin = Ext sin sin
   
 map :: (forall t. tfa t -> tfb t) -> Env tfa r -> Env tfb r
 map _ Emp        = Emp

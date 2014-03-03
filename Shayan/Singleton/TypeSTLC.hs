@@ -29,3 +29,10 @@ instance Show (Typ t) where
   show Int                        = "Int"
   show (t1@(_  `Arr` _) `Arr` t2) = "(" ++ show t1 ++ ") -> " ++ show t2 
   show (t1  `Arr` t2)             = show t1 ++ " -> " ++ show t2 
+
+instance EqlSin Typ where
+  eqlSin Int         Int           = return Rfl
+  eqlSin (Arr t1 t2) (Arr t1' t2') = do Rfl <- eqlSin t1 t1'
+                                        Rfl <- eqlSin t2 t2'
+                                        return Rfl                    
+  eqlSin _            _            = fail "Type Error!"

@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs, PolyKinds, TypeOperators, DataKinds #-}
 module Type.Herbrand where
 
 import qualified Variable as G

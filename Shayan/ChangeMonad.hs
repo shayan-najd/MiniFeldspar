@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE DeriveFunctor, ScopedTypeVariables,GADTs, TypeHoles #-}
 module ChangeMonad where
 
 import Control.Applicative

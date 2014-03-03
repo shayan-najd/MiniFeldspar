@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.Feldspar.NameResolution where
 
 import Prelude hiding (sin)
@@ -11,12 +7,13 @@ import qualified Type.Feldspar as FAS
 import qualified Data.Nat               as A
 import qualified Environment.ADTTable    as AT
 import Conversion
- 
+import Conversion.Nat () 
+
 instance Eq x => 
          Cnv (FAUP.Exp x , AT.Env x FAS.Typ , AT.Env x FAUM.Exp) FAUM.Exp where
-  cnv = \ (e , rt , rf) -> cnvExpUUToU e (zip (map fst rt) [A.Zro ..]) rf
+  cnv = \ (e , rt , rf) -> cnvv e (zip (map fst rt) [A.Zro ..]) rf
     where
-      cnvExpUUToU eaup rb rf = case eaup of
+      cnvv eaup rb rf = case eaup of
         FAUP.ConI i       -> FAUM.ConI <$> pure i
         FAUP.ConB b       -> FAUM.ConB <$> pure b
         FAUP.Var s        -> case (AT.get s rb , AT.get s rf) of
@@ -24,9 +21,9 @@ instance Eq x =>
           (Nothing , Just e) -> pure e
           _                  -> fail "Scope Error!"
         FAUP.Abs s  eb    -> FAUM.Abs <$> 
-                             cnvExpUUToU eb ((s,A.Zro) : fmap succ `map` rb) rf 
+                             cnvv eb ((s,A.Zro) : fmap A.Suc `map` rb) rf 
         FAUP.Let s el eb  -> FAUM.Let <$@> el <*> 
-                             cnvExpUUToU eb ((s,A.Zro) : fmap succ `map` rb) rf 
+                             cnvv eb ((s,A.Zro) : fmap A.Suc `map` rb) rf 
         FAUP.App ef ea    -> FAUM.App <$@> ef <*@> ea
         FAUP.Cnd ec et ef -> FAUM.Cnd <$@> ec <*@> et <*@> ef 
         FAUP.Whl ec eb ei -> FAUM.Whl <$@> ec <*@> eb <*@> ei 
@@ -37,5 +34,5 @@ instance Eq x =>
         FAUP.Ind ea ei    -> FAUM.Ind <$@> ea <*@> ei 
         FAUP.Len e        -> FAUM.Len <$@> e
         where
-          ?cnv = \ e -> cnvExpUUToU e rb rf   
+          ?cnv = \ e -> cnvv e rb rf   
 

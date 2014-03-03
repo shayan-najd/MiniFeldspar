@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.Feldspar.ADTUntypedNamed where
  
 import Expression.Feldspar.ADTUntypedNamed 

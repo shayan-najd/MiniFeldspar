@@ -1,5 +1,4 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs , FlexibleContexts, ScopedTypeVariables #-}
+{-# LANGUAGE Rank2Types #-}
 module Inference where
 
 import qualified TypeChecking as Chk
@@ -12,6 +11,7 @@ import Control.Monad.State (runState,put,get,execState,evalState)
 import Conversion
 import Environment.ADT hiding (get)
 import Data.Foldable(toList)
+import Conversion.Nat ()
 
 mxm :: [Nat] -> Nat
 mxm [] = Zro

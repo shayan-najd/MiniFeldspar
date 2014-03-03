@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE DeriveFunctor, DeriveTraversable, DeriveFoldable #-}
 module Expression.Feldspar.ADTChurch where
  
 import Data.Traversable

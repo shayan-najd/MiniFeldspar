@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs #-}
 module Expression.STLC.GADTValue where
 
 import ErrorMonad

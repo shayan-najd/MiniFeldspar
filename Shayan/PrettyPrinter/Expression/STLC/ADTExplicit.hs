@@ -1,7 +1,7 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module PrettyPrinter.Expression.STLC.ADTExplicit where
 
 import Expression.STLC.ADTExplicit
+import PrettyPrinter.Nat ()
  
 instance Show t => Show (Exp t) where 
   show (Con t i)                 = "(" ++ show i ++ " : " ++ show t ++ ")"

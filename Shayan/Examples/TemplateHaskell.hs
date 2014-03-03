@@ -1,5 +1,4 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TemplateHaskell, NoMonomorphismRestriction, Rank2Types #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Examples.TemplateHaskell where
 
 import Language.Haskell.TH.Syntax

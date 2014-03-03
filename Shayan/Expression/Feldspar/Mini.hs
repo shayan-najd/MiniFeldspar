@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs,TypeFamilies,FlexibleInstances #-}
 module Expression.Feldspar.Mini where
 
 import Data.Array

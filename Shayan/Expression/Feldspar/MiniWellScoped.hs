@@ -1,6 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE GADTs,TypeFamilies,FlexibleInstances, DataKinds, PolyKinds
-           , TypeOperators, FlexibleContexts #-}
 module Expression.Feldspar.MiniWellScoped where
 
 import Prelude (Integer , Bool)

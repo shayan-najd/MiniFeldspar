@@ -50,3 +50,17 @@ instance Show (Typ t) where
   show (t1  `Arr` t2)             = show t1 ++ " -> " ++ show t2 
   show (Tpl tf ts)                = "(" ++ show tf ++ " , " ++ show ts ++ ")" 
   show (Ary t)                    = "Array " ++ show t  
+  
+instance EqlSin Typ where
+  eqlSin Int         Int           = return Rfl
+  eqlSin Bol         Bol           = return Rfl
+  eqlSin (Arr ta tb) (Arr ta' tb') = do Rfl <- eqlSin ta ta'
+                                        Rfl <- eqlSin tb tb'
+                                        return Rfl
+  eqlSin (Tpl tf ts) (Tpl tf' ts') = do Rfl <- eqlSin tf tf'
+                                        Rfl <- eqlSin ts ts'
+                                        return Rfl
+  eqlSin (Ary t)     (Ary t')      = do Rfl <- eqlSin t t'
+                                        return Rfl  
+  eqlSin _              _          = fail "Type Error!"
+  

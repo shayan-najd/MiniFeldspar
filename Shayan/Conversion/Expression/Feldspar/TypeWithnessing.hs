@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs
-           , ImplicitParams, PolyKinds #-}
 module Conversion.Expression.Feldspar.TypeWithnessing where
 
 import Prelude hiding (sin)
@@ -20,10 +16,7 @@ import Conversion.Variable ()
 import Conversion.Existential ()
 import Conversion.Environment ()
 
-import SingletonEquality
-import SingletonEquality.EnvironmentGADT ()
-import SingletonEquality.TypeFeldsparGADT ()
-
+import Singleton
 import Existential
 
 type ExsTyp = ExsSin FG.Typ

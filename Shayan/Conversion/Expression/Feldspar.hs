@@ -1,40 +1,32 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds, PolyKinds #-}
-module Conversion.Expression.Feldspar where
+module Conversion.Expression.Feldspar () where
 
 import Prelude hiding (sin)
-import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
+import qualified Expression.Feldspar.ADTUntypedNamed    as FAUP
 import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
-import qualified Expression.Feldspar.ADTChurch  as FACP
-import qualified Expression.Feldspar.GADTFirstOrder        as FGFO
+import qualified Expression.Feldspar.ADTChurch          as FACP
+import qualified Expression.Feldspar.GADTFirstOrder     as FGFO
 
 import qualified Type.Feldspar           as FAS
-import qualified Singleton.TypeFeldspar            as FG
+import qualified Singleton.TypeFeldspar  as FG
 
 import qualified Environment.ADT         as A
 import qualified Environment.ADTTable    as AT
 import qualified Singleton.Environment   as G
 
 import Conversion
-import Conversion.Type.Feldspar ()
-import Conversion.Variable ()
-import Conversion.Existential ()
-import Conversion.Expression.Feldspar.NameResolution ()
-import Conversion.Expression.Feldspar.TypeInference ()
+import Conversion.Type.Feldspar                       ()
+import Conversion.Variable                            ()
+import Conversion.Existential                         ()
+import Conversion.Expression.Feldspar.NameResolution  ()
+import Conversion.Expression.Feldspar.TypeInference   ()
 import Conversion.Expression.Feldspar.TypeWithnessing ()
-import Conversion.Expression.Feldspar.Lifting ()
-
-import SingletonEquality.EnvironmentGADT ()
-import SingletonEquality.TypeFeldsparGADT ()
-
+import Conversion.Expression.Feldspar.Lifting         ()
+ 
 import TypeChecking.Feldspar.ADTChurch ()
 
 import Existential
 import Singleton
 
-type ExsTyp = ExsSin FG.Typ
 type ExsExp = Exs2 FGFO.Exp (G.Env FG.Typ) FG.Typ
 type SinTyp = HasSin FG.Typ
 type SinEnv = HasSin (G.Env FG.Typ)

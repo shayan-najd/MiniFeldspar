@@ -1,17 +1,13 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies, ImplicitParams, ScopedTypeVariables #-}
 module Evaluation.Feldspar.GADTFirstOrder where
 
 import Prelude hiding (sin)
 import Evaluation 
-import Evaluation.Variable.GADT ()
 import Expression.Feldspar.GADTFirstOrder
 import qualified Expression.Feldspar.GADTValue as V
-import Control.Applicative.Recursion
 import Singleton 
 import qualified Singleton.Environment as E
 import qualified Singleton.TypeFeldspar as G
-import Evaluation.Variable.GADT ()
+import Evaluation.Variable ()
   
 type instance Val (Exp r t) = Trm t
 type instance Env (Exp r t) = Trm r

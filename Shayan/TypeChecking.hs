@@ -1,5 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE TypeFamilies, FlexibleContexts, DataKinds, PolyKinds #-}
 module TypeChecking where
 
 import Type.Herbrand

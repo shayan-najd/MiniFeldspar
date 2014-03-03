@@ -1,7 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
-{-# LANGUAGE MultiParamTypeClasses, FlexibleInstances, FlexibleContexts
-           , ScopedTypeVariables, GADTs, NoMonomorphismRestriction
-           , ImplicitParams, ConstraintKinds #-}
 module Conversion.Expression.STLC.TypeWithnessing where
 
 import Prelude hiding (sin)
@@ -20,10 +16,6 @@ import Conversion
 import Conversion.Type.STLC ()
 import Conversion.Variable ()
 import Conversion.Existential ()
-
-import SingletonEquality
-import SingletonEquality.TypeSTLCGADT ()
-import SingletonEquality.EnvironmentGADT ()
 
 import TypeChecking.STLC.ADTChurch   ()
 import TypeChecking.STLC.ADTExplicit ()

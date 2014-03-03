@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wall -fno-warn-orphans #-}
 module Expression.Feldspar.GADTValue where
 
 import Prelude as P
