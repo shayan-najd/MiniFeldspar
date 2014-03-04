@@ -35,7 +35,7 @@ instance Evl (F.Typ t , Exp r t) where
        Fst ts e        -> V.fst  <$> evl (F.Tpl t  ts , e)  r
        Snd tf e        -> V.snd  <$> evl (F.Tpl tf t  , e)  r
        Ary el ef       -> case t of
-         F.Ary ta      -> V.arr  <$> evl (F.Int , el) r 
+         F.Ary ta      -> V.ary  <$> evl (F.Int , el) r 
                           <*> evl (F.Arr F.Int ta, ef) r
          _             -> fail "Impossible!"                          
        Len ta e        -> V.len  <$> evl (F.Ary ta , e)  r                       

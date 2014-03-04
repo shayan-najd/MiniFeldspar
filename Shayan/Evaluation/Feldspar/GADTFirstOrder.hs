@@ -23,21 +23,24 @@ instance Evl (G.Typ t , Exp r t) where
     ConB b       -> V.conB <$> pure b
     Var x        -> return (E.get x r)
     Abs eb       -> case t of
-     G.Arr _  tb -> V.abs  <$> pure (\ va -> evl (tb , eb) (va , r))
+     G.Arr _  tb -> V.abs  <$> pure (\ va -> frmRgt (evl (tb , eb) (va , r)))
      _           -> fail "Impossible!"
     App ta ef ea -> V.app  <$> evl (G.Arr ta t , ef) r <*> evl (ta , ea) r
     Cnd ec et ef -> V.cnd  <$> evl (G.Bol , ec) r <*> evl (t , et) r 
                     <*> evl (t , ef) r
+    Whl ec eb ei -> V.whl  
+                    <$> pure (\ va -> frmRgt (evl (G.Bol , ec) (va , r))) 
+                    <*> pure (\ va -> frmRgt (evl (t     , eb) (va , r))) 
+                    <*> evl (t , ei) r
     Tpl ef es    -> case t of
      G.Tpl tf ts -> V.tpl  <$> evl (tf , ef) r <*> evl (ts , es) r
      _           -> fail "Impossible!"
     Fst ts e     -> V.fst  <$> evl (G.Tpl t ts , e)  r
     Snd tf e     -> V.snd  <$> evl (G.Tpl tf t , e)  r                      
     Ary el ef    -> case t of 
-     G.Ary ta    -> V.arr  <$> evl (G.Int , el) r <*> evl (G.Arr G.Int ta , ef) r
+     G.Ary ta    -> V.ary  <$> evl (G.Int , el) r 
+                    <*>  pure (\ va -> frmRgt (evl (ta , ef) (va , r)))
      _           -> fail "Impossible!"     
     Len ta e     -> V.len  <$> evl (G.Ary ta , e)  r                       
     Ind ea ei    -> V.ind  <$> evl (G.Ary t , ea) r <*> evl (G.Int , ei) r
-    Whl ec eb ei -> V.whl  <$> evl (G.Arr t G.Bol , ec) r 
-                    <*> evl (G.Arr t t , eb) r <*> evl (t , ei) r
     Let tl el eb -> evl (t , (App tl (Abs eb) el)) r 

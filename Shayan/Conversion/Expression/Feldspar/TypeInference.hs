@@ -28,7 +28,7 @@ instance Cnv FAUM.Exp (FACP.Exp ()) where
        FAUM.Abs eb       -> FACP.Abs  <$> pure () <*@> eb
        FAUM.App ef ea    -> FACP.App  <$@> ef <*@> ea
        FAUM.Cnd ec et ef -> FACP.Cnd  <$@> ec <*@> et <*@> ef 
-       FAUM.Whl ec eb ei -> FACP.Whl  <$@> ec <*@> eb <*@> ei
+       FAUM.Whl ec eb ei -> FACP.Whl  <$> pure () <*@> ec <*@> eb <*@> ei
        FAUM.Tpl ef es    -> FACP.Tpl  <$@> ef <*@> es
        FAUM.Ary el ef    -> FACP.Ary  <$@> el <*@> ef
        FAUM.Ind ea ei    -> FACP.Ind  <$@> ea <*@> ei

@@ -20,6 +20,7 @@ nrmOne ee = case ee of
   Abs t eb            -> Abs <$> pure t  <*@> eb
   Cnd (ConB b) et ef  -> chg (if b then et else ef)
   Cnd ec et ef        -> Cnd <$@> ec <*@> et <*@> ef
+  Whl t ec eb ei      -> Whl <$> pure t <*@> ec <*@> eb <*@> ei
   Tpl ef es           -> Tpl <$@> ef <*@> es
   Fst (Tpl ef _)      -> chg ef
   Fst e               -> Fst <$@> e
@@ -30,7 +31,6 @@ nrmOne ee = case ee of
   Len e               -> Len <$@> e                         
   Ind (Ary _  ef) ei  -> chg (App ef ei)                         
   Ind ea ei           -> Ind <$@> ea <*@> ei                         
-  Whl ec eb ei        -> Whl <$@> ec <*@> eb <*@> ei
   Let el eb           -> Let <$@> el <*@> eb
   where 
     ?cnv = nrmOne

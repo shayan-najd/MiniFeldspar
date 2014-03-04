@@ -18,6 +18,5 @@ data Exp a where
   Prm1  :: String -> (a -> b) -> Exp a -> Exp b
   Prm2  :: String -> (a -> b -> c) -> Exp a -> Exp b -> Exp c
   Val   :: a -> Exp a
-  Undef :: Exp a 
   
    

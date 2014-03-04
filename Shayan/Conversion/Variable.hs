@@ -23,7 +23,6 @@ instance Cnv a (ExsSin b) => Cnv (A.Nat , A.Env a) (Exs2 G.Var (G.Env b) b) wher
                             return (Exs2 (G.Suc x') (t' `G.Ext` r') tr)
  cnv (_       , [])    = fail "Impossible!"  
  
- 
 instance Cnv (A.Nat , GN.Nat n)  (F.Nat n) where
   cnv (A.Zro   , GN.Suc  _) = return F.Zro
   cnv (A.Suc n , GN.Suc n') = F.Suc <$> cnv (n , n')

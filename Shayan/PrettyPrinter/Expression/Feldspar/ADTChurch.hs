@@ -12,7 +12,7 @@ instance Show x => Show (Exp x) where
   show (Cnd ec et ef)        = "if " ++ show ec ++ 
                                " then " ++ show et ++ 
                                " else " ++ show ef
-  show (Whl ec eb ei)        = "while " ++ show ec ++ 
+  show (Whl _ ec eb ei)      = "while " ++ show ec ++ 
                                " from " ++ show ei ++ 
                                " do "   ++ show eb
   show (Tpl ef es)           = "(" ++ show ef 

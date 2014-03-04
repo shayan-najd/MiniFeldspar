@@ -36,6 +36,13 @@ cnd :: Val -> Val -> Val -> ErrM Val
 cnd (ConB vc) v1 v2 = return (if vc then v1 else v2)
 cnd _         _  _  = fail "Type Error!"                
 
+whl :: (Val -> Val) -> (Val -> Val) -> Val -> ErrM Val
+whl fc fb v = return (head (dropWhile 
+                            (\ x -> case fc x of
+                                ConB b -> b
+                                _      -> error "Type Error!") 
+                            (iterate fb v)))
+              
 fst :: Val -> ErrM Val
 fst (Tpl (vf , _ )) = return vf
 fst _               = fail "Type Error!"
@@ -47,11 +54,11 @@ snd _               = fail "Type Error!"
 tpl :: Val -> Val -> ErrM Val
 tpl vf vs = return (Tpl (vf , vs))
  
-arr :: Val -> Val -> ErrM Val
-arr (ConI l) vf = do vs <- sequence [app vf (ConI i)
-                                    | i <- [0 .. l]] 
-                     return (Arr (listArray (0 , l) vs))
-arr _          _  = fail "Type Error!"             
+ary :: Val -> (Val -> Val) -> ErrM Val
+ary (ConI l) vf = return (Arr (listArray (0 , l) 
+                               [vf (ConI i)
+                               | i <- [0 .. l]]))
+ary _        _  = fail "Type Error!"             
 
 len :: Val -> ErrM Val
 len (Arr a) = (return . ConI . (1 +) . uncurry (flip (-)) . bounds) a
@@ -61,10 +68,3 @@ ind :: Val -> Val -> ErrM Val
 ind (Arr a) (ConI i) = return (a ! i)
 ind _       _        = fail " Type Error!"
 
-whl :: Val -> Val -> Val -> ErrM Val
-whl (Abs fc) (Abs fb) v = return (head (dropWhile 
-                                        (\ x -> case fc x of
-                                            ConB b -> b
-                                            _      -> error "Type Error!") 
-                                        (iterate fb v)))
-whl _        _        _ = fail "Type Error!"                          

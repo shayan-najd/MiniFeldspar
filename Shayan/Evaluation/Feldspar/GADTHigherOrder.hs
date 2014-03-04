@@ -40,7 +40,7 @@ instance Evl (G.Typ t , Exp r t) where
     Fst ts e     -> V.fst  <$> evl (G.Tpl t ts , e) r
     Snd tf e     -> V.snd  <$> evl (G.Tpl tf t , e) r                      
     Ary el ef    -> case t of 
-      G.Ary ta   -> V.arr  <$> evl (G.Int , el) r <*> evl (G.Arr G.Int ta , ef) r
+      G.Ary ta   -> V.ary  <$> evl (G.Int , el) r <*> evl (G.Arr G.Int ta , ef) r
       _          -> fail "Impossible!"
     Len ta e     -> V.len  <$> evl (G.Ary ta , e)  r                        
     Ind ea ei    -> V.ind  <$> evl (G.Ary t , ea) r <*> evl (G.Int , ei) r 
@@ -62,7 +62,7 @@ revEvl t r v = case t of
   G.Arr ta tb -> Abs (revEvl tb r . v . frmRgt . (\e -> evl (ta , e) r))
   G.Tpl tf ts -> Tpl (revEvl tf r (fst v)) (revEvl ts r (snd v)) 
   G.Ary ta    -> let (0,l) = bounds v in
-    Ary (ConI l) (revEvl (G.Arr G.Int ta) r 
-                  (fromJust . flip lookup (assocs v)))
-  
+    Ary (ConI l) (revEvl ta r . (fromJust . flip lookup (assocs v)) 
+                  . frmRgt . (\e -> evl ( G.Int, e) r))
+     
  

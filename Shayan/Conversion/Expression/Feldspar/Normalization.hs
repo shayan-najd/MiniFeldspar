@@ -75,20 +75,17 @@ instance (t ~ t' , r ~ r' , SinEnv r) =>
                               return (MiWS.AppV tv v es)
     FGHO.Cnd ec et ef   -> MiWS.Cnd <$> cnv (FG.Bol , ec) 
                            <*> cnv (t , et) <*> cnv (t , ef) 
-    FGHO.Whl (FGHO.Abs fc) (FGHO.Abs fb) ei   
-                        -> MiWS.Whl <$> cnv (FG.Arr t FG.Bol , fc) 
+    FGHO.Whl fc fb ei   -> MiWS.Whl <$> cnv (FG.Arr t FG.Bol , fc) 
                            <*> cnv (FG.Arr t t ,fb) <*> cnv (t , ei)
-    FGHO.Whl _  _  _    -> fail "Normalization Error!"
     FGHO.Tpl ef es      -> case t of
       FG.Tpl tf ts      -> MiWS.Tpl <$> cnv (tf , ef) <*> cnv (ts , es)
       _                 -> fail "Impossible!"
     FGHO.Fst ts e       -> MiWS.Fst <$> pure ts <*> cnv (FG.Tpl t  ts , e)
     FGHO.Snd tf e       -> MiWS.Snd <$> pure tf <*> cnv (FG.Tpl tf t  , e)
-    FGHO.Ary el (FGHO.Abs f) -> case t of
+    FGHO.Ary el f       -> case t of
       FG.Ary ta         -> MiWS.Ary <$> cnv (FG.Int , el) 
                            <*> cnv (FG.Arr FG.Int ta , f)
       _                 -> fail "Impossible!"                           
-    FGHO.Ary _  _       -> fail "Normalization Error!"
     FGHO.Len ta ea      -> MiWS.Len <$> pure ta <*> cnv (FG.Ary ta , ea)
     FGHO.Ind ea ei      -> MiWS.Ind <$> cnv (FG.Ary t , ea) <*> cnv (FG.Int , ei)
     FGHO.Let tl el eb   -> MiWS.Let <$> pure tl <*> cnv (tl , el) 
@@ -126,8 +123,8 @@ instance (t' ~ t , r' ~ r , SinEnv r) =>
     MiWS.AppV _  _ _    -> fail "Impossible!"                       
     MiWS.Cnd ec et ef   -> FGHO.Cnd <$> cnv (FG.Bol , ec) 
                                     <*> cnv (t , et) <*> cnv (t , ef) 
-    MiWS.Whl ec eb ei   -> FGHO.Whl <$> (FGHO.Abs <$> cnv (FG.Arr t FG.Bol , ec))
-                                    <*> (FGHO.Abs <$> cnv (FG.Arr t t ,eb)) 
+    MiWS.Whl ec eb ei   -> FGHO.Whl <$> cnv (FG.Arr t FG.Bol , ec)
+                                    <*> cnv (FG.Arr t t      , eb)
                                     <*> cnv (t , ei)
     MiWS.Tpl ef es      -> case t of 
       FG.Tpl tf ts      -> FGHO.Tpl <$> cnv (tf , ef) <*> cnv (ts , es)
@@ -136,7 +133,7 @@ instance (t' ~ t , r' ~ r , SinEnv r) =>
     MiWS.Snd tf e       -> FGHO.Snd <$> pure tf <*> cnv (FG.Tpl tf t  , e)
     MiWS.Ary el ef      -> case t of
       FG.Ary ta         -> FGHO.Ary <$> cnv (FG.Int , el) 
-                           <*> (FGHO.Abs <$> cnv (FG.Arr FG.Int ta , ef))
+                           <*> cnv (FG.Arr FG.Int ta , ef)
       _                 -> fail "Impossible!"                           
     MiWS.Len ta ea      -> FGHO.Len <$> pure ta <*> cnv (FG.Ary ta , ea)
     MiWS.Ind ea ei      -> FGHO.Ind <$> cnv (FG.Ary t , ea) <*> cnv (FG.Int , ei)

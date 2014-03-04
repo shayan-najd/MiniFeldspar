@@ -15,7 +15,7 @@ instance Evl (Exp t) where
        Tpl ef es       -> V.tpl  <$> evl' ef <*> evl' es
        Fst e           -> V.fst  <$> evl' e
        Snd e           -> V.snd  <$> evl' e                       
-       Ary el ef       -> V.arr  <$> evl' el <*> evl' ef
+       Ary el ef       -> V.ary  <$> evl' el <*> evl' ef
        Len e           -> V.len  <$> evl' e                         
        Ind ea ei       -> V.ind  <$> evl' ea <*> evl' ei                         
        Whl ec eb ei    -> V.whl  <$> evl' ec <*> evl' eb <*> evl' ei
@@ -23,7 +23,6 @@ instance Evl (Exp t) where
        Prm1 _ vf e     -> vf     <$> evl' e
        Prm2 _ vf e1 e2 -> vf     <$> evl' e1 <*> evl' e2
        Val x           -> return x
-       Undef           -> undefined                                
        Var _           -> undefined                             
        where
          evl' :: (Evl e, Env e ~ ()) => e -> ErrM (Val e)
