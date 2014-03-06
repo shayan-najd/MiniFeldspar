@@ -5,7 +5,6 @@ import Prelude hiding (sin)
 import qualified Expression.STLC.ADTUntypedNamed  as SAUP
 import qualified Expression.STLC.ADTUntypedDebruijn  as SAUM
 import qualified Expression.STLC.ADTChurch   as SACP
-import qualified Expression.STLC.ADTExplicit as SAEP
 import qualified Expression.STLC.GADTFirstOrder         as SGFO
 import qualified Expression.STLC.GADTHigherOrder        as SGHO
 
@@ -25,8 +24,7 @@ import Conversion.Expression.STLC.Lifting ()
 import Conversion.Expression.STLC.TypeWithnessing ()
 import Conversion.Expression.STLC.TypeInference ()
  
-import TypeChecking.STLC.ADTChurch   ()
-import TypeChecking.STLC.ADTExplicit ()
+import TypeChecking.STLC   ()
  
 import Existential
 import Singleton
@@ -63,11 +61,6 @@ instance Eq x =>
   cnv (e , rt , rf) = do e' :: SAUM.Exp         <- cnv (e , rt , rf)
                          cnv (e'  , map snd rt)
 
-instance Eq x => 
-         Cnv (SAUP.Exp x , AT.Env x SAS.Typ , AT.Env x SAUM.Exp) 
-         (SAEP.Exp SAS.Typ) where
-  cnv (e , rt , rf) = do e' :: SAUM.Exp <- cnv (e , rt , rf)
-                         cnv (e'  , map snd rt)
 ---------------------------------------------------------------------------------
 -- Conversion from SAUM.Exp
 ---------------------------------------------------------------------------------
@@ -96,15 +89,3 @@ instance (SinEnv r , SinTyp t') =>
          Cnv (SACP.Exp SAS.Typ , A.Env SAS.Typ) (SGFO.Exp r t') where
   cnv (e , r) = do e' :: ExsExp <- cnv (e , r)       
                    cnv e'
----------------------------------------------------------------------------------
--- Conversion from SAEP.Exp
----------------------------------------------------------------------------------
-instance (SinEnv r , SinTyp t') => 
-         Cnv (SAEP.Exp SAS.Typ , A.Env SAS.Typ) (SGHO.Exp r t') where
-  cnv (e , r) = do e' :: SGFO.Exp r t' <- cnv (e , r)         
-                   cnv e'
-
-instance (SinEnv r , SinTyp t') => 
-         Cnv (SAEP.Exp SAS.Typ , A.Env SAS.Typ) (SGFO.Exp r t') where
-  cnv (e , r) = do e' :: ExsExp <- cnv (e , r)       
-                   cnv e' 

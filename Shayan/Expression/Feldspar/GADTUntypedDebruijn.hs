@@ -1,7 +1,7 @@
 module Expression.Feldspar.GADTUntypedDebruijn where
  
-import qualified Data.Nat      as A
-import qualified Data.Fin  as F
+import qualified Data.Nat as A
+import qualified Data.Fin as F
 
 data Exp :: A.Nat -> * where 
   ConI :: Integer -> Exp n 

@@ -1,6 +1,3 @@
-{-# LANGUAGE DeriveFunctor,DeriveFoldable, TypeFamilies, DataKinds
-            ,TypeOperators,ExistentialQuantification #-}
-
 import Prelude hiding (sequence,mapM)
 import Data.Foldable
 import Data.Traversable
@@ -38,15 +35,3 @@ match x y = if x == y
 beta :: Eq a => Term a -> Term a  
 beta (App (Lam tb) t2) = apply t2 tb 
 beta x                 = x
-
-data Var env t = forall env'. (env ~ (t ': env')) => 
-                 Z 
-               | forall env' t'. (env ~ (t' ': env')) =>
-                 S (Var env' t)
-   
-data TTerm env t = TVar (Var env t)
-                 | forall t'. 
-                   TApp (TTerm env (t' -> t)) (TTerm env t')
-                 | forall ta tb. (t ~ (ta -> tb)) => 
-                   TLam (TTerm (ta ': env) tb)  
-  

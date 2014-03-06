@@ -1,7 +1,7 @@
 module Conversion.Nat where
 
 import qualified Data.Nat      as A
-import qualified Data.Fin  as F
+import qualified Data.Fin      as F
 import qualified Singleton.Nat as G
 import qualified Variable      as V
 
@@ -19,6 +19,10 @@ instance Cnv A.Nat ExsNat where
 instance Cnv A.Nat Int where                     
   cnv A.Zro     = return 0
   cnv (A.Suc v) = (1 +) <$> cnv v 
+  
+instance Cnv (F.Nat n) Int where                     
+  cnv F.Zro     = return 0
+  cnv (F.Suc v) = (1 +) <$> cnv v 
   
 instance Cnv Int A.Nat where                     
   cnv 0         = return A.Zro

@@ -13,8 +13,7 @@ import Conversion.Type.STLC ()
 import Conversion.Variable ()
 import Conversion.Existential ()
 
-import TypeChecking.STLC.ADTChurch   ()
-import TypeChecking.STLC.ADTExplicit ()
+import TypeChecking.STLC   ()
  
 import Singleton
 import Singleton.TypeSTLC ()

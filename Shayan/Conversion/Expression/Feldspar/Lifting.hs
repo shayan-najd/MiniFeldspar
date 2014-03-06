@@ -9,30 +9,24 @@ import qualified Singleton.Environment  as G
 
 import Conversion hiding ((<$@>),(<*@>),pure)
 import Conversion.Type.Feldspar ()
-import Conversion.Variable ()
-import Conversion.Existential ()
-
-import Singleton
+import Conversion.Variable      ()
+import Conversion.Existential   ()
  
-type SinTyp = HasSin FG.Typ
-type SinEnv = HasSin (G.Env FG.Typ)
-
 pur :: a -> ErrM a
 pur = return
 
-instance (t ~ t' , r ~ r' , SinEnv r) => 
-         Cnv (FGFO.Exp r t) (FGHO.Exp r' t') where
-  cnv = \ e -> cnv (e , ((G.map FGHO.Var . G.cnvGEnvtoGVar) 
-                         (sin :: G.Env FG.Typ r)))
-               
+instance (t ~ t' , r ~ r') => 
+         Cnv (FGFO.Exp r t , G.Env FG.Typ r) (FGHO.Exp r' t') where
+  cnv (e , r) = cnv (e , ((G.map FGHO.Var . G.cnvGEnvtoGVar) r))
+
 instance (t ~ t' , r ~ r') => 
          Cnv (FGFO.Exp r t , G.Env (FGHO.Exp r) r) (FGHO.Exp r' t') where
-  cnv = uncurry cnvGToGHO
+  cnv = uncurry cnvv
    where
-   cnvGToGHO :: forall rr tt.
+   cnvv :: forall rr tt.
                  FGFO.Exp rr tt -> G.Env (FGHO.Exp rr) rr 
                  -> ErrM (FGHO.Exp rr tt)
-   cnvGToGHO egdt r = case egdt of  
+   cnvv egdt r = case egdt of  
       FGFO.ConI i       -> FGHO.ConI <$> pur i
       FGFO.ConB b       -> FGHO.ConB <$> pur b
       FGFO.Var v        -> pur (G.gets v r)

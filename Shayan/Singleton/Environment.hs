@@ -8,6 +8,8 @@ import Singleton
 import Prelude (error,return,fail)
 import Control.Applicative (Applicative,pure,(<$>),(<*>))
 import Variable
+import qualified Data.Nat as N
+import qualified Singleton.Nat as V
 
 -- Environment (Singleton)
 data Env :: (k -> *) -> [k] -> * where
@@ -32,7 +34,20 @@ instance EqlSin tf => EqlSin (Env tf) where
                                     Rfl <- eqlSin t t'
                                     return Rfl
   eqlSin  _           _        = fail "Scope Error!"     
+  
+type family Len (l :: [k]) :: N.Nat where
+  Len (x ': xs) = N.Suc (Len xs)
+  Len '[]       = N.Zro     
  
+type family Get (n :: N.Nat) (l :: [k]) :: k where
+  Get N.Zro     (x ': xs) = x
+  Get (N.Suc n) (x ': xs) = Get n xs
+                                    
+len :: Env ef r -> V.Nat (Len r)
+len Emp        = V.Zro
+len (Ext _ xs) = V.Suc (len xs)
+
+
 -- Extraction of values from environment
 get :: Var r t -> Trm r -> Trm t
 get Zro     (x , _ ) = x

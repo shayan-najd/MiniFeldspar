@@ -1,18 +1,18 @@
-module PrettyPrinter.Expression.Feldspar.ADTChurch where
+module PrettyPrinter.Expression.Feldspar.GADTUntypedDebruijn where
  
-import Expression.Feldspar.ADTChurch 
-import PrettyPrinter.Nat ()
+import Expression.Feldspar.GADTUntypedDebruijn 
+import PrettyPrinter.Nat ()                                              
 
-instance Show x => Show (Exp x) where 
+instance Show (Exp n) where 
   show (ConI i)              = show i 
   show (ConB b)              = show b
   show (Var x)               = show x 
-  show (Abs t eb)            = "(\\ " ++ show t ++ " -> " ++ show eb ++ ")"
+  show (Abs eb)              = "(\\ -> " ++ show eb ++ ")"
   show (App ef ea)           = show ef ++ " (" ++ show ea ++ ")"
   show (Cnd ec et ef)        = "if " ++ show ec ++ 
                                " then " ++ show et ++ 
                                " else " ++ show ef
-  show (Whl _ ec eb ei)      = "while " ++ show ec ++ 
+  show (Whl ec eb ei)        = "while " ++ show ec ++ 
                                " from " ++ show ei ++ 
                                " do "   ++ show eb
   show (Tpl ef es)           = "(" ++ show ef 
@@ -24,3 +24,4 @@ instance Show x => Show (Exp x) where
   show (Ind ea ei)           = show ea ++ " ! " ++ show ei
   show (Let el eb)           = "let " ++ show el ++ 
                                " in " ++ show eb
+           

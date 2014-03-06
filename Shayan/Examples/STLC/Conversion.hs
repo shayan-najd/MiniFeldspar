@@ -26,7 +26,6 @@ import Evaluation.STLC.GADTHigherOrder ()
 import qualified Examples.STLC.ADTUntypedDebruijn  as AUM
 import qualified Examples.STLC.ADTUntypedNamed  as AUP
 import qualified Examples.STLC.ADTChurch   as ACP
-import qualified Examples.STLC.ADTExplicit as AEP
 import qualified Examples.STLC.GADTFirstOrder         as GFO
 import qualified Examples.TemplateHaskell             as TH
 import Evaluation
@@ -68,5 +67,5 @@ isFourHO e = case (do e' :: GHO.Exp '[] AS.Int <- cnv e
  
 test :: Bool              
 test = isFour AUM.four && isFour' AUP.four &&  
-       isFour ACP.four && isFour  AEP.four && isFourQ TH.four
+       isFour ACP.four && isFourQ TH.four
     && isFourHO GFO.four

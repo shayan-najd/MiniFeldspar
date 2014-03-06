@@ -2,9 +2,11 @@ module Data.Vector where
 
 import Data.Foldable
 import Data.Monoid
+import Data.Traversable 
 import Singleton.Nat
 import qualified Data.Nat as N
 import qualified Data.Fin as F
+import Control.Applicative
 
 infixr 5 :::
 data Vec :: N.Nat -> * -> * where   
@@ -20,6 +22,10 @@ instance Functor (Vec n) where
 instance Foldable (Vec n) where 
   foldMap _ Nil        = mempty
   foldMap f (x ::: xs) = f x `mappend` foldMap f xs
+  
+instance Traversable (Vec n) where 
+  traverse _  Nil       = pure Nil
+  traverse f (x ::: xs) = (:::) <$> f x <*> traverse f xs
 
 len :: Vec n a -> Nat n
 len Nil        = Zro

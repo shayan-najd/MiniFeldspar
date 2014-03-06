@@ -7,7 +7,7 @@ import ErrorMonad
 import Evaluation 
 import Evaluation.STLC.ADTChurch ()
 import qualified Type.STLC as AS
-import TypeChecking.STLC.ADTChurch ()
+import TypeChecking.STLC ()
 import Inference
 import Conversion.Type.STLC ()
 

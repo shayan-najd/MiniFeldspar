@@ -1,4 +1,4 @@
-module TypeChecking.STLC.ADTChurch where
+module TypeChecking.STLC where
  
 import Expression.STLC.ADTChurch  
 import Environment.ADT 
@@ -8,7 +8,8 @@ import InferenceMonad
 import Type.Herbrand hiding (App)
 
 instance Chk Exp where
-  type Cns Exp      = Zro ': Suc (Suc Zro) ': '[]
+  type Cns Exp = Zro ': Suc (Suc Zro) ': '[]
+  type Env Exp = []
   chk e r = case e of
     Con _     -> return int
     Var x     -> get x r
