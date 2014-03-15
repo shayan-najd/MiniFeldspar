@@ -1,7 +1,7 @@
 module Conversion.Expression.Feldspar.Unquoting () where
 
 import Prelude   ()
-import MyPrelude ((==),fail,Bool(..),Maybe(..))
+import MyPrelude ((==),fail,Bool(..),Maybe(..),pure)
 
 import Conversion
 import qualified Expression.Feldspar.ADTUntypedNamed as FAUP
@@ -43,3 +43,38 @@ instance Cnv (TH.Exp , ()) (FAUP.Exp TH.Name) where
     TH.LetE [TH.ValD (TH.VarP x) (TH.NormalB el) []] eb 
                             -> FAUP.Let  <$@> x  <*@> el <*@> eb
     _                       -> fail "Syntax Error!"
+    
+instance Cnv (FAUP.Exp TH.Name , ()) TH.Exp where
+  cnv (ee , ()) = let ?r = () in case ee of 
+    FAUP.ConI i             -> pure (TH.LitE (TH.IntegerL i))
+    FAUP.ConB True          -> pure (TH.ConE 'True)
+    FAUP.ConB False         -> pure (TH.ConE 'False)
+    FAUP.Var n              -> pure (TH.VarE n)
+    FAUP.Abs x  eb          -> TH.LamE [TH.VarP x]    <$@> eb
+    FAUP.App ef ea          -> TH.AppE <$@> ef <*@> ea  
+    FAUP.Cnd ec et ef       -> TH.CondE <$@> ec <*@> et <*@> ef
+    FAUP.Whl xc ec xb eb ei -> do ec' <- cnv (ec , ())
+                                  eb' <- cnv (eb , ())
+                                  ei' <- cnv (ei , ())
+                                  pure (TH.AppE (TH.AppE 
+                                                 (TH.AppE (TH.VarE 'whl) 
+                                                  (TH.LamE [TH.VarP xc] ec')) 
+                                                 (TH.LamE [TH.VarP xb] eb')) 
+                                        ei')
+    FAUP.Tpl ef es          -> do ef' <- cnv (ef , ())
+                                  es' <- cnv (es , ())       
+                                  pure (TH.TupE [ef' , es']) 
+    FAUP.Fst ea             -> TH.AppE (TH.VarE 'fst) <$@> ea
+    FAUP.Snd ea             -> TH.AppE (TH.VarE 'snd) <$@> ea
+    FAUP.Ary el x eb        -> do el' <- cnv (el , ())
+                                  eb' <- cnv (eb , ())
+                                  pure (TH.AppE (TH.AppE (TH.VarE 'ary) el') 
+                                                 (TH.LamE [TH.VarP x] eb'))
+    FAUP.Len ea             -> TH.AppE (TH.VarE 'len) <$@> ea
+    FAUP.Ind el ef          -> do el' <- cnv (el , ())
+                                  ef' <- cnv (ef , ())       
+                                  pure (TH.AppE (TH.AppE (TH.VarE 'ind) el') ef')
+    FAUP.Let x el eb        -> do el' <- cnv (el , ())
+                                  eb' <- cnv (eb , ())
+                                  pure (TH.LetE [TH.ValD (TH.VarP x) 
+                                         (TH.NormalB el') []] eb')

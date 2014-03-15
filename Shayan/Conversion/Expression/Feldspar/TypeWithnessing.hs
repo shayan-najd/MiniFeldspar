@@ -71,4 +71,4 @@ instance (r ~ r' , n ~ Len r , HasSin TFG.Typ t) =>
       ExsSin tl' :: ExsSin TFG.Typ <- cnv tl
       PrfHasSin <- getPrfHasSinM tl'
       FGFO.Let <$@> el <*> cnv (eb , Ext tl' r) 
-    _                                  -> fail "Type Error!"
+    _                                  -> fail "Type Error!" 
