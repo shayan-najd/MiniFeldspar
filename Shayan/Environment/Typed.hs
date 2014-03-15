@@ -57,8 +57,4 @@ instance EqlSin tf => EqlSin (Env tf) where
   
 type family Len (l :: [k]) :: N.Nat where
   Len (x ': xs) = N.Suc (Len xs)
-  Len '[]       = N.Zro     
- 
-type family Get (n :: N.Nat) (l :: [k]) :: k where
-  Get N.Zro     (x ': xs) = x
-  Get (N.Suc n) (x ': xs) = Get n xs
+  Len '[]       = N.Zro 
