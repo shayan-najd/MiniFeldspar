@@ -1,42 +1,45 @@
-module Conversion.Expression.Feldspar.NameResolution where
+module Conversion.Expression.Feldspar.NameResolution () where
 
-import qualified Expression.Feldspar.ADTUntypedNamed    as FAUP
-import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUM
-import qualified Data.Nat                               as A
-import qualified Environment.ADTTable                   as AT
-import qualified Environment.ADT                        as A
+import Prelude ()
+import MyPrelude 
+
+import qualified Expression.Feldspar.ADTUntypedNamed    as FAUN
+import qualified Expression.Feldspar.ADTUntypedDebruijn as FAUD
+
+import qualified Environment.Map                        as EM
+import qualified Environment.Plain                      as EP
+
+import Variable.Plain 
+
 import Conversion
-import Conversion.Nat () 
+import Conversion.Nat         () 
+import Conversion.Environment ()
+import Conversion.Variable    ()
 
 instance Eq x => 
-         Cnv (FAUP.Exp x , A.Env x) FAUM.Exp where
-  cnv (e , rt) = cnv (e , zip rt [A.Zro ..])
+         Cnv (FAUN.Exp x , EP.Env x) FAUD.Exp where
+  cnv (e , r) = cnv (e , zip r [Zro ..])
      
 instance Eq x => 
-         Cnv (FAUP.Exp x , AT.Env x A.Nat) FAUM.Exp where
-  cnv (eaup , rb) = let ?cnv = cnv' in case eaup of
-        FAUP.ConI i             -> FAUM.ConI <$> pure i
-        FAUP.ConB b             -> FAUM.ConB <$> pure b
-        FAUP.Var s              -> FAUM.Var  <$> AT.get s rb
-        FAUP.Abs xb eb          -> FAUM.Abs  <$> cnv ((xb , eb), rb)
-        FAUP.App ef ea          -> FAUM.App  <$@> ef <*@> ea
-        FAUP.Cnd ec et ef       -> FAUM.Cnd  <$@> ec <*@> et <*@> ef 
-        FAUP.Whl xc ec xb eb ei -> FAUM.Whl  <$>  cnv ((xc , ec), rb) 
-                                             <*>  cnv ((xb , eb), rb) 
-                                             <*@> ei 
-        FAUP.Tpl ef es          -> FAUM.Tpl <$@> ef <*@> es 
-        FAUP.Fst e              -> FAUM.Fst <$@> e 
-        FAUP.Snd e              -> FAUM.Snd <$@> e 
-        FAUP.Ary el xf ef       -> FAUM.Ary <$@> el <*> cnv ((xf , ef), rb)
-        FAUP.Ind ea ei          -> FAUM.Ind <$@> ea <*@> ei 
-        FAUP.Len e              -> FAUM.Len <$@> e
-        FAUP.Let xl el eb       -> FAUM.Let <$@> el <*> cnv ((xl , eb), rb)
-        where
-          cnv' :: Cnv (e , AT.Env x A.Nat) FAUM.Exp => 
-                  e -> ErrM FAUM.Exp 
-          cnv' e = cnv (e , rb)           
-
+         Cnv (FAUN.Exp x , EM.Env x Var) FAUD.Exp where
+  cnv (eaup , r) = let ?r = r in case eaup of
+    FAUN.ConI i              -> FAUD.ConI <$@> i
+    FAUN.ConB b              -> FAUD.ConB <$@> b
+    FAUN.Var  x              -> FAUD.Var  <$@> x
+    FAUN.Abs  xb eb          -> FAUD.Abs  <$@> (xb , eb)
+    FAUN.App  ef ea          -> FAUD.App  <$@> ef <*@> ea
+    FAUN.Cnd  ec et ef       -> FAUD.Cnd  <$@> ec <*@> et <*@> ef 
+    FAUN.Whl  xc ec xb eb ei -> FAUD.Whl  <$@> (xc , ec)
+                                          <*@> (xb , eb)  <*@> ei 
+    FAUN.Tpl  ef es          -> FAUD.Tpl  <$@> ef <*@> es 
+    FAUN.Fst  e              -> FAUD.Fst  <$@> e 
+    FAUN.Snd  e              -> FAUD.Snd  <$@> e 
+    FAUN.Ary  el xf ef       -> FAUD.Ary  <$@> el <*@> (xf , ef)
+    FAUN.Ind  ea ei          -> FAUD.Ind  <$@> ea <*@> ei 
+    FAUN.Len  e              -> FAUD.Len  <$@> e
+    FAUN.Let  xl el eb       -> FAUD.Let  <$@> el <*@> (xl , eb)
+ 
 instance Eq x => 
-         Cnv ((x , FAUP.Exp x) , AT.Env x A.Nat) 
-         FAUM.Exp where
-  cnv ((x , e) , rb) = cnv (e , (x , A.Zro) : fmap A.Suc `map` rb)
+         Cnv ((x , FAUN.Exp x) , EM.Env x Var) 
+         FAUD.Exp where
+  cnv ((x , e) , r) = cnv (e , (x , Zro) : fmap (fmap Suc) r)

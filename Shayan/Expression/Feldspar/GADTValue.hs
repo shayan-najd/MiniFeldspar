@@ -1,52 +1,66 @@
 module Expression.Feldspar.GADTValue where
 
-import Prelude as P
-import Data.Array
+import Prelude ()
+import MyPrelude as P hiding (Int) 
+
+import Singleton
+
+import Type.Feldspar.ADT
+import Type.Feldspar.GADT ()
+
+data Val :: Typ -> * where 
+  Val :: Trm t -> Val t
+  
+(===) ::(Eq t', Trm t ~ t') =>
+        Val t -> Val t -> Bool 
+(Val x) === (Val y) = x == y
+
+getVal :: Val t -> Trm t
+getVal (Val x) = x
 
 var :: t -> t
 var = id
 
-conI :: Integer -> Integer
-conI = id 
+conI :: Integer -> Val Int
+conI = Val 
      
-conB :: Bool -> Bool
-conB = id 
+conB :: Bool -> Val Bol
+conB = Val
 
-abs :: (a -> b) -> (a -> b)
-abs = id 
+abs :: (Trm ta -> Trm tb) -> Val (Arr ta tb)
+abs = Val 
         
--- Application of two values
-app :: (ta -> tb) -> ta -> tb
-app = ($)
+app :: Val (Arr ta tb) -> Val ta -> Val tb
+app (Val vf) (Val va) = Val (vf va)
 
-addV :: Integer -> Integer -> Integer
-addV = (+)
+addV :: Val (Arr Int (Arr Int Int))
+addV = Val (+)
+
+cnd :: Val Bol -> Val a -> Val a -> Val a
+cnd (Val vc) vt vf = if vc then vt else vf
+
+whl :: Val (Arr s  Bol) -> Val (Arr s s) -> Val s -> Val s
+whl (Val fc) (Val fb) =  Val . head . dropWhile fc . iterate fb . getVal 
+
+tpl :: Val tf -> Val ts -> Val (Tpl tf ts)
+tpl (Val vf) (Val vs) = Val (vf , vs)
+
+fst :: Val (Tpl a b) -> Val a
+fst (Val v) = Val (P.fst v)
+
+snd :: Val (Tpl a b) -> Val b
+snd (Val v) = Val (P.snd v)
  
-cnd :: Bool -> a -> a -> a
-cnd vc vt vf = if vc then vt else vf
+ary :: Val Int -> Val (Arr Int a) -> Val (Ary a)
+ary (Val vl) (Val vf) =  Val (listArray (0 , vl)  
+                              [vf i | i <- [0 .. vl]])
 
-whl :: (s -> Bool) -> (s -> s) -> s -> s
-whl fc fb = head . dropWhile fc . iterate fb
+len :: Val (Ary a) -> Val Int
+len (Val e)  = (Val . (1 +) . uncurry (flip (-)) . bounds) e
 
-fst :: (a , b) -> a
-fst = P.fst 
-
-snd :: (a , b) -> b
-snd = P.snd 
-
-tpl :: a -> b -> (a , b)
-tpl = (,)
+ind :: Val (Ary a) -> Val Int -> Val a
+ind (Val v) (Val vi) = Val (v ! vi)
  
-ary :: Integer -> (Integer -> a) -> (Array Integer a)
-ary l vf = listArray (0 , l)  
-           [vf i | i <- [0 .. l]]
-
-len :: Array Integer a -> Integer
-len = (1 +) . uncurry (flip (-)) . bounds
-
-ind :: Array Integer a -> Integer -> a
-ind = (!) 
-
-
-lett :: tl -> (tl -> tb) -> tb
-lett = flip ($)
+lett :: Val tl -> Val (Arr tl tb) -> Val tb
+lett (Val vl) (Val vb) = Val (vb vl)
+  

@@ -1,32 +1,34 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts, DataKinds, TypeOperators #-}
 module Examples.Feldspar.GADTFirstOrder where
 
-import Prelude hiding (abs)
+import Prelude ()
+import MyPrelude
+
 import Expression.Feldspar.GADTFirstOrder
-import Variable
-import Evaluation as E
-import Evaluation.Feldspar.GADTFirstOrder ()
+import Variable.Typed
+import Conversion 
+import Conversion.Expression.Feldspar.Evaluation.GADTFirstOrder ()
 import qualified Expression.Feldspar.GADTValue as V
 import Singleton
-import Singleton.TypeFeldspar 
-import qualified Type.Feldspar as A
+import Environment.Typed
 
--- An example expression doubling the input number                    
-dbl :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) (A.Int `A.Arr` A.Int)
-dbl = Abs (app (app (Var (Suc Zro)) (Var Zro)) (Var Zro))
+import qualified Type.Feldspar.ADT  as TFA
+import qualified Type.Feldspar.GADT as TFG
 
--- An example expression composing two types
-compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) =>
-           Exp r ((tb `A.Arr` tc) `A.Arr` ((ta `A.Arr` tb) 
-                  `A.Arr` (ta `A.Arr` tc)))
+dbl :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) 
+       (TFA.Arr TFA.Int TFA.Int)
+dbl = Abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
+
+compose :: (HasSin TFG.Typ ta , HasSin TFG.Typ tb , HasSin TFG.Typ tc) =>
+           Exp r (TFA.Arr (TFA.Arr tb tc) (TFA.Arr (TFA.Arr ta tb) 
+                   (TFA.Arr ta tc)))
 compose = Abs (Abs (Abs 
-                    (Var (Suc (Suc Zro)) `app` (Var (Suc Zro) `app` Var Zro))))
-
--- An example expression representing the integer 4
-four :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) A.Int
-four = (compose `app` dbl `app` dbl) `app` (ConI 1)
+                    (App (Var (Suc (Suc Zro))) 
+                     (App (Var (Suc Zro)) (Var Zro)))))
+          
+four :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) TFA.Int
+four = App (App (App compose dbl) dbl) (ConI 1)
  
--- Two simple test cases
 test :: Bool
-test = evl four (V.addV,()) == return 4
+test = case cnv (four , Ext V.addV Emp) of 
+  Rgt x -> x V.=== V.Val 4
+  Lft _ -> False

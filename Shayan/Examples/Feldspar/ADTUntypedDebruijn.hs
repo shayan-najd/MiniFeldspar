@@ -1,31 +1,27 @@
-{-# OPTIONS_GHC -Wall #-}
 module Examples.Feldspar.ADTUntypedDebruijn where
  
+import Prelude ()
+import MyPrelude
+
 import Expression.Feldspar.ADTUntypedDebruijn
-import Data.Nat
+import Variable.Plain
 import qualified Expression.Feldspar.ADTValue as V
-import ErrorMonad
-import Evaluation  
-import Evaluation.Feldspar.ADTUntypedDebruijn ()
- 
--- An example expression doubling the input number
+import Conversion
+import Conversion.Expression.Feldspar.Evaluation.ADTUntypedDebruijn ()
+  
 dbl :: Exp
 dbl = Abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
 
--- An example expression composing two types
 compose :: Exp
-compose = Abs (Abs (Abs  (Var (Suc (Suc Zro)) 
-                          `App` 
-                          (Var (Suc Zro) 
-                           `App` Var Zro))))
+compose = Abs (Abs (Abs (App (Var (Suc (Suc Zro))) 
+                          (App (Var (Suc Zro)) 
+                           (Var Zro)))))
 
--- An example expression representing the Integer 4
 four :: Exp
-four = (compose `App` dbl `App` dbl) `App` (ConI 1)
+four = App (App (App compose dbl) dbl) (ConI 1)
 
--- Two simple test cases
 test :: Bool
-test = (case evl four [V.addV] of 
+test = (case cnv (four , [V.addV]) of 
           Rgt (V.ConI 4) -> True
           _              -> False) 
 

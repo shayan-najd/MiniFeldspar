@@ -1,42 +1,40 @@
-module Conversion.Expression.Feldspar.ScopeWithnessing where
+module Conversion.Expression.Feldspar.ScopeWithnessing () where
 
-import qualified Expression.Feldspar.ADTUntypedDebruijn  as FAUM
-import qualified Expression.Feldspar.GADTUntypedDebruijn as FGUM
+import Prelude ()
+import MyPrelude
+
+import qualified Expression.Feldspar.ADTUntypedDebruijn  as FAUD
+import qualified Expression.Feldspar.GADTUntypedDebruijn as FGUD
  
-import qualified Singleton.Nat as G
+import Nat.GADT 
 
 import Conversion
 import Conversion.Nat           ()
 import Conversion.Type.Feldspar ()
 import Conversion.Variable      ()
-
-import Existential
-
-type ExsNat = ExsSin G.Nat 
-type ExsExp = Exs1 FGUM.Exp G.Nat
-
-instance Cnv FAUM.Exp ExsExp where
-  cnv ee = do let n = FAUM.fre ee
-              ExsSin n' :: ExsNat <- cnv n 
+ 
+instance Cnv FAUD.Exp (Exs1 FGUD.Exp Nat) where
+  cnv ee = do let n = maximum (FAUD.fre ee)
+              ExsSin n' :: ExsSin Nat <- cnv n 
               e' <- cnv (ee , n')
               return (Exs1 e' n')
      
-instance n ~ n' => Cnv (FAUM.Exp , G.Nat n) (FGUM.Exp n') where
-  cnv (eaum  , n) = let ?cnv = \ e -> cnv (e , n) in case eaum of
-    FAUM.ConI i       -> FGUM.ConI <$> pure i
-    FAUM.ConB b       -> FGUM.ConB <$> pure b 
-    FAUM.Var v        -> FGUM.Var  <$> cnv  (v , n)
-    FAUM.Abs eb       -> FGUM.Abs  <$> cnvf eb 
-    FAUM.App ef ea    -> FGUM.App  <$@> ef <*@> ea
-    FAUM.Cnd ec et ef -> FGUM.Cnd  <$@> ec <*@> et <*@> ef 
-    FAUM.Whl ec eb ei -> FGUM.Whl  <$> cnvf ec <*> cnvf eb <*@> ei
-    FAUM.Tpl ef es    -> FGUM.Tpl  <$@> ef <*@> es
-    FAUM.Ary el ef    -> FGUM.Ary  <$@> el <*> cnvf ef
-    FAUM.Ind ea ei    -> FGUM.Ind  <$@> ea <*@> ei
-    FAUM.Fst e        -> FGUM.Fst  <$@> e
-    FAUM.Snd e        -> FGUM.Snd  <$@> e
-    FAUM.Len e        -> FGUM.Len  <$@> e 
-    FAUM.Let el eb    -> FGUM.Let  <$@> el <*> cnvf eb
+instance n ~ n' => Cnv (FAUD.Exp , Nat n) (FGUD.Exp n') where
+  cnv (eaum  , n) = let ?r = n in case eaum of
+    FAUD.ConI i       -> FGUD.ConI <$@> i
+    FAUD.ConB b       -> FGUD.ConB <$@> b 
+    FAUD.Var v        -> FGUD.Var  <$@> v
+    FAUD.Abs eb       -> FGUD.Abs  <$> cnvf eb 
+    FAUD.App ef ea    -> FGUD.App  <$@> ef <*@> ea
+    FAUD.Cnd ec et ef -> FGUD.Cnd  <$@> ec <*@> et <*@> ef 
+    FAUD.Whl ec eb ei -> FGUD.Whl  <$> cnvf ec <*> cnvf eb <*@> ei
+    FAUD.Tpl ef es    -> FGUD.Tpl  <$@> ef <*@> es
+    FAUD.Fst e        -> FGUD.Fst  <$@> e
+    FAUD.Snd e        -> FGUD.Snd  <$@> e
+    FAUD.Ary el ef    -> FGUD.Ary  <$@> el <*> cnvf ef    
+    FAUD.Len e        -> FGUD.Len  <$@> e 
+    FAUD.Ind ea ei    -> FGUD.Ind  <$@> ea <*@> ei
+    FAUD.Let el eb    -> FGUD.Let  <$@> el <*> cnvf eb
     where
-      cnvf e = cnv (e , G.Suc n) 
+      cnvf e = cnv (e , Suc n) 
          

@@ -1,8 +1,8 @@
-module Control.Applicative.Recursion ((<$>),(<$@>),(<*>),(<*@>),pure,join) where
+module Control.Applicative.Recursion where
 
-import Control.Applicative (Applicative,(<$>),(<*>),pure)
-import Control.Monad (join)
-
+import Prelude ()
+import MyPrelude 
+ 
 infixl 4 <$@>
 (<$@>) :: (Applicative m , ?cnv :: a -> m a') => (a' -> b) -> a -> m b          
 el <$@> er = el <$> ?cnv er

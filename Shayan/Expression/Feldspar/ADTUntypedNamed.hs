@@ -1,7 +1,7 @@
 module Expression.Feldspar.ADTUntypedNamed where
  
-import Data.Traversable
-import Data.Foldable
+import Prelude ()
+import MyPrelude 
 
 data Exp x = ConI Integer 
            | ConB Bool 
@@ -17,4 +17,10 @@ data Exp x = ConI Integer
            | Len (Exp x) 
            | Ind (Exp x) (Exp x) 
            | Let x (Exp x) (Exp x) 
-           deriving (Eq,Functor,Foldable,Traversable)
+
+deriving instance Eq x   => Eq   (Exp x)
+deriving instance Show x => Show (Exp x)
+deriving instance Functor     Exp
+deriving instance Foldable    Exp
+deriving instance Traversable Exp
+              

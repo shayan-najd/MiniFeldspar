@@ -1,8 +1,10 @@
-{-# LANGUAGE TemplateHaskell #-}
 module Examples.TemplateHaskell where
 
-import Language.Haskell.TH.Syntax
+import Prelude ()
+import MyPrelude 
 
+import Language.Haskell.TH.Syntax
+ 
 dbl     :: Q (TExp (Integer -> Integer))
 dbl     = [||\ x -> x + x ||]
 
@@ -11,4 +13,3 @@ compose = [|| \ x2 -> \ x1 -> \ x0 -> x2 (x1 x0) ||]
 
 four   :: Q (TExp Integer)
 four    = [|| ($$compose $$dbl $$dbl) 1 ||]  
-

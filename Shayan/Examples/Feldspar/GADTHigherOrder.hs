@@ -1,32 +1,32 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts, DataKinds, TypeOperators #-}
 module Examples.Feldspar.GADTHigherOrder where
 
-import Prelude hiding (abs)
+import Prelude ()
+import MyPrelude 
+
 import Expression.Feldspar.GADTHigherOrder
-import Variable
-import Evaluation as E
-import Evaluation.Feldspar.GADTHigherOrder ()
+import Variable.Typed
+import Conversion as E
+import Conversion.Expression.Feldspar.Evaluation.GADTHigherOrder ()
 import qualified Expression.Feldspar.GADTValue as V
 import Singleton
-import Singleton.TypeFeldspar ()
-import Singleton.TypeFeldspar
-import qualified Type.Feldspar as A
-
--- An example expression doubling the input number                    
-dbl :: Exp (A.Arr A.Int (A.Arr A.Int A.Int) ': '[]) (A.Arr A.Int A.Int)
-dbl = Abs (\ x -> (app (app (Var Zro) x) x))
-
--- An example expression composing two types
-compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) => 
-           Exp r (A.Arr (A.Arr tb tc) (A.Arr (A.Arr ta tb) (A.Arr ta tc)))
-compose = Abs (\ g -> Abs (\ f -> Abs 
-                    (\ x -> g `app` (f `app` x))))
-
--- An example expression representing the Integer 4
-four :: Exp (A.Int `A.Arr` (A.Int `A.Arr` A.Int) ': '[]) A.Int
-four = (compose `app` dbl `app` dbl) `app` (ConI 1)
+import Type.Feldspar.GADT
+import qualified Type.Feldspar.ADT as TFA
+import Environment.Typed
  
--- Two simple test cases
+dbl :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) 
+       (TFA.Arr TFA.Int TFA.Int)
+dbl = Abs (\ x -> (App (App (Var Zro) x) x))
+
+compose :: (HasSin Typ ta , HasSin Typ tb , HasSin Typ tc) => 
+           Exp r (TFA.Arr (TFA.Arr tb tc) (TFA.Arr (TFA.Arr ta tb) 
+                                           (TFA.Arr ta tc)))
+compose = Abs (\ g -> Abs (\ f -> Abs 
+                    (\ x -> App g (App f x))))
+
+four :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) TFA.Int
+four = App (App (App compose dbl) dbl) (ConI 1)
+ 
 test :: Bool
-test = evl four (V.addV,()) == return 4
+test = case cnv (four , Ext V.addV Emp) of 
+  Rgt x -> x V.=== V.Val 4
+  Lft _ -> False

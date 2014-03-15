@@ -1,181 +1,170 @@
-module Conversion.Expression.Feldspar.Normalization where
+module Conversion.Expression.Feldspar.Normalization () where
 
-import Prelude hiding (sin)
+import Prelude ()
+import MyPrelude
 
-import qualified Expression.Feldspar.MiniWellScoped  as MiWS
-import qualified Expression.Feldspar.GADTHigherOrder as FGHO 
+import qualified Expression.Feldspar.GADTHigherOrder as FGHO
+import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 
-import qualified Variable               as V
-import qualified Type.Feldspar          as A
-import qualified Singleton.TypeFeldspar as FG
-import qualified Singleton.Environment  as G
+import qualified Type.Feldspar.ADT                   as TFA
+import qualified Type.Feldspar.GADT                  as TFG
 
+import Variable.Typed     
+
+import Environment.Typed  
+ 
 import Conversion 
-import Conversion.Type.Feldspar      ()
-import Conversion.Variable           ()
-import Conversion.Existential        ()
-import Existential
+import Conversion.Type.Feldspar ()
+import Conversion.Variable      ()
+import Conversion.Existential   ()
+
 import Singleton
- 
-data EqlOut t1 t2 where
-  EqlOut :: EqlOut (MiWS.Out t2) t2
 
-eqlOut :: FG.Typ t1 -> FG.Typ t2 -> ErrM (EqlOut t1 t2)
-eqlOut FG.Int         FG.Int           = return EqlOut
-eqlOut FG.Bol         FG.Bol           = return EqlOut
-eqlOut t              (FG.Arr _ tb)    = do EqlOut <- eqlOut t tb
-                                            return EqlOut
-eqlOut (FG.Ary ta)    (FG.Ary ta')     = do Rfl <- eqlSin ta ta'
-                                            return EqlOut
-eqlOut (FG.Tpl tf ts) (FG.Tpl tf' ts') = do Rfl <- eqlSin tf tf'
-                                            Rfl <- eqlSin ts ts'
-                                            return EqlOut
-eqlOut _              _                = fail "Normalization Error!"           
-
-data EqlArg t1 t2 where
-  EqlArg :: EqlArg (MiWS.Arg t2) t2
+instance (HasSin TFG.Typ t , t ~ t' , r ~ r') => 
+         Cnv (FGHO.Exp r t , ()) (FMWS.Exp r' t') where
+  cnv (ee , ()) = let ?r = () in case ee of 
+    FGHO.ConI i       -> FMWS.ConI <$@> i 
+    FGHO.ConB b       -> FMWS.ConB <$@> b 
+    FGHO.Var v        -> case sin :: TFG.Typ t of 
+      TFG.Int         -> return (FMWS.AppV v Emp)
+      TFG.Bol         -> return (FMWS.AppV v Emp)
+      TFG.Arr _ _     -> fail "Normalization Error!"
+      TFG.Tpl _ _     -> return (FMWS.AppV v Emp)
+      TFG.Ary _       -> return (FMWS.AppV v Emp)
+    FGHO.Abs _        -> fail "Normalization Error!"
+    FGHO.App _ _      -> do Exs1 v tv <- getVar ee 
+                            PrfHasSin <- getPrfHasSinM tv
+                            DblExsSin es tys <- getArg ee 
+                                                (DblExsSin Emp Emp)
+                            EqlOut <- eqlOut (sin :: TFG.Typ t) tv
+                            EqlArg <- eqlArg tys tv
+                            return (FMWS.AppV v es)
+    FGHO.Cnd ec et ef -> FMWS.Cnd <$@> ec <*@> et <*@> ef
+    FGHO.Whl ec eb ei -> FMWS.Whl <$@> ec <*@> eb <*@> ei
+    FGHO.Tpl ef es    -> case sin :: TFG.Typ t of
+      TFG.Tpl tf ts   -> do PrfHasSin <- getPrfHasSinM tf 
+                            PrfHasSin <- getPrfHasSinM ts
+                            FMWS.Tpl <$@> ef <*@> es
+      _               -> fail "Impossible!"
+    FGHO.Fst e        -> FMWS.Fst <$@> e
+    FGHO.Snd e        -> FMWS.Snd <$@> e
+    FGHO.Ary el ef    -> case sin :: TFG.Typ t of
+      TFG.Ary ta      -> do PrfHasSin <- getPrfHasSinM ta 
+                            FMWS.Ary <$@> el <*@> ef
+      _               -> fail "Impossible!"                           
+    FGHO.Len ea       -> FMWS.Len <$@> ea 
+    FGHO.Ind ea ei    -> FMWS.Ind <$@> ea <*@> ei
+    FGHO.Let el eb    -> FMWS.Let <$@> el <*@> eb
  
-eqlArg :: G.Env FG.Typ r -> FG.Typ t -> ErrM (EqlArg r t)
-eqlArg G.Emp FG.Int           = return EqlArg
-eqlArg G.Emp FG.Bol           = return EqlArg
-eqlArg (G.Ext ta ts) (FG.Arr ta' tb) 
-                              = do Rfl    <- eqlSin ta ta'
-                                   EqlArg <- eqlArg ts tb
-                                   return EqlArg
-eqlArg G.Emp (FG.Ary _)       = return EqlArg
-eqlArg G.Emp (FG.Tpl _ _)     = return EqlArg
-eqlArg _              _       = fail "Normalization Error!"           
- 
-instance (t ~ t' , r ~ r') => 
-         Cnv (FGHO.Exp r t , G.Env FG.Typ r , FG.Typ t) (MiWS.Exp r' t') where
-  cnv (ee , r , t) = case ee of 
-    FGHO.ConI i         -> MiWS.ConI <$> pure i 
-    FGHO.ConB b         -> MiWS.ConB <$> pure b 
-    FGHO.Var v          -> case t of 
-      FG.Arr _ _        -> fail "Normalization Error!"
-      FG.Ary _          -> return (MiWS.AppV t v G.Emp)
-      FG.Int            -> return (MiWS.AppV t v G.Emp)
-      FG.Bol            -> return (MiWS.AppV t v G.Emp)
-      FG.Tpl _ _        -> return (MiWS.AppV t v G.Emp)
-    FGHO.Abs _          -> fail "Normalization Error!"
-    FGHO.App _ _ _      -> do Exs2 v rv tv <- getVar ee r t 
-                              DblExsSin es tys <- getArg ee r 
-                                                  (DblExsSin G.Emp G.Emp)
-                              Rfl    <- eqlSin rv r
-                              EqlOut <- eqlOut t tv
-                              EqlArg <- eqlArg tys tv
-                              return (MiWS.AppV tv v es)
-    FGHO.Cnd ec et ef   -> MiWS.Cnd <$> cnv (ec , r , FG.Bol) 
-                           <*> cnv (et , r , t) <*> cnv (ef , r , t) 
-    FGHO.Whl fc fb ei   -> MiWS.Whl <$> cnv (fc , r , FG.Arr t FG.Bol) 
-                           <*> cnv (fb , r , FG.Arr t t) <*> cnv (ei , r , t)
-    FGHO.Tpl ef es      -> case t of
-      FG.Tpl tf ts      -> MiWS.Tpl <$> cnv (ef , r , tf) <*> cnv (es , r , ts)
-      _                 -> fail "Impossible!"
-    FGHO.Fst ts e       -> MiWS.Fst <$> pure ts <*> cnv (e , r , FG.Tpl t  ts)
-    FGHO.Snd tf e       -> MiWS.Snd <$> pure tf <*> cnv (e , r , FG.Tpl tf t)
-    FGHO.Ary el f       -> case t of
-      FG.Ary ta         -> MiWS.Ary <$> cnv (el , r , FG.Int) 
-                           <*> cnv (f , r , FG.Arr FG.Int ta)
-      _                 -> fail "Impossible!"                           
-    FGHO.Len ta ea      -> MiWS.Len <$> pure ta <*> cnv (ea , r , FG.Ary ta)
-    FGHO.Ind ea ei      -> MiWS.Ind <$> cnv (ea , r , FG.Ary t) 
-                           <*> cnv (ei , r , FG.Int)
-    FGHO.Let tl el eb   -> MiWS.Let <$> pure tl <*> cnv (el , r , tl) 
-                           <*> cnv (eb , r , FG.Arr tl t)
- 
-instance (r ~ r' , ta ~ ta' , tb ~ tb') =>  
-         Cnv (FGHO.Exp r  ta  -> FGHO.Exp r  tb 
-             , G.Env FG.Typ r , FG.Typ (A.Arr ta tb)) 
-             (MiWS.Exp r' ta' -> MiWS.Exp r' tb')
+instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , r ~ r' , ta ~ ta' ,tb ~ tb') =>
+         Cnv (FGHO.Exp r  ta  -> FGHO.Exp r  tb , ()) 
+             (FMWS.Exp r' ta' -> FMWS.Exp r' tb')
          where
-           cnv ( ef , r , FG.Arr ta tb) = return (frmRgt 
-                                                 . (\e -> cnv (e , r , tb)) 
-                                                 . ef 
-                                                 . frmRgt 
-                                                 . (\e -> cnv (e , r , ta)))
+  cnv (ef , ()) = pure (frmRgt . flip (curry cnv) () . ef . 
+                        frmRgt . flip (curry cnv) ())
 
-instance (t' ~ t , r' ~ r) => 
-         Cnv (MiWS.Exp r' t' , G.Env FG.Typ r , FG.Typ t') (FGHO.Exp r t)  where
-  cnv (ee , r , t) = case ee of 
-    MiWS.ConI i         -> FGHO.ConI <$> pure i 
-    MiWS.ConB b         -> FGHO.ConB <$> pure b 
-    MiWS.AppV tv v G.Emp -> do Rfl <- eqlSin tv t
-                               return (FGHO.Var v)
-    MiWS.AppV tv@(FG.Arr _ _) v es@(G.Ext _ _) 
-                        -> do Exs2 e re te <- fldApp (FGHO.Var v) r tv es 
-                              Rfl <- eqlSin te t 
-                              Rfl <- eqlSin r re
-                              return e
-    MiWS.AppV _  _ _    -> fail "Impossible!"                       
-    MiWS.Cnd ec et ef   -> FGHO.Cnd <$> cnv (ec , r , FG.Bol) 
-                                    <*> cnv (et , r , t) <*> cnv (ef , r , t) 
-    MiWS.Whl ec eb ei   -> FGHO.Whl <$> cnv (ec , r , FG.Arr t FG.Bol)
-                                    <*> cnv (eb , r , FG.Arr t t)
-                                    <*> cnv (ei , r , t)
-    MiWS.Tpl ef es      -> case t of 
-      FG.Tpl tf ts      -> FGHO.Tpl <$> cnv (ef , r , tf) 
-                                    <*> cnv (es , r , ts)
-      _                 -> fail "Impossible!"      
-    MiWS.Fst ts e       -> FGHO.Fst <$> pure ts 
-                           <*> cnv (e , r , FG.Tpl t  ts)
-    MiWS.Snd tf e       -> FGHO.Snd <$> pure tf 
-                           <*> cnv (e , r , FG.Tpl tf t)
-    MiWS.Ary el ef      -> case t of
-      FG.Ary ta         -> FGHO.Ary <$> cnv (el , r , FG.Int) 
-                           <*> cnv (ef , r , FG.Arr FG.Int ta)
-      _                 -> fail "Impossible!"                           
-    MiWS.Len ta ea      -> FGHO.Len <$> pure ta <*> cnv (ea , r , FG.Ary ta)
-    MiWS.Ind ea ei      -> FGHO.Ind <$> cnv (ea , r , FG.Ary t) 
-                           <*> cnv (ei , r , FG.Int)
-    MiWS.Let tl el eb   -> FGHO.Let <$> pure tl <*> cnv (el , r , tl) 
-                           <*> cnv (eb , r , FG.Arr tl t)
+instance (HasSin TFG.Typ t , t' ~ t , r' ~ r) => 
+         Cnv (FMWS.Exp r' t' , ()) (FGHO.Exp r t)  where
+  cnv (ee , ()) = let ?r = () in case ee of 
+    FMWS.ConI i       -> FGHO.ConI <$@> i 
+    FMWS.ConB b       -> FGHO.ConB <$@> b 
+    FMWS.AppV v es    -> case (sinTyp v , es) of
+      (TFG.Int     , Emp)     -> pure (FGHO.Var v)
+      (TFG.Bol     , Emp)     -> pure (FGHO.Var v)
+      (TFG.Arr _ _ , Ext _ _) -> do Exs1 e te <- fldApp (FGHO.Var v) es 
+                                    Rfl <- eqlSin te (sin :: TFG.Typ t) 
+                                    return e      
+      (TFG.Tpl _ _ , Emp)     -> pure (FGHO.Var v)
+      (TFG.Ary _   , Emp)     -> pure (FGHO.Var v)      
+    FMWS.Cnd ec et ef -> FGHO.Cnd <$@> ec <*@> et <*@> ef 
+    FMWS.Whl ec eb ei -> FGHO.Whl <$@> ec <*@> eb <*@> ei
+    FMWS.Tpl ef es    -> case sin :: TFG.Typ t of 
+      TFG.Tpl tf ts    -> do PrfHasSin <- getPrfHasSinM tf 
+                             PrfHasSin <- getPrfHasSinM ts
+                             FGHO.Tpl <$@> ef <*@> es
+      _               -> fail "Impossible!"      
+    FMWS.Fst e        -> FGHO.Fst <$@> e 
+    FMWS.Snd e        -> FGHO.Snd <$@> e  
+    FMWS.Ary el ef    -> case sin :: TFG.Typ t of
+      TFG.Ary ta       -> do PrfHasSin <- getPrfHasSinM ta 
+                             FGHO.Ary <$@> el <*@> ef
+      _               -> fail "Impossible!"                           
+    FMWS.Len ea       -> FGHO.Len <$@> ea
+    FMWS.Ind ea ei    -> FGHO.Ind <$@> ea <*@> ei
+    FMWS.Let el eb    -> FGHO.Let <$@> el <*@> eb
                                         
-instance (ta ~ ta' , tb ~ tb' , r ~ r') =>   
-         Cnv (MiWS.Exp r  ta  -> MiWS.Exp r  tb
-             , G.Env FG.Typ r , FG.Typ (A.Arr ta tb))  
+instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb, ta ~ ta' , tb ~ tb' , r ~ r') =>
+         Cnv (FMWS.Exp r  ta  -> FMWS.Exp r  tb , ())  
              (FGHO.Exp r' ta' -> FGHO.Exp r' tb') 
          where
-           cnv (ef , r , FG.Arr ta tb) = return (frmRgt 
-                                             . (\ e -> cnv (e , r , tb)) 
-                                             . ef 
-                                             . frmRgt 
-                                             . (\ e -> cnv (e , r , ta)))
+  cnv (ef , ()) = return (frmRgt . flip (curry cnv) () 
+                          . ef 
+                          . frmRgt . flip (curry cnv) ())
                                      
-fldApp :: forall r t ta tb . t ~ (A.Arr ta tb) => 
-          FGHO.Exp r t -> G.Env FG.Typ r -> FG.Typ t -> 
-          G.Env (MiWS.Exp r) (ta ': MiWS.Arg tb) -> 
-          ErrM (Exs2 FGHO.Exp (G.Env FG.Typ) FG.Typ)  
-fldApp e r (FG.Arr ta tb@(FG.Arr _ _)) (G.Ext ea es@(G.Ext _ _)) = do
-  ea' :: FGHO.Exp r ta <- cnv (ea , r , ta)
-  fldApp (FGHO.App ta e ea') r tb es
-fldApp e r (FG.Arr ta tb)              (G.Ext ea G.Emp)          = do 
-  ea' <- cnv (ea , r , ta)
-  return (Exs2 (FGHO.App ta e ea') r tb)
-fldApp _ _                           _  _                        = 
-  fail "Impossible!"
-                                     
-getVar :: forall r t. FGHO.Exp r t -> G.Env FG.Typ r -> FG.Typ t ->  
-          ErrM (Exs2 V.Var (G.Env FG.Typ) FG.Typ)
-getVar (FGHO.App ta  (FGHO.App tfa eff _) _ ) r tb = 
-  getVar eff r (FG.Arr tfa (FG.Arr ta tb))
-getVar (FGHO.App tv (FGHO.Var v) _ )          r tb = 
-  return (Exs2 v r (FG.Arr tv tb))
-getVar _ _  _                                      = 
-  fail "Normalization Error!"    
+fldApp :: forall r t ta tb . (t ~ (TFA.Arr ta tb) , HasSin TFG.Typ t) => 
+          FGHO.Exp r t ->
+          Env (FMWS.Exp r) (ta ': TFG.Arg tb) -> 
+          ErrM (Exs1 (FGHO.Exp r) TFG.Typ)   
+fldApp e ess = case (sin :: TFG.Typ t , ess) of                              
+  (TFG.Arr ta tb@(TFG.Arr _ _) , Ext ea es@(Ext _ _)) -> do
+    PrfHasSin <- getPrfHasSinM ta
+    PrfHasSin <- getPrfHasSinM tb
+    ea' :: FGHO.Exp r ta <- cnv (ea , ())
+    fldApp (FGHO.App e ea') es
+  (TFG.Arr ta tb              , Ext ea Emp)           -> do 
+    PrfHasSin <- getPrfHasSinM ta
+    ea' <- cnv (ea , ())
+    return (Exs1 (FGHO.App e ea') tb)
+  _                                                   ->  
+    fail "Impossible!"
 
-data DblExsSin c2 tf1 tf2 where
+getVar :: forall r t. HasSin TFG.Typ t => FGHO.Exp r t ->
+          ErrM (Exs1 (Var r) TFG.Typ)
+getVar e = case e of
+  FGHO.App (FGHO.Var v)       _ -> pure (Exs1 v (sinTyp v))
+  FGHO.App ef@(FGHO.App _  _) _ -> getVar ef
+  _                             -> fail "Normalization Error!"
+ 
+data DblExsSin :: (ka -> kb -> *) -> ka -> ka -> * where
   DblExsSin :: c2 tf1 t -> c2 tf2 t -> DblExsSin c2 tf1 tf2
     
-getArg :: forall r t. FGHO.Exp r t -> G.Env FG.Typ r ->
-          DblExsSin G.Env (MiWS.Exp r) FG.Typ ->
-          ErrM (DblExsSin G.Env (MiWS.Exp r) FG.Typ)
-getArg (FGHO.App ta (FGHO.App tfa eff efa) ea) r (DblExsSin args tys) = do 
-  efa' <- cnv (efa , r , tfa)
-  ea'  <- cnv (ea  , r , ta)
-  getArg eff r (DblExsSin (G.Ext efa' (G.Ext ea' args))(G.Ext tfa(G.Ext ta tys)))
-getArg (FGHO.App ta (FGHO.Var _) ea) r           (DblExsSin args tys) = do 
-  ea' <- cnv (ea , r , ta)
-  return (DblExsSin (G.Ext ea' args) (G.Ext ta tys))
-getArg _ _                                       _             = 
-  fail "Normalization Error!"
+getArg :: forall r t. FGHO.Exp r t -> DblExsSin Env (FMWS.Exp r) TFG.Typ ->
+          ErrM (DblExsSin Env (FMWS.Exp r) TFG.Typ)
+getArg e (DblExsSin args tys) = case e of  
+  FGHO.App (FGHO.Var _)       ea -> do 
+    ea' <- cnv (ea , ())
+    return (DblExsSin (Ext ea' args) (Ext (sinTyp ea) tys))
+  FGHO.App ef@(FGHO.App _ _) ea -> do 
+    ea'  <- cnv (ea , ())
+    getArg ef (DblExsSin (Ext ea' args) (Ext (sinTyp ea) tys))
+  _                              ->  
+    fail "Normalization Error!"
+      
+data EqlOut :: TFA.Typ -> TFA.Typ -> * where
+  EqlOut :: EqlOut (TFG.Out t2) t2
+
+eqlOut :: TFG.Typ t1 -> TFG.Typ t2 -> ErrM (EqlOut t1 t2)
+eqlOut TFG.Int         TFG.Int           = return EqlOut
+eqlOut TFG.Bol         TFG.Bol           = return EqlOut
+eqlOut t               (TFG.Arr _ tb)    = do EqlOut <- eqlOut t tb
+                                              return EqlOut
+eqlOut (TFG.Ary ta)    (TFG.Ary ta')     = do Rfl <- eqlSin ta ta'
+                                              return EqlOut
+eqlOut (TFG.Tpl tf ts) (TFG.Tpl tf' ts') = do Rfl <- eqlSin tf tf'
+                                              Rfl <- eqlSin ts ts'
+                                              return EqlOut
+eqlOut _              _                  = fail "Normalization Error!"           
+
+data EqlArg :: [TFA.Typ] -> TFA.Typ -> * where
+  EqlArg :: EqlArg (TFG.Arg t2) t2
+ 
+eqlArg :: Env TFG.Typ r -> TFG.Typ t -> ErrM (EqlArg r t)
+eqlArg Emp TFG.Int       = return EqlArg
+eqlArg Emp TFG.Bol       = return EqlArg
+eqlArg (Ext ta ts) (TFG.Arr ta' tb) 
+                          = do Rfl    <- eqlSin ta ta'
+                               EqlArg <- eqlArg ts tb
+                               return EqlArg
+eqlArg Emp (TFG.Ary _)   = return EqlArg
+eqlArg Emp (TFG.Tpl _ _) = return EqlArg
+eqlArg _     _            = fail "Normalization Error!"           

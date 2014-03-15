@@ -21,3 +21,5 @@
 :set -XScopedTypeVariables
 :set -XMultiParamTypeClasses
 :set -XImplicitParams
+:set -XTemplateHaskell
+:set -XRank2Types

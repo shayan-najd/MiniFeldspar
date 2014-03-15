@@ -1,47 +1,33 @@
 module Expression.Feldspar.MiniWellScoped where
-
-import Prelude (Integer , Bool)
-import Singleton
-import qualified Variable               as V 
-import qualified Type.Feldspar          as F
-import qualified Singleton.TypeFeldspar as FG
-import qualified Singleton.Environment  as G
  
-type family Out (t :: F.Typ) :: F.Typ where 
-  Out (F.Arr ta tb) = Out tb
-  Out t             = t
-    
-type family Arg (t :: F.Typ) :: [F.Typ] where
-  Arg (F.Arr ta tb) = ta ': Arg tb
-  Arg t             = '[]
- 
-data Exp :: [F.Typ] -> F.Typ -> * where
-  ConI  :: Integer -> Exp r F.Int
-  ConB  :: Bool -> Exp r F.Bol
-  AppV  :: FG.Typ t ->
-           V.Var r t -> G.Env (Exp r) (Arg t) -> Exp r (Out t)
-  Cnd   :: Exp r F.Bol -> Exp r t -> Exp r t -> Exp r t
-  Whl   :: (Exp r t -> Exp r F.Bol) -> (Exp r t -> Exp r t) -> 
-           Exp r t -> Exp r t
-  Tpl   :: Exp r tf -> Exp r ts -> Exp r (F.Tpl tf ts)
-  Fst   :: FG.Typ ts -> Exp r (F.Tpl tf ts) -> Exp r tf
-  Snd   :: FG.Typ tf -> Exp r (F.Tpl tf ts) -> Exp r ts
-  Ary   :: Exp r F.Int -> (Exp r F.Int -> Exp r t) -> Exp r (F.Ary t)
-  Len   :: FG.Typ ta -> Exp r (F.Ary ta) -> Exp r F.Int
-  Ind   :: Exp r (F.Ary ta) -> Exp r F.Int -> Exp r ta
-  Let   :: FG.Typ tl -> Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
+import Prelude ()
+import MyPrelude
 
-appV :: HasSin FG.Typ t => V.Var r t -> G.Env (Exp r) (Arg t) -> Exp r (Out t)
-appV = AppV sin
- 
-fst :: HasSin FG.Typ ts => Exp r (F.Tpl tf ts) -> Exp r tf  
-fst = Fst sin
+import qualified Type.Feldspar.ADT      as TFA
+import qualified Type.Feldspar.GADT     as TFG
 
-snd :: HasSin FG.Typ tf => Exp r (F.Tpl tf ts) -> Exp r ts
-snd = Snd sin
+import Variable.Typed
 
-len :: HasSin FG.Typ ta => Exp r (F.Ary ta) -> Exp r F.Int
-len = Len sin
+import Environment.Typed     
 
-lett :: HasSin FG.Typ tl => Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
-lett = Let sin
+import Singleton  
+
+data Exp :: [TFA.Typ] -> TFA.Typ -> * where
+  ConI  :: Integer  -> Exp r TFA.Int
+  ConB  :: Bool     -> Exp r TFA.Bol
+  AppV  :: HasSin TFG.Typ t =>
+           Var r t  -> Env (Exp r) (TFG.Arg t) -> Exp r (TFG.Out t)
+  Cnd   :: Exp r TFA.Bol -> Exp r t -> Exp r t -> Exp r t
+  Whl   :: (Exp r t -> Exp r TFA.Bol) -> (Exp r t -> Exp r t) -> 
+           Exp r t  -> Exp r t
+  Tpl   :: Exp r tf -> Exp r ts -> Exp r (TFA.Tpl tf ts)
+  Fst   :: HasSin TFG.Typ ts => 
+           Exp r (TFA.Tpl tf ts)-> Exp r tf
+  Snd   :: HasSin TFG.Typ tf => 
+           Exp r (TFA.Tpl tf ts)-> Exp r ts
+  Ary   :: Exp r TFA.Int -> (Exp r TFA.Int -> Exp r t) -> Exp r (TFA.Ary t)
+  Len   :: HasSin TFG.Typ ta => 
+           Exp r (TFA.Ary ta) -> Exp r TFA.Int
+  Ind   :: Exp r (TFA.Ary ta) -> Exp r TFA.Int -> Exp r ta
+  Let   :: HasSin TFG.Typ tl => 
+           Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb

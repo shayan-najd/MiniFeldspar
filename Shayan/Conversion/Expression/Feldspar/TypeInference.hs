@@ -1,46 +1,47 @@
-module Conversion.Expression.Feldspar.TypeInference where
+module Conversion.Expression.Feldspar.TypeInference () where
+
+import Prelude ()
+import MyPrelude
 
 import qualified Expression.Feldspar.GADTUntypedDebruijn as FGUD
-import qualified Expression.Feldspar.GADTTyped           as FGCP
+import qualified Expression.Feldspar.GADTTyped           as FGTD
 
-import qualified Data.Vector   as A
-import qualified Type.Herbrand as H
-import qualified Type.Feldspar as FT
+import qualified Type.Herbrand                           as TH
+import qualified Type.Feldspar.ADT                       as TFA
+
+import Environment.Scoped
 
 import Conversion
 import Conversion.Type.Feldspar ()
-import Conversion.Variable ()
+import Conversion.Variable      ()
  
-import TypeChecking.Feldspar ()
+import Inference                (typInf)
+import TypeChecking.Feldspar    ()
 
-import Inference
-import Data.Traversable(traverse)
-
-instance n ~ n' => Cnv (FGUD.Exp n , A.Vec n FT.Typ) (FGCP.Exp n' FT.Typ) where
-  cnv (e , r) = do e' :: FGCP.Exp n () <- cnv e 
+ 
+instance n ~ n' => Cnv (FGUD.Exp n , Env n TFA.Typ) (FGTD.Exp n' TFA.Typ) where
+  cnv (e , r) = do e' :: FGTD.Exp n () <- cnv (e , ()) 
                    cnv (e' , r)                     
 
-instance n ~ n' => Cnv (FGUD.Exp n) (FGCP.Exp n' ()) where
-  cnv eaum = case eaum of
-       FGUD.ConI i       -> FGCP.ConI <$> pure i
-       FGUD.ConB b       -> FGCP.ConB <$> pure b
-       FGUD.Var v        -> FGCP.Var  <$> pure v
-       FGUD.Abs eb       -> FGCP.Abs  <$> cnv eb
-       FGUD.App ef ea    -> FGCP.App  <$> pure () <*@> ef <*@> ea
-       FGUD.Cnd ec et ef -> FGCP.Cnd  <$@> ec <*@> et <*@> ef 
-       FGUD.Whl ec eb ei -> FGCP.Whl  <$> cnv ec <*> cnv eb <*@> ei
-       FGUD.Tpl ef es    -> FGCP.Tpl  <$@> ef <*@> es
-       FGUD.Fst e        -> FGCP.Fst  <$> pure () <*@> e
-       FGUD.Snd e        -> FGCP.Snd  <$> pure () <*@> e
-       FGUD.Ary el ef    -> FGCP.Ary  <$@> el <*> cnv ef
-       FGUD.Len e        -> FGCP.Len  <$> pure () <*@> e 
-       FGUD.Ind ea ei    -> FGCP.Ind  <$@> ea <*@> ei
-       FGUD.Let el eb    -> FGCP.Let  <$> pure () <*@> el <*> cnv eb
-       where
-           ?cnv = cnv
-
-instance n ~ n' => Cnv (FGCP.Exp n () , A.Vec n FT.Typ)(FGCP.Exp n' FT.Typ) where
-  cnv (e , r) = do r' :: A.Vec n (H.Typ (H.EnvFld '[])) <- cnv r
+instance n ~ n' => Cnv (FGUD.Exp n , ()) (FGTD.Exp n' ()) where
+  cnv (eaum , ()) = let ?r = () in case eaum of
+    FGUD.ConI i       -> FGTD.ConI <$@> i
+    FGUD.ConB b       -> FGTD.ConB <$@> b
+    FGUD.Var v        -> FGTD.Var  <$@> v
+    FGUD.Abs eb       -> FGTD.Abs  <$@> eb
+    FGUD.App ef ea    -> FGTD.App  <$@> () <*@> ef <*@> ea
+    FGUD.Cnd ec et ef -> FGTD.Cnd  <$@> ec <*@> et <*@> ef 
+    FGUD.Whl ec eb ei -> FGTD.Whl  <$@> ec <*@> eb <*@> ei
+    FGUD.Tpl ef es    -> FGTD.Tpl  <$@> ef <*@> es
+    FGUD.Fst e        -> FGTD.Fst  <$@> () <*@> e
+    FGUD.Snd e        -> FGTD.Snd  <$@> () <*@> e
+    FGUD.Ary el ef    -> FGTD.Ary  <$@> el <*@> ef
+    FGUD.Len e        -> FGTD.Len  <$@> () <*@> e 
+    FGUD.Ind ea ei    -> FGTD.Ind  <$@> ea <*@> ei
+    FGUD.Let el eb    -> FGTD.Let  <$@> () <*@> el <*@> eb
+ 
+instance n ~ n' => Cnv (FGTD.Exp n () , Env n TFA.Typ)(FGTD.Exp n' TFA.Typ) where
+  cnv (e , r) = do r' :: Env n (TH.Typ (TH.EnvFld '[])) <- cnv (r , ())
                    e' <- typInf e r'
-                   traverse cnv e'
+                   traverse (flip (curry cnv) ()) e'
  

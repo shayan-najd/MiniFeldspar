@@ -1,8 +1,10 @@
-module Conversion.Existential where
+module Conversion.Existential () where
 
-import Prelude hiding (sin)
+import Prelude ()
+import MyPrelude 
+
 import Conversion
-import Existential
+
 import Singleton
 
 ---------------------------------------------------------------------------------

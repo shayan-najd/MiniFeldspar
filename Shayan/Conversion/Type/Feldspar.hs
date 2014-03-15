@@ -1,80 +1,67 @@
-module Conversion.Type.Feldspar where
+module Conversion.Type.Feldspar () where
 
-import qualified Type.Feldspar                     as FAS
-import qualified Singleton.TypeFeldspar            as FG
-import qualified Type.Herbrand                     as H
-import qualified Variable                          as G
+import Prelude ()
+import MyPrelude 
 
-import Data.Vector
-import Conversion
-import Existential
+import qualified Type.Feldspar.ADT  as TFA
+import qualified Type.Feldspar.GADT as TFG
+import qualified Type.Herbrand      as TH
 
-type ExsTyp = ExsSin FG.Typ                
+import Variable.Typed     
+
+import Environment.Scoped
+
+import Conversion 
+
 ---------------------------------------------------------------------------------
---  Conversion from FAS.Typ
+--  Conversion from TFA.Typ
 ---------------------------------------------------------------------------------
-instance Cnv FAS.Typ ExsTyp where  
-  cnv FAS.Int         = return (ExsSin FG.Int)
-  cnv FAS.Bol         = return (ExsSin FG.Bol)
-  cnv (FAS.Arr ta tr) = do ExsSin ta' <- cnv ta
+instance Cnv (TFA.Typ) (ExsSin TFG.Typ) where  
+  cnv TFA.Int         = return (ExsSin TFG.Int)
+  cnv TFA.Bol         = return (ExsSin TFG.Bol)
+  cnv (TFA.Arr ta tr) = do ExsSin ta' <- cnv ta
                            ExsSin tr' <- cnv tr
-                           return (ExsSin (FG.Arr ta' tr'))
-  cnv (FAS.Tpl tf ts) = do ExsSin tf' <- cnv tf
+                           return (ExsSin (TFG.Arr ta' tr'))
+  cnv (TFA.Tpl tf ts) = do ExsSin tf' <- cnv tf
                            ExsSin ts' <- cnv ts
-                           return (ExsSin (FG.Tpl tf' ts'))
-  cnv (FAS.Ary t)     = do ExsSin t' <- cnv t
-                           return (ExsSin (FG.Ary t'))
+                           return (ExsSin (TFG.Tpl tf' ts'))
+  cnv (TFA.Ary t)     = do ExsSin t' <- cnv t
+                           return (ExsSin (TFG.Ary t'))
                             
-instance Cnv FAS.Typ (H.Typ (H.EnvFld '[])) where
-  cnv th = case th of 
-        FAS.Int       -> pure (H.App G.Zro Nil)
-        FAS.Arr ta tb -> do ta' <- cnv ta
-                            tb' <- cnv tb 
-                            return (H.App (G.Suc G.Zro) 
-                                    (ta' ::: (tb' ::: Nil)))
-        FAS.Bol       -> return (H.App (G.Suc (G.Suc G.Zro)) Nil)
-        FAS.Tpl tf ts -> do tf' <- cnv tf
-                            ts' <- cnv ts
-                            return (H.App (G.Suc (G.Suc (G.Suc G.Zro))) 
-                                    (tf' ::: (ts' ::: Nil)))
-        FAS.Ary ta    -> do ta' <- cnv ta
-                            return (H.App (G.Suc (G.Suc (G.Suc (G.Suc G.Zro)))) 
-                                    (ta' ::: Nil))
+instance Cnv (TFA.Typ , ()) (TH.Typ (TH.EnvFld '[])) where
+  cnv (th , ()) = let ?r = () in case th of 
+    TFA.Int       -> pure TH.int
+    TFA.Bol       -> pure TH.bol
+    TFA.Arr ta tb -> TH.arr <$@> ta <*@> tb 
+    TFA.Tpl tf ts -> TH.tpl <$@> tf <*@> ts                             
+    TFA.Ary ta    -> TH.ary <$@> ta
  
 ---------------------------------------------------------------------------------
---  Conversion from FG.Typ
+--  Conversion from TFG.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (FG.Typ a) FAS.Typ where
-  cnv = cnv' 
-    where
-      cnv' :: FG.Typ t -> ErrM FAS.Typ
-      cnv' tg = case tg of
-        FG.Int         -> return FAS.Int
-        FG.Bol         -> return FAS.Bol
-        FG.Arr ta tb   -> do ta' <- cnv' ta
-                             tb' <- cnv' tb
-                             return (FAS.Arr ta' tb')
-        FG.Tpl tf ts   -> do tf' <- cnv' tf
-                             ts' <- cnv' ts
-                             return (FAS.Tpl tf' ts')
-        FG.Ary ta      -> do ta' <- cnv' ta
-                             return (FAS.Ary ta')
+instance Cnv (TFG.Typ a , ()) TFA.Typ where
+  cnv (tt , ()) = let ?r =  () in case tt of
+    TFG.Int       -> pure TFA.Int
+    TFG.Bol       -> pure TFA.Bol
+    TFG.Arr ta tb -> TFA.Arr <$@> ta <*@> tb 
+    TFG.Tpl tf ts -> TFA.Tpl <$@> tf <*@> ts
+    TFG.Ary ta    -> TFA.Ary <$@> ta
 ---------------------------------------------------------------------------------
---  Conversion from H.Typ
+--  Conversion from TH.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (H.Typ (H.EnvFld '[])) FAS.Typ where
-  cnv = cnv'
-    where
-      cnv' :: (H.Typ (H.EnvFld '[])) -> ErrM FAS.Typ
-      cnv' th = case th of 
-        H.App G.Zro _         -> pure FAS.Int      
-        H.App (G.Suc G.Zro) (ta ::: (tb ::: Nil))
-                              -> FAS.Arr <$@> ta <*@> tb
-        H.App (G.Suc (G.Suc G.Zro)) _ 
-                              -> pure FAS.Bol
-        H.App (G.Suc (G.Suc (G.Suc G.Zro))) (tf ::: (ts ::: Nil))
-                              -> FAS.Tpl <$@> tf <*@> ts
-        H.App (G.Suc (G.Suc (G.Suc (G.Suc G.Zro)))) (t ::: Nil)
-                              -> FAS.Ary <$@> t    
-        _                     -> fail "Type Error!"  
-        where ?cnv = cnv'
+instance Cnv (TH.Typ (TH.EnvFld '[]) , ()) TFA.Typ where
+  cnv (th , ()) = let ?r = () in case th of 
+    TH.App Zro _                  -> pure TFA.Int      
+    TH.App (Suc Zro) 
+      (Ext ta (Ext tb Emp))       -> TFA.Arr <$@> ta <*@> tb
+    TH.App (Suc (Suc Zro)) _      -> pure TFA.Bol
+    TH.App (Suc (Suc 
+      (Suc Zro))) 
+      (Ext tf (Ext ts Emp))       -> TFA.Tpl <$@> tf <*@> ts
+    TH.App (Suc (Suc (Suc 
+      (Suc Zro)))) 
+      (Ext t Emp)                 -> TFA.Ary <$@> t    
+    _                             -> fail "Type Error!"
+
+instance ts ~ ts' => Cnv (TFG.Typ ts, a) (TFG.Typ ts') where
+  cnv = pure . fst

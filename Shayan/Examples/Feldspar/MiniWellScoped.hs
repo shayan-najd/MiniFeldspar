@@ -1,69 +1,34 @@
-{-# OPTIONS_GHC -Wall #-}
-{-# LANGUAGE GADTs, FlexibleContexts, DataKinds, PolyKinds, TypeOperators #-}
 module Examples.Feldspar.MiniWellScoped where
 
-import Prelude hiding (abs,sum,snd,fst)
+import Prelude ()
+import MyPrelude 
+
 import Expression.Feldspar.MiniWellScoped
-import Evaluation hiding (Env)
-import Evaluation.Feldspar.MiniWellScoped ()
-import Singleton.Environment hiding (Env)
-import Variable
-import ErrorMonad 
-import qualified Type.Feldspar as A
-import Singleton
+import Environment.Typed
+import qualified Expression.Feldspar.GADTValue as V
+import Variable.Typed
+import Conversion
+import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+import qualified Type.Feldspar.ADT as A
+import Type.Feldspar.GADT ()
 
-type ta :-> tb = A.Arr ta tb
+type Add = A.Arr A.Int (A.Arr A.Int A.Int)
+type EnvAdd = Add ': '[]
 
-type Env = A.Int :-> (A.Int :-> A.Bol) ':
-           A.Bol :-> A.Bol ': 
-           A.Int :-> (A.Int :-> A.Int) ':
-           A.Int :-> (A.Int :-> A.Int) ':
-           A.Int :-> (A.Int :-> A.Int) ': 
-           '[]   
-           
-env :: Trm Env
-env = ((==),(not,((+),((*),(min,())))))
+(+.) :: Exp EnvAdd A.Int -> Exp EnvAdd A.Int -> Exp EnvAdd A.Int
+e1 +. e2 = AppV Zro (Ext e1 (Ext e2 Emp))  
 
-type Vector a = (Exp Env A.Int -> a, Exp Env A.Int)
+dbl :: Exp EnvAdd A.Int -> Exp EnvAdd A.Int
+dbl x = x +. x 
 
-(===) :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Bol
-e1 === e2 = appV Zro (e1 `Ext` (e2 `Ext` Emp))   
+compose :: (Exp r tb -> Exp r tc) -> (Exp r ta -> Exp r tb) 
+           -> Exp r ta -> Exp r tc
+compose = (.)
 
-(/==) :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Bol
-e1 /== e2 =  appV (Suc Zro) (e1 === e2 `Ext` Emp) 
-
-(+.) :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Int
-e1 +. e2 = appV (Suc (Suc Zro)) (e1 `Ext` (e2 `Ext` Emp))  
-
-(*.) :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Int
-e1 *. e2 =  appV (Suc (Suc (Suc Zro))) (e1 `Ext` (e2 `Ext` Emp))  
-
-minF :: Exp Env A.Int -> Exp Env A.Int -> Exp Env A.Int
-minF e1 e2 = appV (Suc (Suc (Suc (Suc Zro)))) (e1 `Ext` (e2 `Ext` Emp))  
-
-sumv :: Vector (Exp Env A.Int) -> Exp Env A.Int
-sumv (ixf,l) = fst $
-               Whl ((/== l) . snd) 
-               (\s -> Tpl (ixf (snd s) +. (fst s)) (snd s +. ConI 1)) 
-               (Tpl (ConI 0) (ConI 0))
-
-mapv :: (a -> b) -> Vector a -> Vector b
-mapv f (ixf,l) = (f. ixf,l)
-
-zipWithv :: (a -> b -> c) -> Vector a -> Vector b -> Vector c
-zipWithv f (ixf1,l1) (ixf2,l2) = (ixf,minF l1 l2)
-  where ixf i = f (ixf1 i) (ixf2 i)
-
-scalarProd :: Vector (Exp Env A.Int) -> Vector (Exp Env A.Int) -> 
-              Exp Env A.Int
-scalarProd vecA vecB = sumv (zipWithv (*.) vecA vecB)
-
-axpy :: Exp Env A.Int -> Vector (Exp Env A.Int) -> 
-        Vector (Exp Env A.Int) -> Vector (Exp Env A.Int)
-axpy a x y = zipWithv (+.) (mapv (a*.) x) y
+four :: Exp EnvAdd A.Int
+four = (dbl . dbl) (ConI 1)
 
 test :: Bool
-test = case evl (scalarProd  (id,ConI 2) (((+.) (ConI 1)),ConI 2)) env of 
-  Rgt x -> x == 2
+test = case cnv (four , Ext V.addV Emp) of  
+  Rgt x -> x V.=== V.Val (4 :: Integer)
   Lft _ -> False
-  

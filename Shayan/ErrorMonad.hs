@@ -1,24 +1,18 @@
 module ErrorMonad where
 
 import Control.Applicative (Applicative(..))
+import Data.Foldable
+import Data.Traversable
 
--- Using this monad has the following benefits:
---   (a) it will not have the problem of error producing code being ignored
---       due to Haskell's laziness. For example, in the following the error 
---       producing code is ignored:
---       $> take 1 [0,error "Disaster!"] 
---          [0]
---   (b) the type forces the programmer to write a handler for the potential 
---       error    
---   (c) it keeps the error message
 data ErrM t = Rgt t 
             | Lft String
-              deriving (Eq , Show)
+              
+deriving instance Eq t   => Eq   (ErrM t)
+deriving instance Show t => Show (ErrM t)
+deriving instance Functor     ErrM
+deriving instance Foldable    ErrM
+deriving instance Traversable ErrM
 
-instance Functor ErrM where
-  fmap f (Rgt x) = Rgt (f x)
-  fmap _ (Lft x) = Lft x
-  
 instance Applicative ErrM where
   pure      = return
   e1 <*> e2 = do v1 <- e1  

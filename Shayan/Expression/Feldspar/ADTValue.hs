@@ -1,15 +1,17 @@
 module Expression.Feldspar.ADTValue where
 
-import ErrorMonad
-import Data.Array
+import Prelude (error)
+import MyPrelude 
 
--- Values
 data Val = ConI Integer
          | ConB Bool  
          | Abs (Val -> Val)
          | Tpl (Val , Val)  
          | Arr (Array Integer Val)  
     
+var :: a -> ErrM a
+var = return
+
 conI :: Integer -> ErrM Val
 conI = return . ConI
 
@@ -19,7 +21,6 @@ conB = return . ConB
 abs :: (Val -> Val) -> ErrM Val
 abs = return . Abs 
 
--- Application of two values
 app :: Val -> Val -> ErrM Val
 app (Abs vf) va = return (vf va)
 app _        _  = fail "Type Error!"
@@ -27,7 +28,6 @@ app _        _  = fail "Type Error!"
 addV :: Val
 addV = Abs (\ (ConI vl) -> Abs (\ (ConI vr) -> ConI (vl + vr)))
 
--- Addition of two values
 add :: Val -> Val -> Val
 add (ConI i) (ConI j) = ConI (i + j)
 add _         _       = error "Type Error!"

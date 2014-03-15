@@ -1,57 +1,74 @@
-module Conversion.Expression.Feldspar.TypeWithnessing where
+module Conversion.Expression.Feldspar.TypeWithnessing () where
 
-import qualified Expression.Feldspar.GADTTyped      as FGCP
+import Prelude ()
+import MyPrelude
+
+import qualified Expression.Feldspar.GADTTyped      as FGTD
 import qualified Expression.Feldspar.GADTFirstOrder as FGFO
-import qualified Singleton.TypeFeldspar             as FG
-import qualified Type.Feldspar                      as FAS
-import qualified Singleton.Environment              as G
+
+import qualified Type.Feldspar.GADT                 as TFG
+import qualified Type.Feldspar.ADT                  as TFA
+
+import Environment.Typed              
 
 import Conversion
 import Conversion.Type.Feldspar ()
 import Conversion.Variable      ()
 
-import Existential
-
-type ExsTyp = ExsSin FG.Typ
- 
-instance (r ~ r' , t ~ t' , n ~ G.Len r) =>
-         Cnv (FGCP.Exp n FAS.Typ , G.Env FG.Typ r , FG.Typ t)  
-             (FGFO.Exp r' t') where
-  cnv (ee , r , t) = case (ee , t) of
-    (FGCP.ConI i       , FG.Int)       -> FGFO.ConI <$> pure i
-    (FGCP.ConB b       , FG.Bol)       -> FGFO.ConB <$> pure b
-    (FGCP.Var x        , _)            -> FGFO.Var  <$> cnv (x , r , t)
-    (FGCP.Abs eb       , FG.Arr ta tb) -> FGFO.Abs  <$> cnv (eb,G.Ext ta r,tb) 
-    (FGCP.App ta ef ea , _)            -> do ExsSin ta' :: ExsTyp <- cnv ta
-                                             FGFO.App <$> pure ta' 
-                                               <*> cnv (ef , r , FG.Arr ta' t)
-                                               <*> cnv (ea , r , ta')
-    (FGCP.Cnd ec et ef , _)            -> FGFO.Cnd <$> cnv (ec , r , FG.Bol)     
-                                          <*> cnv (et , r , t)
-                                          <*> cnv (ef , r , t)
-    (FGCP.Whl ec eb ei , _)            -> FGFO.Whl 
-                                          <$> cnv (ec , G.Ext t r , FG.Bol)
-                                          <*> cnv (eb , G.Ext t r , t)
-                                          <*> cnv (ei , r , t)
-    (FGCP.Tpl ef es    , FG.Tpl tf ts) -> FGFO.Tpl <$> cnv (ef , r , tf) 
-                                                   <*> cnv (es , r , ts) 
-    (FGCP.Fst ts e     , _)            -> do ExsSin ts' :: ExsTyp <- cnv ts
-                                             FGFO.Fst <$> pure ts' 
-                                               <*> cnv (e , r , FG.Tpl t ts') 
-    (FGCP.Snd tf e     , _)            -> do ExsSin tf' :: ExsTyp <- cnv tf
-                                             FGFO.Snd <$> pure tf' 
-                                               <*> cnv (e , r , FG.Tpl tf' t)
-    (FGCP.Ary el ef    , FG.Ary ta)    -> FGFO.Ary 
-                                           <$> cnv (el , r , FG.Int) 
-                                           <*> cnv (ef , G.Ext FG.Int r , ta)
-    (FGCP.Len ta e     , FG.Int )      -> do ExsSin ta' :: ExsTyp <- cnv ta
-                                             FGFO.Len <$> pure ta'
-                                               <*> cnv (e , r , FG.Ary ta')
-    (FGCP.Ind e  ei    , _)            -> FGFO.Ind <$> cnv (e  , r , FG.Ary t)
-                                                   <*> cnv (ei , r , FG.Int)
-    (FGCP.Let tl el eb , _)            -> do ExsSin tl' :: ExsTyp <- cnv tl 
-                                             FGFO.Let <$> pure tl' 
-                                              <*> cnv (el , r , tl')
-                                              <*> cnv (eb , G.Ext tl' r , t) 
-    (_                 , _)            -> fail "Type Error!"
- 
+import Singleton
+  
+instance (r ~ r' , n ~ Len r , HasSin TFG.Typ t) =>
+         Cnv (FGTD.Exp n TFA.Typ , Env TFG.Typ r)  
+             (FGFO.Exp r' t) where
+  cnv (ee , r) = let ?r = r in case (ee , sin :: TFG.Typ t) of
+    (FGTD.ConI i       , TFG.Int)       -> 
+      FGFO.ConI <$@> i
+    (FGTD.ConB b       , TFG.Bol)       -> 
+      FGFO.ConB <$@> b
+    (FGTD.Var x        , _)            -> 
+      FGFO.Var  <$@> x
+    (FGTD.Abs eb       , TFG.Arr ta tb) -> do 
+      PrfHasSin <- getPrfHasSinM ta
+      PrfHasSin <- getPrfHasSinM tb 
+      FGFO.Abs <$> cnv (eb , Ext ta r) 
+    (FGTD.App ta ef ea , _)            -> do 
+      ExsSin (ta' :: TFG.Typ tt) <- cnv ta
+      PrfHasSin <- getPrfHasSinM ta'
+      ea' :: FGFO.Exp r' tt <- cnv (ea , r)
+      FGFO.App <$@> ef <*> pure ea' 
+    (FGTD.Cnd ec et ef , _)            -> 
+      FGFO.Cnd <$@> ec <*@> et <*@> ef 
+    (FGTD.Whl ec eb ei , _)            -> 
+      FGFO.Whl 
+      <$> cnv (ec , Ext (sin :: TFG.Typ t) r)
+      <*> cnv (eb , Ext (sin :: TFG.Typ t) r) 
+      <*@> ei
+    (FGTD.Tpl ef es    , TFG.Tpl tf ts) -> do 
+      PrfHasSin <- getPrfHasSinM tf
+      PrfHasSin <- getPrfHasSinM ts
+      FGFO.Tpl <$@> ef <*@> es
+    (FGTD.Fst ts e     , _)            -> do 
+      ExsSin (ts' :: TFG.Typ tt)        <- cnv ts
+      PrfHasSin <- getPrfHasSinM ts' 
+      e' :: FGFO.Exp r' (TFA.Tpl t tt) <- cnv (e , r)
+      FGFO.Fst <$> pure e' 
+    (FGTD.Snd tf e     , _)            -> do 
+      ExsSin (tf' :: TFG.Typ tt)        <- cnv tf
+      PrfHasSin <- getPrfHasSinM tf'
+      e' :: FGFO.Exp r' (TFA.Tpl tt t) <- cnv (e , r)
+      FGFO.Snd <$> pure e'
+    (FGTD.Ary el ef    , TFG.Ary ta)    -> do 
+      PrfHasSin <- getPrfHasSinM ta
+      FGFO.Ary <$@> el <*> cnv (ef , Ext TFG.Int r)
+    (FGTD.Len ta e     , TFG.Int )      -> do 
+      ExsSin (ta' :: TFG.Typ tt)      <- cnv ta
+      PrfHasSin <- getPrfHasSinM ta'
+      e' :: FGFO.Exp r' (TFA.Ary tt) <- cnv (e , r)
+      FGFO.Len <$> pure e'
+    (FGTD.Ind e  ei , _)               -> 
+      FGFO.Ind <$@> e <*@> ei
+    (FGTD.Let tl el eb , _)            -> do 
+      ExsSin tl' :: ExsSin TFG.Typ <- cnv tl
+      PrfHasSin <- getPrfHasSinM tl'
+      FGFO.Let <$@> el <*> cnv (eb , Ext tl' r) 
+    _                                  -> fail "Type Error!"

@@ -1,11 +1,14 @@
 module ChangeMonad where
 
-import Control.Applicative
-
--- change monad
+import Prelude ()
+import MyPrelude
+ 
 data Chg a = Chg Bool a
-             deriving Functor
 
+deriving instance Functor     Chg
+deriving instance Foldable    Chg
+deriving instance Traversable Chg
+ 
 instance Applicative Chg where
   pure      = return
   af <*> aa = do f <- af 
@@ -16,6 +19,7 @@ instance Monad Chg where
   return           = Chg False 
   (Chg b x) >>= f = let Chg b' x' = f x 
                      in Chg (b || b') x'    
+                        
 chg :: a -> Chg a
 chg = Chg True
 
