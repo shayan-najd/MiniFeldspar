@@ -11,10 +11,8 @@ import qualified Type.Feldspar.GADT                  as TFG
 import Environment.Typed      
  
 import Conversion 
-import Conversion.Type.Feldspar ()
-import Conversion.Variable      ()
-import Conversion.Existential   ()
-  
+import Conversion.Variable ()
+   
 instance (t ~ t' , r ~ r') => 
          Cnv (FGFO.Exp r t , Env TFG.Typ r) (FGHO.Exp r' t') where
   cnv (e , r) = cnv (e , (map FGHO.Var . cnvGEnvtoGVar) r)
@@ -41,8 +39,10 @@ instance (ta ~ ta' , tb ~ tb' , r ~ r') =>
          Cnv (FGFO.Exp (ta ': r) tb , Env (FGHO.Exp r) r) 
              (FGHO.Exp r' ta' -> FGHO.Exp r' tb') 
          where
-  cnv (eb , r) = return (FGHO.prdAll . frmRgt . cnv' eb .
-                          map FGHO.sucAll . flip Ext r) 
+  cnv (eb , r) = pure (FGHO.prdAll  
+                      . frmRgt . cnv' eb
+                      . map FGHO.sucAll 
+                      . flip Ext r) 
     where
       cnv' :: forall rr tt. FGFO.Exp rr tt  -> Env (FGHO.Exp rr) rr -> 
               ErrM (FGHO.Exp rr tt)

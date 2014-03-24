@@ -7,7 +7,7 @@ import Expression.Feldspar.GADTFirstOrder
 import Variable.Typed
 import Conversion 
 import Conversion.Expression.Feldspar.Evaluation.GADTFirstOrder ()
-import qualified Expression.Feldspar.GADTValue as V
+import qualified Expression.Feldspar.GADTValue as FGV
 import Singleton
 import Environment.Typed
 
@@ -29,6 +29,6 @@ four :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) TFA.Int
 four = App (App (App compose dbl) dbl) (ConI 1)
  
 test :: Bool
-test = case cnv (four , Ext V.addV Emp) of 
-  Rgt x -> x V.=== V.Val 4
+test = case cnv (four , Ext FGV.addV Emp) of 
+  Rgt x -> x FGV.=== FGV.Exp 4
   Lft _ -> False

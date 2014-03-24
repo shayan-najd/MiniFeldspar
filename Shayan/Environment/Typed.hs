@@ -7,17 +7,21 @@ import Singleton
 
 import Variable.Typed
 
-import qualified Nat.ADT  as N
-import qualified Nat.GADT as V
+import qualified Nat.GADT as NG
 
 data Env :: (k -> *) -> [k] -> * where
   Emp :: Env tf '[]
   Ext :: tf t -> Env tf e -> Env tf (t ': e)
 
-len :: Env ef r -> V.Nat (Len r)
-len Emp        = V.Zro
-len (Ext _ xs) = V.Suc (len xs)
+len :: Env ef r -> NG.Nat (Len r)
+len Emp        = NG.Zro
+len (Ext _ xs) = NG.Suc (len xs)
  
+add :: (?env :: Env tf r') => Var r t -> Var (Add r' r) t
+add v = case ?env of
+  Emp      -> v
+  Ext _ xs -> let ?env = xs in Suc (add v)                  
+                  
 get :: Var r t -> Env tf r -> tf t
 get Zro     (Ext x  _ ) = x
 get (Suc n) (Ext _  xs) = get n xs
@@ -41,7 +45,7 @@ type instance Trm (tf ': ts) = (Trm tf , Trm ts)
                    
 type instance RevTrm ()        = '[]                   
 type instance RevTrm (tf , ts) = (RevTrm tf ': RevTrm ts)                    
-                                                     
+
 instance HasSin (Env tf) '[] where
   sin = Emp
   
@@ -54,7 +58,3 @@ instance EqlSin tf => EqlSin (Env tf) where
                                     Rfl <- eqlSin t t'
                                     return Rfl
   eqlSin  _           _        = fail "Scope Error!"     
-  
-type family Len (l :: [k]) :: N.Nat where
-  Len (x ': xs) = N.Suc (Len xs)
-  Len '[]       = N.Zro 

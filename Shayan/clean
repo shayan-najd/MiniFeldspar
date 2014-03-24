@@ -1,1 +1,3 @@
 find . -name '*~' | xargs rm
+find . -name '*.o' | xargs rm
+find . -name '*.hi' | xargs rm

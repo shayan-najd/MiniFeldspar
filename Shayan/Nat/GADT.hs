@@ -29,5 +29,10 @@ instance EqlSin Nat where
                                return Rfl 
   eqlSin _       _        = fail "Type Error!"                           
   
+instance GetPrfHasSin Nat where
+  getPrfHasSin Zro     = PrfHasSin 
+  getPrfHasSin (Suc n) = case getPrfHasSin n of 
+    PrfHasSin -> PrfHasSin
+  
   
   

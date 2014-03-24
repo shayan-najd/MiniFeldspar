@@ -34,8 +34,7 @@ library
      ImplicitParams,
      TemplateHaskell,
      Rank2Types
-  exposed-modules: 
-     InferenceMonad,
+  exposed-modules: InferenceMonad,
      ChangeMonad,
      Inference,
      VanillaPrelude,
@@ -51,10 +50,8 @@ library
      Type.Herbrand,
      Type.Feldspar.GADT,
      Type.Feldspar.ADT,
-     Control.Applicative.Recursion,
      TypeChecking.Feldspar,
      Conversion.Nat,
-     Conversion.Existential,
      Conversion.Environment,
      Conversion.Variable,
      Conversion.Type.Feldspar,
@@ -68,6 +65,7 @@ library
      Conversion.Expression.Feldspar.ScopeWithnessing,
      Conversion.Expression.Feldspar.NameResolution,
      Conversion.Expression.Feldspar.Evaluation.GADTHigherOrder,
+     Conversion.Expression.Feldspar.Evaluation.ADTValue,
      Conversion.Expression.Feldspar.Evaluation.GADTFirstOrder,
      Conversion.Expression.Feldspar.Evaluation.ADTUntypedNamed,
      Conversion.Expression.Feldspar.Evaluation.MiniWellScoped,
@@ -101,9 +99,14 @@ library
      Examples.Feldspar.GADTUntypedDebruijn,
      Examples.Feldspar.Conversion,
      Examples.Feldspar.GADTTyped,
+     Examples.Feldspar.IP.MiniWellScoped,
+     Examples.Feldspar.IP.TemplateHaskell,
+     Examples.Feldspar.Prelude.GADTHigherOrder,
+     Examples.Feldspar.Prelude.GADTFirstOrder,
      Examples.Feldspar.Prelude.MiniWellScoped,
+     Examples.Feldspar.Prelude.TemplateHaskell,
      Normalization.Feldspar.GADTHigherOrder,
-     Normalization.Feldspar.GADTTyped 
+     Normalization.Feldspar.GADTTyped
   build-depends:       
      base             == 4.7.*,
      mtl              == 2.1.*,

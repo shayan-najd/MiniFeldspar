@@ -65,31 +65,31 @@ instance GetPrfHasSin Typ where
     Ary ta    -> case getPrfHasSin ta of
       PrfHasSin -> PrfHasSin
 
-getPrfHasSinArr :: forall ta tb. HasSin Typ (A.Arr ta tb) => 
-                   T (A.Arr ta tb) -> (PrfHasSin Typ ta , PrfHasSin Typ tb)
-getPrfHasSinArr T = case sin :: Typ (A.Arr ta tb) of 
+getPrfHasSinArr :: forall ta tb t. HasSin Typ (A.Arr ta tb) => 
+                   t (A.Arr ta tb) -> (PrfHasSin Typ ta , PrfHasSin Typ tb)
+getPrfHasSinArr _ = case sin :: Typ (A.Arr ta tb) of 
   Arr ta tb -> (getPrfHasSin ta , getPrfHasSin tb)
  
-getPrfHasSinTpl :: forall tf ts. HasSin Typ (A.Tpl tf ts) => 
-                   T (A.Tpl tf ts) -> (PrfHasSin Typ tf , PrfHasSin Typ ts)
-getPrfHasSinTpl T = case sin :: Typ (A.Tpl tf ts) of 
+getPrfHasSinTpl :: forall tf ts t. HasSin Typ (A.Tpl tf ts) => 
+                   t (A.Tpl tf ts) -> (PrfHasSin Typ tf , PrfHasSin Typ ts)
+getPrfHasSinTpl _ = case sin :: Typ (A.Tpl tf ts) of 
   Tpl tf ts -> (getPrfHasSin tf , getPrfHasSin ts)
 
-getPrfHasSinAry :: forall ta. HasSin Typ (A.Ary ta) => 
-                   T (A.Ary ta) -> PrfHasSin Typ ta
-getPrfHasSinAry T = case sin :: Typ (A.Ary ta) of 
+getPrfHasSinAry :: forall ta t. HasSin Typ (A.Ary ta) => 
+                   t (A.Ary ta) -> PrfHasSin Typ ta
+getPrfHasSinAry _ = case sin :: Typ (A.Ary ta) of 
   Ary ta    -> getPrfHasSin ta
 
 getPrfHasSinArrM :: HasSin Typ (A.Arr ta tb) => 
-                    T (A.Arr ta tb) -> ErrM (PrfHasSin Typ ta , PrfHasSin Typ tb)
+                    t (A.Arr ta tb) -> ErrM (PrfHasSin Typ ta , PrfHasSin Typ tb)
 getPrfHasSinArrM = return . getPrfHasSinArr
 
 getPrfHasSinTplM :: HasSin Typ (A.Tpl tf ts) => 
-                    T (A.Tpl tf ts) -> ErrM (PrfHasSin Typ tf , PrfHasSin Typ ts)
+                    t (A.Tpl tf ts) -> ErrM (PrfHasSin Typ tf , PrfHasSin Typ ts)
 getPrfHasSinTplM = return . getPrfHasSinTpl
 
 getPrfHasSinAryM :: HasSin Typ (A.Ary ta) => 
-                   T (A.Ary ta) -> ErrM (PrfHasSin Typ ta)
+                   t (A.Ary ta) -> ErrM (PrfHasSin Typ ta)
 getPrfHasSinAryM = return  . getPrfHasSinAry
 
 type family Out (t :: A.Typ) :: A.Typ where 
@@ -99,3 +99,15 @@ type family Out (t :: A.Typ) :: A.Typ where
 type family Arg (t :: A.Typ) :: [A.Typ] where
   Arg (A.Arr ta tb) = ta ': Arg tb
   Arg t             = '[] 
+  
+getArgTyp :: Typ (A.Arr ta tb) -> Typ ta  
+getArgTyp (Arr ta _) = ta
+
+getFstTyp :: Typ (A.Tpl tf ts) -> Typ tf  
+getFstTyp (Tpl tf _) = tf
+
+getSndTyp :: Typ (A.Tpl tf ts) -> Typ ts  
+getSndTyp (Tpl _  ts) = ts
+
+getAryTyp :: Typ (A.Ary ta) -> Typ ta  
+getAryTyp (Ary ta) = ta

@@ -8,59 +8,62 @@ import Singleton
 import Type.Feldspar.ADT
 import Type.Feldspar.GADT ()
 
-data Val :: Typ -> * where 
-  Val :: Trm t -> Val t
+data Exp :: Typ -> * where 
+  Exp :: Trm t -> Exp t
   
-(===) ::(Eq t', Trm t ~ t') =>
-        Val t -> Val t -> Bool 
-(Val x) === (Val y) = x == y
+mapTrm :: (Trm t -> Trm t') -> Exp t -> Exp t'
+mapTrm f (Exp x) = Exp (f x) 
 
-getVal :: Val t -> Trm t
-getVal (Val x) = x
+(===) ::(Eq t', Trm t ~ t') =>
+        Exp t -> Exp t -> Bool 
+(Exp x) === (Exp y) = x == y
+
+getTrm :: Exp t -> Trm t
+getTrm (Exp x) = x
 
 var :: t -> t
 var = id
 
-conI :: Integer -> Val Int
-conI = Val 
+conI :: Integer -> Exp Int
+conI = Exp 
      
-conB :: Bool -> Val Bol
-conB = Val
+conB :: Bool -> Exp Bol
+conB = Exp
 
-abs :: (Trm ta -> Trm tb) -> Val (Arr ta tb)
-abs = Val 
+abs :: (Trm ta -> Trm tb) -> Exp (Arr ta tb)
+abs = Exp 
         
-app :: Val (Arr ta tb) -> Val ta -> Val tb
-app (Val vf) (Val va) = Val (vf va)
+app :: Exp (Arr ta tb) -> Exp ta -> Exp tb
+app (Exp vf) (Exp va) = Exp (vf va)
 
-addV :: Val (Arr Int (Arr Int Int))
-addV = Val (+)
+addV :: Exp (Arr Int (Arr Int Int))
+addV = Exp (+)
 
-cnd :: Val Bol -> Val a -> Val a -> Val a
-cnd (Val vc) vt vf = if vc then vt else vf
+cnd :: Exp Bol -> Exp a -> Exp a -> Exp a
+cnd (Exp vc) vt vf = if vc then vt else vf
 
-whl :: Val (Arr s  Bol) -> Val (Arr s s) -> Val s -> Val s
-whl (Val fc) (Val fb) =  Val . head . dropWhile fc . iterate fb . getVal 
+whl :: Exp (Arr s  Bol) -> Exp (Arr s s) -> Exp s -> Exp s
+whl (Exp fc) (Exp fb) =  Exp . head . dropWhile fc . iterate fb . getTrm 
 
-tpl :: Val tf -> Val ts -> Val (Tpl tf ts)
-tpl (Val vf) (Val vs) = Val (vf , vs)
+tpl :: Exp tf -> Exp ts -> Exp (Tpl tf ts)
+tpl (Exp vf) (Exp vs) = Exp (vf , vs)
 
-fst :: Val (Tpl a b) -> Val a
-fst (Val v) = Val (P.fst v)
+fst :: Exp (Tpl a b) -> Exp a
+fst (Exp v) = Exp (P.fst v)
 
-snd :: Val (Tpl a b) -> Val b
-snd (Val v) = Val (P.snd v)
+snd :: Exp (Tpl a b) -> Exp b
+snd (Exp v) = Exp (P.snd v)
  
-ary :: Val Int -> Val (Arr Int a) -> Val (Ary a)
-ary (Val vl) (Val vf) =  Val (listArray (0 , vl)  
+ary :: Exp Int -> Exp (Arr Int a) -> Exp (Ary a)
+ary (Exp vl) (Exp vf) =  Exp (listArray (0 , vl)  
                               [vf i | i <- [0 .. vl]])
 
-len :: Val (Ary a) -> Val Int
-len (Val e)  = (Val . (1 +) . uncurry (flip (-)) . bounds) e
+len :: Exp (Ary a) -> Exp Int
+len (Exp e)  = (Exp . (1 +) . uncurry (flip (-)) . bounds) e
 
-ind :: Val (Ary a) -> Val Int -> Val a
-ind (Val v) (Val vi) = Val (v ! vi)
+ind :: Exp (Ary a) -> Exp Int -> Exp a
+ind (Exp v) (Exp vi) = Exp (v ! vi)
  
-lett :: Val tl -> Val (Arr tl tb) -> Val tb
-lett (Val vl) (Val vb) = Val (vb vl)
+lett :: Exp tl -> Exp (Arr tl tb) -> Exp tb
+lett (Exp vl) (Exp vb) = Exp (vb vl)
   

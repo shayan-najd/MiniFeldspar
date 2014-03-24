@@ -12,63 +12,84 @@ import qualified Type.Feldspar.ADT                  as TFA
 import Environment.Typed              
 
 import Conversion
-import Conversion.Type.Feldspar ()
 import Conversion.Variable      ()
 
 import Singleton
   
+type ExsTyp = ExsSin TFG.Typ
+
 instance (r ~ r' , n ~ Len r , HasSin TFG.Typ t) =>
          Cnv (FGTD.Exp n TFA.Typ , Env TFG.Typ r)  
              (FGFO.Exp r' t) where
-  cnv (ee , r) = let ?r = r in case (ee , sin :: TFG.Typ t) of
-    (FGTD.ConI i       , TFG.Int)       -> 
-      FGFO.ConI <$@> i
-    (FGTD.ConB b       , TFG.Bol)       -> 
-      FGFO.ConB <$@> b
-    (FGTD.Var x        , _)            -> 
-      FGFO.Var  <$@> x
-    (FGTD.Abs eb       , TFG.Arr ta tb) -> do 
-      PrfHasSin <- getPrfHasSinM ta
-      PrfHasSin <- getPrfHasSinM tb 
-      FGFO.Abs <$> cnv (eb , Ext ta r) 
-    (FGTD.App ta ef ea , _)            -> do 
-      ExsSin (ta' :: TFG.Typ tt) <- cnv ta
-      PrfHasSin <- getPrfHasSinM ta'
-      ea' :: FGFO.Exp r' tt <- cnv (ea , r)
-      FGFO.App <$@> ef <*> pure ea' 
-    (FGTD.Cnd ec et ef , _)            -> 
-      FGFO.Cnd <$@> ec <*@> et <*@> ef 
-    (FGTD.Whl ec eb ei , _)            -> 
-      FGFO.Whl 
-      <$> cnv (ec , Ext (sin :: TFG.Typ t) r)
-      <*> cnv (eb , Ext (sin :: TFG.Typ t) r) 
-      <*@> ei
-    (FGTD.Tpl ef es    , TFG.Tpl tf ts) -> do 
-      PrfHasSin <- getPrfHasSinM tf
-      PrfHasSin <- getPrfHasSinM ts
-      FGFO.Tpl <$@> ef <*@> es
-    (FGTD.Fst ts e     , _)            -> do 
-      ExsSin (ts' :: TFG.Typ tt)        <- cnv ts
-      PrfHasSin <- getPrfHasSinM ts' 
-      e' :: FGFO.Exp r' (TFA.Tpl t tt) <- cnv (e , r)
-      FGFO.Fst <$> pure e' 
-    (FGTD.Snd tf e     , _)            -> do 
-      ExsSin (tf' :: TFG.Typ tt)        <- cnv tf
-      PrfHasSin <- getPrfHasSinM tf'
-      e' :: FGFO.Exp r' (TFA.Tpl tt t) <- cnv (e , r)
-      FGFO.Snd <$> pure e'
-    (FGTD.Ary el ef    , TFG.Ary ta)    -> do 
-      PrfHasSin <- getPrfHasSinM ta
-      FGFO.Ary <$@> el <*> cnv (ef , Ext TFG.Int r)
-    (FGTD.Len ta e     , TFG.Int )      -> do 
-      ExsSin (ta' :: TFG.Typ tt)      <- cnv ta
-      PrfHasSin <- getPrfHasSinM ta'
-      e' :: FGFO.Exp r' (TFA.Ary tt) <- cnv (e , r)
-      FGFO.Len <$> pure e'
-    (FGTD.Ind e  ei , _)               -> 
-      FGFO.Ind <$@> e <*@> ei
-    (FGTD.Let tl el eb , _)            -> do 
-      ExsSin tl' :: ExsSin TFG.Typ <- cnv tl
-      PrfHasSin <- getPrfHasSinM tl'
-      FGFO.Let <$@> el <*> cnv (eb , Ext tl' r) 
+  cnv (ee , r) = let ?r = r in let t = sin :: TFG.Typ t in case (ee , t) of
+    (FGTD.ConI i       , TFG.Int)      -> FGFO.ConI <$@> i
+    (FGTD.ConB b       , TFG.Bol)      -> FGFO.ConB <$@> b
+    (FGTD.Var x        , _)            -> FGFO.Var  <$@> x
+    (FGTD.Abs eb       , TFG.Arr ta _) -> case TFG.getPrfHasSinArr t of
+      (PrfHasSin , PrfHasSin)          -> FGFO.Abs  <$@> (ta , eb) 
+    (FGTD.App ta ef ea , _)            -> do ExsSin ta' :: ExsTyp <- cnv ta
+                                             PrfHasSin <- getPrfHasSinM ta'
+                                             ea' <- cnvImp ea
+                                             FGFO.App <$@> ef 
+                                                       <*> pure (samTyp ta' ea') 
+    (FGTD.Cnd ec et ef , _)            -> FGFO.Cnd <$@> ec <*@> et <*@> ef 
+    (FGTD.Whl ec eb ei , _)            -> FGFO.Whl <$@> (t , ec) <*@> (t , eb) 
+                                          <*@> ei
+    (FGTD.Tpl ef es    , TFG.Tpl _ _)  -> case TFG.getPrfHasSinTpl t of
+      (PrfHasSin , PrfHasSin)          -> FGFO.Tpl <$@> ef <*@> es
+    (FGTD.Fst ts e     , _)            -> do ExsSin ts' <- cnv ts
+                                             PrfHasSin  <- getPrfHasSinM ts' 
+                                             e'         <- cnvImp e 
+                                             FGFO.Fst <$> pure 
+                                                      (samTyp (TFG.Tpl t ts') e')
+    (FGTD.Snd tf e     , _)            -> do ExsSin tf' <- cnv tf
+                                             PrfHasSin  <- getPrfHasSinM tf'
+                                             e'         <- cnvImp e
+                                             FGFO.Snd <$> pure 
+                                                      (samTyp (TFG.Tpl tf' t) e')
+    (FGTD.Ary el ef    , TFG.Ary _)    -> case TFG.getPrfHasSinAry t of
+      PrfHasSin                        -> FGFO.Ary <$@> el <*@> (TFG.Int , ef)
+    (FGTD.Len ta e     , TFG.Int )     -> do ExsSin ta' :: ExsTyp <- cnv ta
+                                             PrfHasSin <- getPrfHasSinM ta'
+                                             e' <- cnvImp e
+                                             FGFO.Len <$> pure 
+                                                      (samTyp (TFG.Ary ta') e')
+    (FGTD.Ind e  ei    , _)            -> FGFO.Ind <$@> e <*@> ei
+    (FGTD.Let tl el eb , _)            -> do ExsSin tl' :: ExsTyp <- cnv tl
+                                             PrfHasSin <- getPrfHasSinM tl'
+                                             FGFO.Let <$@> el <*@> (tl' , eb) 
     _                                  -> fail "Type Error!" 
+    
+instance (r ~ r' , n ~ Len (tr ': r) , HasSin TFG.Typ t , tr ~ tr') =>
+         Cnv ((TFG.Typ tr , FGTD.Exp n TFA.Typ) , Env TFG.Typ r)  
+             (FGFO.Exp (tr' ': r') t) where    
+  cnv ((t , ee) , r) = cnv (ee , Ext t r)           
+
+instance (n ~ Len r , HasSin TFG.Typ t) =>
+         Cnv (FGFO.Exp r t , Env TFG.Typ r) (FGTD.Exp n TFA.Typ)  
+              where
+  cnv (ee , r) = let ?r = r in let t = sin :: TFG.Typ t in case ee of
+    FGFO.ConI i               -> FGTD.ConI <$@> i
+    FGFO.ConB b               -> FGTD.ConB <$@> b
+    FGFO.Var x                -> FGTD.Var  <$@> x
+    FGFO.Abs eb               -> case TFG.getPrfHasSinArr t of
+      (PrfHasSin , PrfHasSin) -> FGTD.Abs <$@> eb
+    FGFO.App ef ea            -> FGTD.App <$@> sinTypOf ea t <*@> ef <*@> ea
+    FGFO.Cnd ec et ef         -> FGTD.Cnd <$@> ec <*@> et <*@> ef
+    FGFO.Whl ec eb ei         -> FGTD.Whl <$@> ec <*@> eb <*@> ei
+    FGFO.Tpl ef es            -> case TFG.getPrfHasSinTpl t of
+      (PrfHasSin , PrfHasSin) -> FGTD.Tpl <$@> ef <*@> es  
+    FGFO.Fst e                -> FGTD.Fst <$@> TFG.getSndTyp(sinTypOf e t) <*@> e
+    FGFO.Snd e                -> FGTD.Snd <$@> TFG.getFstTyp(sinTypOf e t) <*@> e
+    FGFO.Ary el ef            -> case TFG.getPrfHasSinAry t of
+      PrfHasSin               -> FGTD.Ary <$@> el <*@> ef
+    FGFO.Len e                -> FGTD.Len <$@> TFG.getAryTyp(sinTypOf e t) <*@> e
+    FGFO.Ind e  ei            -> FGTD.Ind <$@> e <*@> ei
+    FGFO.Let el eb            -> FGTD.Let <$@> sinTypOf el t 
+                                          <*@> el <*@> eb
+                                          
+instance (n ~ Len (ta ': r) , HasSin TFG.Typ t, HasSin TFG.Typ ta) =>
+         Cnv (FGFO.Exp (ta ': r) t , Env TFG.Typ r) 
+             (FGTD.Exp n TFA.Typ) 
+         where
+  cnv (ee , r) = cnv (ee , Ext (sin :: TFG.Typ ta) r)       

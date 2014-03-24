@@ -38,7 +38,7 @@ import Normalization.Feldspar.GADTHigherOrder  ()
 import Conversion
 import Conversion.Variable                     ()
 import Conversion.Environment                  ()
-import Conversion.Existential                  ()
+-- import Conversion.Existential                  ()
 import Conversion.Type.Feldspar                ()
 import Conversion.Expression.TemplateHaskell   ()
 import Conversion.Expression.Feldspar          ()
@@ -58,16 +58,16 @@ envAddTypG =  ET.Ext typAddG ET.Emp
 vec :: ES.Env One TH.Name
 vec = ES.Ext '(+) ES.Emp
 
-envAddValG :: ET.Env FGV.Val EnvAdd
+envAddValG :: ET.Env FGV.Exp EnvAdd
 envAddValG = ET.Ext FGV.addV ET.Emp
 
-envAddValV :: ES.Env One FAV.Val
+envAddValV :: ES.Env One FAV.Exp
 envAddValV = ES.Ext FAV.addV ES.Emp
 
-envAddValA :: EP.Env FAV.Val
+envAddValA :: EP.Env FAV.Exp
 envAddValA = FAV.addV : []
 
-envAddValM :: EM.Env TH.Name FAV.Val
+envAddValM :: EM.Env TH.Name FAV.Exp
 envAddValM = ('(+) , FAV.addV) : []
 
 cnvFMWS :: Cnv (e , ET.Env TFG.Typ EnvAdd , ES.Env (NA.Suc NA.Zro) TH.Name) 
@@ -78,21 +78,21 @@ cnvFMWS e j = case (do e'   :: FGHO.Exp EnvAdd TFA.Int <- cnv (e , envAddTypG
                        e''' :: FMWS.Exp EnvAdd TFA.Int <- cnv (e'' , envAddTypG
                                                               ,vec)
                        curry cnv e''' envAddValG) of  
-           Rgt (FGV.Val i) -> i == j
+           Rgt (FGV.Exp i) -> i == j
            _     -> False   
 
 cnvFGHO :: Cnv (e , ET.Env TFG.Typ EnvAdd , ES.Env (NA.Suc NA.Zro) TH.Name) 
            (FGHO.Exp EnvAdd TFA.Int) => e -> Integer -> Bool
 cnvFGHO e j = case (do e' :: FGHO.Exp EnvAdd  TFA.Int <- cnv (e , envAddTypG,vec)
                        curry cnv e' envAddValG) of  
-           Rgt (FGV.Val i) -> i == j           
+           Rgt (FGV.Exp i) -> i == j           
            _     -> False   
 
 cnvFGFO :: Cnv (e , ET.Env TFG.Typ EnvAdd , ES.Env (NA.Suc NA.Zro) TH.Name) 
            (FGFO.Exp EnvAdd TFA.Int) => e -> Integer -> Bool
 cnvFGFO e j = case (do e' :: FGFO.Exp EnvAdd TFA.Int <- cnv (e , envAddTypG ,vec)
                        curry cnv e' envAddValG) of  
-           Rgt (FGV.Val i) -> i == j
+           Rgt (FGV.Exp i) -> i == j
            _             -> False 
 
 cnvFGTD :: Cnv (e , ET.Env TFG.Typ EnvAdd , ES.Env (NA.Suc NA.Zro) TH.Name) 

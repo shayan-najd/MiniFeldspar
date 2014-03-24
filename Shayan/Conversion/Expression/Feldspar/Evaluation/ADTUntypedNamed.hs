@@ -4,29 +4,29 @@ import Prelude   ()
 import MyPrelude
 
 import Expression.Feldspar.ADTUntypedNamed
-import qualified Expression.Feldspar.ADTValue as V
+import qualified Expression.Feldspar.ADTValue as FAV
 
 import Environment.Map             
 
 import Conversion  
 import Conversion.Variable ()
 
-instance Eq v => Cnv (Exp v , Env v V.Val) V.Val where
+instance Eq v => Cnv (Exp v , Env v FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of        
-    ConI i             -> V.conI <$@> i
-    ConB b             -> V.conB <$@> b 
-    Var x              -> V.var  <$@> x
-    Abs x eb           -> V.abs  <$@> (x , eb)
-    App ef ea          -> V.app  <$@> ef <*@> ea 
-    Cnd ec et ef       -> V.cnd  <$@> ec <*@> et <*@> ef      
-    Whl xc ec xb eb ei -> V.whl  <$@> (xc , ec) <*@> (xb , eb) <*@> ei
-    Tpl ef es          -> V.tpl  <$@> ef <*@> es 
-    Fst e              -> V.fst  <$@> e
-    Snd e              -> V.snd  <$@> e 
-    Ary el x ef        -> V.ary  <$@> el <*@> (x , ef)
-    Len e              -> V.len  <$@> e                         
-    Ind ea ei          -> V.ind  <$@> ea <*@> ei                         
-    Let x el eb        -> return <$@> App (Abs x eb) el)
+    ConI i             -> FAV.conI <$@> i
+    ConB b             -> FAV.conB <$@> b 
+    Var x              -> FAV.var  <$@> x
+    Abs x eb           -> FAV.abs  <$@> (x , eb)
+    App ef ea          -> FAV.app  <$@> ef <*@> ea 
+    Cnd ec et ef       -> FAV.cnd  <$@> ec <*@> et <*@> ef      
+    Whl xc ec xb eb ei -> FAV.whl  <$@> (xc , ec) <*@> (xb , eb) <*@> ei
+    Tpl ef es          -> FAV.tpl  <$@> ef <*@> es 
+    Fst e              -> FAV.fst  <$@> e
+    Snd e              -> FAV.snd  <$@> e 
+    Ary el x ef        -> FAV.ary  <$@> el <*@> (x , ef)
+    Len e              -> FAV.len  <$@> e                         
+    Ind ea ei          -> FAV.ind  <$@> ea <*@> ei                         
+    Let x el eb        -> pure     <$@> App (Abs x eb) el)
         
-instance Eq v => Cnv ((v , Exp v) , Env v V.Val) (V.Val -> V.Val) where
+instance Eq v => Cnv ((v , Exp v) , Env v FAV.Exp) (FAV.Exp -> FAV.Exp) where
   cnv ((x , e) , r) = pure (frmRgt . curry cnv e . (: r) . (,) x) 

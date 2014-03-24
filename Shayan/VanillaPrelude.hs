@@ -1,19 +1,21 @@
 module VanillaPrelude where
 
-fst :: t
-fst = undefined
+import Data.Array
 
-snd :: t
-snd = undefined
-
-whl :: t
+whl :: (s -> Bool) -> (s -> s) -> s -> s 
 whl = undefined
 
-ary :: t
+fst :: (a , b) -> a
+fst = undefined
+
+snd :: (a , b) -> b
+snd = undefined
+
+ary :: Integer -> (Integer -> a) -> a
 ary = undefined
 
-len :: t
+len :: (Array Integer a) -> Integer
 len = undefined
 
-ind :: t 
+ind :: (Array Integer a) -> Integer -> a 
 ind = undefined

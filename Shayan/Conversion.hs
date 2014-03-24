@@ -1,4 +1,4 @@
-module Conversion(Cnv(..),(<$@>),(<*@>)) where
+module Conversion(Cnv(..),(<$@>),(<*@>),cnvImp) where
 
 import Prelude ()
 import MyPrelude
@@ -19,19 +19,13 @@ instance Cnv (TH.Name , r) TH.Name where
   
 instance Cnv (() , r) () where
   cnv = pure . fst 
+   
+instance Cnv (a , r) b => Cnv (Array Integer a , r) (Array Integer b) where
+  cnv (e , r) = let ?r = r in mapM cnvImp e
 
-instance Cnv Integer Integer where
-  cnv = pure 
-  
-instance Cnv Bool Bool where
-  cnv = pure  
-  
-instance Cnv TH.Name TH.Name where
-  cnv = pure    
-  
-instance Cnv () () where  
-  cnv = pure
-  
+cnvImp :: (Cnv (a , r) b , ?r :: r) => a -> ErrM b
+cnvImp x = cnv (x  , ?r)
+
 infixl 4 <$@>
 (<$@>) :: (?r :: r , Cnv (a , r) a') => (a' -> b) -> a -> ErrM b
 el <$@> er = el <$> cnv (er , ?r)

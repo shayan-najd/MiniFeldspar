@@ -28,8 +28,8 @@ instance Cnv (TFA.Typ) (ExsSin TFG.Typ) where
   cnv (TFA.Ary t)     = do ExsSin t' <- cnv t
                            return (ExsSin (TFG.Ary t'))
                             
-instance Cnv (TFA.Typ , ()) (TH.Typ (TH.EnvFld '[])) where
-  cnv (th , ()) = let ?r = () in case th of 
+instance Cnv (TFA.Typ , r) (TH.Typ (TH.EnvFld '[])) where
+  cnv (th , r) = let ?r = r in case th of 
     TFA.Int       -> pure TH.int
     TFA.Bol       -> pure TH.bol
     TFA.Arr ta tb -> TH.arr <$@> ta <*@> tb 
@@ -39,8 +39,8 @@ instance Cnv (TFA.Typ , ()) (TH.Typ (TH.EnvFld '[])) where
 ---------------------------------------------------------------------------------
 --  Conversion from TFG.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (TFG.Typ a , ()) TFA.Typ where
-  cnv (tt , ()) = let ?r =  () in case tt of
+instance Cnv (TFG.Typ a , r) TFA.Typ where
+  cnv (tt , r) = let ?r =  r in case tt of
     TFG.Int       -> pure TFA.Int
     TFG.Bol       -> pure TFA.Bol
     TFG.Arr ta tb -> TFA.Arr <$@> ta <*@> tb 
@@ -49,8 +49,8 @@ instance Cnv (TFG.Typ a , ()) TFA.Typ where
 ---------------------------------------------------------------------------------
 --  Conversion from TH.Typ
 ---------------------------------------------------------------------------------
-instance Cnv (TH.Typ (TH.EnvFld '[]) , ()) TFA.Typ where
-  cnv (th , ()) = let ?r = () in case th of 
+instance Cnv (TH.Typ (TH.EnvFld '[]) , r) TFA.Typ where
+  cnv (th , r) = let ?r = r in case th of 
     TH.App Zro _                  -> pure TFA.Int      
     TH.App (Suc Zro) 
       (Ext ta (Ext tb Emp))       -> TFA.Arr <$@> ta <*@> tb
@@ -63,5 +63,5 @@ instance Cnv (TH.Typ (TH.EnvFld '[]) , ()) TFA.Typ where
       (Ext t Emp)                 -> TFA.Ary <$@> t    
     _                             -> fail "Type Error!"
 
-instance ts ~ ts' => Cnv (TFG.Typ ts, a) (TFG.Typ ts') where
+instance ts ~ ts' => Cnv (TFG.Typ ts, r) (TFG.Typ ts') where
   cnv = pure . fst

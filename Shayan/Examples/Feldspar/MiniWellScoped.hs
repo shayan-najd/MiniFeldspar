@@ -5,7 +5,7 @@ import MyPrelude
 
 import Expression.Feldspar.MiniWellScoped
 import Environment.Typed
-import qualified Expression.Feldspar.GADTValue as V
+import qualified Expression.Feldspar.GADTValue as FGV
 import Variable.Typed
 import Conversion
 import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
@@ -29,6 +29,6 @@ four :: Exp EnvAdd A.Int
 four = (dbl . dbl) (ConI 1)
 
 test :: Bool
-test = case cnv (four , Ext V.addV Emp) of  
-  Rgt x -> x V.=== V.Val (4 :: Integer)
+test = case cnv (four , Ext FGV.addV Emp) of  
+  Rgt x -> x FGV.=== FGV.Exp (4 :: Integer)
   Lft _ -> False

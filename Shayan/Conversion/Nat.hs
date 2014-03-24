@@ -8,11 +8,12 @@ import qualified Nat.GADT as NG
 
 import Conversion
  
-instance Cnv NA.Nat (ExsSin NG.Nat) where
-  cnv NA.Zro     = return (ExsSin NG.Zro)
-  cnv (NA.Suc n) = do ExsSin n' <- cnv n
-                      return (ExsSin (NG.Suc n'))
-                     
+instance Cnv (NA.Nat , r) (ExsSin NG.Nat) where
+  cnv (ee , r) = let ?r = r in case ee of 
+    NA.Zro     -> return (ExsSin NG.Zro)
+    (NA.Suc n) -> do ExsSin n' <- cnvImp n
+                     return (ExsSin (NG.Suc n'))
+ 
 instance Cnv NA.Nat Int where                     
   cnv NA.Zro     = return 0
   cnv (NA.Suc v) = (1 +) <$> cnv v 
