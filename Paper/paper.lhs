@@ -73,14 +73,17 @@
 
 \title{Embedding Domain-Specific Languages with Quotation and Normalisation}
 
-%\title{NDSLs}
-%\subtitle{A Better Way to Combine Deep and Shallow Embedding}
-
 \authorinfo{Shayan Najd}
            {The University of Edinburgh}
            {}
-\authorinfo{Other People}
-           {Various Places}
+\authorinfo{Sam Lindley}
+           {The University of Edinburgh}
+           {}
+\authorinfo{Josef Svenningsson}
+           {Chalmers University of Technology}
+           {}
+\authorinfo{Philip Wadler}
+           {The University of Edinburgh}
            {}
 %% \authorinfo{Name2\and Name3}
 %%            {Affiliation2/3}
@@ -93,24 +96,24 @@
 We describe a technique, based on quotation and normalisation of
 quoted terms, for embedding into a host-language a domain-specific
 language that translates into a target language. The technique was
-developed by Cheney, Lindley, and Wadler, who applied it to embed
-queries into F\# that translate into SQL. They conjectured that the
-same technique applied in other situations, and here we test that
+developed by Cheney, Lindley, and Wadler (2013), who applied it to
+embed queries into F\# that translate into SQL. They conjectured that
+the same technique applied in other situations, and here we test that
 conjecture by applying the technique to the Feldspar system of
 Axelsson and others (2010), which embeds signal processing programs
-into Haskell that translate into C.  We validate our technique by
+into Haskell that translate into C. We validate our technique by
 re-implementing Feldspar using Template Haskell quasi-quotation, and
 confirm that Feldspar and our technique yield identical target code on
 a range of applications including image processing, FFT, and CRC.
 
-Feldspar, as well as similar languages such as Nicola and ???,
+Feldspar, as well as similar languages such as Nicola and Hydra,
 benefits from a clever combination of deep and shallow embedding that
 permits programs in the embedded language to look almost---but not
-quite!---identical to programs in the host language.  (For instance,
+quite!---identical to programs in the host language. (For instance,
 arithmetic and pairing is identical in embedded and host languages,
-but comparison and conditionals are not.)  In contrast, our technique
+but comparison and conditionals are not.) In contrast, our technique
 makes the syntax of the embedded language identical to that of the
-host language.  Apart from building a normaliser for quoted terms, our
+host language. Apart from building a normaliser for quoted terms, our
 technique is simpler to apply than existing techniques; and we argue
 that a single normaliser can be built once and used to embed many
 domain-specific languages into a given host language.
