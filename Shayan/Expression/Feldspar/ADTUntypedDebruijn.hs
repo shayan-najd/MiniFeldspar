@@ -7,6 +7,7 @@ import Variable.Plain
 
 data Exp = ConI Integer 
          | ConB Bool 
+         | ConF Float  
          | Var  Var  
          | Abs  Exp
          | App  Exp Exp  
@@ -19,6 +20,7 @@ data Exp = ConI Integer
          | Len  Exp 
          | Ind  Exp Exp 
          | Let  Exp Exp
+         | Cmx  Exp Exp  
          
 deriving instance Eq   Exp
 deriving instance Show Exp
@@ -27,6 +29,7 @@ fre :: Exp -> [Nat]
 fre ee = case ee of
   ConI _        -> []
   ConB _        -> []
+  ConF _        -> []
   Var  n        -> [n] 
   Abs  eb       -> drpZro (fre eb)
   App  ef ea    -> fre ef ++ fre ea
@@ -39,5 +42,6 @@ fre ee = case ee of
   Len  e        -> fre e
   Ind  e ei     -> fre e  ++ fre ei
   Let  el eb    -> fre el ++ drpZro (fre eb)                      
+  Cmx  er ei    -> fre er ++ fre ei
   where
     drpZro = fmap prd . filter (/= Zro)

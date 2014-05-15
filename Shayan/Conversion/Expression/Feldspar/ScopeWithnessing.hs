@@ -22,6 +22,7 @@ instance n ~ n' => Cnv (FAUD.Exp , Nat n) (FGUD.Exp n') where
   cnv (eaum  , n) = let ?r = n in case eaum of
     FAUD.ConI i       -> FGUD.ConI <$@> i
     FAUD.ConB b       -> FGUD.ConB <$@> b 
+    FAUD.ConF b       -> FGUD.ConF <$@> b     
     FAUD.Var v        -> FGUD.Var  <$@> v
     FAUD.Abs eb       -> FGUD.Abs  <$> cnvf eb 
     FAUD.App ef ea    -> FGUD.App  <$@> ef <*@> ea
@@ -34,6 +35,7 @@ instance n ~ n' => Cnv (FAUD.Exp , Nat n) (FGUD.Exp n') where
     FAUD.Len e        -> FGUD.Len  <$@> e 
     FAUD.Ind ea ei    -> FGUD.Ind  <$@> ea <*@> ei
     FAUD.Let el eb    -> FGUD.Let  <$@> el <*> cnvf eb
+    FAUD.Cmx er ei    -> FGUD.Cmx  <$@> er <*@> ei    
     where
       cnvf e = cnv (e , Suc n) 
          
@@ -41,6 +43,7 @@ instance Cnv (FGUD.Exp n , r) (FAUD.Exp) where
   cnv (eaum  , r) = let ?r = r in case eaum of
     FGUD.ConI i       -> FAUD.ConI <$@> i
     FGUD.ConB b       -> FAUD.ConB <$@> b 
+    FGUD.ConF b       -> FAUD.ConF <$@> b     
     FGUD.Var v        -> FAUD.Var  <$@> v
     FGUD.Abs eb       -> FAUD.Abs  <$@> eb 
     FGUD.App ef ea    -> FAUD.App  <$@> ef <*@> ea
@@ -53,4 +56,4 @@ instance Cnv (FGUD.Exp n , r) (FAUD.Exp) where
     FGUD.Len e        -> FAUD.Len  <$@> e 
     FGUD.Ind ea ei    -> FAUD.Ind  <$@> ea <*@> ei
     FGUD.Let el eb    -> FAUD.Let  <$@> el <*@> eb
- 
+    FGUD.Cmx er ei    -> FAUD.Cmx  <$@> er <*@> ei 

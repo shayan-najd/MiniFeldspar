@@ -24,6 +24,7 @@ instance (r ~ r' , n ~ Len r , HasSin TFG.Typ t) =>
   cnv (ee , r) = let ?r = r in let t = sin :: TFG.Typ t in case (ee , t) of
     (FGTD.ConI i       , TFG.Int)      -> FGFO.ConI <$@> i
     (FGTD.ConB b       , TFG.Bol)      -> FGFO.ConB <$@> b
+    (FGTD.ConF b       , TFG.Flt)      -> FGFO.ConF <$@> b
     (FGTD.Var x        , _)            -> FGFO.Var  <$@> x
     (FGTD.Abs eb       , TFG.Arr ta _) -> case TFG.getPrfHasSinArr t of
       (PrfHasSin , PrfHasSin)          -> FGFO.Abs  <$@> (ta , eb) 
@@ -54,7 +55,8 @@ instance (r ~ r' , n ~ Len r , HasSin TFG.Typ t) =>
                                              e' <- cnvImp e
                                              FGFO.Len <$> pure 
                                                       (samTyp (TFG.Ary ta') e')
-    (FGTD.Ind e  ei    , _)            -> FGFO.Ind <$@> e <*@> ei
+    (FGTD.Ind e  ei    , _)            -> FGFO.Ind <$@> e  <*@> ei
+    (FGTD.Cmx er ei    , TFG.Cmx)      -> FGFO.Cmx <$@> er <*@> ei
     (FGTD.Let tl el eb , _)            -> do ExsSin tl' :: ExsTyp <- cnv tl
                                              PrfHasSin <- getPrfHasSinM tl'
                                              FGFO.Let <$@> el <*@> (tl' , eb) 
@@ -71,6 +73,7 @@ instance (n ~ Len r , HasSin TFG.Typ t) =>
   cnv (ee , r) = let ?r = r in let t = sin :: TFG.Typ t in case ee of
     FGFO.ConI i               -> FGTD.ConI <$@> i
     FGFO.ConB b               -> FGTD.ConB <$@> b
+    FGFO.ConF b               -> FGTD.ConF <$@> b    
     FGFO.Var x                -> FGTD.Var  <$@> x
     FGFO.Abs eb               -> case TFG.getPrfHasSinArr t of
       (PrfHasSin , PrfHasSin) -> FGTD.Abs <$@> eb
@@ -87,6 +90,7 @@ instance (n ~ Len r , HasSin TFG.Typ t) =>
     FGFO.Ind e  ei            -> FGTD.Ind <$@> e <*@> ei
     FGFO.Let el eb            -> FGTD.Let <$@> sinTypOf el t 
                                           <*@> el <*@> eb
+    FGFO.Cmx er  ei           -> FGTD.Cmx <$@> er <*@> ei 
                                           
 instance (n ~ Len (ta ': r) , HasSin TFG.Typ t, HasSin TFG.Typ ta) =>
          Cnv (FGFO.Exp (ta ': r) t , Env TFG.Typ r) 

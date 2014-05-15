@@ -10,7 +10,7 @@ import Variable.Typed
 import Conversion
 import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 import qualified Type.Feldspar.ADT as A
-import Type.Feldspar.GADT ()
+import Type.Feldspar.ADT  as TFA
 
 type Add = A.Arr A.Int (A.Arr A.Int A.Int)
 type EnvAdd = Add ': '[]
@@ -29,6 +29,9 @@ four :: Exp EnvAdd A.Int
 four = (dbl . dbl) (ConI 1)
 
 test :: Bool
-test = case cnv (four , Ext FGV.addV Emp) of  
+test = case cnv (four 
+                , Ext (FGV.Exp (+) 
+                       :: FGV.Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int)))  
+                  Emp) of  
   Rgt x -> x FGV.=== FGV.Exp (4 :: Integer)
   Lft _ -> False

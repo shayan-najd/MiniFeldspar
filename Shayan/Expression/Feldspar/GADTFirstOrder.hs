@@ -13,6 +13,7 @@ import qualified Type.Feldspar.GADT as TFG
 data Exp :: [TFA.Typ] -> TFA.Typ -> * where 
   ConI :: Integer  -> Exp r TFA.Int 
   ConB :: Bool     -> Exp r TFA.Bol
+  ConF :: Float    -> Exp r TFA.Flt
   Var  :: Var r t  -> Exp r t  
   Abs  :: Exp (ta ': r) tb -> Exp r (TFA.Arr ta tb) 
   App  :: HasSin TFG.Typ ta => 
@@ -26,6 +27,7 @@ data Exp :: [TFA.Typ] -> TFA.Typ -> * where
   Len  :: HasSin TFG.Typ ta => Exp r (TFA.Ary ta) -> Exp r TFA.Int 
   Ind  :: Exp r (TFA.Ary ta) -> Exp r TFA.Int -> Exp r ta 
   Let  :: HasSin TFG.Typ tl => Exp r tl -> Exp (tl ': r) tb -> Exp r tb  
+  Cmx  :: Exp r TFA.Flt -> Exp r TFA.Flt -> Exp r TFA.Cmx
   
 sucAll :: Exp r t' -> Exp (t ': r) t'
 sucAll = mapVar Suc
@@ -38,6 +40,7 @@ mapVar :: forall r r' t.
 mapVar f ee = case ee of
   ConI i       -> ConI i
   ConB i       -> ConB i
+  ConF i       -> ConF i
   Var v        -> Var (f v)
   Abs eb       -> Abs (mf eb)  
   App ef ea    -> App (m ef)  (m ea)
@@ -50,6 +53,7 @@ mapVar f ee = case ee of
   Len e        -> Len (m e)
   Ind ea ei    -> Ind (m ea)  (m ei)
   Let el eb    -> Let (m el)  (mf eb)
+  Cmx er ei    -> Cmx (m er)  (m ei)
   where
     m :: Exp r tt -> Exp r' tt
     m  = mapVar f

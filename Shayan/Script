@@ -1,0 +1,26 @@
+#!/bin/bash
+for a in IP CRC FFT
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    ./clean
+	    rm ${a}${n}
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Compile ghc -o ${a}${n} Examples/Feldspar/${a}/${n}.hs  -XRankNTypes -XPolyKinds -XGADTs -XStandaloneDeriving -XDeriveTraversable -XDeriveFoldable -XDeriveFunctor -XTemplateHaskell -XImplicitParams -XMultiParamTypeClasses -XTypeOperators -XDataKinds -XFlexibleInstances -XPatternSynonyms -XTypeFamilies -XScopedTypeVariables  
+	done
+    done
+done
+./clean
+for a in IP CRC FFT
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    rm ${a}${n}.c
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Gen ./${a}${n} 
+	done
+    done
+done
+./clean

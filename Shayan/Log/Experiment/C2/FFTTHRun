@@ -1,0 +1,20 @@
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun
+rm ./ImageFFT.pgm
+{ time ./FFTTH 2> sleepStdErr.txt ; } 2>> timeFFTTHRun

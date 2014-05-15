@@ -1,0 +1,52 @@
+
+We propose a general technique for embedding Domain-Specific
+Languages, abbreviated as DSL, in a host language supporting
+quotations. We call the resulting DSLs as Quoted DSL, abbreviated as
+QDSL, opposed to the term Embedded DSL, abbreviated as EDSL, referring
+to the result of common existing embedding techniques.
+ 
+
+The common existing embedding techniques piggyback on the following
+important features of the host language:
+ (a) Syntax: 
+     EDSLs "partially" reuse the syntax of the host language. EDSLs are
+     normal programs written in the host language. As a result, there is
+     no need to provide a lexer and parser for EDSLs. However, this
+     also forces the EDSLs to have a rather indirect syntax (e.g. it
+     is often impossible to write conditionals with the if-then-else
+     syntax in EDSLs).
+ (b) Naming Mechanism and Module System:
+     EDSLs inherit, and reuse, the scoping and naming rules of the
+     host language.
+ (c) Type Checker, Inference Engine, and Overloading Mechanism: 
+     EDSLs often reuse the type system of the host language (e.g. via
+     GADTs). However, this reuse of the type system of the host
+     language often involves complex type machinery which often makes
+     it difficult, if not impossible, to reuse the type inference
+     system of the host language.
+ (d) Normalization and Optimization: 
+     A few EDSLs even reuse the evaluation process of the host
+     language to normalize the object language (e.g. in
+     Feldspar). They may also benefit from the optimization process of
+     the host language (e.g. sharing and common sub-expression
+     elmination)
+ (e) Evaluation: 
+     By specific encodings, such as Higher-Order Abstract Syntax, some
+     EDSLs also reuse the evaluation process of the host language.
+ (f) Exisiting Code and Interoperability:
+     It is often possible for EDSLs to use the programs written in the
+     host language. Moreover, it is relatively easy to do
+     metaprogramming in the object language by considering the
+     host-level code generating and manipulating the object language
+     structures as meta-programs.
+ (g) Tools and Macro Systems:
+     EDSLs reues the tools provided for the host language. However,
+     this reuse of tools often results in poor feedback (e.g. back
+     error messages).
+ 
+Our proposed embedding technique also piggybacks on the mentioned important features of the host language, but in a more refined and controlled way:
+(a) Syntax:QDSLs can reuse the exact syntax of the host language. If needed, it is also possible to provide custom syntax (in a language that supports typed quasi-quotations).
+(b) QDSLs reuse the type system of the host language (e.g. via typed quotations)
+(c) QDSLs can reuse the normalization process of the host language. 
+ 
+In order to evaluate our proposed technique, we provide an alternative quotation-based front-end for an existing EDSL, MiniFeldspar [citation to "Combining Deep and Shallow Embedding for EDSL"]. MiniFeldspar is a full-spectrum EDSL: it piggybacks on all the three mentioned features of host language, making it a good target to evaluate our results. Particularly, MiniFeldspar is one of the few existing documented EDSLs that reuses the evaluation process of the host language to provide normalization guarantees (i.e elimination of intermediate data structures). MiniFeldspar is designed to capture the essence of this normalization process in the well-respected EDSL Feldspar. Feldspar is ...

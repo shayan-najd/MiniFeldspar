@@ -22,6 +22,7 @@ instance (t ~ t' , r ~ r') =>
   cnv (ee , r) = let ?r = r in case ee of  
       FGFO.ConI i       -> FGHO.ConI <$@> i
       FGFO.ConB b       -> FGHO.ConB <$@> b
+      FGFO.ConF b       -> FGHO.ConF <$@> b      
       FGFO.Var v        -> id        <$@> v 
       FGFO.Abs eb       -> FGHO.Abs  <$@> eb
       FGFO.App ef ea    -> FGHO.App  <$@> ef <*@> ea
@@ -34,7 +35,8 @@ instance (t ~ t' , r ~ r') =>
       FGFO.Len e        -> FGHO.Len  <$@> e 
       FGFO.Ind ea ei    -> FGHO.Ind  <$@> ea <*@> ei
       FGFO.Let el eb    -> FGHO.Let  <$@> el <*@> eb  
-       
+      FGFO.Cmx er ei    -> FGHO.Cmx  <$@> er <*@> ei       
+
 instance (ta ~ ta' , tb ~ tb' , r ~ r') => 
          Cnv (FGFO.Exp (ta ': r) tb , Env (FGHO.Exp r) r) 
              (FGHO.Exp r' ta' -> FGHO.Exp r' tb') 

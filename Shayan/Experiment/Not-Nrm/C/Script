@@ -1,0 +1,45 @@
+#!/bin/bash
+#for i in {1..10}
+#do
+#    rm ip
+#    /usr/bin/time -f "%e" -a -o timeIPGCC gcc -o ip IP.c -std=c99 -lm
+#done 
+for i in {1..10}
+do
+    rm fftth
+    /usr/bin/time -f "%e" -a -o timeFFTTHGCC gcc -o fftth FFTTemplateHaskell.c -std=c99 -lm
+done 
+#for i in {1..10}
+#do
+#    rm fftms
+#    /usr/bin/time -f "%e" -a -o timeFFTMSGCC gcc -o fftms FFTMiniWellScoped.c -std=c99 -lm
+#done 
+#for i in {1..10}
+#do
+#    rm crcth
+#    /usr/bin/time -f "%e" -a -o timeCRCTHGCC gcc -o crcth CRCTemplateHaskell.c -std=c99 -lm
+#done 
+#for i in {1..10}
+#do
+#    rm crcms
+#    /usr/bin/time -f "%e" -a -o timeCRCMSGCC gcc -o crcms CRCMiniWellScoped.c -std=c99 -lm
+#done 
+#for i in {1..10}
+#do
+#    rm Image.pbm
+#    /usr/bin/time -f "%e" -a -o timeIPRun ./ip
+#done 
+#for i in {1..10}
+#do
+#    /usr/bin/time -f "%e" -a -o timeCRCTHRun ./crcth
+#done 
+#for i in {1..10}
+#do
+#    /usr/bin/time -f "%e" -a -o timeCRCMSRun ./crcms
+#done 
+for i in {1..10}
+do
+    rm ImageFFT.pgm
+    /usr/bin/time -f "%e" -a -o timeFFTTHRun ./fftth
+done 
+ 

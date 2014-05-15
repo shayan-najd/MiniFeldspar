@@ -1,0 +1,20 @@
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen
+rm ~/IPMini.c
+{ time ./IPMini 2> sleepStdErr.txt ; } 2>> timeIPMiniGen

@@ -27,6 +27,7 @@ instance n ~ n' => Cnv (FGUD.Exp n , rr) (FGTD.Exp n' ()) where
   cnv (eaum , r) = let ?r = r in case eaum of
     FGUD.ConI i       -> FGTD.ConI <$@> i
     FGUD.ConB b       -> FGTD.ConB <$@> b
+    FGUD.ConF b       -> FGTD.ConF <$@> b    
     FGUD.Var v        -> FGTD.Var  <$@> v
     FGUD.Abs eb       -> FGTD.Abs  <$@> eb
     FGUD.App ef ea    -> FGTD.App  <$@> () <*@> ef <*@> ea
@@ -39,7 +40,8 @@ instance n ~ n' => Cnv (FGUD.Exp n , rr) (FGTD.Exp n' ()) where
     FGUD.Len e        -> FGTD.Len  <$@> () <*@> e 
     FGUD.Ind ea ei    -> FGTD.Ind  <$@> ea <*@> ei
     FGUD.Let el eb    -> FGTD.Let  <$@> () <*@> el <*@> eb
- 
+    FGUD.Cmx er ei    -> FGTD.Cmx  <$@> er <*@> ei 
+
 instance n ~ n' => Cnv (FGTD.Exp n () , Env n TFA.Typ)(FGTD.Exp n' TFA.Typ) where
   cnv (e , r) = let ?r = r in 
     do r' :: Env n (TH.Typ (TH.EnvFld '[])) <- cnvImp r
@@ -50,6 +52,7 @@ instance n ~ n' => Cnv (FGTD.Exp n' t , r) (FGUD.Exp n)  where
   cnv (eaum , r) = let ?r = r in case eaum of
     FGTD.ConI i       -> FGUD.ConI <$@> i
     FGTD.ConB b       -> FGUD.ConB <$@> b
+    FGTD.ConF b       -> FGUD.ConF <$@> b    
     FGTD.Var v        -> FGUD.Var  <$@> v
     FGTD.Abs eb       -> FGUD.Abs  <$@> eb
     FGTD.App _ ef ea  -> FGUD.App  <$@> ef <*@> ea
@@ -62,4 +65,4 @@ instance n ~ n' => Cnv (FGTD.Exp n' t , r) (FGUD.Exp n)  where
     FGTD.Len _ e      -> FGUD.Len  <$@> e 
     FGTD.Ind ea ei    -> FGUD.Ind  <$@> ea <*@> ei
     FGTD.Let _ el eb  -> FGUD.Let  <$@> el <*@> eb
- 
+    FGTD.Cmx er ei    -> FGUD.Cmx  <$@> er <*@> ei 

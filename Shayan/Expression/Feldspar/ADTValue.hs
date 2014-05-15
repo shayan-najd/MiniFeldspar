@@ -5,10 +5,67 @@ import MyPrelude
 
 data Exp = ConI Integer
          | ConB Bool  
+         | ConF Float  
          | Abs (Exp -> Exp)
          | Tpl (Exp , Exp)  
          | Ary (Array Integer Exp)  
-    
+         | Cmx (Complex Float)  
+ 
+class Lft t where
+  lft :: t -> Exp
+  
+instance Lft Integer where  
+  lft = ConI
+  
+instance Lft Bool where  
+  lft = ConB
+
+instance Lft Float where  
+  lft = ConF
+
+instance (CoLft a , Lft b) => Lft (a -> b) where
+  lft f = Abs (lft . f . colft)
+
+instance (Lft a , Lft b) => Lft (a , b) where
+  lft (x , y) = Tpl (lft x , lft y) 
+  
+instance Lft a => Lft (Array Integer a) where  
+  lft a = Ary (fmap lft a)
+  
+instance Lft (Complex Float) where  
+  lft = Cmx
+
+class CoLft t where
+  colft :: Exp -> t
+  
+instance CoLft Integer where  
+  colft (ConI i) = i
+  colft _        = error "Type Error!"
+  
+instance CoLft Bool where  
+  colft (ConB b) = b
+  colft _        = error "Type Error!"
+  
+instance CoLft Float where  
+  colft (ConF f) = f
+  colft _        = error "Type Error!"
+
+instance (Lft a , CoLft b) => CoLft (a -> b) where
+  colft (Abs f) = colft . f . lft 
+  colft _       = error "Type Error!"
+
+instance (CoLft a , CoLft b) => CoLft (a , b) where
+  colft (Tpl (x , y) ) = (colft x , colft y)
+  colft _              = error "Type Error!"
+  
+instance CoLft a => CoLft (Array Integer a) where  
+  colft (Ary x) = fmap colft x
+  colft _       = error "Type Error!"
+  
+instance CoLft (Complex Float) where  
+  colft (Cmx c) = c
+  colft _       = error "Type Error!"
+
 var :: a -> ErrM a
 var = return
 
@@ -17,6 +74,9 @@ conI = return . ConI
 
 conB :: Bool -> ErrM Exp
 conB = return . ConB
+
+conF :: Float -> ErrM Exp
+conF = return . ConF
 
 abs :: (Exp -> Exp) -> ErrM Exp
 abs = return . Abs 
@@ -55,9 +115,9 @@ tpl :: Exp -> Exp -> ErrM Exp
 tpl vf vs = return (Tpl (vf , vs))
  
 ary :: Exp -> (Exp -> Exp) -> ErrM Exp
-ary (ConI l) vf = return (Ary (listArray (0 , l) 
+ary (ConI l) vf = return (Ary (listArray (0 , (l - 1)) 
                                [vf (ConI i)
-                               | i <- [0 .. l]]))
+                               | i <- [0 .. (l - 1)]]))
 ary _        _  = fail "Type Error!"             
 
 len :: Exp -> ErrM Exp
@@ -68,3 +128,6 @@ ind :: Exp -> Exp -> ErrM Exp
 ind (Ary a) (ConI i) = return (a ! i)
 ind _       _        = fail " Type Error!"
 
+cmx :: Exp -> Exp -> ErrM Exp 
+cmx (ConF fr) (ConF fi) = return (Cmx (fr :+ fi))
+cmx _         _         = fail " Type Error!"

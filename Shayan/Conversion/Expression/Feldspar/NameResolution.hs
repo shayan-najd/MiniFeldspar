@@ -23,6 +23,7 @@ instance Eq x =>
   cnv (eaup , r) = let ?r = r in case eaup of
     FAUN.ConI i              -> FAUD.ConI <$@> i
     FAUN.ConB b              -> FAUD.ConB <$@> b
+    FAUN.ConF b              -> FAUD.ConF <$@> b    
     FAUN.Var  x              -> FAUD.Var  <$@> x
     FAUN.Abs  xb eb          -> FAUD.Abs  <$@> (xb , eb)
     FAUN.App  ef ea          -> FAUD.App  <$@> ef <*@> ea
@@ -33,10 +34,11 @@ instance Eq x =>
     FAUN.Fst  e              -> FAUD.Fst  <$@> e 
     FAUN.Snd  e              -> FAUD.Snd  <$@> e 
     FAUN.Ary  el xf ef       -> FAUD.Ary  <$@> el <*@> (xf , ef)
+    FAUN.Len  e              -> FAUD.Len  <$@> e    
     FAUN.Ind  ea ei          -> FAUD.Ind  <$@> ea <*@> ei 
-    FAUN.Len  e              -> FAUD.Len  <$@> e
     FAUN.Let  xl el eb       -> FAUD.Let  <$@> el <*@> (xl , eb)
- 
+    FAUN.Cmx  er ei          -> FAUD.Cmx  <$@> er <*@> ei  
+    
 instance Eq x => 
          Cnv ((x , FAUN.Exp x) , EM.Env x Var) 
          FAUD.Exp where
@@ -47,6 +49,7 @@ instance (x ~ x') =>
   cnv (eaup , r) = let ?r = r in case eaup of
     FAUD.ConI i        -> FAUN.ConI <$@> i
     FAUD.ConB b        -> FAUN.ConB <$@> b
+    FAUD.ConF b        -> FAUN.ConF <$@> b    
     FAUD.Var  x        -> let ?r = snd r in FAUN.Var  <$@> x
     FAUD.Abs  eb       -> do (xb , eb') <- cnvf eb 
                              pure (FAUN.Abs xb eb')
@@ -60,10 +63,11 @@ instance (x ~ x') =>
     FAUD.Snd  e        -> FAUN.Snd  <$@> e 
     FAUD.Ary  el ef    -> do (xf , ef') <- cnvf ef 
                              FAUN.Ary  <$@> el <*> pure xf <*> pure ef' 
-    FAUD.Ind  ea ei    -> FAUN.Ind  <$@> ea <*@> ei 
     FAUD.Len  e        -> FAUN.Len  <$@> e
+    FAUD.Ind  ea ei    -> FAUN.Ind  <$@> ea <*@> ei     
     FAUD.Let  el eb    -> do (xl , eb') <- cnvf eb
                              FAUN.Let  <$> pure xl <*@> el <*> pure eb'
+    FAUD.Cmx  er ei    -> FAUN.Cmx  <$@> er <*@> ei                              
     where  
       cnvf :: FAUD.Exp -> ErrM (x , FAUN.Exp x)
       cnvf e = case r of 

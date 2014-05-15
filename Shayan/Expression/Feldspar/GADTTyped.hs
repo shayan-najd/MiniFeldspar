@@ -10,6 +10,7 @@ import qualified Nat.ADT as NA
 data Exp :: NA.Nat -> * -> * where 
   ConI :: Integer -> Exp n t 
   ConB :: Bool    -> Exp n t 
+  ConF :: Float   -> Exp n t   
   Var  :: Var n   -> Exp n t 
   Abs  :: Exp (NA.Suc n) t -> Exp n t
   App  :: t -> Exp n t -> Exp n t -> Exp n t   
@@ -22,6 +23,7 @@ data Exp :: NA.Nat -> * -> * where
   Len  :: t -> Exp n t -> Exp n t  
   Ind  :: Exp n t -> Exp n t -> Exp n t 
   Let  :: t -> Exp n t -> Exp (NA.Suc n) t -> Exp n t 
+  Cmx  :: Exp n t -> Exp n t -> Exp n t 
 
 deriving instance Eq t   => Eq   (Exp n t) 
 deriving instance Show t => Show (Exp n t)
@@ -39,6 +41,7 @@ mapVar :: (Var n -> Var n') -> Exp n t -> Exp n' t
 mapVar f ebb = case ebb of  
   ConI i       -> ConI i
   ConB b       -> ConB b
+  ConF b       -> ConF b
   Var v        -> Var (f v)
   Abs eb       -> Abs (mf eb)  
   App t  ef ea -> App t (m ef) (m ea)    
@@ -51,6 +54,7 @@ mapVar f ebb = case ebb of
   Len t  e     -> Len t (m e )                         
   Ind ea ei    -> Ind (m ea) (m ei)                         
   Let t  el eb -> Let t (m el) (mf eb) 
+  Cmx er ei    -> Cmx (m er) (m ei)                         
   where                    
     m  = mapVar f
     mf = mapVar (inc f)
@@ -59,6 +63,7 @@ sbs :: Exp n ta -> Var n -> Exp n ta -> Exp n ta
 sbs ebb v eaa = case ebb of  
   ConI i         -> ConI i
   ConB b         -> ConB b
+  ConF b         -> ConF b
   Var x 
     | x == v     -> eaa              
     | otherwise  -> ebb            
@@ -73,6 +78,7 @@ sbs ebb v eaa = case ebb of
   Len t  e       -> Len t (s e )                         
   Ind ea ei      -> Ind (s ea) (s ei)                         
   Let t  el eb   -> Let t (s el) (sf eb) 
+  Cmx er ei      -> Cmx (s er) (s ei)                         
   where
     s  e = sbs e v eaa 
     sf e = sbs e (Suc v) (sucAll eaa)
@@ -84,6 +90,7 @@ fre' :: forall n t. Exp n t -> Var n -> [Var n]
 fre' ee v = case ee of
   ConI _       -> [] 
   ConB _       -> [] 
+  ConF _       -> []   
   Var x 
    | x >= v    -> [x] 
    | otherwise -> []                      
@@ -98,6 +105,7 @@ fre' ee v = case ee of
   Len _  e     -> f  e  
   Ind ea ei    -> f  ea ++ f  ei
   Let _  el eb -> f  el ++ ff eb
+  Cmx er ei    -> f  er ++ f  ei  
   where
     f  e = fre' e v
     

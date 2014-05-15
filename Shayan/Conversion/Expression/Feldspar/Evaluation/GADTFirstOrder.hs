@@ -21,6 +21,7 @@ instance (HasSin TFG.Typ t , t' ~ t) =>
   cnv (ee , r) = let ?r = r in case ee of 
     ConI i                   -> FGV.conI <$@> i
     ConB b                   -> FGV.conB <$@> b
+    ConF b                   -> FGV.conF <$@> b    
     Var x                    -> FGV.var  <$@> x
     Abs eb                   -> case TFG.getPrfHasSinArr (T :: T t) of
      (PrfHasSin , PrfHasSin) -> cnv (eb , r)
@@ -36,6 +37,7 @@ instance (HasSin TFG.Typ t , t' ~ t) =>
     Len e                    -> FGV.len  <$@> e                        
     Ind ea ei                -> FGV.ind  <$@> ea <*@> ei
     Let el eb                -> cnv (App (Abs eb) el , r)
+    Cmx er ei                -> FGV.cmx  <$@> er <*@> ei    
  
 instance (ta' ~ ta , tb' ~ tb , HasSin TFG.Typ ta , HasSin TFG.Typ tb) => 
          Cnv (Exp (ta ': r) tb , Env FGV.Exp r)  (FGV.Exp (TFA.Arr ta' tb'))

@@ -27,6 +27,9 @@ four :: Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int) ': '[]) TFA.Int
 four = App (App (App compose dbl) dbl) (ConI 1)
  
 test :: Bool
-test = case cnv (four , Ext FGV.addV Emp) of 
+test = case cnv ( four 
+                , Ext (FGV.Exp (+) 
+                       :: FGV.Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int))) 
+                  Emp) of 
   Rgt x -> x FGV.=== FGV.Exp 4
   Lft _ -> False

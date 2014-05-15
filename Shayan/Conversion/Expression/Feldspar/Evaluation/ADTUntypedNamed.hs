@@ -15,6 +15,7 @@ instance Eq v => Cnv (Exp v , Env v FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of        
     ConI i             -> FAV.conI <$@> i
     ConB b             -> FAV.conB <$@> b 
+    ConF b             -> FAV.conF <$@> b     
     Var x              -> FAV.var  <$@> x
     Abs x eb           -> FAV.abs  <$@> (x , eb)
     App ef ea          -> FAV.app  <$@> ef <*@> ea 
@@ -26,7 +27,8 @@ instance Eq v => Cnv (Exp v , Env v FAV.Exp) FAV.Exp where
     Ary el x ef        -> FAV.ary  <$@> el <*@> (x , ef)
     Len e              -> FAV.len  <$@> e                         
     Ind ea ei          -> FAV.ind  <$@> ea <*@> ei                         
-    Let x el eb        -> pure     <$@> App (Abs x eb) el)
+    Let x el eb        -> pure     <$@> App (Abs x eb) el
+    Cmx er ei          -> FAV.cmx  <$@> er <*@> ei)
         
 instance Eq v => Cnv ((v , Exp v) , Env v FAV.Exp) (FAV.Exp -> FAV.Exp) where
   cnv ((x , e) , r) = pure (frmRgt . curry cnv e . (: r) . (,) x) 

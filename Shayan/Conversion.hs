@@ -8,12 +8,19 @@ import qualified Language.Haskell.TH.Syntax as TH
 class Cnv a b where
   cnv :: a -> ErrM b
   
-instance Cnv (Integer , r) Integer where
+instance Cnv (Word32 , r) Word32 where
   cnv = pure . fst
   
 instance Cnv (Bool , r) Bool where
   cnv = pure . fst  
   
+instance Cnv (Float , r) Float where
+  cnv = pure . fst  
+
+instance Cnv (Complex Float , r) (Complex Float) where
+  cnv = pure . fst  
+
+
 instance Cnv (TH.Name , r) TH.Name where
   cnv = pure . fst    
   

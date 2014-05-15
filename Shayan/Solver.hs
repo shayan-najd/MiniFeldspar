@@ -6,7 +6,7 @@ import MyPrelude
 import Singleton
 import Environment.Scoped
 import Type.Herbrand
- 
+
 slv :: [Typ r] -> [HerCon r] -> ErrM [Typ r]
 slv mem []                                   
   = return mem

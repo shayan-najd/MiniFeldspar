@@ -19,6 +19,9 @@ instance NrmOne Integer      where
 instance NrmOne Bool         where
   nrmOne = pure
 
+instance NrmOne Float        where
+  nrmOne = pure
+
 instance NrmOne VP.Var       where
   nrmOne = pure
 

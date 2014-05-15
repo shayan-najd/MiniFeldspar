@@ -19,6 +19,7 @@ instance Cnv (Exp n t , Env n FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of        
     ConI i       -> FAV.conI <$@> i
     ConB b       -> FAV.conB <$@> b 
+    ConF b       -> FAV.conF <$@> b     
     Var x        -> FAV.var  <$@> x
     Abs eb       -> FAV.abs  <$@> eb
     App _  ef ea -> FAV.app  <$@> ef <*@> ea 
@@ -30,7 +31,8 @@ instance Cnv (Exp n t , Env n FAV.Exp) FAV.Exp where
     Ary el ef    -> FAV.ary  <$@> el <*@> ef
     Len _  e     -> FAV.len  <$@> e                         
     Ind ea ei    -> FAV.ind  <$@> ea <*@> ei                            
-    Let _  el eb -> return <$@> App undefined (Abs eb) el)
+    Let _  el eb -> return   <$@> App undefined (Abs eb) el
+    Cmx er ei    -> FAV.cmx  <$@> er <*@> ei)                            
     
 instance Cnv (Exp (Suc n) t , Env n FAV.Exp) (FAV.Exp -> FAV.Exp) where
   cnv (e , r) = pure (frmRgt . curry cnv e . (flip Ext r))
