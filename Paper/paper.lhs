@@ -1,5 +1,6 @@
 \documentclass[preprint]{sigplanconf}
 
+%include lhs2TeX.fmt
 % US Letter page size
 %\pdfpagewidth=8.5in
 %\pdfpageheight=11in
@@ -61,7 +62,6 @@
 %% (10) Conclusion
 %% (11) Acknowledgements 
 
-
 \begin{document}
 
 %% \conferenceinfo{WXYZ '05}{date, City.} 
@@ -71,23 +71,20 @@
 %% \titlebanner{banner above paper title}        % These are ignored unless
 %% \preprintfooter{short description of paper}   % 'preprint' option specified.
 
-\title{Embedding Domain-Specific Languages with Quotation and Normalisation}
+\title{QDSLs: Why its nicer to be quoted normally}
 
 \authorinfo{Shayan Najd}
            {The University of Edinburgh}
-           {}
+           {sh.najd@@ed.ac.uk}
 \authorinfo{Sam Lindley}
            {The University of Edinburgh}
-           {}
+           {sam.lindley@@ed.ac.uk}
 \authorinfo{Josef Svenningsson}
            {Chalmers University of Technology}
-           {}
+           {josefs@@chalmers.se}
 \authorinfo{Philip Wadler}
            {The University of Edinburgh}
-           {}
-%% \authorinfo{Name2\and Name3}
-%%            {Affiliation2/3}
-%%            {Email2/3}
+           {philip.wadler@@ed.ac.uk}
 
 \maketitle
 
