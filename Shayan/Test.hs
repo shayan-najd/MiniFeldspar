@@ -40,3 +40,7 @@ main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
 --   to reuse Vanilla Prelude
 -- * check for all exhaustive partterns and transform them
 -- * Conversion of FGHO (x :-> y) ~> (FMWS x -> FMWS y)
+-- * Free Fusion for Church / Ahman's Containers
+-- * Supporting F
+-- * Scope Proofing Quotations (e.g. Sam's misunderstanding) [EncodingTypes.txt] 
+-- * Support for Syntactic Suggar in Quotations (e.g. use TH-Desugar)
