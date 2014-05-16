@@ -1,3 +1,5 @@
 find . -name '*~' | xargs rm
 find . -name '*.o' | xargs rm
 find . -name '*.hi' | xargs rm
+find . -name '*.dyn_o' | xargs rm
+find . -name '*.dyn_hi' | xargs rm

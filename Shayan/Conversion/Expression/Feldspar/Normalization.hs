@@ -20,19 +20,22 @@ instance (HasSin TFG.Typ t , t ~ t' , r ~ r') =>
   cnv (ee , r) = let ?r = r in let t = (sin :: TFG.Typ t) in  case ee of 
     FGHO.ConI i               -> FMWS.ConI <$@> i 
     FGHO.ConB b               -> FMWS.ConB <$@> b 
+    FGHO.ConF b               -> FMWS.ConF <$@> b     
     FGHO.Var v                -> case sin :: TFG.Typ t of 
       TFG.Int                 -> return (FMWS.AppV v Emp)
       TFG.Bol                 -> return (FMWS.AppV v Emp)
+      TFG.Flt                 -> return (FMWS.AppV v Emp)
       TFG.Arr _ _             -> fail "Normalization Error!"
       TFG.Tpl _ _             -> return (FMWS.AppV v Emp)
       TFG.Ary _               -> return (FMWS.AppV v Emp)
+      TFG.Cmx                 -> return (FMWS.AppV v Emp)
     FGHO.Abs _                -> fail "Normalization Error!"
     FGHO.App _ _              -> do Exs1 v tv <- getVar ee 
                                     PrfHasSin <- getPrfHasSinM tv
                                     DblExsSin es tys <- getArg ee 
                                                         (DblExsSin Emp Emp)
-                                    EqlOut <- eqlOut t tv
-                                    EqlArg <- eqlArg tys tv
+                                    TFG.EqlOut <- TFG.eqlOut t tv
+                                    TFG.EqlArg <- TFG.eqlArg tys tv
                                     return (FMWS.AppV v es)
     FGHO.Cnd ec et ef         -> FMWS.Cnd <$@> ec <*@> et <*@> ef
     FGHO.Whl ec eb ei         -> FMWS.Whl <$@> ec <*@> eb <*@> ei
@@ -45,7 +48,9 @@ instance (HasSin TFG.Typ t , t ~ t' , r ~ r') =>
     FGHO.Len ea               -> FMWS.Len <$@> ea 
     FGHO.Ind ea ei            -> FMWS.Ind <$@> ea <*@> ei
     FGHO.Let el eb            -> FMWS.Let <$@> el <*@> eb
- 
+    FGHO.Cmx er ei            -> FMWS.Cmx <$@> er <*@> ei    
+    FGHO.Tmp x                -> pure (FMWS.Tmp x)
+    
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , r ~ r' , ta ~ ta' ,tb ~ tb') =>
          Cnv (FGHO.Exp r  ta  -> FGHO.Exp r  tb , rr) 
              (FMWS.Exp r' ta' -> FMWS.Exp r' tb')
@@ -58,14 +63,17 @@ instance (HasSin TFG.Typ t , t' ~ t , r' ~ r) =>
   cnv (ee , r) = let ?r = r in let t = (sin :: TFG.Typ t) in case ee of 
     FMWS.ConI i               -> FGHO.ConI <$@> i 
     FMWS.ConB b               -> FGHO.ConB <$@> b 
+    FMWS.ConF b               -> FGHO.ConF <$@> b     
     FMWS.AppV v es            -> case (sinTyp v , es) of
       (TFG.Int     , Emp)     -> FGHO.Var <$> pure v
       (TFG.Bol     , Emp)     -> FGHO.Var <$> pure v
+      (TFG.Flt     , Emp)     -> FGHO.Var <$> pure v
       (TFG.Arr _ _ , Ext _ _) -> do Exs1 e te <- fldApp (FGHO.Var v) es 
                                     Rfl <- eqlSin te t
                                     return e      
       (TFG.Tpl _ _ , Emp)     -> FGHO.Var <$> pure v
       (TFG.Ary _   , Emp)     -> FGHO.Var <$> pure v      
+      (TFG.Cmx     , Emp)     -> FGHO.Var <$> pure v      
     FMWS.Cnd ec et ef         -> FGHO.Cnd <$@> ec <*@> et <*@> ef 
     FMWS.Whl ec eb ei         -> FGHO.Whl <$@> ec <*@> eb <*@> ei
     FMWS.Tpl ef es            -> case TFG.getPrfHasSinTpl t of 
@@ -77,7 +85,9 @@ instance (HasSin TFG.Typ t , t' ~ t , r' ~ r) =>
     FMWS.Len ea               -> FGHO.Len <$@> ea
     FMWS.Ind ea ei            -> FGHO.Ind <$@> ea <*@> ei
     FMWS.Let el eb            -> FGHO.Let <$@> el <*@> eb
-                                        
+    FMWS.Cmx er ei            -> FGHO.Cmx <$@> er <*@> ei    
+    FMWS.Tmp x                -> pure (FGHO.Tmp x) 
+    
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb, ta ~ ta' , tb ~ tb' , r ~ r') =>
          Cnv (FMWS.Exp r  ta  -> FMWS.Exp r  tb , rr)  
              (FGHO.Exp r' ta' -> FGHO.Exp r' tb') 
@@ -98,7 +108,7 @@ fldApp e ess = let ?r = () in case TFG.getPrfHasSinArr (T :: T t) of
       ea' <- cnvImp ea
       return (Exs1 (FGHO.App e ea') tb)
     _                                               ->  
-      fail "Impossible!"
+      impossibleM
 
 getVar :: forall r t. HasSin TFG.Typ t => 
           FGHO.Exp r t -> ErrM (Exs1 (Var r) TFG.Typ)
@@ -121,31 +131,3 @@ getArg e (DblExsSin args tys) = let ?r = () in case e of
     getArg ef (DblExsSin (Ext ea' args) (Ext (sinTyp ea) tys))
   _                              ->  
     fail "Normalization Error!"
-      
-data EqlOut :: TFA.Typ -> TFA.Typ -> * where
-  EqlOut :: EqlOut (TFG.Out t2) t2
-
-eqlOut :: TFG.Typ t1 -> TFG.Typ t2 -> ErrM (EqlOut t1 t2)
-eqlOut TFG.Int         TFG.Int           = return EqlOut
-eqlOut TFG.Bol         TFG.Bol           = return EqlOut
-eqlOut t               (TFG.Arr _ tb)    = do EqlOut <- eqlOut t tb
-                                              return EqlOut
-eqlOut (TFG.Ary ta)    (TFG.Ary ta')     = do Rfl <- eqlSin ta ta'
-                                              return EqlOut
-eqlOut (TFG.Tpl tf ts) (TFG.Tpl tf' ts') = do Rfl <- eqlSin tf tf'
-                                              Rfl <- eqlSin ts ts'
-                                              return EqlOut
-eqlOut _              _                  = fail "Normalization Error!"           
-
-data EqlArg :: [TFA.Typ] -> TFA.Typ -> * where
-  EqlArg :: EqlArg (TFG.Arg t2) t2
- 
-eqlArg :: Env TFG.Typ r -> TFG.Typ t -> ErrM (EqlArg r t)
-eqlArg Emp TFG.Int                  = return EqlArg
-eqlArg Emp TFG.Bol                  = return EqlArg
-eqlArg (Ext ta ts) (TFG.Arr ta' tb) = do Rfl    <- eqlSin ta ta'
-                                         EqlArg <- eqlArg ts tb
-                                         return EqlArg
-eqlArg Emp (TFG.Ary _)              = return EqlArg
-eqlArg Emp (TFG.Tpl _ _)            = return EqlArg
-eqlArg _     _                      = fail "Normalization Error!"           

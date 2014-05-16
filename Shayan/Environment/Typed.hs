@@ -20,7 +20,7 @@ len (Ext _ xs) = NG.Suc (len xs)
 add :: (?env :: Env tf r') => Var r t -> Var (Add r' r) t
 add v = case ?env of
   Emp      -> v
-  Ext _ xs -> let ?env = xs in Suc (add v)                  
+  Ext _ xs -> let ?env = xs in Suc (add v) 
                   
 get :: Var r t -> Env tf r -> tf t
 get Zro     (Ext x  _ ) = x
@@ -34,7 +34,7 @@ cnvGEnvtoGVar (Ext _ xs) = Ext Zro (map Suc (cnvGEnvtoGVar xs))
 map :: (forall t. tfa t -> tfb t) -> Env tfa r -> Env tfb r
 map _ Emp        = Emp
 map f (Ext x xs) = Ext (f x) (map f xs)   
-  
+
 mapM :: Applicative m => 
         (forall t. tfa t -> m (tfb t)) -> Env tfa r -> m (Env tfb r)
 mapM _ Emp        = pure Emp

@@ -1,0 +1,10 @@
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun
+{ time ./CRC 2> sleepStdErr.txt ; } 2>> timeCRCRun

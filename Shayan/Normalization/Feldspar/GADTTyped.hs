@@ -13,6 +13,7 @@ instance NrmOne (Exp n t) where
   nrmOne ee = case ee of
     ConI i              -> ConI <$@> i 
     ConB b              -> ConB <$@> b
+    ConF b              -> ConF <$@> b    
     Var x               -> Var  <$@> x
     Abs eb              -> Abs  <$@> eb
     App _  (Abs eb) ea  -> chg ((prdAll . sbs eb Zro . sucAll) ea)
@@ -26,3 +27,4 @@ instance NrmOne (Exp n t) where
     Len t  e            -> Len  <$> pure t <*@> e                         
     Ind ea ei           -> Ind  <$@> ea    <*@> ei                         
     Let t  el eb        -> Let  <$> pure t <*@> el <*@> eb
+    Cmx er ei           -> Cmx  <$@> er    <*@> ei                             

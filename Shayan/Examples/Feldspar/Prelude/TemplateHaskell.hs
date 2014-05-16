@@ -1,138 +1,299 @@
-{-# OPTIONS_GHC -fno-warn-unused-matches #-}
-module Examples.Feldspar.Prelude.TemplateHaskell where
+module Examples.Feldspar.Prelude.TemplateHaskell 
+       (Data
+       ,MP.Integer,litI
+       ,MP.Float,litF                     
+       ,MP.Bool(True,False)
+       ,Tpl,{-((,)),-}fst,snd           
+       ,Complex,cmx,real,imag
+       ,Ary,ary,len,ind        
+       ,{-ifThenElse,-}whl,forLoop
+       ,not,(&&),(||)                  
+       ,Equality((==)),(/=)
+       ,Ordering((<)),(>),(>=),(<=),min           
+       ,Numeric((+),(-),(*),(/)),ilog2
+       ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
+       ,i2f,cis
+       ,(...),permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
+       ) where
 
 import Prelude ()
-import MyPrelude hiding (fst,snd)
-import qualified Expression.Feldspar.ADTValue        as FAV
-import VanillaPrelude 
+import MyPrelude (Integer,Array,Float,Bool(..))
+import qualified MyPrelude as MP
 
 import Language.Haskell.TH.Syntax
-import qualified Expression.Feldspar.ADTUntypedNamed as FAUN
-import qualified Type.Feldspar.ADT                   as TFA
-import qualified Type.Feldspar.GADT                  as TFG
-
-import Conversion 
-import Conversion.Expression.Feldspar ()
-import Conversion.Expression.Feldspar.Evaluation.ADTUntypedNamed ()
-
-import qualified Environment.Map    as EM
-import qualified Environment.Scoped as ES
-import qualified Environment.Typed  as ET
  
-import qualified Nat.ADT            as NA
-
-type ta :-> tb = TFA.Arr ta tb
-
-(-->) :: TFG.Typ a -> TFG.Typ b -> TFG.Typ (a :-> b)
-(-->) = TFG.Arr
-  
-infixr 5 <:>
-(<:>) :: tf t -> ET.Env tf e -> ET.Env tf (t ': e)
-(<:>) = ET.Ext
-
-infixr 5 <->
-(<->) :: t -> ES.Env n t -> ES.Env (NA.Suc n) t
-(<->) = ES.Ext
-
-type TypLst =  TFA.Int :-> (TFA.Int :-> TFA.Bol) ':
-               TFA.Bol :-> TFA.Bol ': 
-               TFA.Int :-> (TFA.Int :-> TFA.Int) ':
-               TFA.Int :-> (TFA.Int :-> TFA.Int) ':
-               TFA.Int :-> (TFA.Int :-> TFA.Int) ': 
-               TFA.Int :-> (TFA.Int :-> TFA.Bol) ':
-               TFA.Int :-> (TFA.Int :-> TFA.Int) ':
-               '[]   
-           
-envVal :: EM.Env Name FAV.Exp
-envVal = ('(==) , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConB (i == j))))  : 
-         ('not  , FAV.Abs (\ (FAV.ConB b) -> FAV.ConB (not b)))      :
-         ('(+)  , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConI (i + j))))   :
-         ('(*)  , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConI (i * j))))   :
-         ('min  , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConI (min i j)))) :
-         ('(<)  , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConB (i < j))))   :
-         ('div  , FAV.Abs (\ (FAV.ConI i) -> 
-                    FAV.Abs (\ (FAV.ConI j) -> FAV.ConI (div i j)))) :
-         []
-
-envNam :: ES.Env (NA.Suc (NA.Suc (NA.Suc (NA.Suc 
-                  (NA.Suc (NA.Suc (NA.Suc NA.Zro))))))) Name
-envNam = '(==) <-> 
-         'not  <->
-         '(+)  <->                 
-         '(*)  <->                  
-         'min  <->                           
-         '(<)  <->
-         'div  <->
-         ES.Emp
- 
-envTyp :: ET.Env TFG.Typ TypLst          
-envTyp = TFG.Int --> (TFG.Int --> TFG.Bol) <:>
-         TFG.Bol --> TFG.Bol               <:> 
-         TFG.Int --> (TFG.Int --> TFG.Int) <:>
-         TFG.Int --> (TFG.Int --> TFG.Int) <:>
-         TFG.Int --> (TFG.Int --> TFG.Int) <:> 
-         TFG.Int --> (TFG.Int --> TFG.Bol) <:> 
-         TFG.Int --> (TFG.Int --> TFG.Int) <:> 
-         ET.Emp
+import Examples.Feldspar.Prelude.Environment
+import qualified VanillaPrelude as VP 
 
 type Data t = Q (TExp t)
-type Vec  t = (Data (Integer -> t) , Data Integer)
- 
-(/==) :: Data (Integer -> Integer -> Bool)
-(/==) = [|| \ e1 -> \ e2 -> not (e1 == e2) ||] 
+type Ary t = Array Integer t
 
-sumv :: Vec Integer -> Data Integer
-sumv (ixf , l) = [|| fst (whl 
-                          (\ x -> ( $$((/==)) (snd x) $$l)) 
-                          (\ s -> (($$ixf (snd s)) + (fst s) , (snd s) + 1 )) 
-                          (0 , 0)) 
-                  ||]
+class FO a                              where {}
+instance FO Bool                        where {}
+instance FO Integer                     where {}
+instance FO Float                       where {}
+instance FO Complex                     where {}
+instance (FO a , FO b) => FO (Tpl a b)  where {}
+instance FO a => FO (Ary a)             where {}
+ 
+instance Lift Integer where
+  lift i = MP.return (LitE (IntegerL (MP.toInteger i)))
+ 
+instance Lift Float where
+  lift f = MP.return (LitE (RationalL (MP.toRational f)))
+
+litI :: Integer -> Data Integer
+litI i = [|| i ||]
+
+litF :: Float -> Data Float
+litF f = [|| f ||]
+
+---------------------------------------------------------------------------------
+-- Tuple
+---------------------------------------------------------------------------------
+
+type Tpl a b = (a , b)
+
+fst :: (a , b) -> a
+fst = VP.fst
+
+snd :: (a , b) -> b
+snd = VP.snd
+
+---------------------------------------------------------------------------------
+-- Complex
+---------------------------------------------------------------------------------
+
+type Complex = MP.Complex Float
+ 
+cmx :: Float -> Float -> Complex
+cmx = VP.cmx
+
+real :: Data (Complex -> Float)
+real = [|| realPartHsk ||]
+
+imag :: Data (Complex -> Float)
+imag = [|| imagPartHsk ||]
+
+---------------------------------------------------------------------------------
+-- Ary
+---------------------------------------------------------------------------------
+
+ary :: Integer -> (Integer -> a) -> Ary a
+ary = VP.ary
+
+len :: Ary a -> Integer
+len = VP.len
+
+ind :: Ary a -> Integer -> a
+ind = VP.ind
+
+---------------------------------------------------------------------------------
+-- Control Flow
+---------------------------------------------------------------------------------
+
+whl :: FO s => (s -> Bool) -> (s -> s) -> s -> s
+whl = VP.whl
+
+forLoop :: FO s => Data (Integer -> s -> (Integer -> s -> s) -> s)
+forLoop = [|| \ l -> \ init -> \ step -> 
+              snd (whl (\ t -> $$((<)) (fst t) l)
+                       (\ t -> ( $$((+)) (fst t) 1  
+                               , step (fst t) (snd t)))
+                   (0 , init)) 
+          ||]
+          
+---------------------------------------------------------------------------------
+-- Boolean Operators
+---------------------------------------------------------------------------------
+
+not :: Data (Bool -> Bool)
+not = [||  \ x -> if x then False else True ||] 
+
+(&&) :: Data (Bool -> Bool -> Bool)
+(&&) = [|| \ x -> \ y -> if x then y else False ||]
+
+(||) :: Data (Bool -> Bool -> Bool)
+(||) = [|| \ x -> \ y -> if x then True else y ||]
+
+---------------------------------------------------------------------------------
+-- Equality
+---------------------------------------------------------------------------------
   
-mapv :: Data (a -> b) -> Vec a -> Vec b
-mapv f (ixf,l) = ([|| \ x -> $$f ($$ixf x) ||] , l)
+class Equality t where
+  (==) :: Data (t -> t -> Bool)
+  
+instance Equality Bool where
+  (==) = [|| eqlBolHsk ||] 
 
-zipWithv :: Data (a -> b -> c) -> Vec a -> Vec b -> Vec c
-zipWithv f (ixf1,l1) (ixf2,l2) = (ixf , [|| min $$l1 $$l2 ||])
-  where ixf = [|| \ i -> $$f ($$ixf1 i) ($$ixf2 i) ||]
+instance Equality Integer where
+  (==) = [|| eqlIntHsk ||]
+
+instance Equality Float where
+  (==) = [|| eqlFltHsk ||]
+         
+(/=) :: Equality t => Data (t -> t -> Bool)
+(/=)= [|| \ x -> \ y -> $$not (($$((==))) x y) ||]
+
+
+---------------------------------------------------------------------------------
+-- Ordering
+---------------------------------------------------------------------------------
+
+class Ordering t where
+  (<) :: Data (t -> t -> Bool)
+   
+instance Ordering Bool where
+  (<) = [|| \ x -> \ y -> ltdBolHsk x y ||] 
+
+instance Ordering Integer where
+  (<) = [|| \ x -> \ y -> ltdIntHsk x y ||]   
+  
+instance Ordering Float where
+  (<) = [|| \ x -> \ y -> ltdFltHsk x y ||] 
+    
+(>) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+(>) = [|| \ x -> \ y -> $$not ($$((||)) ($$((<)) x y) ($$((==)) x y)) ||]
+
+(>=) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+(>=) = [|| \ x -> \ y -> $$not ($$((<)) x y) ||]
+
+(<=) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+(<=) = [|| \ x -> \ y -> $$((||)) ($$((<)) x y) ($$((==)) x y) ||]
+
+min :: Ordering t => Data(t -> t -> t) 
+min = [|| \ x -> \ y -> if ($$((<)) x y) then x else y ||]
+
+---------------------------------------------------------------------------------
+-- Numeric
+---------------------------------------------------------------------------------
+
+class Numeric t where
+  (+) :: Data (t -> t -> t) 
+  (-) :: Data (t -> t -> t)  
+  (*) :: Data (t -> t -> t)  
+  (/) :: Data (t -> t -> t) 
  
+instance Numeric Integer where
+  (+) = [|| addIntHsk ||]
+  (-) = [|| subIntHsk ||]
+  (*) = [|| mulIntHsk ||]          
+  (/) = [|| divIntHsk ||]
+    
+instance Numeric Float where 
+  (+) = [|| addFltHsk ||]
+  (-) = [|| subFltHsk ||]
+  (*) = [|| mulFltHsk ||]          
+  (/) = [|| divFltHsk ||]
 
-scalarProd :: Vec Integer -> Vec Integer -> Data Integer
-scalarProd vecA vecB = sumv (zipWithv [|| (*) ||] vecA vecB)
+instance Numeric (Complex) where 
+  (+) = [|| addCmxHsk ||]
+  (-) = [|| subCmxHsk ||]
+  (*) = [|| mulCmxHsk ||]          
+  (/) = [|| divCmxHsk ||] 
+  
+ilog2 :: Data (Integer -> Integer)
+ilog2 = [|| ilog2Hsk ||] 
+  {-
+  [|| \ xx -> ($$((-))) 31  ($$nlz xx) ||]
+ where
+   nlz :: Data (Integer -> Integer)
+   nlz = [|| \ x -> $$bitCount ($$complement 
+                                $$(MP.foldl go [|| x ||] [1,2,4,8,16])) ||]
+     where
+       go :: Data Integer -> Integer -> Data Integer
+       go b s = [|| $$((.|.)) $$b  ($$((.>>.)) $$b s) ||]
+   -}
+---------------------------------------------------------------------------------
+-- Bitwise Operators
+---------------------------------------------------------------------------------
 
-axpy :: Data Integer -> Vec Integer -> Vec Integer -> Vec Integer
-axpy a x y = zipWithv [|| (+) ||] (mapv [|| \ b ->  $$a * b ||] x) y
+(.&.)      :: Data (Integer -> Integer -> Integer) 
+(.&.)         = [|| andIntHsk ||] 
 
-tst :: Data Integer
-tst = scalarProd ([||\ x -> x ||] , [|| 2 ||]) ([||\ x -> x + 1 ||] , [|| 2 ||])
+(.|.)      :: Data (Integer -> Integer -> Integer) 
+(.|.)         = [|| orIntHsk ||] 
 
-test :: Bool
-test = case (do tst' :: FAUN.Exp Name <- cnv (tst , envTyp , envNam) 
-                cnv (tst' , envVal)) of
-         Rgt (FAV.ConI x) -> x == 2
-         _                -> False
-                  
-cnvVec :: [Integer] -> Vec Integer
-cnvVec vss = ( g vss 
-            , [|| l ||] )
-  where
-    l  = (toInteger . length) vss
-    g  = f 0 
-    f _ []       = [|| \ x -> 0 ||]
-    f i (v : vs) = [|| \ x -> if (x == i) 
-                              then v
-                              else $$(f (i+1) vs) x 
-                   ||]
+xor        :: Data (Integer -> Integer -> Integer) 
+xor           = [|| xorIntHsk ||] 
 
-cnvLst :: Vec Integer -> [Integer] 
-cnvLst (ixf , l) = frmRgt (
-                   do ixf' :: FAUN.Exp Name <- cnv (ixf  , envTyp , envNam) 
-                      FAV.Abs f             <- cnv (ixf' , envVal)
-                      l'   :: FAUN.Exp Name <- cnv (l    , envTyp , envNam)
-                      FAV.ConI i            <- cnv (l'   , envVal)
-                      return (fmap ((\ (FAV.ConI k) -> k) . f . FAV.ConI) 
-                              [0..(i-1)]))
+(.>>.)     :: Data (Integer -> Integer -> Integer) 
+(.>>.)        = [|| shrIntHsk ||]  
+
+(.<<.)     :: Data (Integer -> Integer -> Integer)
+(.<<.)        = [|| shlIntHsk ||] 
+ 
+complement :: Data (Integer -> Integer)
+complement    = [|| cmpIntHsk ||] 
+
+testBit    :: Data (Integer -> Integer -> Bool)
+testBit       = [|| \ i -> \ j -> if $$((==)) ($$((.&.)) i ($$((.<<.)) 1 j)) 0 
+                                  then False  
+                                  else True ||] 
+ 
+oneBits :: Data (Integer -> Integer)
+oneBits       =  [|| \ n -> $$complement (($$((.<<.)))($$complement 0) n) ||]
+
+lsbs :: Data (Integer -> Integer -> Integer)
+lsbs          = [|| \ k -> \ i -> ($$((.&.))) i  ($$oneBits k) ||]
+
+---------------------------------------------------------------------------------
+-- Conversion Operators
+---------------------------------------------------------------------------------
+ 
+i2f :: Data (Integer -> Float)
+i2f = [|| i2fHsk ||] 
+
+cis :: Data (Float -> Complex)
+cis = [|| cisHsk ||] 
+
+---------------------------------------------------------------------------------
+-- Array Operators
+---------------------------------------------------------------------------------
+
+(...) :: Data (Integer -> Integer -> Ary Integer)
+(...) = [|| \ m -> \ n -> ary 
+                          (if ($$((<)) n m) 
+                           then 0 
+                           else ($$((+)) ($$((-)) n m) 1))
+                          (\ i -> $$((+)) i m) ||]  
+   
+permute :: Data ((Integer -> Integer -> Integer) -> Ary t -> Ary t)
+permute = [|| \ f -> \ v -> ary (len v) 
+                                   (\ i -> ind v 
+                                           (f (len v) i)) ||]
+ 
+reverse :: Data (Ary t -> Ary t)
+reverse = [|| $$permute (\ l i -> $$((-)) ($$((-)) l 1) i) ||]
+
+foldl :: FO a => Data ((a -> b -> a) -> a -> Ary b -> a)
+foldl = [|| \ f -> \ acc -> \ v -> 
+            $$forLoop (len v) acc (\ i -> \ a ->  f a (ind v i)) ||]
+ 
+map :: Data ((a -> b) -> Ary a -> Ary b)
+map = [|| \ f -> \ v -> ary (len v) (\ i -> f (ind v i)) ||]     
+
+zipWith :: Data ((a -> b -> c) -> Ary a -> Ary b -> Ary c)
+zipWith = [|| \ f -> \ v1 -> \ v2 -> 
+                ary ($$min (len v1) (len v2))
+                    (\ i -> f (ind v1 i) (ind v2 i)) ||]
+
+sum :: Data (Ary Integer -> Integer)
+sum = [|| $$foldl $$((+)) 0 ||]
+
+scalarProd :: Data (Ary Integer -> Ary Integer -> Integer)
+scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$((*)) v1 v2) ||]
+ 
+fromList :: [Data a] -> Data a -> Data (Ary a)
+fromList lst k =  let l = MP.fromInteger (MP.toInteger (MP.length lst))
+                  in  [|| ary l
+                          (\ i -> $$(MP.foldr 
+                                     (\ j acc -> 
+                                       let l' = (MP.fromInteger (MP.toInteger j))
+                                       in  [|| if   $$((==)) i l'
+                                               then $$(lst MP.!! j)
+                                               else $$acc ||]) k 
+                                      (MP.enumFromTo 0 (MP.length lst MP.- 1))
+                                     )
+                          ) 
+                      ||]                      

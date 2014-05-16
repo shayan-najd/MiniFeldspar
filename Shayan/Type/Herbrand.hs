@@ -40,38 +40,33 @@ appTs i t = fmap (appT i t)
 appTtas :: [(NA.Nat , Typ r)] -> Typ r -> Typ r
 appTtas ttas t = foldl (\ ta (i , t') -> appT i t' ta) t ttas 
 
-intVar :: Var (NA.Zro ': r) NA.Zro
-intVar = Zro
+type EnvFld r = NA.N0 ': NA.N2 ': NA.N0 ': NA.N2 ': 
+                NA.N1 ': NA.N0 ': NA.N0 ': r
+{-                
+intVar :: Var (EnvFld r) NA.Zro
+intVar = Zro                   
 
-arrVar :: Var (EnvIntArr r) (NA.Suc (NA.Suc NA.Zro))
+arrVar :: Var (EnvFld r) (NA.Suc (NA.Suc NA.Zro))
 arrVar = Suc Zro  
 
-bolVar :: Var (EnvIntArr (NA.Zro ': r)) NA.Zro
+bolVar :: Var (EnvFld r) NA.Zro
 bolVar = Suc (Suc Zro)
 
-tplVar :: Var (EnvIntArr (NA.Zro ': NA.Suc (NA.Suc NA.Zro) ': r)) 
-          (NA.Suc (NA.Suc NA.Zro))
+tplVar :: Var (EnvFld r) (NA.Suc (NA.Suc NA.Zro))
 tplVar = Suc (Suc (Suc Zro))
 
 aryVar :: Var (EnvFld r) (NA.Suc NA.Zro)
 aryVar = Suc (Suc (Suc (Suc Zro)))
 
-int :: Typ (EnvIntArr r)
-int = App intVar Emp
+fltVar :: Var (EnvFld r) NA.Zro
+fltVar = Suc (Suc (Suc (Suc (Suc Zro))))
+-}                       
+ 
+pattern Int       = App Zro Emp
+pattern Arr ta tb = App (Suc Zro) (Ext ta (Ext tb Emp))
+pattern Bol       = App (Suc (Suc Zro)) Emp
+pattern Tpl tf ts = App (Suc (Suc (Suc Zro))) (Ext tf (Ext ts Emp))       
+pattern Ary ta    = App (Suc (Suc (Suc (Suc Zro)))) (Ext ta  Emp)  
+pattern Flt       = App (Suc (Suc (Suc (Suc (Suc Zro))))) Emp
+pattern Cmx       = App (Suc (Suc (Suc (Suc (Suc (Suc Zro)))))) Emp
 
-arr :: Typ (EnvIntArr r) -> Typ (EnvIntArr r) -> Typ (EnvIntArr r) 
-arr ta tb = App arrVar (Ext ta (Ext tb Emp))
-
-bol :: Typ (EnvIntArr (NA.Zro ': r))
-bol = App bolVar Emp
-
-tpl :: r' ~ (EnvIntArr (NA.Zro ': NA.Suc (NA.Suc NA.Zro) ': r)) => 
-       Typ r' -> Typ r' -> Typ r'
-tpl tf ts = App tplVar (Ext tf (Ext ts Emp))       
-
-ary :: Typ (EnvFld r) -> Typ (EnvFld r)
-ary ta = App aryVar (Ext ta  Emp)  
-
-type EnvIntArr r = NA.Zro ': NA.Suc (NA.Suc NA.Zro) ': r 
-type EnvFld    r = EnvIntArr (NA.Zro ': NA.Suc (NA.Suc NA.Zro) 
-                              ': NA.Suc NA.Zro ': r)

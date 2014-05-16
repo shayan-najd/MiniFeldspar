@@ -10,59 +10,29 @@ import qualified Type.Feldspar.ADT             as TFA
 import Conversion 
 import Conversion.Expression.Feldspar.Evaluation.GADTHigherOrder ()
 
-import Environment.Typed
-import Variable.Typed
+import Examples.Feldspar.Prelude.Environment
 
-type ta :-> tb = TFA.Arr ta tb
+type Vector a = (Exp Prelude TFA.Int -> a, Exp Prelude TFA.Int)
 
-type EnvT = TFA.Int :-> (TFA.Int :-> TFA.Bol) ':
-            TFA.Bol :-> TFA.Bol ': 
-            TFA.Int :-> (TFA.Int :-> TFA.Int) ':
-            TFA.Int :-> (TFA.Int :-> TFA.Int) ':
-            TFA.Int :-> (TFA.Int :-> TFA.Int) ': 
-            '[]   
-           
-env :: Env FGV.Exp EnvT
-env = Ext (FGV.Exp (==)) 
-      (Ext (FGV.Exp not) 
-       (Ext (FGV.Exp (+))                  
-        (Ext (FGV.Exp (*))                  
-         (Ext (FGV.Exp min)                            
-          Emp))))
-      
-type Vector a = (Exp EnvT TFA.Int -> a, Exp EnvT TFA.Int)
+(===) :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Bol
+e1 === e2 = App (App (Var eqlIntVar) e1) e2
 
-eqlVar :: Var EnvT (TFA.Int :-> (TFA.Int :-> TFA.Bol))
-eqlVar = Zro
+(/==) :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Bol
+e1 /== e2 =  Cnd (e1 === e2) (ConB False) (ConB True) 
 
-notVar :: Var EnvT (TFA.Bol :-> TFA.Bol)
-notVar = Suc Zro
+(+.) :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Int
+e1 +. e2 = App (App (Var addIntVar) e1) e2
 
-addVar :: Var EnvT (TFA.Int :-> (TFA.Int :-> TFA.Int))
-addVar = Suc (Suc Zro)
+(*.) :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Int
+e1 *. e2 =  App (App (Var mulIntVar) e1) e2
 
-mulVar :: Var EnvT (TFA.Int :-> (TFA.Int :-> TFA.Int))
-mulVar = Suc (Suc (Suc Zro))
-  
-minVar :: Var EnvT (TFA.Int :-> (TFA.Int :-> TFA.Int))
-minVar = Suc (Suc (Suc (Suc Zro)))
+(<.) :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Bol
+e1 <. e2 =  App (App (Var ltdIntVar) e1) e2
 
-(===) :: Exp EnvT TFA.Int -> Exp EnvT TFA.Int -> Exp EnvT TFA.Bol
-e1 === e2 = App (App (Var eqlVar) e1) e2
+minF :: Exp Prelude TFA.Int -> Exp Prelude TFA.Int -> Exp Prelude TFA.Int
+minF e1 e2 = Cnd (e1 <. e2) e1 e2
 
-(/==) :: Exp EnvT TFA.Int -> Exp EnvT TFA.Int -> Exp EnvT TFA.Bol
-e1 /== e2 =  App (Var notVar) (e1 === e2)
-
-(+.) :: Exp EnvT TFA.Int -> Exp EnvT TFA.Int -> Exp EnvT TFA.Int
-e1 +. e2 = App (App (Var addVar) e1) e2
-
-(*.) :: Exp EnvT TFA.Int -> Exp EnvT TFA.Int -> Exp EnvT TFA.Int
-e1 *. e2 =  App (App (Var mulVar) e1) e2
-
-minF :: Exp EnvT TFA.Int -> Exp EnvT TFA.Int -> Exp EnvT TFA.Int
-minF e1 e2 = App (App (Var minVar) e1) e2
-
-sumv :: Vector (Exp EnvT TFA.Int) -> Exp EnvT TFA.Int
+sumv :: Vector (Exp Prelude TFA.Int) -> Exp Prelude TFA.Int
 sumv (ixf,l) = Fst (
                Whl ((/== l) . Snd) 
                (\ s -> Tpl ((ixf (Snd s)) +. (Fst s)) ((Snd s) +. ConI 1)) 
@@ -75,15 +45,15 @@ zipWithv :: (a -> b -> c) -> Vector a -> Vector b -> Vector c
 zipWithv f (ixf1,l1) (ixf2,l2) = (ixf,minF l1 l2)
   where ixf i = f (ixf1 i) (ixf2 i)
 
-scalarProd :: Vector (Exp EnvT TFA.Int) -> Vector (Exp EnvT TFA.Int) -> 
-              Exp EnvT TFA.Int
+scalarProd :: Vector (Exp Prelude TFA.Int) -> Vector (Exp Prelude TFA.Int) -> 
+              Exp Prelude TFA.Int
 scalarProd vecA vecB = sumv (zipWithv (*.) vecA vecB)
 
-axpy :: Exp EnvT TFA.Int -> Vector (Exp EnvT TFA.Int) -> 
-        Vector (Exp EnvT TFA.Int) -> Vector (Exp EnvT TFA.Int)
+axpy :: Exp Prelude TFA.Int -> Vector (Exp Prelude TFA.Int) -> 
+        Vector (Exp Prelude TFA.Int) -> Vector (Exp Prelude TFA.Int)
 axpy a x y = zipWithv (+.) (mapv (a*.) x) y
 
 test :: Bool
-test = case curry cnv (scalarProd  (id,ConI 2) (((+.) (ConI 1)),ConI 2)) env of 
+test = case curry cnv (scalarProd  (id,ConI 2) (((+.) (ConI 1)),ConI 2)) etFGV of
   Rgt ((FGV.Exp x) :: FGV.Exp TFA.Int) -> x == 2
   _                                    -> False

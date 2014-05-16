@@ -1,20 +1,25 @@
 module MyPrelude 
-       (Int,Integer,Num(..),div,toInteger,
+       (Int,MyPrelude.Integer,Num(..),div,toInteger,pi,(/),floor,log,
+        Word32,Rational, 
+        Float,toRational,fromRational,fromIntegral,
         Bool(..),(&&),(||),not,
-        IO,print,readFile,writeFile,
+        Complex(..),realPart,imagPart,cis,magnitude,
+        (.&.),(.|.),xor,shiftR,shiftL,complement,popCountDefault,testBit,
+        IO,print,readFile,writeFile,putStrLn,
         fst,snd,
         String,lines,unlines,
         read,
         (.),flip,curry,uncurry,id,const,
-        (++),zip,head,dropWhile,iterate,length,zipWith,filter,(!!),
+        (++),zip,head,dropWhile,iterate,length,zipWith,filter,(!!),delete,init,
         Maybe(..),fromJust,maybe,
         Enum(..),
         Ord(..),
         Eq(..),
         Show(..),
-        otherwise, impossible,
+        otherwise, impossible , impossibleM,
         lookup,
-        State,getState,put,modify,runState,execState,evalState,
+        State,getState,put,modify,runState,execState,evalState,StateT
+             ,lift,runStateT,
         module ErrorMonad,
         module Existential,
         module Data.Monoid,
@@ -36,9 +41,18 @@ import Data.Functor
 import Control.Monad hiding (forM,forM_,sequence,sequence_,msum,mapM,mapM_)
 import Data.Monoid
 import Control.Monad.State 
+import Data.List
+import Data.Complex
+import Data.Word
+import Data.Bits
 
 impossible :: a
 impossible = error "Impossible!"
 
+impossibleM :: Monad m => m a
+impossibleM = fail "Impossible!"
+
 getState :: MonadState s m => m s
 getState = get
+
+type Integer = Word32

@@ -5,6 +5,7 @@ import MyPrelude
 
 data Exp x = ConI Integer 
            | ConB Bool 
+           | ConF Float   
            | Var x  
            | Abs x (Exp x)
            | App (Exp x) (Exp x)  
@@ -17,6 +18,7 @@ data Exp x = ConI Integer
            | Len (Exp x) 
            | Ind (Exp x) (Exp x) 
            | Let x (Exp x) (Exp x) 
+           | Cmx (Exp x) (Exp x)  
 
 deriving instance Eq x   => Eq   (Exp x)
 deriving instance Show x => Show (Exp x)

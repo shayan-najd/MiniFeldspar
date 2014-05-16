@@ -1,0 +1,20 @@
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC 
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC 
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC 
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC 
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC
+rm FFTMini
+{ time gcc -o FFTMini FFTMini.c -std=c99 -lm -Wconversion 2> sleepStdErr.txt ; } 2>> timeFFTMiniGCC

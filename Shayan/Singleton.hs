@@ -46,7 +46,7 @@ type family Len (l :: [k]) :: NA.Nat where
   Len (x ': xs) = NA.Suc (Len xs)
   Len '[]       = NA.Zro 
 
-type family Add (ll :: [k]) (lr :: [k]) where
+type family Add (ll :: [k]) (lr :: [k]) :: [k]  where
   Add '[]       lr = lr
   Add (x ': xs) lr = x ': Add xs lr
                   

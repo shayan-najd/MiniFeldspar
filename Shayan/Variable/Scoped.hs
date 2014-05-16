@@ -1,4 +1,4 @@
-module Variable.Scoped (Var(..) , prd , inc) where
+module Variable.Scoped where
 
 import Prelude ()
 import MyPrelude
@@ -21,3 +21,14 @@ inc :: (Var n -> Var n') ->
        Var (NA.Suc n) -> Var (NA.Suc n')
 inc _ Zro     = Zro
 inc f (Suc x) = Suc (f x)
+
+pattern N0 = Zro
+pattern N1 = Suc N0
+pattern N2 = Suc N1
+pattern N3 = Suc N2 
+pattern N4 = Suc N3 
+pattern N5 = Suc N4 
+pattern N6 = Suc N5 
+pattern N7 = Suc N6 
+pattern N8 = Suc N7 
+pattern N9 = Suc N8 

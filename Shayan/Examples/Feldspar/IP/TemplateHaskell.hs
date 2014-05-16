@@ -1,59 +1,91 @@
-module Examples.Feldspar.IP.TemplateHaskell where
-  
+
+
 import Prelude ()
-import MyPrelude hiding (snd, fst)
+import qualified MyPrelude as MP
 
-import Examples.Feldspar.Prelude.TemplateHaskell
+import Examples.Feldspar.Prelude.TemplateHaskell 
+import Examples.Feldspar.Prelude.Environment
+import Examples.Feldspar.IP.Common
 
--- Conversion from grayscale to black & white 
-toBW :: Vec Integer -> Vec Integer
-toBW = mapv [|| \ x -> if  (x < 135) then 1 else 0 ||]
-        
--- The standard red channel grayscale coefficient
+import Conversion
+import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+
+import qualified Expression.Feldspar.GADTValue       as FGV
+import qualified Type.Feldspar.GADT                  as TFG
+import Compiler (scompileWith)
+
+import Normalization
+import Normalization.Feldspar.MiniWellScoped ()
+
+import qualified Language.Haskell.TH.Syntax          as TH
+import qualified Expression.Feldspar.MiniWellScoped  as FMWS
+import qualified Type.Feldspar.ADT                   as TFA
+import Conversion.Expression.Feldspar ()
+
+import qualified Environment.Scoped                  as ES
+import qualified Environment.Typed                   as ET
+import Singleton (Len)
+import qualified Nat.ADT                             as NA
+ 
+toBW :: Data (Ary Integer -> Ary Integer)
+toBW = [|| $$map (\ x -> if $$((<)) x 135 then 1 else 0) ||]
+
 redCoefficient :: Data Integer
 redCoefficient   = [|| 30 ||]
 
--- The standard green channel grayscale coefficient
 greenCoefficient :: Data Integer
 greenCoefficient = [|| 59 ||]
 
--- The standard blue channel grayscale coefficient
 blueCoefficient :: Data Integer
 blueCoefficient  = [|| 11 ||]
- 
--- Conversion from RGB to grayscale
+
 rgbToGray :: Data (Integer -> Integer -> Integer -> Integer)
-rgbToGray = [|| \ r -> \ g -> \ b -> 
-                 div ((r * $$redCoefficient  ) +                        
-                      (g * $$greenCoefficient) +
-                      (b * $$blueCoefficient )) 100
-            ||] 
-                                    
--- Conversion from colored to grayscale       
-toGray :: Vec Integer -> Vec Integer
-toGray (ixf , l) = ([|| \ i ->  $$rgbToGray 
-                                ($$ixf (i * 3)) 
-                                ($$ixf ((i * 3) + 1)) 
-                                ($$ixf ((i * 3) + 2)) ||] 
-                   , [|| div $$l 3 ||])                      
-  
--- Conversion from colored to black and white
-fromColoredtoBW :: Vec Integer -> Vec Integer
-fromColoredtoBW = toBW . toGray
-           
-main :: IO ()          
-main = do let filePPM = "Examples/Feldspar/IP/Image/Lena/Image2.ppm"
---          let filePGM = "Examples/Feldspar/IP/Image/Lena/Image2.pgm"
-          let filePBM = "Examples/Feldspar/IP/Image/Lena/Image2.pbm"    
-          f <- readFile filePPM
-          let "P3" : s : "255" : c = lines f
---          let pgm = unlines ("P2" : s : "255" 
---                           : (fmap show  
---                              . cnvLst . toGray . cnvVec 
---                              . fmap (read :: String -> Integer)) c)            
-          let pbm = unlines ("P1" : s : "255" 
-                             : (fmap show  
-                                . cnvLst . fromColoredtoBW . cnvVec 
-                                . fmap (read :: String -> Integer)) c)  
---          writeFile filePGM  pgm      
-          writeFile filePBM  pbm
+rgbToGray = [|| \ r -> \ g -> \ b ->  
+               $$((/)) 
+               ($$((+))
+                ($$((+)) ($$((*)) r $$redCoefficient )
+                         ($$((*)) g $$greenCoefficient))
+                ($$((*)) b $$blueCoefficient )) 100 ||]
+                 
+toGray :: Data (Ary Integer -> Ary Integer)
+toGray = [|| \ v -> ary ($$((/)) (len v) 3)
+                    (\ i -> let j = $$((*)) i 3
+                            in $$rgbToGray 
+                               (ind v j) 
+                               (ind v ($$((+)) j 1)) 
+                               (ind v ($$((+)) j 2))) ||]
+ 
+fromColoredtoBW :: Data (Ary Integer -> Ary Integer)
+fromColoredtoBW = [|| \ v -> $$toBW ($$toGray v) ||]
+
+inp :: Data (Ary Integer)
+inp = fromList (MP.fmap (\ i -> [|| i ||]) tstPPM) [|| 0 ||]
+      
+out :: [MP.Integer]
+out  = let outFMWS :: FMWS.Exp Prelude (TFA.Ary TFA.Int) =
+             MP.frmRgt (cnv ([|| $$fromColoredtoBW $$inp ||] , etTFG , esTH ))
+           (FGV.Exp e) :: FGV.Exp (TFA.Ary TFA.Int) = 
+             MP.frmRgt (cnv (outFMWS , etFGV)) 
+       in MP.elems e    
+
+prop :: MP.Bool
+prop = out MP.== tstPBM
+
+dummyVec :: Ary Integer
+dummyVec = dummyVec
+
+es :: ES.Env (NA.Suc (Len Prelude)) TH.Name
+es = 'dummyVec <+> esTH      
+
+et :: ET.Env TFG.Typ (TFA.Ary TFA.Int ': Prelude)
+et = TFG.Ary TFG.Int <:> etTFG
+ 
+fromColoredtoBWFMWS :: FMWS.Exp (TFA.Ary TFA.Int ': Prelude) (TFA.Ary TFA.Int)
+fromColoredtoBWFMWS = nrm (MP.frmRgt 
+                           (cnv ([|| $$fromColoredtoBW dummyVec ||] , et , es))) 
+
+main :: MP.IO ()
+main = let f = MP.frmRgt (scompileWith [("v0" , TFA.Ary TFA.Int)]  
+                             (TFG.Ary TFG.Int) ("v0" <+> esString) 
+                          1 fromColoredtoBWFMWS) 
+       in  MP.writeFile "IPTemplateHaskell.c" f     

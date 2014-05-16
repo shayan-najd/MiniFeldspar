@@ -1,0 +1,20 @@
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun
+rm ./Image.pbm
+{ time ./IP 2> sleepStdErr.txt ; } 2>> timeIPRun

@@ -1,56 +1,66 @@
-module Examples.Feldspar.IP.MiniWellScoped where
-import Prelude ()
-import MyPrelude hiding (div)
+{-# LANGUAGE RebindableSyntax #-}
 
-import Expression.Feldspar.MiniWellScoped
-import qualified Expression.Feldspar.GADTValue as V
-import Examples.Feldspar.Prelude.MiniWellScoped
-import qualified Type.Feldspar.ADT as TFA
+import Prelude (IO)
+import qualified MyPrelude as MP
 
--- Conversion from grayscale to black & white 
-toBW :: Vec (Data TFA.Int) -> Vec (Data TFA.Int)
-toBW = mapv (\x -> Cnd (x <. (ConI 135)) (ConI 1) (ConI 0)) 
+import Examples.Feldspar.Prelude.MiniWellScoped 
+import Examples.Feldspar.Prelude.Environment
+import Examples.Feldspar.IP.Common
 
--- The standard red channel grayscale coefficient
-redCoefficient :: Data TFA.Int
-redCoefficient   = ConI 30
+import Conversion
+import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 
--- The standard green channel grayscale coefficient
-greenCoefficient :: Data TFA.Int
-greenCoefficient = ConI 59
+import qualified Expression.Feldspar.GADTValue as FGV 
+import qualified Type.Feldspar.GADT            as TFG
+import Compiler (scompileWith)
+ 
+import Normalization
+import Normalization.Feldspar.MiniWellScoped ()
 
--- The standard blue channel grayscale coefficient
-blueCoefficient :: Data TFA.Int
-blueCoefficient  = ConI 11
+toBW :: Vec (Data Integer) -> Vec (Data Integer)
+toBW = map (\x -> if x < 135 then 1 else 0) 
 
--- Conversion from RGB to grayscale
-rgbToGray :: Data TFA.Int -> Data TFA.Int -> 
-             Data TFA.Int -> Data TFA.Int 
-rgbToGray r g b = div ((r *. redCoefficient  ) +.                        
-                       (g *. greenCoefficient) +.
-                       (b *. blueCoefficient )) (ConI 100)
-                   
--- Conversion from colored to grayscale       
-toGray :: Vec (Data TFA.Int) -> Vec (Data TFA.Int)
-toGray (ixf , len) = (\ i -> let j = i *. (ConI 3)
-                             in rgbToGray 
-                                (ixf j) 
-                                (ixf (j +. (ConI 1))) 
-                                (ixf (j +. (ConI 2))) 
-                     , div len (ConI 3))
+redCoefficient :: Data Integer
+redCoefficient   = 30
+
+greenCoefficient :: Data Integer
+greenCoefficient = 59
+
+blueCoefficient :: Data Integer
+blueCoefficient  = 11
+
+rgbToGray :: Data Integer -> Data Integer -> 
+             Data Integer -> Data Integer 
+rgbToGray r g b = ((r * redCoefficient  ) +                        
+                   (g * greenCoefficient) +
+                   (b * blueCoefficient )) / 100
+                 
+toGray :: Vec (Data Integer) -> Vec (Data Integer)
+toGray v = vec ((length v) / 3)
+           (\ i -> let j = i * 3
+                   in rgbToGray 
+                      (v !! j) 
+                      (v !! (j + 1)) 
+                      (v !! (j + 2)))
   
--- Conversion from colored to black and white
-fromColoredtoBW :: Vec (Data TFA.Int) -> Vec (Data TFA.Int)
-fromColoredtoBW = toBW . toGray
-           
-main :: IO ()          
-main = do let filePPM = "Examples/Feldspar/IP/Image/Lena/Image.ppm"
-          let filePGM = "Examples/Feldspar/IP/Image/Lena/Image.pbm"
-          f <- readFile filePPM
-          let "P3" : s : "255" : c = lines f
-          let v' = unlines ("P1" : s : "255" 
-                           : (fmap (\ (V.Exp x) -> show x) 
-                             . cnvLst . fromColoredtoBW . cnvVec 
-                             . fmap (V.Exp . (read :: String -> Integer))) c)  
-          writeFile filePGM  v'      
-                     
+fromColoredtoBW :: Vec (Data Integer) -> Vec (Data Integer)
+fromColoredtoBW v = toBW (toGray v)
+ 
+inp :: Vec (Data Integer)
+inp = fromList 
+      (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstPPM) 0
+
+out :: [MP.Integer]
+out  = let FGV.Exp e =  MP.frmRgt (cnv ((vec2ary MP.. 
+                                         fromColoredtoBW) inp, etFGV)) 
+       in MP.elems e
+
+prop :: MP.Bool
+prop = out MP.== tstPBM
+
+main :: IO ()
+main = let f = MP.frmRgt 
+                  (scompileWith [] (TFG.Ary TFG.Int) esString 0 
+                  (nrm (vec2ary MP.. fromColoredtoBW MP.. ary2vec)))
+       in  MP.writeFile "IPMiniWellScoped.c" f    
+ 

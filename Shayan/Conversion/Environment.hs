@@ -3,8 +3,8 @@ module Conversion.Environment () where
 import Prelude ()
 import MyPrelude 
 
-import qualified Environment.Plain  as EP
 import qualified Environment.Map    as EM
+import qualified Environment.Plain  as EP
 import qualified Environment.Typed  as ET
 import qualified Environment.Scoped as ES
 
@@ -59,3 +59,5 @@ instance n ~ Len r =>
   cnv (ee , r) = let ?r = r in case ee of
     ET.Emp      -> pure ES.Emp
     ET.Ext x xs -> ES.Ext <$@> x <*@> xs
+     
+    

@@ -59,7 +59,9 @@ vec :: ES.Env One TH.Name
 vec = ES.Ext '(+) ES.Emp
 
 envAddValG :: ET.Env FGV.Exp EnvAdd
-envAddValG = ET.Ext FGV.addV ET.Emp
+envAddValG = ET.Ext (FGV.Exp (+) 
+                       :: FGV.Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int)))  
+             ET.Emp
 
 envAddValV :: ES.Env One FAV.Exp
 envAddValV = ES.Ext FAV.addV ES.Emp

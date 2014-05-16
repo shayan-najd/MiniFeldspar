@@ -36,6 +36,7 @@ inf e r = do let mts = (mxm . concat) [mtas x | x <- toList e]
                  (i' , cs) = execState (Chk.chk e r) (succ mts , [])
              mTs <- slv (fmap Mta [Zro .. pred i']) cs
              let ttas = zip [Zro ..] mTs 
+                 
              return (fmap (appTtas ttas) e)
   
 chk :: (Chk.Chk ef , Traversable ef , r ~ Chk.Cns ef) => 
