@@ -1,0 +1,110 @@
+We plan to use the typed quotation facility in Haskell to write
+programs in the domain-specific language Feldspar. Our goal is to use
+the normalization process described in the paper "A practical theory
+of language-integrated query" to generate Feldspar programs, with the
+same efficiency as the normal embedding. We propose the following
+steps:
+
+(a) The user writes Feldspar programs with typed quotations
+(i.e. "[||...||]") in Template Haskell.
+
+(b) "TExp" (typed quotations in Haskell) is just a wrapper around the
+untyped representation (called TH, Template Haskell) and could not be
+used directly for our typed conversion to Feldspar; we also need to
+have the types of the sub-expressions. We first extract the untyped
+representation:
+
+> -- from Template Haskell
+> unTypeQ  :: Q (TExp a) -> Q TH.Exp
+
+(c) We then need to get out of the "Q" monad:
+
+> -- from Template Haskell
+> runQ :: Quasi m => Q a -> m a
+
+> -- our implementation
+> -- ErrM is our implementation of the Error Monad
+> instance Quasi ErrM where ...
+ 
+(d) We then convert to an untyped version of Feldspar's FOAS (First
+Order Abstract Syntax), represented by ADT (called FAUN, Feldspar ADT
+Untyped Named), which is polymorphic on the type of variable
+names (we use String for testing, and TH.Name in practice):
+
+> -- our implementation
+> cnvTHtoFAUN :: TH.Exp -> ErrM (FAUN.Exp TH.Name)
+
+(e) We then convert to a version with De Bruijn indices (called FAUD,
+Feldspar ADT Untyped De bruijn):
+
+> -- our implementation
+> cnvFAUNtoFAUD :: Eq x => [x] -> FAUN.Exp x -> ErrM (FAUD.Exp)
+
+The list [x] is a mapping from free names to De Bruijn indices.
+
+(f) We infer the types by the following substeps and return a version
+explicitly carrying types (a la Church), which is polymorphic on the
+type (called FAC, Feldspar ADT Church):
+
+> -- our implementation
+> infer :: FAUD.Exp -> ErrM (FAC.Exp Typ)
+
+  (1) conversion from FAUD to FAC where each explicit type is a fresh
+  Skolem variable (represtend by Natural numbers):
+
+  > -- our implementation
+  > cnvFAUDtoFAC :: FAUD.Exp -> FAC.Exp Nat  
+
+  (2) typechecking the above to collect Herbrand constraints (called
+  HerCon, Herbrand Constraint):
+
+  > -- our implementation 
+  > chk :: FAC.Exp Nat -> [HerCon]
+
+  (3) solving the Herband constraints, resulting in a mapping of fresh
+  Skolem variables and their corresponding simple types (i.e. types
+  without Skolem variables). If a Skolem variable does not correspond
+  to a simple type, we return an error (i.e. we consider the input
+  ill-typed).
+  
+  > -- our implementation 
+  > slv :: [HerCon] -> ErrM [Typ]
+  
+  (4) replacing the Skolem variables with their corresponding simple
+  types using the mapping. If a metavariable does not exist in the
+  mapping, we return an error.
+
+  > -- our implementation
+  > rpl :: [Typ] -> FAC.Exp Nat -> ErrM (FAC.Exp Typ) 
+ 
+(g) Conversion to a FOAS with GADT representation (called FGFO,
+Feldspar GADT FOAS), wrapped in an existential type (called ExsFGFO,
+Existential FGFO):
+
+> -- our implementation
+> cnvFACtoExsFGFO :: FAC.Exp Typ -> ErrM ExsFGFO.Exp
+
+(h) We use type classes (called SinTyp and SinEnv, Singleton for Type
+and Singleton for Environment), providing singletons, to cast the values
+wrapped in existential types to GADT expressions of the type, under
+the environment, provided by the context:
+
+> -- our implementation
+> cast :: (SinEnv e , SinTyp t) => ExsFGFO.Exp -> ErrM (FGFO.Exp e t)
+
+(j) The last step is to convert to Feldspar's HOAS represented by
+GADT (called FGHO, Feldspar GADT HOAS):
+
+> -- our implementation
+> cnvFGFOtoFGHO :: FGFO.Exp r t -> FGHO.Exp r t
+
+By putting it all together, and explicitly providing the environment
+for the free variables, we can get rid of the "SinTyp" constraint,
+since the type index is known at the compile time via the phantom type 
+of the typed quotation:
+
+> -- our implementation
+> toFeldspar :: SinTyp t => Env e -> Q (TExp t) -> ErrM (FGHO.Exp e t)
+
+/Shayan
+

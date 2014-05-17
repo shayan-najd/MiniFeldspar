@@ -1,0 +1,14 @@
+To be exact, we have four classes of language constructs:
+
+(a) built-in constructs which C Compiler has specific rules for compiling them
+
+   (1) constructs available directly in Haskell which have unique constructors in TemplateHaskell's AST: Literals, Variables, Application, Abstraction, Conditional, Pairs, and Let
+
+   (2) constructs available in MiniFeldspar but without a corresponding constructor in TemplateHaskell's AST, written as application of a free variable to its inputs in the TH Haskell syntax: 'True', 'False', 'while', 'arr', '!', 'arrLen', 'fst', and 'snd'
+
+(b) user-defined constructs
+
+   (1) the ones that are spliced (i.e. has $$ prefix)
+
+   (2) the ones that have vanilla type and their definition (in form of MiniFeldspar AST) is explicitly passed to the compiler 
+       (e.g. cCompile [|| forLoop' ||] [("TemplateHaskell.forLoop'",forLoop)])

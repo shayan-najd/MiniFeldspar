@@ -100,7 +100,7 @@ mapMC (TFG.Arr t ts) f (Ext x xs) = case getPrfHasSin t of
   PrfHasSin -> do x'  <- f x
                   xs' <- mapMC ts f xs  
                   return (Ext x' xs')
-mapMC _              _ _          = fail "Impossible!"
+mapMC _              _ _          = impossibleM
  
 absTmp :: forall r t t'. (HasSin TFG.Typ t', HasSin TFG.Typ t) => 
           Exp r t' -> String -> Exp r t -> Exp r t

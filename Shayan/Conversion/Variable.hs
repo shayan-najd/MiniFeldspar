@@ -36,7 +36,7 @@ instance Cnv (VP.Var, r) VP.Var where
 instance Cnv (VP.Var , NG.Nat n) (VS.Var n) where
   cnv (VP.Zro   , NG.Suc  _) = return VS.Zro
   cnv (VP.Suc n , NG.Suc n') = VS.Suc <$> cnv (n , n')
-  cnv _                      = fail "Impossible!"  
+  cnv _                      = impossibleM
  
 instance (HasSin NG.Nat (Len r) , HasSin tf t , EqlSin tf) => 
          Cnv (VP.Nat , ET.Env tf r) (VT.Var r t) where                     
@@ -62,7 +62,7 @@ instance (n ~ Len r , r ~ r' , EqlSin tf , HasSin tf t) =>
   cnv (VS.Zro   , ET.Ext x _ ) = do Rfl <- eqlSin x (sin :: tf t) 
                                     return VT.Zro         
   cnv (VS.Suc n , ET.Ext _ xs) = VT.Suc <$> cnv (n , xs) 
-  cnv _                        = fail "Impossible!" 
+  cnv _                        = impossibleM 
 
 instance Cnv (VS.Var n   , ES.Env n  t) t      where
   cnv (x , r) = return (ES.get x r)

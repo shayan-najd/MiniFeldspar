@@ -1,5 +1,0 @@
-theorem = forall r :: [*]. forall t :: *. forall e :: Exp r t. forall en :: Exp r t. e ~> en 
-          => 
-           (forall tr :: *. tr `isin_list` r => FO tr) ^ FO t => 
-           (forall rs :: [*]. forall ts :: *. forall es :: Exp rs ts. es `isin_exp` en => FO ts).    
-          
