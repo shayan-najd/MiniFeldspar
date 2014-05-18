@@ -1,5 +1,6 @@
 module Nat.TH where
 
+import Prelude ()
 import MyPrelude
 import Language.Haskell.TH.Syntax
 

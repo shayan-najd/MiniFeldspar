@@ -1,8 +1,9 @@
 module ErrorMonad where
 
+import Prelude (Monad(..),String,Eq,Show,Functor,error)
 import Control.Applicative (Applicative(..))
-import Data.Foldable
-import Data.Traversable
+import Data.Foldable (Foldable)
+import Data.Traversable (Traversable)
 
 data ErrM t = Rgt t 
             | Lft String

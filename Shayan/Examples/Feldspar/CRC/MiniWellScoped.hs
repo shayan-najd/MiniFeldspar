@@ -17,7 +17,7 @@ import Compiler (scompileWith)
 import Normalization
 import Normalization.Feldspar.MiniWellScoped ()
   
-crc32 :: Vec (Data Integer) -> Data Integer        
+crc32 :: Vec Integer -> Data Integer        
 crc32 = foldl updCrc 0 
  
 updCrc :: Data Integer -> Data Integer -> Data Integer
@@ -29,10 +29,10 @@ updCrc = \ cc -> \ ch ->
            ((xor cc 0xFFFFFFFF) .>>. 8)) 
           0xFFFFFFFF
  
-tblVec :: Vec (Data Integer)
+tblVec :: Vec Integer
 tblVec = fromList (MP.fmap (\ i -> litI (MP.fromIntegral i)) tblLst) 0 
   
-inp :: Vec (Data Integer)
+inp :: Vec Integer
 inp = fromList 
       (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstInp) 0
 

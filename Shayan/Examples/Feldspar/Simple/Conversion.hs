@@ -1,4 +1,4 @@
-module Examples.Feldspar.Conversion where
+module Examples.Feldspar.Simple.Conversion where
 
 import Prelude ()
 import MyPrelude
@@ -14,14 +14,14 @@ import qualified Expression.Feldspar.MiniWellScoped      as FMWS
 import qualified Expression.Feldspar.ADTValue            as FAV
 import qualified Expression.Feldspar.GADTValue           as FGV
 
-import qualified Examples.TemplateHaskell                as TH
-import qualified Examples.Feldspar.ADTUntypedNamed       as FAUN
-import qualified Examples.Feldspar.ADTUntypedDebruijn    as FAUD
-import qualified Examples.Feldspar.GADTUntypedDebruijn   as FGUD
-import qualified Examples.Feldspar.GADTTyped             as FGTD
-import qualified Examples.Feldspar.GADTFirstOrder        as FGFO 
-import qualified Examples.Feldspar.GADTHigherOrder       as FGHO
-import qualified Examples.Feldspar.MiniWellScoped        as FMWS ()
+import qualified Examples.Feldspar.Simple.TemplateHaskell     as TH
+import qualified Examples.Feldspar.Simple.ADTUntypedNamed     as FAUN
+import qualified Examples.Feldspar.Simple.ADTUntypedDebruijn  as FAUD
+import qualified Examples.Feldspar.Simple.GADTUntypedDebruijn as FGUD
+import qualified Examples.Feldspar.Simple.GADTTyped           as FGTD
+import qualified Examples.Feldspar.Simple.GADTFirstOrder      as FGFO 
+import qualified Examples.Feldspar.Simple.GADTHigherOrder     as FGHO
+import qualified Examples.Feldspar.Simple.MiniWellScoped      as FMWS ()
 
 import qualified Type.Feldspar.ADT                       as TFA 
 import qualified Type.Feldspar.GADT                      as TFG 

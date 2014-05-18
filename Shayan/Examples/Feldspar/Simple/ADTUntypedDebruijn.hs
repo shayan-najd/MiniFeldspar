@@ -1,4 +1,4 @@
-module Examples.Feldspar.ADTUntypedDebruijn where
+module Examples.Feldspar.Simple.ADTUntypedDebruijn where
  
 import Prelude ()
 import MyPrelude

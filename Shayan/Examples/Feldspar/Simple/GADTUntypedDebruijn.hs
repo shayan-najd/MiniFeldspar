@@ -1,4 +1,4 @@
-module Examples.Feldspar.GADTUntypedDebruijn where
+module Examples.Feldspar.Simple.GADTUntypedDebruijn where
  
 import Prelude ()
 import MyPrelude

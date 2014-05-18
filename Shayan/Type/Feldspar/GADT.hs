@@ -26,7 +26,6 @@ type instance Trm (A.Ary ta)    = Array Word32 (Trm ta)
 type instance Trm (A.Tpl tf ts) = (Trm tf , Trm ts)
 type instance Trm A.Cmx         = Complex Float
   
-
 type instance RevTrm Word32             = A.Int 
 type instance RevTrm Bool               = A.Bol
 type instance RevTrm Float              = A.Flt
@@ -55,7 +54,6 @@ instance HasSin Typ ta => HasSin Typ (A.Ary ta) where
   
 instance HasSin Typ A.Cmx where
   sin = Cmx 
-
 
 instance EqlSin Typ where
   eqlSin Int         Int           = return Rfl
@@ -152,7 +150,6 @@ eqlArg ET.Emp         (Ary _)      = return EqlArg
 eqlArg ET.Emp         (Tpl _ _)    = return EqlArg
 eqlArg ET.Emp         Cmx          = return EqlArg
 eqlArg _              _            = fail "Normalization Error!"           
-
 
 getArgTyp :: Typ (A.Arr ta tb) -> Typ ta  
 getArgTyp (Arr ta _) = ta

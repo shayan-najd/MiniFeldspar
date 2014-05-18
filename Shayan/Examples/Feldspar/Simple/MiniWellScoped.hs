@@ -1,4 +1,4 @@
-module Examples.Feldspar.MiniWellScoped where
+module Examples.Feldspar.Simple.MiniWellScoped where
 
 import Prelude ()
 import MyPrelude 

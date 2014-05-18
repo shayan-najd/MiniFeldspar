@@ -1,6 +1,6 @@
 module Conversion.Expression.Feldspar.Evaluation.ADTValue () where
 
-import Prelude   ()
+import Prelude ()
 import MyPrelude
 
 import qualified Expression.Feldspar.ADTValue  as FAV

@@ -18,7 +18,7 @@ tstOut = 3632233996
 
 inp :: Vec Integer
 inp = fromList 
-      (MP.fmap (\ i -> lit (MP.fromIntegral i)) tstInp) 0
+      (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstInp) 0
 
 out :: MP.Integer
 out = (MP.fromIntegral (eval (crc32 inp)))
@@ -37,7 +37,7 @@ updCrc cc ch =
  
 tblVec :: Vec Integer
 tblVec = fromList (MP.fmap 
-                   (\ i -> lit (MP.fromIntegral i)) 
+                   (\ i -> litI (MP.fromIntegral i)) 
                    tblLst) 0                 
 
 tblLst :: [MP.Integer]

@@ -42,26 +42,7 @@ appTtas ttas t = foldl (\ ta (i , t') -> appT i t' ta) t ttas
 
 type EnvFld r = NA.N0 ': NA.N2 ': NA.N0 ': NA.N2 ': 
                 NA.N1 ': NA.N0 ': NA.N0 ': r
-{-                
-intVar :: Var (EnvFld r) NA.Zro
-intVar = Zro                   
-
-arrVar :: Var (EnvFld r) (NA.Suc (NA.Suc NA.Zro))
-arrVar = Suc Zro  
-
-bolVar :: Var (EnvFld r) NA.Zro
-bolVar = Suc (Suc Zro)
-
-tplVar :: Var (EnvFld r) (NA.Suc (NA.Suc NA.Zro))
-tplVar = Suc (Suc (Suc Zro))
-
-aryVar :: Var (EnvFld r) (NA.Suc NA.Zro)
-aryVar = Suc (Suc (Suc (Suc Zro)))
-
-fltVar :: Var (EnvFld r) NA.Zro
-fltVar = Suc (Suc (Suc (Suc (Suc Zro))))
--}                       
- 
+  
 pattern Int       = App Zro Emp
 pattern Arr ta tb = App (Suc Zro) (Ext ta (Ext tb Emp))
 pattern Bol       = App (Suc (Suc Zro)) Emp

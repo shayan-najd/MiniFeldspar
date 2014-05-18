@@ -3,29 +3,30 @@ module Test where
 import Prelude ()
 import MyPrelude
 
-import qualified Examples.Feldspar.ADTUntypedNamed         as FAUN
-import qualified Examples.Feldspar.ADTUntypedDebruijn      as FAUD
-import qualified Examples.Feldspar.GADTUntypedDebruijn     as FGUD
-import qualified Examples.Feldspar.GADTTyped               as FGTD
-import qualified Examples.Feldspar.GADTFirstOrder          as FGFO
-import qualified Examples.Feldspar.GADTHigherOrder         as FGHO
-import qualified Examples.Feldspar.MiniWellScoped          as FMWS
-import qualified Examples.Feldspar.Conversion              as FCNV
+import qualified Examples.Feldspar.Simple.ADTUntypedNamed     as FAUN
+import qualified Examples.Feldspar.Simple.ADTUntypedDebruijn  as FAUD
+import qualified Examples.Feldspar.Simple.GADTUntypedDebruijn as FGUD
+import qualified Examples.Feldspar.Simple.GADTTyped           as FGTD
+import qualified Examples.Feldspar.Simple.GADTFirstOrder      as FGFO
+import qualified Examples.Feldspar.Simple.GADTHigherOrder     as FGHO
+import qualified Examples.Feldspar.Simple.MiniWellScoped      as FMWS
+import qualified Examples.Feldspar.Simple.Conversion          as FCNV
 -- import qualified Examples.Feldspar.Prelude.TemplateHaskellSolution1A as FPTHS1A
 -- import qualified Examples.Feldspar.Prelude.TemplateHaskellSolution1B as FPTHS1B
 -- import qualified Examples.Feldspar.Prelude.TemplateHaskellSolution2A as FPTHS2A
 -- import qualified Examples.Feldspar.Prelude.TemplateHaskellSolution2B as FPTHS2B
-import qualified Examples.Feldspar.Prelude.MiniWellScoped  as FPMWS ()
-import qualified Examples.Feldspar.Prelude.GADTHigherOrder as FPGHO
-import qualified Examples.Feldspar.Prelude.GADTFirstOrder  as FPGFO
+--import qualified Examples.Feldspar.Prelude.GADTHigherOrder as FPGHO
+--import qualified Examples.Feldspar.Prelude.GADTFirstOrder  as FPGFO
+--import qualified Examples.Feldspar.Prelude.MiniWellScoped  as FPMWS ()
+
 import Conversion.Expression.Feldspar.Evaluation.ADTValue () 
 import Normalization.Feldspar.GADTTyped ()
 
 main :: IO ()
 main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
                  FGTD.test  && FGFO.test  && FGHO.test &&
-                 FMWS.test  && FCNV.test  &&
-                 FPGFO.test && FPGHO.test -- &&
+                 FMWS.test  && FCNV.test  -- &&
+--                 FPGFO.test &&  FPGHO.test &&
                  --  FPMWS.test && 
                  --    FPTHS1A.test && FPTHS1B.test && FPTHS2A.test && FPTHS2B.test 
               then "Pass!"

@@ -1,4 +1,4 @@
-module Examples.Feldspar.ADTUntypedNamed where
+module Examples.Feldspar.Simple.ADTUntypedNamed where
  
 import Prelude ()
 import MyPrelude

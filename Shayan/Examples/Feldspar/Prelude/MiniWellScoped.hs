@@ -2,12 +2,12 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        (Data 
        ,Integer,Integral(..),litI
        ,Float,Rational(..),litF
-       ,Bool,true,false
+       ,Bool,pattern True, pattern False
        ,Tpl,tpl,fst,snd           
        ,Complex,cmx,real,imag
        ,Vec,vec,length,(!!)           
-       ,Ary,ary, ind , len              
-       ,ifThenElse,forLoop,forLoopVec,whl
+       ,Ary,ary,len,ind               
+       ,ifThenElse,whl,forLoop,forLoopVec
        ,not,(&&),(||)                  
        ,Equality((==)),(/=)
        ,Ordering((<)),(>),(>=),(<=),min           
@@ -29,6 +29,8 @@ import qualified Type.Feldspar.GADT            as TFG
 import Singleton
 import Environment.Typed hiding (map,len)
 import Examples.Feldspar.Prelude.Environment
+
+type Type t = HasSin TFG.Typ t
  
 type Data t = Exp Prelude t
 
@@ -79,12 +81,10 @@ litF = ConF
 
 type Bool = TFA.Bol  
 
-true :: Data Bool
-true = ConB MP.True
+pattern True  = ConB MP.True
 
-false :: Data Bool
-false = ConB MP.False
-
+pattern False = ConB MP.False 
+ 
 ---------------------------------------------------------------------------------
 -- Tuple
 ---------------------------------------------------------------------------------
@@ -94,10 +94,10 @@ type Tpl a b = TFA.Tpl a b
 tpl :: Data a -> Data b -> Data (Tpl a b)
 tpl = Tpl
 
-fst :: HasSin TFG.Typ b => Data (Tpl a b) -> Data a
+fst :: Type b => Data (Tpl a b) -> Data a
 fst = Fst
 
-snd :: HasSin TFG.Typ a => Data (Tpl a b) -> Data b
+snd :: Type a => Data (Tpl a b) -> Data b
 snd = Snd
 
 ---------------------------------------------------------------------------------
@@ -119,15 +119,15 @@ imag e = AppV imagPartVar (Ext e Emp)
 -- Vec
 ---------------------------------------------------------------------------------
 
-data Vec t = Vec (Data Integer) (Data Integer -> t)
+data Vec t = Vec (Data Integer) (Data Integer -> Data t)
  
-vec :: Data Integer -> (Data Integer -> t) -> Vec t
+vec :: Data Integer -> (Data Integer -> Data t) -> Vec t
 vec = Vec
 
 length :: Vec t -> Data Integer
 length (Vec l _) = l
 
-(!!) :: Vec t -> Data Integer -> t
+(!!) :: Vec t -> Data Integer -> Data t
 (!!) (Vec _ f) = f 
 
 ---------------------------------------------------------------------------------
@@ -137,15 +137,12 @@ length (Vec l _) = l
 ary :: Data Integer -> (Data Integer -> Data t) -> Data (Ary t)
 ary = Ary
 
-len  :: HasSin TFG.Typ t => Data (Ary t) -> Data Integer
+len  :: Type t => Data (Ary t) -> Data Integer
 len = Len
-
-lengthA = len 
 
 ind :: Data (Ary t) -> Data Integer -> Data t
 ind = Ind 
 
-(!!!) = ind
 ---------------------------------------------------------------------------------
 -- Control Flow
 ---------------------------------------------------------------------------------
@@ -153,10 +150,10 @@ ind = Ind
 ifThenElse :: Data Bool -> Data a -> Data a -> Data a
 ifThenElse = Cnd
 
-whl :: (Exp r t -> Exp r Bool) -> (Exp r t -> Exp r t) -> Exp r t -> Exp r t  
+whl :: (Data t -> Data Bool) -> (Data t -> Data t) -> Data t -> Data t  
 whl = Whl
 
-forLoop :: HasSin TFG.Typ s => Data Integer -> Data s -> 
+forLoop :: Type s => Data Integer -> Data s -> 
            (Data Integer -> Data s -> Data s ) -> Data s
 forLoop l init step = Snd (Whl (\ t -> (Fst t) < l)
                                (\ t -> Tpl 
@@ -165,8 +162,8 @@ forLoop l init step = Snd (Whl (\ t -> (Fst t) < l)
                                (Tpl (ConI 0) init))
                       
 
-forLoopVec :: HasSin TFG.Typ s => Data Integer -> Vec (Data s) -> 
-           (Data Integer -> Vec (Data s) -> Vec (Data s)) -> Vec (Data s)
+forLoopVec :: Type s => Data Integer -> Vec s -> 
+           (Data Integer -> Vec s -> Vec s) -> Vec s
 forLoopVec l init step =  let init'     = vec2ary init
                               step' i a = vec2ary (step i (ary2vec a))
                           in  ary2vec (forLoop l init' step')    
@@ -176,13 +173,13 @@ forLoopVec l init step =  let init'     = vec2ary init
 ---------------------------------------------------------------------------------
 
 not :: Data Bool -> Data Bool
-not x = ifThenElse x false true
+not x = ifThenElse x False True
 
 (&&) :: Data Bool -> Data Bool -> Data Bool
-x && y = ifThenElse x y false
+x && y = ifThenElse x y False
 
 (||) :: Data Bool -> Data Bool -> Data Bool
-x || y = ifThenElse x true y
+x || y = ifThenElse x True y
 
 ---------------------------------------------------------------------------------
 -- Equality
@@ -301,8 +298,8 @@ complement e  = AppV cmpIntVar (Ext e Emp)
 
 testBit    :: Data Integer -> Data Integer -> Data Bool 
 testBit el er =  ifThenElse ((el .&. (ConI 1 .<<. er)) == ConI 0) 
-                 false  
-                 true
+                 False  
+                 True
  
 oneBits :: Data Integer -> Data Integer
 oneBits n = complement (complement (ConI 0) .<<. n)
@@ -320,17 +317,17 @@ i2f e = AppV i2fVar (Ext e Emp)
 cis :: Data Float -> Data (Complex)
 cis e = AppV cisVar (Ext e Emp)
  
-vec2ary :: Vec (Data t) -> Data (TFA.Ary t)
+vec2ary :: Vec t -> Data (Ary t)
 vec2ary v = Ary (length v) (v !!) 
 
-ary2vec :: HasSin TFG.Typ t => Data (TFA.Ary t) -> Vec (Data t)
+ary2vec :: Type t => Data (Ary t) -> Vec t
 ary2vec v = vec (Len v) (\i -> Ind v i)
 
 ---------------------------------------------------------------------------------
 -- Vector Operators
 ---------------------------------------------------------------------------------
 
-(...) :: Data Integer -> Data Integer -> Vec (Data Integer)
+(...) :: Data Integer -> Data Integer -> Vec Integer
 (...) m n = let l = ifThenElse (n < m) (ConI 0) (n - m + (ConI 1))
             in  vec l (\ i -> i + m)
   
@@ -342,32 +339,32 @@ permute f v = let l = length v
 reverse :: Vec t -> Vec t
 reverse = permute (\ l i -> l - (ConI 1) - i)
 
-foldl :: HasSin TFG.Typ a => 
-         (Data a -> Data b -> Data a) -> Data a -> Vec (Data b) -> Data a
+foldl :: Type a => 
+         (Data a -> Data b -> Data a) -> Data a -> Vec b -> Data a
 foldl f acc v  = let l = length v
                  in  forLoop l acc (\ i a ->  f a (v !! i))
    
 
-foldlVec :: HasSin TFG.Typ a => 
-         (Vec (Data a) -> Data b -> Vec (Data a)) -> Vec (Data a) -> 
-         Vec (Data b) -> Vec (Data a)
+foldlVec :: Type a => 
+         (Vec a -> Data b -> Vec a) -> Vec a -> 
+         Vec b -> Vec a
 foldlVec f acc v  = let l = length v
                         acc' = vec2ary acc
                         f' vv d = vec2ary (f (ary2vec vv) d)
                     in  ary2vec (forLoop l acc' (\ i a ->  f' a (v !! i)))
 
-map :: (a -> b) -> Vec a -> Vec b
+map :: (Data a -> Data b) -> Vec a -> Vec b
 map f v = let l = length v
           in vec l (\i -> f (v !! i))     
 
-zipWith :: (a -> b -> c) -> Vec a -> Vec b -> Vec c
+zipWith :: (Data a -> Data b -> Data c) -> Vec a -> Vec b -> Vec c
 zipWith f v1 v2 = vec (min (length v1) (length v2))
                       (\ i -> f (v1 !! i) (v2 !! i))
 
-sum :: Vec (Data Integer) -> Data Integer
+sum :: Vec Integer -> Data Integer
 sum = foldl (+) (ConI 0)
 
-scalarProd :: Vec (Data Integer) -> Vec (Data Integer) -> Data Integer
+scalarProd :: Vec Integer -> Vec Integer -> Data Integer
 scalarProd v1 v2 = sum (zipWith (*) v1 v2)
 
 ---------------------------------------------------------------------------------
@@ -378,30 +375,30 @@ scalarProd v1 v2 = sum (zipWith (*) v1 v2)
 (....) m n = let l = ifThenElse (n < m) (ConI 0) (n - m + (ConI 1))
              in  Ary l (\ i -> i + m)
   
-permuteA :: HasSin TFG.Typ t => 
+permuteA :: Type t => 
             (Data Integer -> Data Integer -> Data Integer)
            -> Data (Ary t) -> Data (Ary t)
-permuteA f v = let l = lengthA v 
-               in  Ary l (\ i -> v !!! (f l i))
+permuteA f v = let l = len v 
+               in  Ary l (\ i -> ind v (f l i))
  
-reverseA :: HasSin TFG.Typ t => Data (Ary t) -> Data (Ary t)
+reverseA :: Type t => Data (Ary t) -> Data (Ary t)
 reverseA = permuteA (\ l i -> l - (ConI 1) - i)
 
-foldlA :: (HasSin TFG.Typ a , HasSin TFG.Typ b) => 
+foldlA :: (Type a , Type b) => 
          (Data a -> Data b -> Data a) -> Data a -> Data (Ary b) -> Data a
-foldlA f acc v  = let l = lengthA v
-                  in  forLoop l acc (\ i a ->  f a (v !!! i))
+foldlA f acc v  = let l = len v
+                  in  forLoop l acc (\ i a ->  f a (ind v i))
    
-mapA :: HasSin TFG.Typ a => 
+mapA :: Type a => 
         (Data a -> Data b) -> Data (Ary a) -> Data (Ary b)
-mapA f v = let l = lengthA v
-           in Ary l (\ i -> f (v !!! i))     
+mapA f v = let l = len v
+           in Ary l (\ i -> f (ind v i))     
 
-zipWithA :: (HasSin TFG.Typ a , HasSin TFG.Typ b) => 
+zipWithA :: (Type a , Type b) => 
             (Data a -> Data b -> Data c) -> Data (Ary a) -> Data (Ary b) -> 
            Data (Ary c)
-zipWithA f v1 v2 = Ary (min (lengthA v1) (lengthA v2))
-                      (\ i -> f (v1 !!! i) (v2 !!! i))
+zipWithA f v1 v2 = Ary (min (len v1) (len v2))
+                      (\ i -> f (ind v1 i) (ind v2 i))
 
 sumA :: Data (Ary Integer) -> Data Integer
 sumA = foldlA (+) (ConI 0)
@@ -413,7 +410,7 @@ scalarProdA v1 v2 = sumA (zipWithA (*) v1 v2)
 -- Helper Operators
 ---------------------------------------------------------------------------------
 
-fromList:: [Data a] -> Data a -> Vec (Data a)
+fromList:: [Data a] -> Data a -> Vec a
 fromList lst k =  vec
                   (litI (MP.fromIntegral (MP.length lst))) 
                   (\ i ->  MP.foldr 

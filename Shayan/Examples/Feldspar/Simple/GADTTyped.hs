@@ -1,4 +1,4 @@
-module Examples.Feldspar.GADTTyped where
+module Examples.Feldspar.Simple.GADTTyped where
  
 import Prelude ()
 import MyPrelude

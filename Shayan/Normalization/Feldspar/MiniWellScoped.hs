@@ -2,13 +2,13 @@ module Normalization.Feldspar.MiniWellScoped () where
 
 import Prelude ()
 import MyPrelude
-import Data.Constraint
-import Data.Constraint.Unsafe
+-- import Data.Constraint
+-- import Data.Constraint.Unsafe
  
 import Expression.Feldspar.MiniWellScoped hiding (ref)
    
 import Environment.Typed hiding (add)
-import Variable.Typed
+-- import Variable.Typed
 import Normalization
 import Data.IORef
 import System.IO.Unsafe

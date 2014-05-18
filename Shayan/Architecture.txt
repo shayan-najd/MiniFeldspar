@@ -1,0 +1,87 @@
+
+Expressions
+-----------
+There are different representations of the expressions in
+MiniFeldspar. Each representaion corresponds to a specific stage in
+the system pipline. 
+These representations can be found in the folder "Expression".
+
+Types
+-----
+There are three represnetations of types in MiniFeldspar: 
+(a) a simple ADT represenation
+(b) a singleton representation via GADTS
+(c) a generic represnation via Herbrand Constraints, 
+    used for the constraint solving
+These representations can be found in the folder "Type".
+
+
+Environments
+------------
+There are four represnation for environments in MiniFeldspar:
+(a) a plain list
+(b) a simple lookup map
+(c) a vector (a list with its length available at the type level)
+(d) a singleton version of lists via GADTs
+These representations can be found in the folder "Environment".
+
+Variables
+---------
+There are three representation for variables in MiniFeldspar:
+(a) variables corresponding to environment type (b)
+(b) variables corresponding to environment type (c)
+(c) variables corresponding to enviroment type (d)
+These representations can be found in the folder "Variable".
+
+Nats
+----
+There are three representation of natural numbers:
+(a) a simple ADT representation
+(b) a singleton representation via GADTS
+(c) a representation via TemplateHaskell, to generate 
+    large natural numbers based on positive integer literals
+These representations can be found in the folder "Nat".
+
+Conversions
+-----------
+Conversion between each different representations of the expressions,
+the types, the environment, the variables and natural numbers. 
+These conversions can be found in the folder "Conversion" and they are
+all instances of the type class "Cnv" which is defined in
+"Conversion.hs".
+
+Examples and Tests
+------------------
+There are five kinds of example programs:
+(a) simple arithmatic programs, to test each stage of the system
+(b) Image Processing algorithm
+(c) CRC algorithm
+(d) FFT algorithm
+(e) Prelude functions required for the above mentioned algorithms
+The examples and test programs can be found in the folder "Examples"
+and the test programs are linked the file "Test.hs".
+
+Typeinference and Typechecking
+------------------------------
+Typeinference is done by collecting Herbrand constraints and solving
+them. The code for traversal is found in the folder "TypeChecking"
+which provides and instance for the type class defined in the file
+"TypeChecking.hs". The traversal happens in a monad defined in
+"InferenceMonad.hs". The solver is defined in "Solver.hs". Mentioned
+pieces are put together via the functions defind in "Inference.hs".
+
+Normalization
+-------------
+Normalization is defined in normal-order via a set of rewrite rules
+and a monad that tracks if rewrite rules are triggered. Normalization
+process stops if there are no more changes.  Nomralization rewrite
+rules are defined as instances of the type class defined in
+"Normalization.hs", available in the folder "Normalization". The
+mentioned monad is defined in "ChangeMonad.hs".
+
+Compiler
+--------
+The code for compiling the core MiniFeldspar AST to C code AST is
+defined in "Compiler.hs".
+
+

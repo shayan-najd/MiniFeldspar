@@ -1,13 +1,14 @@
-module Examples.Feldspar.IP.Feldspar where
+{-# LANGUAGE RebindableSyntax #-}
+ 
+import Prelude ()
+import MyPrelude (IO)
 
-import Prelude (IO)
 import Examples.Feldspar.Prelude.Feldspar 
-
 import Feldspar.Compiler (icompile)
  
 -- Conversion from grayscale to black & white 
 toBW :: Vec Integer -> Vec Integer
-toBW = map (\x -> condition (x < 135) 1 0) 
+toBW = map (\ x -> if x < 135 then 1 else 0) 
 
 -- The standard red channel grayscale coefficient
 redCoefficient :: Data Integer
@@ -32,10 +33,10 @@ rgbToGray r g b = ((r * redCoefficient  ) +
 toGray :: Vec Integer -> Vec Integer
 toGray v = vec ((length v) / 3)
            (\ i -> let j = i * 3
-                        in rgbToGray 
-                           (v !! j) 
-                           (v !! (j + 1)) 
-                           (v !! (j + 2)))
+                   in rgbToGray 
+                          (v !! j) 
+                          (v !! (j + 1)) 
+                          (v !! (j + 2)))
   
 -- Conversion from colored to black and white
 fromColoredtoBW :: Vec Integer -> Vec Integer

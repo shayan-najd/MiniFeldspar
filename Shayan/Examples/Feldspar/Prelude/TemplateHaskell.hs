@@ -10,7 +10,7 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,not,(&&),(||)                  
        ,Equality((==)),(/=)
        ,Ordering((<)),(>),(>=),(<=),min           
-       ,Numeric((+),(-),(*),(/)),ilog2
+       ,Numeric((+),(-),(*),(/),negate),ilog2
        ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
        ,i2f,cis
        ,(...),permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
@@ -26,6 +26,7 @@ import Examples.Feldspar.Prelude.Environment
 import qualified VanillaPrelude as VP 
 
 type Data t = Q (TExp t)
+
 type Ary t = Array Integer t
 
 class FO a                              where {}
@@ -35,15 +36,23 @@ instance FO Float                       where {}
 instance FO Complex                     where {}
 instance (FO a , FO b) => FO (Tpl a b)  where {}
 instance FO a => FO (Ary a)             where {}
+
+---------------------------------------------------------------------------------
+-- Integer
+---------------------------------------------------------------------------------
  
 instance Lift Integer where
   lift i = MP.return (LitE (IntegerL (MP.toInteger i)))
- 
-instance Lift Float where
-  lift f = MP.return (LitE (RationalL (MP.toRational f)))
 
 litI :: Integer -> Data Integer
 litI i = [|| i ||]
+
+---------------------------------------------------------------------------------
+-- Float
+---------------------------------------------------------------------------------
+ 
+instance Lift Float where
+  lift f = MP.return (LitE (RationalL (MP.toRational f)))
 
 litF :: Float -> Data Float
 litF f = [|| f ||]
@@ -173,24 +182,28 @@ class Numeric t where
   (-) :: Data (t -> t -> t)  
   (*) :: Data (t -> t -> t)  
   (/) :: Data (t -> t -> t) 
+  negate :: Data (t -> t)
  
 instance Numeric Integer where
   (+) = [|| addIntHsk ||]
   (-) = [|| subIntHsk ||]
   (*) = [|| mulIntHsk ||]          
   (/) = [|| divIntHsk ||]
+  negate = [|| \ i -> $$((-)) 0 i ||]  
     
 instance Numeric Float where 
   (+) = [|| addFltHsk ||]
   (-) = [|| subFltHsk ||]
   (*) = [|| mulFltHsk ||]          
   (/) = [|| divFltHsk ||]
+  negate = [|| \ f -> $$((-)) 0.0 f ||]
 
 instance Numeric (Complex) where 
   (+) = [|| addCmxHsk ||]
   (-) = [|| subCmxHsk ||]
   (*) = [|| mulCmxHsk ||]          
   (/) = [|| divCmxHsk ||] 
+  negate = [|| \ c -> $$((-)) (cmx 0.0 0.0) c ||]
   
 ilog2 :: Data (Integer -> Integer)
 ilog2 = [|| ilog2Hsk ||] 

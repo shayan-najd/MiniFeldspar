@@ -3,19 +3,19 @@ module Examples.Feldspar.Prelude.Feldspar
        ,Integer,Integral(..),litI
        ,Float,Rational(..),litF
        ,Bool,true,false
---       ,Tpl,tpl,fst,snd           
+       ,Tpl,tpl,fst,snd           
        ,Complex,complex,real,imag
        ,Vec,vec,length,(!!)           
-       ,Ary,ary -- ,lengthA,(!!!)                
-       ,ifThenElse,forLoop{-,forLoopVec,whl -}
+       ,Ary,ary,len,ind                 
+       ,ifThenElse,whl,forLoop,forLoopVec
        ,not,(&&),(||)                  
        ,Equality((==)),(/=)
        ,Ordering((<)),(>),(>=),(<=),min           
        ,Numeric((+),(-),(*),(/),negate),ilog2
        ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
-       ,i2f,cis -- ,ary2vec,vec2ary                                  
-       ,(...),permute,reverse,foldl {-,foldlVec -},map,zipWith,sum,scalarProd,fromList
-  --     ,(....),permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
+       ,i2f,cis,ary2vec,vec2ary                                  
+       ,(...),permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
+       ,(....),permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
        ) where
 
 import Prelude ()
@@ -23,7 +23,7 @@ import qualified Prelude   as P
 import qualified MyPrelude as MP
 
 import Feldspar 
-  (Data,Float,Bool,condition,forLoop)
+  (Data,Float,Bool)
 
 import qualified Feldspar        as F 
   (WordN
@@ -34,18 +34,28 @@ import qualified Feldspar        as F
   ,(<)
   ,(+),(-),(*),(/),div
   ,(.|.),(.&.),xor,bitCount,testBit,complement,shiftRU,shiftLU
-  ,i2n,cis,parallel)
-  
+  ,i2n,cis
+  ,condition)
+
+-- import qualified Feldspar.Core.Frontend.Tuple   as T 
+
 import qualified Feldspar.Core.Frontend.Complex as C 
   (complex,realPart,imagPart)
-  
-import qualified Feldspar.Vector as V 
+
+import qualified Feldspar.Vector                as V 
   (Pull1,indexed1,length,(!!))
 
+import qualified Feldspar.Core.Frontend.Array   as A
+  (parallel,getLength,getIx)
+  
+import qualified Feldspar.Core.Frontend.Loop    as L
+  (whileLoop) 
+
+import qualified Feldspar.Core.Frontend as CF
+  (desugar)
+
 import Feldspar.Core.Types (Type)
-
--- type Ary t = Array Integer t
-
+ 
 ---------------------------------------------------------------------------------
 -- Integer
 ---------------------------------------------------------------------------------
@@ -91,6 +101,21 @@ false :: Data Bool
 false = F.false
 
 ---------------------------------------------------------------------------------
+-- Tuple
+---------------------------------------------------------------------------------
+
+type Tpl a b = (a , b)
+
+tpl :: (Type a , Type b) => Data a -> Data b -> Data (a , b)
+tpl x y = CF.desugar (x , y)
+
+fst :: (Type a , Type b) => Data (a , b) -> Data a
+fst = fst
+
+snd :: (Type a , Type b) => Data (a , b) -> Data b
+snd = snd
+
+---------------------------------------------------------------------------------
 -- Complex
 ---------------------------------------------------------------------------------
 
@@ -124,30 +149,55 @@ length = V.length
 -- Ary
 ---------------------------------------------------------------------------------
 
-type Ary t = Data [t]
+type Ary t = [t]
 
-ary :: Type a => Data Integer -> (Data Integer -> Data a) -> Ary a 
-ary = F.parallel
+ary :: Type t => Data Integer -> (Data Integer -> Data t) -> Data (Ary t) 
+ary = A.parallel
+
+len :: Type t => Data (Ary t) -> Data Integer
+len = A.getLength
+
+ind :: Type t => Data (Ary t) -> Data Integer -> Data t
+ind = A.getIx
 
 ---------------------------------------------------------------------------------
 -- Control Flow
 ---------------------------------------------------------------------------------
 
 ifThenElse :: Type a => Data Bool -> Data a -> Data a -> Data a
-ifThenElse = condition
+ifThenElse = F.condition
+ 
+whl :: Type t => (Data t -> Data Bool) -> (Data t -> Data t) -> Data t -> Data t
+whl ec eb ei = L.whileLoop ei ec eb
+
+ 
+forLoop :: Type s => Data Integer -> Data s -> 
+           (Data Integer -> Data s -> Data s ) -> Data s
+forLoop l init step = snd (whl (\ t -> (fst t) < l)
+                               (\ t -> tpl 
+                                       ((fst t) + (litI 1)) 
+                                       (step (fst t) (snd t)))
+                               (tpl (litI 0) init)) 
+                      
+forLoopVec :: Type s => Data Integer -> Vec s -> 
+              (Data Integer -> Vec s -> Vec s) -> Vec s
+forLoopVec l init step =  let init'     = vec2ary init
+                              step' i a = vec2ary (step i (ary2vec a))
+                          in  ary2vec (forLoop l init' step')
+
 
 ---------------------------------------------------------------------------------
 -- Boolean Operators
 ---------------------------------------------------------------------------------
 
 not :: Data Bool -> Data Bool
-not x = condition x false true
+not x = ifThenElse x false true
 
 (&&) :: Data Bool -> Data Bool -> Data Bool
-x && y = condition x y false
+x && y = ifThenElse x y false
 
 (||) :: Data Bool -> Data Bool -> Data Bool
-x || y = condition x true y
+x || y = ifThenElse x true y
 
 ---------------------------------------------------------------------------------
 -- Equality
@@ -194,7 +244,7 @@ x >= y = not (x < y)
 x <= y = (x < y) || (x == y)
 
 min :: (Type t , Ordering t) => Data t -> Data t -> Data t
-min x y = condition (x < y) x y
+min x y = ifThenElse (x < y) x y
 
 ---------------------------------------------------------------------------------
 -- Numeric
@@ -293,13 +343,19 @@ i2f = F.i2n
 
 cis :: Data Float -> Data (Complex)
 cis = F.cis
+
+vec2ary :: Type t => Vec t -> Data (Ary t)
+vec2ary v = ary (length v) (v !!) 
+
+ary2vec :: Type t => Data (Ary t) -> Vec t
+ary2vec v = vec (len v) (\i -> ind v i)
  
 ---------------------------------------------------------------------------------
 -- Vector Operators
 ---------------------------------------------------------------------------------
 
 (...) :: Data Integer -> Data Integer -> Vec Integer
-(...) m n = let l = condition (n < m) 0 (n - m + 1)
+(...) m n = let l = ifThenElse (n < m) 0 (n - m + 1)
             in  vec l (\ i -> i + m)
   
 permute :: (Data Integer -> Data Integer -> Data Integer)
@@ -313,7 +369,14 @@ reverse = permute (\ l i -> l - 1 - i)
 foldl :: Type a => (Data a -> Data b -> Data a) -> Data a -> Vec b -> Data a
 foldl f acc v  = let l = length v
                  in  forLoop l acc (\ i a ->  f a (v !! i))
- 
+
+foldlVec :: Type a => 
+            (Vec a -> Data b -> Vec a) -> Vec a -> Vec b -> Vec a
+foldlVec f acc v  = let l = length v
+                        acc' = vec2ary acc
+                        f' vv d = vec2ary (f (ary2vec vv) d)
+                    in  ary2vec (forLoop l acc' (\ i a ->  f' a (v !! i)))
+
 map :: (Data a -> Data b) -> Vec a -> Vec b
 map f v = let l = length v
           in vec l (\i -> f (v !! i))     
@@ -329,6 +392,45 @@ scalarProd :: Vec Integer -> Vec Integer -> Data Integer
 scalarProd v1 v2 = sum (zipWith (*) v1 v2)
 
 ---------------------------------------------------------------------------------
+-- Ary Operators
+---------------------------------------------------------------------------------
+
+(....) :: Data Integer -> Data Integer -> Data (Ary Integer)
+(....) m n = let l = ifThenElse (n < m) (litI 0) (n - m + (litI 1))
+             in  ary l (\ i -> i + m)
+  
+permuteA :: Type t => 
+            (Data Integer -> Data Integer -> Data Integer)
+           -> Data (Ary t) -> Data (Ary t)
+permuteA f v = let l = len v 
+               in  ary l (\ i -> ind v (f l i))
+ 
+reverseA :: Type t => Data (Ary t) -> Data (Ary t)
+reverseA = permuteA (\ l i -> l - (litI 1) - i)
+
+foldlA :: (Type a , Type b) => 
+         (Data a -> Data b -> Data a) -> Data a -> Data (Ary b) -> Data a
+foldlA f acc v  = let l = len v
+                  in  forLoop l acc (\ i a ->  f a (ind v i))
+   
+mapA :: (Type a , Type b) => 
+        (Data a -> Data b) -> Data (Ary a) -> Data (Ary b)
+mapA f v = let l = len v
+           in ary l (\ i -> f (ind v i))     
+
+zipWithA :: (Type a , Type b , Type c) => 
+            (Data a -> Data b -> Data c) -> Data (Ary a) -> Data (Ary b) -> 
+           Data (Ary c)
+zipWithA f v1 v2 = ary (min (len v1) (len v2))
+                      (\ i -> f (ind v1 i) (ind v2 i))
+
+sumA :: Data (Ary Integer) -> Data Integer
+sumA = foldlA (+) (litI 0)
+
+scalarProdA :: Data (Ary Integer) -> Data (Ary Integer) -> Data Integer
+scalarProdA v1 v2 = sumA (zipWithA (*) v1 v2)
+
+---------------------------------------------------------------------------------
 -- Helper Operators
 ---------------------------------------------------------------------------------
 
@@ -336,10 +438,22 @@ fromList:: Type a => [Data a] -> Data a -> Vec a
 fromList lst k =  vec
                   (F.value (MP.fromInteger (MP.toInteger (MP.length lst)))) 
                   (\ i ->  MP.foldr 
-                           (\ j acc -> condition 
+                           (\ j acc -> ifThenElse 
                                        (i == 
                                         (F.value (MP.fromInteger 
                                                   (MP.toInteger j))))
+                                       (lst MP.!! j)
+                                       acc)
+                           k         
+                           (MP.enumFromTo 0 (MP.length lst MP.- 1)))
+
+fromListA :: Type a => [Data a] -> Data a -> Data (Ary a)
+fromListA lst k = ary
+                  (litI (MP.fromIntegral (MP.length lst))) 
+                  (\ i ->  MP.foldr 
+                           (\ j acc -> ifThenElse 
+                                       (i == 
+                                        (litI (MP.fromIntegral j)))
                                        (lst MP.!! j)
                                        acc)
                            k         

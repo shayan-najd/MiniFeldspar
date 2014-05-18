@@ -1,6 +1,6 @@
 {-# LANGUAGE RebindableSyntax #-}
 
-import Prelude (IO)
+import Prelude ()
 import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.MiniWellScoped 
@@ -17,7 +17,7 @@ import Compiler (scompileWith)
 import Normalization
 import Normalization.Feldspar.MiniWellScoped ()
 
-toBW :: Vec (Data Integer) -> Vec (Data Integer)
+toBW :: Vec Integer -> Vec Integer
 toBW = map (\x -> if x < 135 then 1 else 0) 
 
 redCoefficient :: Data Integer
@@ -35,7 +35,7 @@ rgbToGray r g b = ((r * redCoefficient  ) +
                    (g * greenCoefficient) +
                    (b * blueCoefficient )) / 100
                  
-toGray :: Vec (Data Integer) -> Vec (Data Integer)
+toGray :: Vec Integer -> Vec Integer
 toGray v = vec ((length v) / 3)
            (\ i -> let j = i * 3
                    in rgbToGray 
@@ -43,22 +43,22 @@ toGray v = vec ((length v) / 3)
                       (v !! (j + 1)) 
                       (v !! (j + 2)))
   
-fromColoredtoBW :: Vec (Data Integer) -> Vec (Data Integer)
+fromColoredtoBW :: Vec Integer -> Vec Integer
 fromColoredtoBW v = toBW (toGray v)
  
-inp :: Vec (Data Integer)
+inp :: Vec Integer
 inp = fromList 
       (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstPPM) 0
 
 out :: [MP.Integer]
 out  = let FGV.Exp e =  MP.frmRgt (cnv ((vec2ary MP.. 
                                          fromColoredtoBW) inp, etFGV)) 
-       in MP.elems e
+       in  MP.elems e
 
 prop :: MP.Bool
 prop = out MP.== tstPBM
 
-main :: IO ()
+main :: MP.IO ()
 main = let f = MP.frmRgt 
                   (scompileWith [] (TFG.Ary TFG.Int) esString 0 
                   (nrm (vec2ary MP.. fromColoredtoBW MP.. ary2vec)))

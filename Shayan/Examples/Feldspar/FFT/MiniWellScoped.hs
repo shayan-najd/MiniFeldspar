@@ -17,16 +17,16 @@ import Compiler(scompile)
 import Normalization
 import Normalization.Feldspar.MiniWellScoped ()
 
-fft :: Vec (Data Complex) -> Vec (Data Complex)
+fft :: Vec Complex -> Vec Complex
 fft v = let steps = ilog2 (length v) - 1 
         in  bitRev steps (fftCore steps v)
          
-fftCore :: Data Integer -> Vec (Data Complex) -> Vec (Data Complex)
+fftCore :: Data Integer -> Vec Complex -> Vec Complex
 fftCore n vv = forLoopVec (n + 1) vv 
                (\ j v -> vec (length vv) (ixf v (n - j)))
 
-ixf :: Vec (Data Complex)
-             -> Data Integer -> Data Integer -> Data Complex
+ixf :: Vec Complex
+    -> Data Integer -> Data Integer -> Data Complex
 ixf v k i = let k2   = 1 .<<. k
                 a    = v !!  i
                 b    = v !! (xor i k2)
@@ -34,7 +34,7 @@ ixf v k i = let k2   = 1 .<<. k
                             * i2f (lsbs k i) / i2f k2)
             in  if testBit i k then twid * (b - a) else a + b
           
-bitRev :: Data Integer -> Vec (Data Complex) -> Vec (Data Complex)
+bitRev :: Data Integer -> Vec Complex -> Vec Complex
 bitRev n x = forLoopVec n x (\ i -> permute (\ _ -> rotBit (i + 1)))
  
 rotBit :: Data Integer -> Data Integer -> Data Integer
@@ -44,7 +44,7 @@ rotBit k i = lefts .|. rights
     rights = lsbs k ir
     lefts  = (((ir .>>. k) .<<. 1) .|. (i .&. 1)) .<<. k
   
-inp :: Vec (Data Complex)
+inp :: Vec Complex
 inp = fromList (MP.fmap (\ f -> cmx (litF f) 0.0) tstInp) 
       (cmx 0.0 0.0)
  

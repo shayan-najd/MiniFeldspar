@@ -4,6 +4,7 @@ module Examples.Feldspar.FFT.Feldspar where
 import Prelude ()
 import qualified MyPrelude as MP
 import Examples.Feldspar.Prelude.Feldspar
+import Examples.Feldspar.FFT.Common
 
 import Feldspar(eval)
 import Feldspar.Compiler 
@@ -14,7 +15,7 @@ fft v = let steps = ilog2 (length v) - 1
         in  bitRev steps (fftCore steps v)
   
 fftCore :: Data Integer -> Vec Complex -> Vec Complex
-fftCore n vv = forLoop (n + 1) vv 
+fftCore n vv = forLoopVec (n + 1) vv 
                (\ j v -> vec (length vv) (ixf v (n - j)))
  
 ixf :: Vec Complex
@@ -27,7 +28,7 @@ ixf v k i = let k2   = 1 .<<. k
              in if (testBit i k) then (twid * (b - a)) else (a + b)
           
 bitRev :: Data Integer -> Vec Complex -> Vec Complex
-bitRev n x = forLoop n x (\ i -> permute (\ _ -> rotBit (i + 1)))
+bitRev n x = forLoopVec n x (\ i -> permute (\ _ -> rotBit (i + 1)))
  
 rotBit :: Data Integer -> Data Integer -> Data Integer
 rotBit k i = lefts .|. rights
@@ -38,7 +39,7 @@ rotBit k i = lefts .|. rights
 
 inp :: Vec Complex
 inp = fromList (MP.fmap 
-                (\ f -> complex f 0.0) lst) 
+                (\ f -> complex (litF f) 0.0) tstInp) 
       (complex 0.0 0.0)
                          
 out :: [Float]

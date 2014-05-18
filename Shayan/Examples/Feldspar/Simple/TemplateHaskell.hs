@@ -1,4 +1,4 @@
-module Examples.TemplateHaskell where
+module Examples.Feldspar.Simple.TemplateHaskell where
 
 import Prelude ()
 import MyPrelude 

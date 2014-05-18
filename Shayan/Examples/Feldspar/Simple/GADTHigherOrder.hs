@@ -1,4 +1,4 @@
-module Examples.Feldspar.GADTHigherOrder where
+module Examples.Feldspar.Simple.GADTHigherOrder where
 
 import Prelude ()
 import MyPrelude 
