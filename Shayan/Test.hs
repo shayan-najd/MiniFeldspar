@@ -45,3 +45,5 @@ main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
 -- * Supporting F
 -- * Scope Proofing Quotations (e.g. Sam's misunderstanding) [EncodingTypes.txt] 
 -- * Support for Syntactic Suggar in Quotations (e.g. use TH-Desugar)
+-- * Add sqrt and memorize (for Float) to Preludes that do not have it
+-- * Write the code required for memorize

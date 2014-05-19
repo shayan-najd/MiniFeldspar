@@ -67,6 +67,7 @@ type Prelude = TFA.Cmx :-> TFA.Flt ':
                TFA.Int :-> TFA.Flt               ':
                TFA.Flt :-> TFA.Cmx               ':
                TFA.Int :-> TFA.Int               ':
+               TFA.Flt :-> TFA.Flt               ':
                '[]
                
 ---------------------------------------------------------------------------------
@@ -103,6 +104,7 @@ etTFG = TFG.Cmx --> TFG.Flt <:>
         TFG.Int --> TFG.Flt               <:>
         TFG.Flt --> TFG.Cmx               <:>
         TFG.Int --> TFG.Int               <:>
+        TFG.Flt --> TFG.Flt               <:>
         ET.Emp
 
 ---------------------------------------------------------------------------------
@@ -139,6 +141,7 @@ esTH = 'realPartHsk
    <+> 'i2fHsk 
    <+> 'cisHsk 
    <+> 'ilog2Hsk 
+   <+> 'sqrtHsk
    <+> ES.Emp
 
 ---------------------------------------------------------------------------------
@@ -182,6 +185,7 @@ esFAV = realPartFAV
    <+> i2fFAV 
    <+> cisFAV 
    <+> ilog2FAV 
+   <+> sqrtFAV 
    <+> ES.Emp
 
 ---------------------------------------------------------------------------------
@@ -218,6 +222,7 @@ etFGV = (FGV.Exp realPartHsk
      <:> FGV.Exp i2fHsk
      <:> FGV.Exp cisHsk
      <:> FGV.Exp ilog2Hsk
+     <:> FGV.Exp sqrtHsk
      <:> ET.Emp)
 
 ---------------------------------------------------------------------------------
@@ -320,6 +325,9 @@ cisVar = $(nat 27 "")
 ilog2Var :: Var Prelude (TFA.Int :-> TFA.Int)
 ilog2Var = $(nat 28 "")
 
+sqrtVar ::  Var Prelude (TFA.Flt :-> TFA.Flt)
+sqrtVar = $(nat 29 "")
+
 ---------------------------------------------------------------------------------
 -- TH.Name
 ---------------------------------------------------------------------------------
@@ -416,6 +424,9 @@ cisHsk = cis
 ilog2Hsk :: Int -> Int 
 ilog2Hsk x = floor (log (fromIntegral x) / log (2 :: Float)) 
 
+sqrtHsk :: Flt -> Flt
+sqrtHsk = sqrt
+
 ---------------------------------------------------------------------------------
 -- FAV
 ---------------------------------------------------------------------------------
@@ -507,3 +518,5 @@ cisFAV = FAV.lft  cisHsk
 ilog2FAV :: FAV.Exp 
 ilog2FAV = FAV.lft ilog2Hsk
 
+sqrtFAV :: FAV.Exp 
+sqrtFAV = FAV.lft sqrtHsk

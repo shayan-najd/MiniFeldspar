@@ -6,11 +6,11 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,Tpl,{-((,)),-}fst,snd           
        ,Complex,cmx,real,imag
        ,Ary,ary,len,ind        
-       ,{-ifThenElse,-}whl,forLoop
+       ,{-ifThenElse,-}whl,forLoop,memorize
        ,not,(&&),(||)                  
        ,Equality((==)),(/=)
        ,Ordering((<)),(>),(>=),(<=),min           
-       ,Numeric((+),(-),(*),(/),negate),ilog2
+       ,Numeric((+),(-),(*),(/),negate),ilog2,sqrt
        ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
        ,i2f,cis
        ,(...),permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
@@ -42,10 +42,16 @@ instance FO a => FO (Ary a)             where {}
 ---------------------------------------------------------------------------------
  
 instance Lift Integer where
-  lift i = MP.return (LitE (IntegerL (MP.toInteger i)))
-
+    lift i = MP.return (LitE (IntegerL (MP.toInteger i)))
+ 
 litI :: Integer -> Data Integer
 litI i = [|| i ||]
+
+class FrmInt t where
+    frmInt :: Data (Integer -> t)
+
+instance FrmInt Integer where
+    frmInt =  [|| \ i -> i ||]
 
 ---------------------------------------------------------------------------------
 -- Float
@@ -56,6 +62,9 @@ instance Lift Float where
 
 litF :: Float -> Data Float
 litF f = [|| f ||]
+
+instance FrmInt Float where
+    frmInt = i2f
 
 ---------------------------------------------------------------------------------
 -- Tuple
@@ -111,6 +120,9 @@ forLoop = [|| \ l -> \ init -> \ step ->
                                , step (fst t) (snd t)))
                    (0 , init)) 
           ||]
+
+memorize :: Data (Ary Float -> Ary Float)
+memorize = memorize -- [|| memHsk ||]
           
 ---------------------------------------------------------------------------------
 -- Boolean Operators
@@ -217,6 +229,10 @@ ilog2 = [|| ilog2Hsk ||]
        go :: Data Integer -> Integer -> Data Integer
        go b s = [|| $$((.|.)) $$b  ($$((.>>.)) $$b s) ||]
    -}
+
+sqrt :: Data (Float -> Float)
+sqrt = [|| sqrtHsk ||]
+
 ---------------------------------------------------------------------------------
 -- Bitwise Operators
 ---------------------------------------------------------------------------------
@@ -264,12 +280,12 @@ cis = [|| cisHsk ||]
 -- Array Operators
 ---------------------------------------------------------------------------------
 
-(...) :: Data (Integer -> Integer -> Ary Integer)
+(...) :: (FrmInt t , Numeric t) => Data (Integer -> Integer -> Ary t)
 (...) = [|| \ m -> \ n -> ary 
                           (if ($$((<)) n m) 
                            then 0 
                            else ($$((+)) ($$((-)) n m) 1))
-                          (\ i -> $$((+)) i m) ||]  
+                          (\ i -> $$((+)) ($$frmInt i) ($$frmInt m)) ||]  
    
 permute :: Data ((Integer -> Integer -> Integer) -> Ary t -> Ary t)
 permute = [|| \ f -> \ v -> ary (len v) 
@@ -291,8 +307,8 @@ zipWith = [|| \ f -> \ v1 -> \ v2 ->
                 ary ($$min (len v1) (len v2))
                     (\ i -> f (ind v1 i) (ind v2 i)) ||]
 
-sum :: Data (Ary Integer -> Integer)
-sum = [|| $$foldl $$((+)) 0 ||]
+sum :: (FO t , Numeric t , FrmInt t) => Data (Ary t -> t)
+sum = [|| $$foldl $$((+)) ($$frmInt 0) ||]
 
 scalarProd :: Data (Ary Integer -> Ary Integer -> Integer)
 scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$((*)) v1 v2) ||]

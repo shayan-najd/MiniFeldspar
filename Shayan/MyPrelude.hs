@@ -1,5 +1,5 @@
 module MyPrelude 
-       (Int,MyPrelude.Integer,Num(..),div,toInteger,pi,(/),floor,log,
+       (Int,MyPrelude.Integer,Num(..),div,toInteger,pi,(/),floor,log,sqrt,
         Word32,Rational, 
         Float,toRational,fromRational,fromIntegral,
         Bool(..),(&&),(||),not,
