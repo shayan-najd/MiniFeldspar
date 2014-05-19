@@ -68,6 +68,7 @@ type Prelude = TFA.Cmx :-> TFA.Flt ':
                TFA.Flt :-> TFA.Cmx               ':
                TFA.Int :-> TFA.Int               ':
                TFA.Flt :-> TFA.Flt               ':
+               TFA.Ary TFA.Flt :-> TFA.Ary TFA.Flt ':
                '[]
                
 ---------------------------------------------------------------------------------
@@ -105,6 +106,7 @@ etTFG = TFG.Cmx --> TFG.Flt <:>
         TFG.Flt --> TFG.Cmx               <:>
         TFG.Int --> TFG.Int               <:>
         TFG.Flt --> TFG.Flt               <:>
+        TFG.Ary TFG.Flt --> TFG.Ary TFG.Flt <:>
         ET.Emp
 
 ---------------------------------------------------------------------------------
@@ -141,7 +143,8 @@ esTH = 'realPartHsk
    <+> 'i2fHsk 
    <+> 'cisHsk 
    <+> 'ilog2Hsk 
-   <+> 'sqrtHsk
+   <+> 'sqrtFltHsk
+   <+> 'memHsk
    <+> ES.Emp
 
 ---------------------------------------------------------------------------------
@@ -185,7 +188,8 @@ esFAV = realPartFAV
    <+> i2fFAV 
    <+> cisFAV 
    <+> ilog2FAV 
-   <+> sqrtFAV 
+   <+> sqrtFltFAV 
+   <+> memFAV 
    <+> ES.Emp
 
 ---------------------------------------------------------------------------------
@@ -222,7 +226,8 @@ etFGV = (FGV.Exp realPartHsk
      <:> FGV.Exp i2fHsk
      <:> FGV.Exp cisHsk
      <:> FGV.Exp ilog2Hsk
-     <:> FGV.Exp sqrtHsk
+     <:> FGV.Exp sqrtFltHsk
+     <:> FGV.Exp memHsk
      <:> ET.Emp)
 
 ---------------------------------------------------------------------------------
@@ -325,8 +330,11 @@ cisVar = $(nat 27 "")
 ilog2Var :: Var Prelude (TFA.Int :-> TFA.Int)
 ilog2Var = $(nat 28 "")
 
-sqrtVar ::  Var Prelude (TFA.Flt :-> TFA.Flt)
-sqrtVar = $(nat 29 "")
+sqrtFltVar ::  Var Prelude (TFA.Flt :-> TFA.Flt)
+sqrtFltVar = $(nat 29 "")
+
+memVar ::  Var Prelude (TFA.Ary TFA.Flt :-> TFA.Ary TFA.Flt)
+memVar = $(nat 30 "")
 
 ---------------------------------------------------------------------------------
 -- TH.Name
@@ -424,8 +432,11 @@ cisHsk = cis
 ilog2Hsk :: Int -> Int 
 ilog2Hsk x = floor (log (fromIntegral x) / log (2 :: Float)) 
 
-sqrtHsk :: Flt -> Flt
-sqrtHsk = sqrt
+sqrtFltHsk :: Flt -> Flt
+sqrtFltHsk = sqrt
+
+memHsk :: Array Integer Flt -> Array Integer Flt
+memHsk = id
 
 ---------------------------------------------------------------------------------
 -- FAV
@@ -518,5 +529,8 @@ cisFAV = FAV.lft  cisHsk
 ilog2FAV :: FAV.Exp 
 ilog2FAV = FAV.lft ilog2Hsk
 
-sqrtFAV :: FAV.Exp 
-sqrtFAV = FAV.lft sqrtHsk
+sqrtFltFAV :: FAV.Exp 
+sqrtFltFAV = FAV.lft sqrtFltHsk
+
+memFAV :: FAV.Exp 
+memFAV = FAV.lft memHsk

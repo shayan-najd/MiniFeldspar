@@ -47,3 +47,6 @@ main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
 -- * Support for Syntactic Suggar in Quotations (e.g. use TH-Desugar)
 -- * Add sqrt and memorize (for Float) to Preludes that do not have it
 -- * Write the code required for memorize
+-- * Add support for partial type annotation *in* the quoted language
+-- * Use macros for polymorphic datatypes
+-- * Generate polymorphic datatypes

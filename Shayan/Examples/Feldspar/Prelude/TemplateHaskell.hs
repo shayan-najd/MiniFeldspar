@@ -122,7 +122,7 @@ forLoop = [|| \ l -> \ init -> \ step ->
           ||]
 
 memorize :: Data (Ary Float -> Ary Float)
-memorize = memorize -- [|| memHsk ||]
+memorize = [|| memHsk ||]
           
 ---------------------------------------------------------------------------------
 -- Boolean Operators
@@ -231,7 +231,7 @@ ilog2 = [|| ilog2Hsk ||]
    -}
 
 sqrt :: Data (Float -> Float)
-sqrt = [|| sqrtHsk ||]
+sqrt = [|| sqrtFltHsk ||]
 
 ---------------------------------------------------------------------------------
 -- Bitwise Operators
