@@ -27,6 +27,9 @@ import qualified Environment.Typed                   as ET
 import Singleton (Len)
 import qualified Nat.ADT                             as NA
 
+import Optimization
+import Optimization.Feldspar.MiniWellScoped ()
+
 unit :: Data (Ary Float)
 unit =  [|| ary 1 (\ _i -> 0.0) ||]
 
@@ -60,7 +63,7 @@ test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$((...)) 0 $$size)))) ||]
 
 
 testFMWS :: FMWS.Exp Prelude TFA.Flt
-testFMWS = MP.frmRgt (cnv (test , etTFG , esTH))
+testFMWS = opt (MP.frmRgt (cnv (test , etTFG , esTH))) etFGV
 
 main :: MP.IO ()
 main = let f = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 

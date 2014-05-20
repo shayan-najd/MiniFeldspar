@@ -1,4 +1,4 @@
-module Normalization.Feldspar.MiniWellScoped () where
+module Optimization.Feldspar.MiniWellScoped () where
 
 import Prelude ()
 import MyPrelude
@@ -9,11 +9,14 @@ import Expression.Feldspar.MiniWellScoped hiding (ref)
    
 import Environment.Typed hiding (add)
 -- import Variable.Typed
-import Normalization
+import Optimization
 import Data.IORef
 import System.IO.Unsafe
 import Singleton
 import qualified Type.Feldspar.GADT as TFG
+import qualified Conversion as C
+import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+import qualified Expression.Feldspar.GADTValue as FGV
 
 {-
 add :: Env t ra -> Env t rb -> Env t (Add ra rb)
@@ -39,14 +42,25 @@ hasCnd (Ext _           xs) = hasCnd xs
 
 -}
 
-instance HasSin TFG.Typ t => NrmOne (Exp n t) where
-  nrmOne ee = let t = sin :: TFG.Typ t in case ee of
+isLit :: Exp n t -> Bool
+isLit (ConI _) = True
+isLit (ConB _) = True
+isLit (ConF _) = True
+isLit _        = False
+
+allLit :: Env (Exp r) r' -> Bool
+allLit Emp                  = True
+allLit (Ext x           xs) = isLit x && allLit xs
+
+instance HasSin TFG.Typ t => OptOne (Exp r t) (Env FGV.Exp r) where
+  optOne ee r = let ?r = r in let t = sin :: TFG.Typ t in case ee of
     ConI i                    -> ConI <$@> i 
     ConB b                    -> ConB <$@> b
     ConF f                    -> ConF <$@> f    
     AppV v es 
-{-    | hasCnd es             -> cmt v Emp es
-      | otherwise   -}        -> AppV v <$> nrmOneEnv (sinTypOf v t , es) 
+      | allLit es             -> let Rgt (FGV.Exp e) = C.cnv (ee , r)
+                                 in  chg (frmRgt (C.cnv (FGV.Exp e , r)))
+      | otherwise             -> AppV v <$> optOneEnv (sinTypOf v t , es , r)
     Cnd (ConB True)  et _     -> chg et
     Cnd (ConB False) _  ef    -> chg ef
     Cnd ec et ef              -> Cnd  <$@> ec <*@> et <*@> ef
@@ -76,21 +90,21 @@ ref :: IORef Int
 ref = unsafePerformIO (newIORef 0)
 
 instance (HasSin TFG.Typ tb, HasSin TFG.Typ ta) => 
-         NrmOne (Exp n ta -> Exp n tb) where
-  nrmOne f = let i = unsafePerformIO (do j <- readIORef ref
-                                         modifyIORef ref (+1)
-                                         return j)
-                 v = ("_xn" ++ show i)    
-             in do eb <- nrmOne (f (Tmp v))
-                   return (\ x -> absTmp x v eb) 
+         OptOne (Exp r ta -> Exp r tb) (Env FGV.Exp r) where
+  optOne f r = let i = unsafePerformIO (do j <- readIORef ref
+                                           modifyIORef ref (+1)
+                                           return j)
+                   v = ("_xn" ++ show i)    
+               in do eb <- optOne (f (Tmp v)) r
+                     return (\ x -> absTmp x v eb) 
                    
-nrmOneEnv :: (TFG.Arg t ~ r') => 
-               (TFG.Typ t , Env (Exp r) r') -> Chg (Env (Exp r) r')
-nrmOneEnv (TFG.Arr t ts , Ext e es) = case getPrfHasSin t of
-    PrfHasSin -> do e'  <- nrmOne e
-                    es' <- nrmOneEnv (ts , es)
+optOneEnv :: (TFG.Arg t ~ r') => 
+               (TFG.Typ t , Env (Exp r) r' , Env FGV.Exp r) -> Chg (Env (Exp r) r')
+optOneEnv (TFG.Arr t ts , Ext e es , r) = case getPrfHasSin t of
+    PrfHasSin -> do e'  <- optOne e r
+                    es' <- optOneEnv (ts , es , r)
                     pure (Ext e' es')
-nrmOneEnv (TFG.Arr _ _  , _)        = impossibleM                    
-nrmOneEnv (_            , Emp)      = pure Emp                    
-nrmOneEnv (_            , Ext _ _)  = impossibleM                    
+optOneEnv (TFG.Arr _ _  , _       , _) = impossibleM                    
+optOneEnv (_            , Emp     , _) = pure Emp                    
+optOneEnv (_            , Ext _ _ , _) = impossibleM                    
 
