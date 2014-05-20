@@ -62,7 +62,7 @@ test2m :: Data Float
 test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$((...)) 0 $$size)))) ||]
 
 testFMWS :: FMWS.Exp Prelude TFA.Flt
-testFMWS = opt (MP.frmRgt (cnv (test , etTFG , esTH))) etFGV
+testFMWS = opt (MP.frmRgt (cnv (test2 , etTFG , esTH))) etFGV
 
 main :: MP.IO ()
 main = let f = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 

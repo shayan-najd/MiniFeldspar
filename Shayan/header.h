@@ -308,3 +308,8 @@ AryFlt newAryFlt(Int s)
 {
   return ((AryFlt) {.size = s , .elems = malloc(s * sizeof(Flt))});
 }
+
+AryFlt mem(AryFlt a)
+{
+  return a;
+}
