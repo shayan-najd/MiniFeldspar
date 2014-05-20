@@ -58,8 +58,10 @@ There are five kinds of example programs:
 (c) CRC algorithm
 (d) FFT algorithm
 (e) Prelude functions required for the above mentioned algorithms
+(f) Blur algorithm
 The examples and test programs can be found in the folder "Examples"
 and the test programs are linked the file "Test.hs".
+
 
 Typeinference and Typechecking
 ------------------------------
@@ -84,4 +86,8 @@ Compiler
 The code for compiling the core MiniFeldspar AST to C code AST is
 defined in "Compiler.hs".
 
-
+Optimization
+------------
+The code for optimization in the style of Normalization-By-Evaluation
+(abbreviated as NBE) is defined in "Optimization.hs" and the folder
+"Optmization".
