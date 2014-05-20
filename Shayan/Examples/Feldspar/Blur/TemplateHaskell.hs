@@ -29,6 +29,9 @@ import qualified Nat.ADT                             as NA
 import Optimization
 import Optimization.Feldspar.MiniWellScoped ()
 
+upto :: Data (Integer -> Ary Float)
+upto =  [|| \ m -> ary m (\ i -> $$i2f i) ||]
+
 unit :: Data (Ary Float)
 unit =  [|| ary 1 (\ _i -> 0.0) ||]
 
@@ -53,39 +56,29 @@ size :: Data Int
 size = [|| 100000 ||]
 
 test :: Data Float
-test   = [|| $$sum ($$blur ($$((...)) 0 $$size)) ||]
+test   = [|| $$sum ($$blur ($$upto $$size)) ||]
 
 test2 :: Data Float
-test2  = [|| $$sum ($$blur ($$blur ($$((...)) 0 $$size))) ||]
+test2  = [|| $$sum ($$blur ($$blur ($$upto $$size))) ||]
 
 test2m :: Data Float
-test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$((...)) 0 $$size)))) ||]
+test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$upto $$size)))) ||]
 
 testFMWS :: FMWS.Exp Prelude TFA.Flt
-testFMWS = opt (MP.frmRgt (cnv (test2 , etTFG , esTH))) etFGV
+testFMWS = opt (MP.frmRgt (cnv (test , etTFG , esTH))) etFGV
 
-main :: MP.IO ()
-main = let f = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 
-       in  MP.putStrLn f
+test2FMWS :: FMWS.Exp Prelude TFA.Flt
+test2FMWS = opt (MP.frmRgt (cnv (test2 , etTFG , esTH))) etFGV
 
-{-
+test2mFMWS :: FMWS.Exp Prelude TFA.Flt
+test2mFMWS = opt (MP.frmRgt (cnv (test2m , etTFG , esTH))) etFGV
+
+testC :: MP.String
+testC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 
+
+test2C :: MP.String
+test2C = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2FMWS) 
+
+test2mC :: MP.String
+test2mC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2mFMWS) 
  
-   
-dummyAry0 :: Ary Integer
-dummyAry0 = dummyAry0
-
-es :: ES.Env ((NA.Suc (Len Prelude))) TH.Name
-es = 'dummyAry0 <+> esTH      
-
-et :: ET.Env TFG.Typ (TFA.Ary TFA.Int ': Prelude)
-et = TFG.Ary TFG.Int <:> etTFG
- 
-crc32FMWS :: FMWS.Exp (TFA.Ary TFA.Int ': Prelude) 
-             TFA.Int
-crc32FMWS = nrm (MP.frmRgt (cnv ([|| $$crc32 dummyAry0 ||] , et , es)))
-
-main :: MP.IO ()
-main = let f = MP.frmRgt (scompileWith [("v0" , TFA.Ary TFA.Int)]  
-                          TFG.Int ("v0" <+> esString) 1 crc32FMWS) 
-           in  MP.writeFile "CRCTemplateHaskell.c" f
--}
