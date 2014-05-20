@@ -17,15 +17,10 @@ import Compiler (scompileWith)
 import Normalization
 import Normalization.Feldspar.MiniWellScoped ()
 
-import qualified Language.Haskell.TH.Syntax          as TH
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Conversion.Expression.Feldspar ()
-
-import qualified Environment.Scoped                  as ES
-import qualified Environment.Typed                   as ET
-import Singleton (Len)
-import qualified Nat.ADT                             as NA
+ 
  
 toBW :: Data (Ary Integer -> Ary Integer)
 toBW = [|| $$map (\ x -> if $$((<)) x 135 then 1 else 0) ||]
@@ -73,19 +68,18 @@ prop = out MP.== tstPBM
 
 dummyVec :: Ary Integer
 dummyVec = dummyVec
-
-es :: ES.Env (NA.Suc (Len Prelude)) TH.Name
-es = 'dummyVec <+> esTH      
-
-et :: ET.Env TFG.Typ (TFA.Ary TFA.Int ': Prelude)
-et = TFG.Ary TFG.Int <:> etTFG
  
 fromColoredtoBWFMWS :: FMWS.Exp (TFA.Ary TFA.Int ': Prelude) (TFA.Ary TFA.Int)
-fromColoredtoBWFMWS = nrm (MP.frmRgt 
-                           (cnv ([|| $$fromColoredtoBW dummyVec ||] , et , es))) 
+fromColoredtoBWFMWS = MP.frmRgt 
+                           (cnv ([|| $$fromColoredtoBW dummyVec ||] 
+                                , TFG.Ary TFG.Int <:> etTFG 
+                                , 'dummyVec <+> esTH))
 
 main :: MP.IO ()
-main = let f = MP.frmRgt (scompileWith [("v0" , TFA.Ary TFA.Int)]  
-                             (TFG.Ary TFG.Int) ("v0" <+> esString) 
-                          1 fromColoredtoBWFMWS) 
-       in  MP.writeFile "IPTemplateHaskell.c" f     
+main = MP.getArgs MP.>>=  
+       (\ [as] -> let f = MP.frmRgt 
+                          (scompileWith [("v0" , TFA.Ary TFA.Int)]  
+                           (TFG.Ary TFG.Int) 
+                           ("v0" <+> esString) 1 
+                           (nrmIf (as MP./= "NoNrm") fromColoredtoBWFMWS)) 
+                  in  MP.writeFile (as MP.++ "IPTemplateHaskell.c") f)     

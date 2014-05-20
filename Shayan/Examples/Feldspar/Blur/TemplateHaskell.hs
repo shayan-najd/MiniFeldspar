@@ -5,7 +5,6 @@ import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.TemplateHaskell
 import Examples.Feldspar.Prelude.Environment
---import Examples.Feldspar.CRC.Common
 
 import Conversion
 import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
@@ -45,14 +44,15 @@ append =  [|| \ a -> \ b ->
                       else ind b ($$((-)) i (len a))) ||]
 
 blur :: Data (Ary Float -> Ary Float)
-blur =  [|| \ a -> $$zipWith $$geometric 
+blur =  [|| \ a -> $$zipWith 
+                   $$geometric 
                    ($$append $$unit a) 
                    ($$append a $$unit) ||]
 
 size :: Data Int
 size = [|| 100000 ||]
 
--- test :: Data Float
+test :: Data Float
 test   = [|| $$sum ($$blur ($$((...)) 0 $$size)) ||]
 
 test2 :: Data Float
@@ -61,14 +61,12 @@ test2  = [|| $$sum ($$blur ($$blur ($$((...)) 0 $$size))) ||]
 test2m :: Data Float
 test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$((...)) 0 $$size)))) ||]
 
-
 testFMWS :: FMWS.Exp Prelude TFA.Flt
 testFMWS = opt (MP.frmRgt (cnv (test , etTFG , esTH))) etFGV
 
 main :: MP.IO ()
 main = let f = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 
        in  MP.putStrLn f
-
 
 {-
  

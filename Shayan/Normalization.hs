@@ -1,5 +1,5 @@
 module Normalization 
-       (NrmOne(..),(<$>),(<*>),pure,(<$@>),(<*@>),Chg(..),chg,nrm) 
+       (NrmOne(..),(<$>),(<*>),pure,(<$@>),(<*@>),Chg(..),chg,nrm,nrmIf) 
        where
 
 import Prelude ()
@@ -33,6 +33,10 @@ instance NrmOne (VT.Var r t) where
 
 nrm :: NrmOne a => a -> a
 nrm = tilNotChg nrmOne
+
+nrmIf :: NrmOne a => Bool -> a -> a 
+nrmIf True = nrm
+nrmIf False = id
 
 infixl 4 <$@>
 (<$@>) :: NrmOne a => (a -> b) -> a -> Chg b          

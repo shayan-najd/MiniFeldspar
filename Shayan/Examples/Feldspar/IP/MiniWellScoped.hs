@@ -58,9 +58,15 @@ out  = let FGV.Exp e =  MP.frmRgt (cnv ((vec2ary MP..
 prop :: MP.Bool
 prop = out MP.== tstPBM
 
+fromColoredtoBWAry :: Data (Ary Integer) -> Data (Ary Integer)
+fromColoredtoBWAry = vec2ary MP.. fromColoredtoBW MP.. ary2vec
+
 main :: MP.IO ()
-main = let f = MP.frmRgt 
-                  (scompileWith [] (TFG.Ary TFG.Int) esString 0 
-                  (nrm (vec2ary MP.. fromColoredtoBW MP.. ary2vec)))
-       in  MP.writeFile "IPMiniWellScoped.c" f    
+main = MP.getArgs MP.>>=
+       (\ [as] -> let f = MP.frmRgt 
+                          (scompileWith [] 
+                           (TFG.Ary TFG.Int) 
+                           esString 0 
+                           (nrmIf (as MP./= "NoNrm") fromColoredtoBWAry))
+                  in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f)    
  

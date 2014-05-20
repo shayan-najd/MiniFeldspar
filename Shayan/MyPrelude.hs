@@ -5,7 +5,7 @@ module MyPrelude
         Bool(..),(&&),(||),not,
         Complex(..),realPart,imagPart,cis,magnitude,
         (.&.),(.|.),xor,shiftR,shiftL,complement,popCountDefault,testBit,
-        IO,print,readFile,writeFile,putStrLn,
+        IO,print,readFile,writeFile,putStrLn,getArgs,
         fst,snd,
         String,lines,unlines,
         read,
@@ -45,6 +45,7 @@ import Data.List
 import Data.Complex
 import Data.Word
 import Data.Bits
+import System.Environment
 
 impossible :: a
 impossible = error "Impossible!"

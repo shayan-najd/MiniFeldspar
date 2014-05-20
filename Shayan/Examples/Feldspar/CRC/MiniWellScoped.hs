@@ -43,7 +43,14 @@ out  = let FGV.Exp e =  MP.frmRgt (cnv (crc32 inp , etFGV))
 prop :: MP.Bool
 prop = test out
 
+crcAry :: Data (Ary Integer) -> Data Integer
+crcAry = crc32 MP.. ary2vec
+
 main :: MP.IO ()
-main = let f = MP.frmRgt (scompileWith [] TFG.Int esString 0  
-                          (nrm (crc32 MP.. ary2vec)))
-         in MP.writeFile "CRCMiniWellScoped.c" f 
+main = MP.getArgs MP.>>=
+       (\ [as] -> let f = MP.frmRgt 
+                          (scompileWith [] 
+                           TFG.Int 
+                           esString 0  
+                           (nrmIf (as MP./= "NoNrm") crcAry))
+                  in  MP.writeFile (as MP.++ "CRCMiniWellScoped.c") f) 

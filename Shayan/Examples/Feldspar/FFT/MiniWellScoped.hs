@@ -16,7 +16,7 @@ import Compiler(scompile)
 
 import Normalization
 import Normalization.Feldspar.MiniWellScoped ()
-
+ 
 fft :: Vec Complex -> Vec Complex
 fft v = let steps = ilog2 (length v) - 1 
         in  bitRev steps (fftCore steps v)
@@ -56,7 +56,14 @@ out = let FGV.Exp e = MP.frmRgt (cnv (vec2ary (fft inp) , etFGV))
 prop :: MP.Bool
 prop = test out
 
+fftAry :: Data (Ary Complex) -> Data (Ary Complex)
+fftAry = vec2ary MP.. fft MP.. ary2vec
+
 main :: MP.IO ()
-main = let f = MP.frmRgt (scompile (TFG.Ary TFG.Cmx) esString 
-                          (nrm (vec2ary MP.. fft MP.. ary2vec)))
-       in MP.writeFile "FFTMiniWellScoped.c" f    
+main = MP.getArgs MP.>>= 
+       (\ [as] -> let f = MP.frmRgt 
+                          (scompile 
+                           (TFG.Ary TFG.Cmx) 
+                           esString 
+                           (nrmIf (as MP./= "NoNrm") fftAry))
+                  in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f)    

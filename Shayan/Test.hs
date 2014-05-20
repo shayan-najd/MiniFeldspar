@@ -50,3 +50,5 @@ main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
 -- * Add support for partial type annotation *in* the quoted language
 -- * Use macros for polymorphic datatypes
 -- * Generate polymorphic datatypes
+-- * Check all external imports are only via MyPrelude
+-- * Shift Whole Pipline to the compile time!
