@@ -5,6 +5,7 @@ import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.TemplateHaskell
 import Examples.Feldspar.Prelude.Environment
+import Examples.Feldspar.Blur.Common
 
 import Conversion
 import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
@@ -53,7 +54,7 @@ blur =  [|| \ a -> $$zipWith
                    ($$append a $$unit) ||]
 
 size :: Data Int
-size = [|| 100000 ||]
+size = [|| 1000 ||]
 
 test :: Data Float
 test   = [|| $$sum ($$blur ($$upto $$size)) ||]
@@ -86,16 +87,23 @@ test3mFMWS :: FMWS.Exp Prelude (TFA.Ary TFA.Flt)
 test3mFMWS = opt (MP.frmRgt (cnv (test3m , etTFG , esTH))) etFGV
 
 testC :: MP.String
-testC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 
+testC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS))
 
 test2C :: MP.String
-test2C = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2FMWS) 
+test2C = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2FMWS))
 
 test2mC :: MP.String
-test2mC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2mFMWS) 
+test2mC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2mFMWS))
 
 test3C :: MP.String
-test3C = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3FMWS) 
+test3C = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3FMWS)) 
 
 test3mC :: MP.String
-test3mC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3mFMWS)  
+test3mC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3mFMWS))  
+
+main :: MP.IO ()
+main = do MP.writeFile "testopt.c"   (testC   MP.++ loaderC)
+          MP.writeFile "test2opt.c"  (test2C  MP.++ loaderC)
+          MP.writeFile "test2mopt.c" (test2mC MP.++ loaderC)
+          MP.writeFile "test3opt.c"  (test3C  MP.++ loaderC)
+          MP.writeFile "test3mopt.c" (test3mC MP.++ loaderC)
