@@ -64,6 +64,12 @@ test2  = [|| $$sum ($$blur ($$blur ($$upto $$size))) ||]
 test2m :: Data Float
 test2m = [|| $$sum ($$blur ($$memorize ($$blur ($$upto $$size)))) ||]
 
+test3 :: Data (Ary Float)
+test3 = [|| $$blur ($$blur ($$upto $$size)) ||]
+
+test3m :: Data (Ary Float)
+test3m = [|| $$blur($$memorize ($$blur ($$upto $$size))) ||]
+
 testFMWS :: FMWS.Exp Prelude TFA.Flt
 testFMWS = opt (MP.frmRgt (cnv (test , etTFG , esTH))) etFGV
 
@@ -73,6 +79,12 @@ test2FMWS = opt (MP.frmRgt (cnv (test2 , etTFG , esTH))) etFGV
 test2mFMWS :: FMWS.Exp Prelude TFA.Flt
 test2mFMWS = opt (MP.frmRgt (cnv (test2m , etTFG , esTH))) etFGV
 
+test3FMWS :: FMWS.Exp Prelude (TFA.Ary TFA.Flt)
+test3FMWS = opt (MP.frmRgt (cnv (test3 , etTFG , esTH))) etFGV
+
+test3mFMWS :: FMWS.Exp Prelude (TFA.Ary TFA.Flt)
+test3mFMWS = opt (MP.frmRgt (cnv (test3m , etTFG , esTH))) etFGV
+
 testC :: MP.String
 testC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 testFMWS) 
 
@@ -81,4 +93,9 @@ test2C = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2FMWS)
 
 test2mC :: MP.String
 test2mC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2mFMWS) 
- 
+
+test3C :: MP.String
+test3C = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3FMWS) 
+
+test3mC :: MP.String
+test3mC = MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3mFMWS)  

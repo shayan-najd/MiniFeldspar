@@ -19,23 +19,28 @@ instance Pretty Exp where
  pretty (App op es) = text op <+> parens (commaCat (fmap pretty es))
  
 instance Pretty Stmt where
- pretty (Whl e s) = text "while" <+> parens (pretty e) 
-  $+$ pretty s
- pretty (If e1 e2 e3) = text "if" <+> parens (pretty e1) 
-  $+$ pretty e2  
+ pretty (Whl e ss) = text "while" <+> parens (pretty e) 
+  $+$ (lbrace
+   $+$ nest 2 (vcat (fmap pretty ss))
+   $+$ rbrace)
+ pretty (If e1 ss1 ss2) = text "if" <+> parens (pretty e1) 
+  $+$ (lbrace
+   $+$ nest 2 (vcat (fmap pretty ss1))
+   $+$ rbrace)
   $+$ text "else" 
-  $+$ pretty e3 
- pretty (Grp ss) = lbrace
-                   $+$ nest 2 (vcat (fmap pretty ss))
-                   $+$ rbrace
+  $+$ (lbrace
+   $+$ nest 2 (vcat (fmap pretty ss2))
+   $+$ rbrace) 
  pretty (Assign v e)      = text v <+> text "=" <+> pretty e <> semi
  pretty (Declare (v , t)) = pretty t <+> text v <> semi
  
 instance Pretty Func where
- pretty (Func name vs body) = 
+ pretty (Func name vs ss) = 
   text "void" <+> text name 
   <+> parens (commaCat (fmap pretty vs) )
-  $+$ pretty body
+  $+$ (lbrace
+   $+$ nest 2 (vcat (fmap pretty ss))
+   $+$ rbrace)
   
 instance Pretty Var where
  pretty (v,t) = pretty t <+> text v
