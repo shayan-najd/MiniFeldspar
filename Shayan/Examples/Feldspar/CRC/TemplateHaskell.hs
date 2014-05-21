@@ -64,4 +64,5 @@ main = MP.getArgs MP.>>=
                            TFG.Int 
                            ("v0" <+> esString) 1 
                            (nrmIf (as MP./= "NoNrm") crc32FMWS)) 
-                  in  MP.writeFile (as MP.++ "CRCTemplateHaskell.c") f)
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in  MP.writeFile (as MP.++ "CRCTemplateHaskell.c") f')

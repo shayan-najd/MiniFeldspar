@@ -88,4 +88,5 @@ main = MP.getArgs MP.>>=
                            (TFG.Ary TFG.Cmx) 
                            ("v0" <+> esString) 1 
                            (nrmIf (as MP./= "NoNrm") fftFMWS)) 
-                  in MP.writeFile (as MP.++ "FFTTemplateHaskell.c") f)
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in MP.writeFile (as MP.++ "FFTTemplateHaskell.c") f')

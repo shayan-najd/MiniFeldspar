@@ -82,4 +82,5 @@ main = MP.getArgs MP.>>=
                            (TFG.Ary TFG.Int) 
                            ("v0" <+> esString) 1 
                            (nrmIf (as MP./= "NoNrm") fromColoredtoBWFMWS)) 
-                  in  MP.writeFile (as MP.++ "IPTemplateHaskell.c") f)     
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in  MP.writeFile (as MP.++ "IPTemplateHaskell.c") f')     

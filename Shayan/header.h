@@ -5,6 +5,9 @@
 #include <complex.h>
 #include <math.h>
 
+#ifndef Feldspar_Header
+#define Feldspar_Header
+
 typedef uint32_t Int;
 typedef float Flt;
 typedef bool  Bol;
@@ -313,3 +316,5 @@ AryFlt mem(AryFlt a)
 {
   return a;
 }
+
+#endif

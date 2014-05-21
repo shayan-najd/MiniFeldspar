@@ -48,9 +48,10 @@ crcAry = crc32 MP.. ary2vec
 
 main :: MP.IO ()
 main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt 
-                          (scompileWith [] 
-                           TFG.Int 
-                           esString 0  
-                           (nrmIf (as MP./= "NoNrm") crcAry))
-                  in  MP.writeFile (as MP.++ "CRCMiniWellScoped.c") f) 
+       (\ [as] -> let f  = MP.frmRgt 
+                           (scompileWith [] 
+                            TFG.Int 
+                            esString 0  
+                            (nrmIf (as MP./= "NoNrm") crcAry))
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in  MP.writeFile (as MP.++ "CRCMiniWellScoped.c") f') 

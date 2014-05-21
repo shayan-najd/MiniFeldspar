@@ -68,5 +68,6 @@ main = MP.getArgs MP.>>=
                            (TFG.Ary TFG.Int) 
                            esString 0 
                            (nrmIf (as MP./= "NoNrm") fromColoredtoBWAry))
-                  in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f)    
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f')    
  

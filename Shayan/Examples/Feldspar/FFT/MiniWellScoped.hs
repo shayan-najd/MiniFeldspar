@@ -66,4 +66,5 @@ main = MP.getArgs MP.>>=
                            (TFG.Ary TFG.Cmx) 
                            esString 
                            (nrmIf (as MP./= "NoNrm") fftAry))
-                  in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f)    
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+                  in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f')    

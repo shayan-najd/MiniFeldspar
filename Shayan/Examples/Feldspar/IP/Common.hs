@@ -22,3 +22,22 @@ tstPBM = unsafePerformIO
          (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image.pbm"
              let "P1" : _ : "255" : c = lines f
              return (fmap (read :: String -> Integer) c))
+
+loaderC :: String
+loaderC = "\nint main()\
+\\n{\
+\\n  Image   imgIn = readImage(\"Image.ppm\");\
+\\n  AryInt  aryIn = newAryInt(size(imgIn)); \
+\\n  for (Int i = 0; i < size(imgIn); i++)\
+\\n    aryIn = setAryInt(aryIn , i , imgIn.data[i]);\
+\\n  AryInt aryOut;\
+\\n  func(aryIn , &aryOut);\
+\\n  Image imgOut = {.sizeX = imgIn.sizeX, \
+\\n                  .sizeY = imgIn.sizeY,\
+\\n                  .type  = 1,\
+\\n                  .data  = malloc(lenAryInt(aryOut) * sizeof(Int))}; \
+\\n  for(Int i = 0; i < lenAryInt(aryOut); i++)\
+\\n    imgOut.data[i] = indAryInt(aryOut , i);\
+\\n  writeImage (\"Image.pbm\" , imgOut);\
+\\n  return 0;\
+\\n}"

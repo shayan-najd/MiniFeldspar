@@ -17,3 +17,22 @@ tstInp = [-4.71238898038469,
           3.141592653589793,
           4.71238898038469,
           6.283185307179586]
+
+loaderC :: String
+loaderC = "\nint main()\
+\\n{\
+\\n  Image   imgIn = readImage(\"Image.pgm\");\
+\\n  AryCmx  aryIn = newAryCmx(size(imgIn)); \
+\\n  for (Int i = 0; i < size(imgIn); i++)\
+\\n    aryIn = setAryCmx(aryIn , i , cmx(i2f(imgIn.data[i]),0.0));\
+\\n  AryCmx aryOut;\
+\\n  func(aryIn , &aryOut);\
+\\n  Image imgOut = {.sizeX = imgIn.sizeX, \
+\\n                  .sizeY = imgIn.sizeY,\
+\\n                  .type  = 2,\
+\\n                  .data  = malloc(lenAryCmx(aryOut) * sizeof(Int))}; \
+\\n  for(Int i = 0; i < lenAryCmx(aryOut); i++)\
+\\n    imgOut.data[i] = (Int)(floorf(cabsf(indAryCmx(aryOut , i))));\
+\\n  writeImage (\"ImageFFT.pgm\" , imgOut);\
+\\n  return 0;\
+\\n}"
