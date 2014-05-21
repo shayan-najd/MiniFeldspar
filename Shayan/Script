@@ -1,5 +1,4 @@
 #!/bin/bash
-
 for a in IP CRC FFT
 do
     for n in MiniWellScoped TemplateHaskell
@@ -59,3 +58,24 @@ do
 	done
     done
 done
+for a in IP CRC FFT
+do
+    for n in MiniWellScoped TemplateHaskell
+    do	    
+	rm ${a}${n}
+	for f in Nrm NoNrm
+	do
+	    rm ${f}${a}${n}.c
+	    rm ${f}${a}${n}
+	done
+    done
+done
+rm ImageFFT.pgm
+rm Image.pbm
+./clean
+F=Experiment_$(date +%Y-%m-%d-%H-%M-%S)
+mkdir $F
+for file in time*; do 
+    mv $file ./$F/$file
+done
+./Process ./$F/
