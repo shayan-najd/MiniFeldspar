@@ -1,6 +1,6 @@
 name:                MiniFeldspar
 version:             0.1.0.0
-synopsis:            A Conversion from Template Haskell to MiniFeldspar
+synopsis:            MiniFeldspar
 homepage:            https://github.com/shayan-najd/MiniFeldspar/tree/master/Shayan
 license:             GPL-3
 license-file:        LICENSE
@@ -8,8 +8,10 @@ author:              Shayan Najd
 maintainer:          sh dot najd att ed.ac.uk
 category:            Language
 build-type:          Simple
-cabal-version:       >=1.8
-library 
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
   ghc-options: -Wall -fno-warn-orphans
   extensions:
      NoMonomorphismRestriction,
@@ -34,7 +36,10 @@ library
      ImplicitParams,
      TemplateHaskell,
      Rank2Types
-  exposed-modules: InferenceMonad,
+     PatternSynonyms
+  exposed-modules:     
+     InferenceMonad,
+     Optimization,
      ChangeMonad,
      Inference,
      VanillaPrelude,
@@ -46,6 +51,7 @@ library
      Solver,
      Test,
      Conversion,
+     Compiler,
      ErrorMonad,
      Type.Herbrand,
      Type.Feldspar.GADT,
@@ -62,6 +68,7 @@ library
      Conversion.Expression.Feldspar.Normalization,
      Conversion.Expression.Feldspar.Lifting,
      Conversion.Expression.Feldspar.TypeInference,
+     Conversion.Expression.Feldspar.CodeGeneration,
      Conversion.Expression.Feldspar.ScopeWithnessing,
      Conversion.Expression.Feldspar.NameResolution,
      Conversion.Expression.Feldspar.Evaluation.GADTHigherOrder,
@@ -75,12 +82,14 @@ library
      Expression.Feldspar.GADTHigherOrder,
      Expression.Feldspar.GADTValue,
      Expression.Feldspar.ADTValue,
+     Expression.Feldspar.C,
      Expression.Feldspar.GADTFirstOrder,
      Expression.Feldspar.ADTUntypedNamed,
      Expression.Feldspar.MiniWellScoped,
      Expression.Feldspar.ADTUntypedDebruijn,
      Expression.Feldspar.GADTUntypedDebruijn,
      Expression.Feldspar.GADTTyped,
+     Nat.TH,
      Nat.GADT,
      Nat.ADT,
      Variable.Typed,
@@ -90,25 +99,27 @@ library
      Environment.Map,
      Environment.Plain,
      Environment.Scoped,
-     Examples.TemplateHaskell,
-     Examples.Feldspar.GADTHigherOrder,
-     Examples.Feldspar.GADTFirstOrder,
-     Examples.Feldspar.ADTUntypedNamed,
-     Examples.Feldspar.MiniWellScoped,
-     Examples.Feldspar.ADTUntypedDebruijn,
-     Examples.Feldspar.GADTUntypedDebruijn,
-     Examples.Feldspar.Conversion,
-     Examples.Feldspar.GADTTyped,
-     Examples.Feldspar.IP.MiniWellScoped,
-     Examples.Feldspar.IP.TemplateHaskell,
-     Examples.Feldspar.Prelude.GADTHigherOrder,
-     Examples.Feldspar.Prelude.GADTFirstOrder,
      Examples.Feldspar.Prelude.MiniWellScoped,
+     Examples.Feldspar.Prelude.Environment,
      Examples.Feldspar.Prelude.TemplateHaskell,
+     Examples.Feldspar.Simple.GADTHigherOrder,
+     Examples.Feldspar.Simple.GADTFirstOrder,
+     Examples.Feldspar.Simple.ADTUntypedNamed,
+     Examples.Feldspar.Simple.MiniWellScoped,
+     Examples.Feldspar.Simple.ADTUntypedDebruijn,
+     Examples.Feldspar.Simple.GADTUntypedDebruijn,
+     Examples.Feldspar.Simple.Conversion,
+     Examples.Feldspar.Simple.GADTTyped,
+     Examples.Feldspar.Simple.TemplateHaskell,
      Normalization.Feldspar.GADTHigherOrder,
-     Normalization.Feldspar.GADTTyped
+     Normalization.Feldspar.MiniWellScoped,
+     Normalization.Feldspar.GADTTyped,
+     Optimization.Feldspar.MiniWellScoped
+
   build-depends:       
-     base             == 4.7.*,
-     mtl              == 2.1.*,
-     array            == 0.5.*,
-     template-haskell == 2.9.*
+     base             >=4.7 && <4.8,
+     mtl              >=2.2 && <2.3,
+     template-haskell >=2.9 && <2.10,
+     array            >=0.5,
+     pretty           >=1.1 && <1.2 
+  default-language:    Haskell2010

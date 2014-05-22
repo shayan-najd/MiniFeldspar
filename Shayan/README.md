@@ -14,6 +14,6 @@ To redo the experiment:
 
 *  run "Script"
 
-To compile the project (which unfortunately often gets outdated):
+To compile the project:
 
 * use "cabal install"

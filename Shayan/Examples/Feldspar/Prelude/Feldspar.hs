@@ -36,9 +36,7 @@ import qualified Feldspar        as F
   ,(.|.),(.&.),xor,bitCount,testBit,complement,shiftRU,shiftLU
   ,i2n,cis
   ,condition)
-
--- import qualified Feldspar.Core.Frontend.Tuple   as T 
-
+ 
 import qualified Feldspar.Core.Frontend.Complex as C 
   (complex,realPart,imagPart)
 
@@ -52,7 +50,7 @@ import qualified Feldspar.Core.Frontend.Loop    as L
   (whileLoop) 
 
 import qualified Feldspar.Core.Frontend as CF
-  (desugar)
+  (sugar,desugar)
 
 import Feldspar.Core.Types (Type)
  
@@ -110,10 +108,12 @@ tpl :: (Type a , Type b) => Data a -> Data b -> Data (a , b)
 tpl x y = CF.desugar (x , y)
 
 fst :: (Type a , Type b) => Data (a , b) -> Data a
-fst = fst
+fst = MP.fst MP.. (CF.sugar 
+                       :: (Type a, Type b) => Data (a,b) -> (Data a, Data b))
 
 snd :: (Type a , Type b) => Data (a , b) -> Data b
-snd = snd
+snd = MP.snd MP.. (CF.sugar 
+                       :: (Type a, Type b) => Data (a,b) -> (Data a, Data b))
 
 ---------------------------------------------------------------------------------
 -- Complex
