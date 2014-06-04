@@ -487,7 +487,7 @@ $\longrightarrow^*$.
 
 \expapp{E_a}{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r}}) & \longrightarrow 
 & \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expapp{E_a}E_l)\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expapp{E_a}E_r) 
-& \\
+& if\ X_l \notin \fv{E_a}\ \wedge\\ & & &\ \ \ X_r \notin \fv{E_a} \\
 
 \expshr{X_l}{E_l}{X_l}                             & \longrightarrow 
 & E_l & \\
