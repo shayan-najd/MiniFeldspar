@@ -90,7 +90,7 @@
 \newcommand{\expsnd}[1]{\mathbf{Snd}\ #1}
 \newcommand{\explft}[2]{\mathbf{Inl}\ #1\ #2}
 \newcommand{\exprgt}[2]{\mathbf{Inr}\ #1\ #2}
-\newcommand{\expcas}[3]{\mathbf{Case}\ #1\ #2\ #3}
+\newcommand{\expcas}[5]{\mathbf{Case}\ #1\ \mathbf{of}\ \mathbf{Inl}\ #2.\ #3\ \boldsymbol{|}\ \mathbf{Inr}\ #4.\ #5}
 
 %% Environment
 \newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
@@ -202,7 +202,7 @@ defined by the BNF grammar in Figure~\ref{fig:exp}.
 & \ |\ \ & \tm{\expsnd{E}}       & \textrm{projection-second} \\ 
 & \ |\ \ & \tm{\explft{E}{T}}    & \textrm{injection-left}    \\
 & \ |\ \ & \tm{\exprgt{T}{E}}    & \textrm{injection-right}   \\
-& \ |\ \ & \tm{\expcas{E}{E}{E}} & \textrm{case}           
+& \ |\ \ & \tm{\expcas{E}{X}{E}{X}{E}} & \textrm{case}           
 \end{array}
 \]
 \caption{Expressions}
@@ -347,13 +347,13 @@ the inference rules in Figure~\ref{fig:typing}.
 {
   \env \vdash \typing{E_s}{\typsum{T_l}{T_r}} 
 & 
-  \env \vdash \typing{E_l}{\typarr{T_l}{T_c}}  
+  \typenvcon{X_l}{T_l} \vdash \typing{E_l}{T_c}  
 & 
-  \env \vdash \typing{E_r}{\typarr{T_r}{T_c}}   
+  \typenvcon{X_r}{T_r} \vdash \typing{E_r}{T_c}
 }
 {case}
 {
-  \env \vdash \typing{\expcas{E_s}{E_l}{E_r}}{T_c} 
+  \env \vdash \typing{\expcas{E_s}{X_l}{E_l}{X_r}{E_r}}{T_c} 
 } 
 \end{array}
 \]
@@ -400,7 +400,7 @@ the predicate defined in Figure~\ref{fig:val}.
 }
 {abstraction}
 {
-  \valuep{\expabs{X_a}{T}{E_b}}
+  \valuep{\expabs{X_a}{T_a}{E_b}}
 }
 
 \\~\\
@@ -411,7 +411,7 @@ the predicate defined in Figure~\ref{fig:val}.
   &
   \valuep{E_s} 
 }
-{Product}
+{product}
 {
   \valuep{\expprd{E_f}{E_s}}
 }
@@ -424,7 +424,7 @@ the predicate defined in Figure~\ref{fig:val}.
 }
 {injection-left}
 {
-  \valuep{\explft{E_l}{T}}
+  \valuep{\explft{E_l}{T_r}}
 }
 
 &
@@ -435,7 +435,7 @@ the predicate defined in Figure~\ref{fig:val}.
 }
 {injection-right}
 {
-  \valuep{\exprgt{T}{E_r}}
+  \valuep{\exprgt{T_l}{E_r}}
 }
 
 \end{array}
@@ -485,9 +485,9 @@ $\longrightarrow^*$.
 \expapp{E_a}{(\expshr{X_l}{E_l}{E_b}}) & \longrightarrow 
 & \expshr{X_l}{E_l}{\expapp{E_a}{E_b}} & if\ X_l \notin \fv{E_a}\\
 
-\expapp{E_a}{(\expcas{E_c}{E_l}{E_r}}) & \longrightarrow 
-& \expcas{E_c}{(\expapp{E_a}E_l)}{(\expapp{E_a}{E_r})} & \\
-
+\expapp{E_a}{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r}}) & \longrightarrow 
+& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expapp{E_a}E_l)\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expapp{E_a}E_r) 
+& \\
 
 \expshr{X_l}{E_l}{X_l}                             & \longrightarrow 
 & E_l & \\
@@ -496,7 +496,7 @@ $\longrightarrow^*$.
 & \sbs{E_b}{X_l}{E_l} & if\ \valuep{E_l} \\
 
 \expshr{X_l}{E_l}{E_b}                             & \longrightarrow 
-& E_l                                             & if\ \neg \valuep{E_l}\ \wedge\\ & & &\ \ \ X_l \notin \fv{E_b} \\
+& E_b                                             & if\ \neg \valuep{E_l}\ \wedge\\ & & &\ \ \ X_l \notin \fv{E_b} \\
 
 \expshr{X_l}{(\expshr{X_{ll}}{E_{ll}}{E_{lb}})}{E_b} & \longrightarrow 
 & \expshr{X_{ll}}{E_{ll}}{\\&&\expshr{X_l}{E_{lb}}{E_b}} & if\ X_{ll} \notin \fv{E_b}\\
@@ -510,35 +510,40 @@ $\longrightarrow^*$.
 \expfst{\expprd{E_f}{E_s}}                         & \longrightarrow 
 & E_f                                              & \\
 
-\expfst{(\expshr{X_l}{E_l}{E_b})}                    & \longrightarrow 
-& \expshr{X_l}{E_l}{\expfst E_b}                   & \\
+\expfst{(\expshr{X_l}{E_l}{E_b})}                   & \longrightarrow 
+& \expshr{X_l}{E_l}{\expfst E_b}                    & \\
 
-\expfst{(\expcas{E_c}{E_l}{E_r})}                    & \longrightarrow 
-& \expcas{E_c}{\\ & & (\expabs{X_l}{T_l}{\expfst{(\expapp{E_l}{X_l})}})}{\\ & & (\expabs{X_r}{T_r}{\expfst{(\expapp{E_r}{X_r})}})} &\ if\ ToDo \\
+\expfst{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r})}          & \longrightarrow 
+& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expfst{E_l})\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expfst{E_r}) 
+& \\
 
-\expsnd{\expprd{E_f}{E_s}}                         & \longrightarrow 
-& E_s                                              & \\
+\expsnd{\expprd{E_f}{E_s}}                          & \longrightarrow 
+& E_s                                               & \\
 
 \expsnd{(\expshr{X_l}{E_l}{E_b})}                    & \longrightarrow 
-& \expshr{X_l}{E_l}{\expsnd E_b}                   & \\
+& \expshr{X_l}{E_l}{\expsnd E_b}                     & \\
 
-\expsnd{(\expcas{E_c}{E_l}{E_r})}                    & \longrightarrow 
-& \expcas{E_c}{\\ & & (\expabs{X_l}{ToDo}{\expsnd{(\expapp{E_l}{X_l})}})}{\\ & & (\expabs{X_r}{ToDo}{\expsnd{(\expapp{E_r}{X_r})}})} &\ if\ ToDo \\
+\expsnd{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r})}          & \longrightarrow 
+& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expsnd{E_l})\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expsnd{E_r}) 
+& \\
 
 %%\explft{E_l}{T_r}                                  & \longrightarrow 
 %%& \expshr{X_l}{E_l}{\explft{X_l}{T_r}}              & if\ \neg \valuep{E_l}\\
 %%
 %%\exprgt{T_l}{E_r}                                  & \longrightarrow 
 %%& \expshr{X_l}{E_r}{\exprgt{T_l}{X_l}}              & if\ \neg \valuep{E_r}\\
+ 
+\mathbf{Case}\ (\explft{E_c}{T_c})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+& \longrightarrow 
+& \expshr{X_l}{E_c}{E_l}                             & \\
+ 
+\mathbf{Case}\ (\exprgt{T_c}{E_c})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+& \longrightarrow 
+& \expshr{X_r}{E_c}{E_r}                             & \\
 
-\expcas{(\explft{E_c}{T_c})}{E_l}{E_r}              & \longrightarrow 
-& \expapp{E_l}{E_c}                                & \\
-
-\expcas{(\exprgt{T_c}{E_c})}{E_l}{E_r}              & \longrightarrow 
-& \expapp{E_r}{E_c}                                 & \\
-
-\expcas{(\expshr{X_l}{E_{lc}}{E_b})}{E_l}{E_r}         & \longrightarrow 
-& \expshr{X_l}{E_{lc}}{\\&&(\expcas{E_b}{E_l}{E_r})}       & if\ X_l \notin \fv{E_l}\ \wedge \\ & & &\ \ \ X_l \notin \fv{E_r} 
+\mathbf{Case}\ (\expshr{X_{cl}}{E_{cl}}{E_b})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+& \longrightarrow 
+& \expshr{X_{cl}}{E_{cl}}{\\&&(\expcas{E_b}{X_l}{E_l}{X_r}{E_r})}       & if\ X_l \notin \fv{E_l}\ \wedge \\ & & &\ \ \ X_l \notin \fv{E_r} 
  
 
 \end{array}
@@ -571,8 +576,9 @@ $$(\Gamma_s \vdash \typing{E_s}{T_s}) \wedge (\reduce{E_s}{E_t}) \wedge (Norm(E_
             \vee 
             (\exists\ T_e \in \Gamma_s. T_i \in T_e)$$
 
- 
+TODO: Define what $\in$ means for types and expressions
 \end{theorem}
+
 
  
 \end{document}
