@@ -1,0 +1,578 @@
+\documentclass[11p,a4paper]{article}
+\usepackage[round]{natbib}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage{mathtools}
+\usepackage[pdfauthor={Shayan Najd},pdftitle={Modular Lazy Normaliser},pagebackref=true,pdftex]{hyperref}
+\usepackage{titling}
+
+\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+ 
+% color framework
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\jd}[1]{{\judgecolor #1}}
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+\newcommand{\Tp}[1]{{\Typecolor #1}}
+\newcommand{\Tm}[1]{{\Termcolor #1}}
+
+\newcommand{\tmof}[1]{\tm{#1:{}}}
+\newcommand{\Tmof}[1]{\Tm{#1:{}}}
+\newcommand{\tmsem}[1]{\tm{\sem{\Tm{#1}}}}
+\newcommand{\tpsem}[1]{\tp{\sem{\Tp{#1}}}}
+\newcommand{\tmSem}[1]{{\termcolor \left\llbracket
+                        \judgecolor #1
+                        \termcolor \right\rrbracket}}
+
+
+%%
+\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
+\newcommand{\todo}[1]{\textbf{#1}}
+\newcommand{\etal}{\emph{et~al.}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\spacer}{\quad\quad\quad\quad}
+\newcommand{\filler}{\hspace{0.9\textwidth}}
+\newcommand{\tighten}{\vspace{-1ex}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{definition}[theorem]{Definition}
+\newcommand{\hole}{[]}
+
+%% Types
+\newcommand{\typvar}[1]{#1}
+\newcommand{\typunt}{\boldsymbol{\top}}
+\newcommand{\typarr}[2]{#1\boldsymbol{\rightarrow}#2}
+\newcommand{\typprd}[2]{#1\boldsymbol{\times}#2}
+\newcommand{\typsum}[2]{#1\boldsymbol{+}#2}
+\newcommand{\typrec}[2]{\boldsymbol{\mu}#1\boldsymbol{.}#2}
+
+%% Expressions
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expunt}{\boldsymbol{\top}}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{\dblcolon}#2\boldsymbol{.}\ #3}
+\newcommand{\expapp}[2]{#1\ #2}
+\newcommand{\expshr}[3]{\mathbf{Share}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
+\newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
+\newcommand{\expfst}[1]{\mathbf{Fst}\ #1}
+\newcommand{\expsnd}[1]{\mathbf{Snd}\ #1}
+\newcommand{\explft}[2]{\mathbf{Inl}\ #1\ #2}
+\newcommand{\exprgt}[2]{\mathbf{Inr}\ #1\ #2}
+\newcommand{\expcas}[3]{\mathbf{Case}\ #1\ #2\ #3}
+
+%% Environment
+\newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
+\newcommand{\envcon}[2]{\tp{#1,}\ #2}
+\newcommand{\env}{\tp{\Gamma}}
+\newcommand{\typing}[2]{\tm{#1:\ }\tp{#2}}
+
+\newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
+\newcommand{\sbs}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{FV\ (#1)}
+
+\newcommand{\reduce}[2]{#1 \longrightarrow^* #2} 
+\newcommand{\valuep}[1]{Value\ (#1)}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\abovecaptionskip}{0pt}
+\setlength{\droptitle}{0pt} 
+\addtolength{\droptitle}{-60pt}
+\addtolength{\textheight}{50pt}
+\addtolength{\textwidth}{125pt}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+%%\setlength{\marginparsep}{0pt}
+%%\setlength{\marginparwidth}{0pt}
+
+\begin{document}
+\title{Modular Lazy Normalisation}
+\author{Shayan Najd}
+\maketitle 
+\section*{Introduction}
+In this article, I sketch design of a ``modular lazy normalisation''
+algorithm.
+
+The normalisation algorithm takes as input an expression and returns a
+``semantically equivalent'' expression in ``normal form''. In
+particular, we are interested in a normal form where all
+$\beta$-redexes, and $\delta$-redexes corresponding to data
+desctructors are eliminated.
+
+Normalisation algorithm is ``lazy'' in the sense that elimination of
+redexes does not duplicate expressions; it preserves sharing.
+
+Normalisation algorithm is ``modular'' in the sense that the same
+algorithm can be applied to a family of languages. Members of
+the mentioned family of languages differ only in their set of built-in
+functions and built-in types.
+
+\section*{Step I -- No Polymorphism}
+Variables, denoted by the nonterminal $X$, are distinct set of
+names. Metavariables $X_s$, for arbitrary subscript $s$, range over
+variables.
+
+Types, denoted by the nonterminal $T$, are \textbf{closed} terms
+defined by the BNF grammar in Figure~\ref{fig:typ}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{llll}
+\tp{T} & \mathbin{\ ::=\ } 
+%% & \tp{\typvar{X}}        & \textrm{variable}     \\
+%% & \ |\ \ 
+         & \tp{\typunt}       & \textrm{unit}         \\
+& \ |\ \ & \tp{\typarr{T}{T}} & \textrm{abstraction}  \\
+& \ |\ \ & \tp{\typprd{T}{T}} & \textrm{product}      \\
+& \ |\ \ & \tp{\typsum{T}{T}} & \textrm{sum}       %% \\
+%% & \ |\ \ & \tp{\typrec{X}{T}} & \textrm{recursion} 
+\end{array}
+\]\caption{Types}
+\label{fig:typ}
+\end{figure*}
+
+Metavariables $T_s$, for arbitrary subscript $s$, range over
+types. Types correspond to formule in minimal propositional logic.
+
+%% and we restrict them to occure strictly
+%% positive:
+%% \todo{definition of strictly positive here}  
+%% With exception of the recursion type, 
+%% The recursion type is included to be able
+%% to encode a wide range of datatypes which are otherwise built-in in
+%% the language; every monomorphic datatype can be viewed as a recursive
+%% sums of products. This general encoding enables us to provide
+%% generic normalisation rules for data destructors. The generic rules
+%% need to only consider three data destructors: two destructors for
+%% products and one for sums. Since all data destructors are a combination
+%% of the mentioned three data destructors, their corresponding
+%% $\delta$-redexes are combinations of $\delta$-redexes corresponding to
+%% the three data destructors. Therefore, by cooking in a set of
+%% normalisation rules to eliminate $\delta$-redexes corresponding to the
+%% three data destructors, we gaurantee removal of all $\delta$-redexes
+%% corresponding to data destructors; there is no need to provide and
+%% build in a separate set of $\delta-$reduction rules per each datatype.
+ 
+Expressions, denoted by the nonterminal $E$, are \textbf{open} terms
+defined by the BNF grammar in Figure~\ref{fig:exp}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{llll}
+\tm{E} & \mathbin{\ ::=\ } 
+         & \tm{\expvar{X}}       & \textrm{variable}          \\
+& \ |\ \ & \tm{\expunt}          & \textrm{unit}              \\
+& \ |\ \ & \tm{\expabs{X}{T}{E}} & \textrm{abstraction}       \\
+& \ |\ \ & \tm{\expapp{E}{E}}    & \textrm{application}       \\
+& \ |\ \ & \tm{\expshr{X}{E}{E}} & \textrm{sharing}           \\
+& \ |\ \ & \tm{\expprd{E}{E}}    & \textrm{product}           \\
+& \ |\ \ & \tm{\expfst{E}}       & \textrm{projection-first}  \\
+& \ |\ \ & \tm{\expsnd{E}}       & \textrm{projection-second} \\ 
+& \ |\ \ & \tm{\explft{E}{T}}    & \textrm{injection-left}    \\
+& \ |\ \ & \tm{\exprgt{T}{E}}    & \textrm{injection-right}   \\
+& \ |\ \ & \tm{\expcas{E}{E}{E}} & \textrm{case}           
+\end{array}
+\]
+\caption{Expressions}
+\label{fig:exp}
+\end{figure*}
+ 
+Metavariables $E_s$, for arbitrary subscript $s$, range over
+expressions. Expressions correspond to proofs in minimal propositional
+logic.
+
+Subsititution is defined as usual and it is denoted as
+$\sbs{E_x}{X_s}{E_s}$ for subtitution of the expression $E_s$ for the
+variable $X_s$ in the expression $E_x$. Set of free variables in an
+expression is calculated as usual and it is denote as $\fv{E_s}$ for
+set of free variables in $E_s$.
+% We follow Barendregt convension such that we assume variables in a
+% term are all distinct. 
+Typing, normalisation, and evaluation environments are all maps from
+variable names. The metavariable $\Gamma$ ranges over environments.
+The inference rules are equivalent up to exchange, contraction, and
+weakening operations.
+
+Typing relations, denoted as $:$ infix operator, are defined by
+the inference rules in Figure~\ref{fig:typing}.
+
+\begin{figure*}[h]
+\[\colored
+\begin{array}{ll}
+\fbox{$\env \vdash \typing{E}{T}$}
+\\~\\
+\inference
+{}
+{variable}
+{
+  \typenvcon{X_v}{T_v} \vdash \typing{X_v}{T_v}
+}
+
+&
+
+\inference
+{}
+{unit}
+{
+   \env \vdash \typing{\expunt}{\typunt}
+}
+ 
+\\~\\
+
+\inference
+{
+  \typenvcon{X_a}{T_a} \vdash \typing{E_b}{T_b} 
+}
+{abstraction}
+{
+  \env \vdash \typing{\expabs{X_a}{T_a}{E_b}}{\typarr{T_a}{T_b}}
+}
+ 
+&
+
+\inference
+{
+  \env \vdash \typing{E_f}{\typarr{T_a}{T_b}} 
+& \env \vdash \typing{E_a}{T_a} 
+}
+{application}
+{
+  \env \vdash \typing{\expapp{E_f}{E_a}}{T_b} 
+}
+
+\\~\\ 
+
+\inference
+{
+  \env \vdash \typing{E_s}{T_s}
+  &
+  \typenvcon{X_s}{T_s} \vdash \typing{E_b}{T_b}
+}
+{share}
+{
+  \env \vdash \typing{\expshr{X_s}{E_s}{E_b}}{T_b}
+}
+ 
+&
+ 
+\inference
+{
+  \env \vdash \typing{E_l}{T_l}
+  & 
+  \env \vdash \typing{E_r}{T_r} 
+}
+{product}
+{
+  \env \vdash \typing{\expprd{E_l}{E_r}}{\typprd{T_l}{T_r}} 
+}
+ 
+\\~\\ 
+
+\inference
+{
+  \env \vdash \typing{E_p}{\typprd{T_l}{T_r}} 
+}
+{projection-first}
+{
+  \env \vdash \typing{\expfst{E_p}}{T_l}
+}
+ 
+&
+
+\inference
+{
+  \env \vdash \typing{E_p}{\typprd{T_l}{T_r}} 
+}
+{projection-second}
+{
+  \env \vdash \typing{\expsnd{E_p}}{T_r}
+}
+
+\\~\\
+
+\inference
+{
+  \env \vdash \typing{E_l}{T_l}
+}
+{injection-left}
+{
+  \env \vdash \typing{\explft{E_l}{T_r}}{\typsum{T_l}{T_r}}
+}
+ 
+&
+\inference
+{
+  \env \vdash \typing{E_r}{T_r} 
+}
+{injection-right}
+{
+  \env \vdash \typing{\exprgt{T_l}{E_r}}{\typsum{T_l}{T_r}}
+}
+ 
+\\~\\
+
+\inference
+{
+  \env \vdash \typing{E_s}{\typsum{T_l}{T_r}} 
+& 
+  \env \vdash \typing{E_l}{\typarr{T_l}{T_c}}  
+& 
+  \env \vdash \typing{E_r}{\typarr{T_r}{T_c}}   
+}
+{case}
+{
+  \env \vdash \typing{\expcas{E_s}{E_l}{E_r}}{T_c} 
+} 
+\end{array}
+\]
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+
+Typing rules are syntax-directed and algorithmic. The consistency of
+the type system can be established by its correspondence (under
+Curry-Howard) to minimal logic.\\
+
+Values are expressions that do not compute and they are identified by
+the predicate defined in Figure~\ref{fig:val}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{lll}
+
+\fbox{$\valuep{E}$}
+
+\\~\\
+
+\inference
+{}
+{variable}
+{
+  \valuep{\expvar{X_v}}
+}
+
+ &
+
+\inference
+{}
+{unit}
+{
+  \valuep{\expunt}
+}
+
+&
+
+\inference
+{
+   \valuep{E_b}
+}
+{abstraction}
+{
+  \valuep{\expabs{X_a}{T}{E_b}}
+}
+
+\\~\\
+
+\inference
+{
+  \valuep{E_f} 
+  &
+  \valuep{E_s} 
+}
+{Product}
+{
+  \valuep{\expprd{E_f}{E_s}}
+}
+ 
+&
+
+\inference
+{ 
+  \valuep{E_l} 
+}
+{injection-left}
+{
+  \valuep{\explft{E_l}{T}}
+}
+
+&
+
+\inference
+{ 
+  \valuep{E_r} 
+}
+{injection-right}
+{
+  \valuep{\exprgt{T}{E_r}}
+}
+
+\end{array}
+\]
+\caption{Values}
+\label{fig:val}
+\end{figure*}
+  
+%% Evaluation frames, denoted as $\Tp{F_x}$, are defined by the
+%% following grammar:
+
+%% \begin{figure*}
+%% \[\uncolored
+%% \begin{array}{llll}
+%% \Tp{F} & \mathbin{\ ::=\ } & \Tp{\expapp{\hole}{E}} & \textrm{application-fun.}     \\
+%% & \ |\ \ & \Tp{\expapp{V}{\hole}}                   & \textrm{application-arg.}     \\
+%% & \ |\ \ & \Tp{\expshr{X}{\hole}{E}}                & \textrm{sharing}              \\
+%% & \ |\ \ & \Tp{\expprd{\hole}{E}}                   & \textrm{product-first}        \\
+%% & \ |\ \ & \Tp{\expprd{V}{\hole}}                   & \textrm{product-second}       \\
+%% & \ |\ \ & \Tp{\expfst{\hole}}                      & \textrm{projection-first}     \\
+%% & \ |\ \ & \Tp{\expsnd{\hole}}                      & \textrm{projection-second}    \\
+%% & \ |\ \ & \Tp{\explft{\hole}{T}}                   & \textrm{injection-left}       \\
+%% & \ |\ \ & \Tp{\exprgt{T}{\hole}}                   & \textrm{injection-right}      \\
+%% & \ |\ \ & \Tp{\expcas{\hole}{E}{E}}                & \textrm{case}                 \\
+%% \end{array}
+%% \]
+%% \caption{Evaluation Frame}
+%% \label{fig:evlfrm}
+%% \end{figure*}
+
+Reduction rules, denoted by $\longrightarrow$ infix operator, are
+defined in Figure~\ref{fig:red}.Reflexive transivtive closure of the
+reduction relation $\longrightarrow$ is denoted as
+$\longrightarrow^*$.
+   
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{lcll}
+\fbox{$E \longrightarrow E$} \\~\\
+
+\expapp{(\expabs{X_a}{T_a}{E_b})}{E_a} & \longrightarrow 
+& \expshr{X_a}{E_a}{E_b} & \\
+
+\expapp{(\expshr{X_l}{E_l}{E_b})}{E_a} & \longrightarrow 
+& \expshr{X_l}{E_l}{\expapp{E_b}{E_a}} & if\ X_l \notin \fv{E_a}\\
+
+\expapp{E_a}{(\expshr{X_l}{E_l}{E_b}}) & \longrightarrow 
+& \expshr{X_l}{E_l}{\expapp{E_a}{E_b}} & if\ X_l \notin \fv{E_a}\\
+
+\expapp{E_a}{(\expcas{E_c}{E_l}{E_r}}) & \longrightarrow 
+& \expcas{E_c}{(\expapp{E_a}E_l)}{(\expapp{E_a}{E_r})} & \\
+
+
+\expshr{X_l}{E_l}{X_l}                             & \longrightarrow 
+& E_l & \\
+
+\expshr{X_l}{E_l}{E_b}                             & \longrightarrow 
+& \sbs{E_b}{X_l}{E_l} & if\ \valuep{E_l} \\
+
+\expshr{X_l}{E_l}{E_b}                             & \longrightarrow 
+& E_l                                             & if\ \neg \valuep{E_l}\ \wedge\\ & & &\ \ \ X_l \notin \fv{E_b} \\
+
+\expshr{X_l}{(\expshr{X_{ll}}{E_{ll}}{E_{lb}})}{E_b} & \longrightarrow 
+& \expshr{X_{ll}}{E_{ll}}{\\&&\expshr{X_l}{E_{lb}}{E_b}} & if\ X_{ll} \notin \fv{E_b}\\
+
+%%\expprd{E_f}{E_s}                                  & \longrightarrow 
+%%& \expshr{X_l}{E_f}{\expprd{X_l}{E_s}}             & if\ \neg \valuep{E_f} \\       
+%%
+%%\expprd{E_f}{E_s}                                  & \longrightarrow 
+%%& \expshr{X_l}{E_s}{\expprd{E_f}{X_l}}             & if\ \valuep{E_f}\ and\ \neg \valuep{E_s} \\       
+
+\expfst{\expprd{E_f}{E_s}}                         & \longrightarrow 
+& E_f                                              & \\
+
+\expfst{(\expshr{X_l}{E_l}{E_b})}                    & \longrightarrow 
+& \expshr{X_l}{E_l}{\expfst E_b}                   & \\
+
+\expfst{(\expcas{E_c}{E_l}{E_r})}                    & \longrightarrow 
+& \expcas{E_c}{\\ & & (\expabs{X_l}{T_l}{\expfst{(\expapp{E_l}{X_l})}})}{\\ & & (\expabs{X_r}{T_r}{\expfst{(\expapp{E_r}{X_r})}})} &\ if\ ToDo \\
+
+\expsnd{\expprd{E_f}{E_s}}                         & \longrightarrow 
+& E_s                                              & \\
+
+\expsnd{(\expshr{X_l}{E_l}{E_b})}                    & \longrightarrow 
+& \expshr{X_l}{E_l}{\expsnd E_b}                   & \\
+
+\expsnd{(\expcas{E_c}{E_l}{E_r})}                    & \longrightarrow 
+& \expcas{E_c}{\\ & & (\expabs{X_l}{ToDo}{\expsnd{(\expapp{E_l}{X_l})}})}{\\ & & (\expabs{X_r}{ToDo}{\expsnd{(\expapp{E_r}{X_r})}})} &\ if\ ToDo \\
+
+%%\explft{E_l}{T_r}                                  & \longrightarrow 
+%%& \expshr{X_l}{E_l}{\explft{X_l}{T_r}}              & if\ \neg \valuep{E_l}\\
+%%
+%%\exprgt{T_l}{E_r}                                  & \longrightarrow 
+%%& \expshr{X_l}{E_r}{\exprgt{T_l}{X_l}}              & if\ \neg \valuep{E_r}\\
+
+\expcas{(\explft{E_c}{T_c})}{E_l}{E_r}              & \longrightarrow 
+& \expapp{E_l}{E_c}                                & \\
+
+\expcas{(\exprgt{T_c}{E_c})}{E_l}{E_r}              & \longrightarrow 
+& \expapp{E_r}{E_c}                                 & \\
+
+\expcas{(\expshr{X_l}{E_{lc}}{E_b})}{E_l}{E_r}         & \longrightarrow 
+& \expshr{X_l}{E_{lc}}{\\&&(\expcas{E_b}{E_l}{E_r})}       & if\ X_l \notin \fv{E_l}\ \wedge \\ & & &\ \ \ X_l \notin \fv{E_r} 
+ 
+
+\end{array}
+\]
+\caption{Reduction Rules}
+\label{fig:red}
+\end{figure*} 
+
+\begin{definition}[Normal Form]\ \\
+An expression $E_s$ is in normal form, if and only if, it cannot reduce any further:
+
+$ Norm(E_s) \Leftrightarrow \nexists E_t.\ E_s \longrightarrow E_t$
+
+\end{definition}
+
+\begin{theorem}[Preservation]\ \\
+Reduction preserves the type of the source expression:
+
+$(\env \vdash \typing{E_s}{T_s})\wedge(E_s \longrightarrow E_t)\Rightarrow \env \vdash \typing{E_t}{T_s}$
+\end{theorem}
+
+\begin{theorem}[Original Subformula Property]\ \\
+If an expression $E_s$ reduces to the expression $E_t$ which is in
+normal form, then each subexpression of $E_t$ has a type that is a
+subterm of type of $E_t$ or a type in the environment:
+
+$$(\Gamma_s \vdash \typing{E_s}{T_s}) \wedge (\reduce{E_s}{E_t}) \wedge (Norm(E_t))
+   \Rightarrow
+   \forall\ (\Gamma_i \vdash \typing{E_i}{T_i}) \in E_t.\ (T_i \in T_s) 
+            \vee 
+            (\exists\ T_e \in \Gamma_s. T_i \in T_e)$$
+
+ 
+\end{theorem}
+
+ 
+\end{document}
