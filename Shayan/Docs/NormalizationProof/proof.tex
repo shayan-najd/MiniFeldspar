@@ -70,6 +70,8 @@
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{definition}[theorem]{Definition}
 \newcommand{\hole}{[]}
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
 
 %% Types
 \newcommand{\typvar}[1]{#1}
@@ -82,15 +84,15 @@
 %% Expressions
 \newcommand{\expvar}[1]{#1}
 \newcommand{\expunt}{\boldsymbol{\top}}
-\newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{\dblcolon}#2\boldsymbol{.}\ #3}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{\colon}#2\boldsymbol{.}\ #3}
 \newcommand{\expapp}[2]{#1\ #2}
-\newcommand{\expshr}[3]{\mathbf{Share}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
+\newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
 \newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
-\newcommand{\expfst}[1]{\mathbf{Fst}\ #1}
-\newcommand{\expsnd}[1]{\mathbf{Snd}\ #1}
-\newcommand{\explft}[2]{\mathbf{Inl}\ #1\ #2}
-\newcommand{\exprgt}[2]{\mathbf{Inr}\ #1\ #2}
-\newcommand{\expcas}[5]{\mathbf{Case}\ #1\ \mathbf{of}\ \mathbf{Inl}\ #2.\ #3\ \boldsymbol{|}\ \mathbf{Inr}\ #4.\ #5}
+\newcommand{\expfst}[1]{\mathbf{fst}\ #1}
+\newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
+\newcommand{\explft}[2]{\mathbf{inl}\ #1\ #2}
+\newcommand{\exprgt}[2]{\mathbf{inr}\ #1\ #2}
+\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \mathbf{inl}\ #2.\ #3\ \boldsymbol{|}\ \mathbf{inr}\ #4.\ #5}
 
 %% Environment
 \newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
@@ -140,31 +142,30 @@ the mentioned family of languages differ only in their set of built-in
 functions and built-in types.
 
 \section*{Step I -- No Polymorphism}
-Variables, denoted by the nonterminal $X$, are distinct set of
-names. Metavariables $X_s$, for arbitrary subscript $s$, range over
-variables.
+Variables are distinct set of names. Metavariables $s$, $t$, $x$, $y$, and $z$
+range over variables.
 
-Types, denoted by the nonterminal $T$, are \textbf{closed} terms
-defined by the BNF grammar in Figure~\ref{fig:typ}.
+Types are \textbf{closed} terms defined by the BNF grammar in
+Figure~\ref{fig:typ}.
 
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-\tp{T} & \mathbin{\ ::=\ } 
+\tp{A,B,C} & \mathbin{\ ::=\ } 
 %% & \tp{\typvar{X}}        & \textrm{variable}     \\
 %% & \ |\ \ 
          & \tp{\typunt}       & \textrm{unit}         \\
-& \ |\ \ & \tp{\typarr{T}{T}} & \textrm{abstraction}  \\
-& \ |\ \ & \tp{\typprd{T}{T}} & \textrm{product}      \\
-& \ |\ \ & \tp{\typsum{T}{T}} & \textrm{sum}       %% \\
+& \ |\ \ & \tp{\typarr{A}{B}} & \textrm{abstraction}  \\
+& \ |\ \ & \tp{\typprd{A}{B}} & \textrm{product}      \\
+& \ |\ \ & \tp{\typsum{A}{B}} & \textrm{sum}       %% \\
 %% & \ |\ \ & \tp{\typrec{X}{T}} & \textrm{recursion} 
 \end{array}
 \]\caption{Types}
 \label{fig:typ}
 \end{figure*}
 
-Metavariables $T_s$, for arbitrary subscript $s$, range over
-types. Types correspond to formule in minimal propositional logic.
+Metavariables $A$, $B$, and $C$ range over types. Types correspond to
+formule in minimal propositional logic.
 
 %% and we restrict them to occure strictly
 %% positive:
@@ -185,39 +186,39 @@ types. Types correspond to formule in minimal propositional logic.
 %% corresponding to data destructors; there is no need to provide and
 %% build in a separate set of $\delta-$reduction rules per each datatype.
  
-Expressions, denoted by the nonterminal $E$, are \textbf{open} terms
-defined by the BNF grammar in Figure~\ref{fig:exp}.
+Expressions are \textbf{open} terms defined by the BNF grammar in
+Figure~\ref{fig:exp}.
 
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-\tm{E} & \mathbin{\ ::=\ } 
-         & \tm{\expvar{X}}       & \textrm{variable}          \\
+\tm{J,K,L,M,N} & \mathbin{\ ::=\ } 
+         & \tm{\expvar{x}}       & \textrm{variable}          \\
 & \ |\ \ & \tm{\expunt}          & \textrm{unit}              \\
-& \ |\ \ & \tm{\expabs{X}{T}{E}} & \textrm{abstraction}       \\
-& \ |\ \ & \tm{\expapp{E}{E}}    & \textrm{application}       \\
-& \ |\ \ & \tm{\expshr{X}{E}{E}} & \textrm{sharing}           \\
-& \ |\ \ & \tm{\expprd{E}{E}}    & \textrm{product}           \\
-& \ |\ \ & \tm{\expfst{E}}       & \textrm{projection-first}  \\
-& \ |\ \ & \tm{\expsnd{E}}       & \textrm{projection-second} \\ 
-& \ |\ \ & \tm{\explft{E}{T}}    & \textrm{injection-left}    \\
-& \ |\ \ & \tm{\exprgt{T}{E}}    & \textrm{injection-right}   \\
-& \ |\ \ & \tm{\expcas{E}{X}{E}{X}{E}} & \textrm{case}           
+& \ |\ \ & \tm{\expabs{x}{A}{N}} & \textrm{abstraction}       \\
+& \ |\ \ & \tm{\expapp{L}{M}}    & \textrm{application}       \\
+& \ |\ \ & \tm{\expshr{x}{M}{N}} & \textrm{sharing}           \\
+& \ |\ \ & \tm{\expprd{M}{N}}    & \textrm{product}           \\
+& \ |\ \ & \tm{\expfst{L}}       & \textrm{projection-first}  \\
+& \ |\ \ & \tm{\expsnd{L}}       & \textrm{projection-second} \\ 
+& \ |\ \ & \tm{\explft{M}{B}}    & \textrm{injection-left}    \\
+& \ |\ \ & \tm{\exprgt{A}{N}}    & \textrm{injection-right}   \\
+& \ |\ \ & \tm{\expcas{L}{x}{M}{y}{N}} & \textrm{case}           
 \end{array}
 \]
 \caption{Expressions}
 \label{fig:exp}
 \end{figure*}
  
-Metavariables $E_s$, for arbitrary subscript $s$, range over
+Metavariables $J$, $K$, $L$, $M$, and $N$ range over
 expressions. Expressions correspond to proofs in minimal propositional
 logic.
 
 Subsititution is defined as usual and it is denoted as
-$\sbs{E_x}{X_s}{E_s}$ for subtitution of the expression $E_s$ for the
-variable $X_s$ in the expression $E_x$. Set of free variables in an
-expression is calculated as usual and it is denote as $\fv{E_s}$ for
-set of free variables in $E_s$.
+$\sbs{N}{x}{M}$ for subtitution of the expression $M$ for the
+variable $x$ in the expression $N$. Set of free variables in an
+expression is calculated as usual and it is denote as $\fv{N}$ for
+set of free variables in $N$.
 % We follow Barendregt convension such that we assume variables in a
 % term are all distinct. 
 Typing, normalisation, and evaluation environments are all maps from
@@ -231,20 +232,20 @@ the inference rules in Figure~\ref{fig:typing}.
 \begin{figure*}[h]
 \[\colored
 \begin{array}{ll}
-\fbox{$\env \vdash \typing{E}{T}$}
+\fbox{$\env \vdash \typing{M}{A}$}
 \\~\\
 \inference
 {}
-{variable}
+{\mathbf{Ax}}
 {
-  \typenvcon{X_v}{T_v} \vdash \typing{X_v}{T_v}
+  \typenvcon{x}{A} \vdash \typing{x}{A}
 }
 
 &
 
 \inference
 {}
-{unit}
+{\typunt}
 {
    \env \vdash \typing{\expunt}{\typunt}
 }
@@ -253,107 +254,107 @@ the inference rules in Figure~\ref{fig:typing}.
 
 \inference
 {
-  \typenvcon{X_a}{T_a} \vdash \typing{E_b}{T_b} 
+  \typenvcon{x}{A} \vdash \typing{N}{B} 
 }
-{abstraction}
+{{\to}\intro}
 {
-  \env \vdash \typing{\expabs{X_a}{T_a}{E_b}}{\typarr{T_a}{T_b}}
+  \env \vdash \typing{\expabs{x}{A}{N}}{\typarr{A}{B}}
 }
  
 &
 
 \inference
 {
-  \env \vdash \typing{E_f}{\typarr{T_a}{T_b}} 
-& \env \vdash \typing{E_a}{T_a} 
+  \env \vdash \typing{L}{\typarr{A}{B}} 
+& \env \vdash \typing{M}{A} 
 }
-{application}
+{{\to}\elim}
 {
-  \env \vdash \typing{\expapp{E_f}{E_a}}{T_b} 
+  \env \vdash \typing{\expapp{L}{M}}{B} 
 }
 
 \\~\\ 
 
 \inference
 {
-  \env \vdash \typing{E_s}{T_s}
+  \env \vdash \typing{M}{A}
   &
-  \typenvcon{X_s}{T_s} \vdash \typing{E_b}{T_b}
+  \typenvcon{x}{A} \vdash \typing{N}{B}
 }
-{share}
+{\mathbf{let}}
 {
-  \env \vdash \typing{\expshr{X_s}{E_s}{E_b}}{T_b}
+  \env \vdash \typing{\expshr{x}{M}{N}}{B}
 }
  
 &
  
 \inference
 {
-  \env \vdash \typing{E_l}{T_l}
+  \env \vdash \typing{M}{A}
   & 
-  \env \vdash \typing{E_r}{T_r} 
+  \env \vdash \typing{N}{B} 
 }
-{product}
+{{\times}\intro}
 {
-  \env \vdash \typing{\expprd{E_l}{E_r}}{\typprd{T_l}{T_r}} 
+  \env \vdash \typing{\expprd{M}{N}}{\typprd{A}{B}} 
 }
  
 \\~\\ 
 
 \inference
 {
-  \env \vdash \typing{E_p}{\typprd{T_l}{T_r}} 
+  \env \vdash \typing{L}{\typprd{A}{B}} 
 }
-{projection-first}
+{{\times}\elim_1}
 {
-  \env \vdash \typing{\expfst{E_p}}{T_l}
+  \env \vdash \typing{\expfst{L}}{A}
 }
  
 &
 
 \inference
 {
-  \env \vdash \typing{E_p}{\typprd{T_l}{T_r}} 
+  \env \vdash \typing{L}{\typprd{A}{B}} 
 }
-{projection-second}
+{{\times}\elim_2}
 {
-  \env \vdash \typing{\expsnd{E_p}}{T_r}
+  \env \vdash \typing{\expsnd{L}}{B}
 }
 
 \\~\\
 
 \inference
 {
-  \env \vdash \typing{E_l}{T_l}
+  \env \vdash \typing{M}{A}
 }
-{injection-left}
+{{+}\intro_1}
 {
-  \env \vdash \typing{\explft{E_l}{T_r}}{\typsum{T_l}{T_r}}
+  \env \vdash \typing{\explft{M}{B}}{\typsum{A}{B}}
 }
  
 &
 \inference
 {
-  \env \vdash \typing{E_r}{T_r} 
+  \env \vdash \typing{N}{B} 
 }
-{injection-right}
+{{+}\intro_2}
 {
-  \env \vdash \typing{\exprgt{T_l}{E_r}}{\typsum{T_l}{T_r}}
+  \env \vdash \typing{\exprgt{A}{N}}{\typsum{A}{B}}
 }
  
 \\~\\
 
 \inference
 {
-  \env \vdash \typing{E_s}{\typsum{T_l}{T_r}} 
+  \env \vdash \typing{L}{\typsum{A}{B}} 
 & 
-  \typenvcon{X_l}{T_l} \vdash \typing{E_l}{T_c}  
+  \typenvcon{x}{A} \vdash \typing{M}{C}  
 & 
-  \typenvcon{X_r}{T_r} \vdash \typing{E_r}{T_c}
+  \typenvcon{y}{B} \vdash \typing{N}{C}
 }
-{case}
+{{+}\elim}
 {
-  \env \vdash \typing{\expcas{E_s}{X_l}{E_l}{X_r}{E_r}}{T_c} 
+  \env \vdash \typing{\expcas{L}{x}{M}{y}{N}}{C} 
 } 
 \end{array}
 \]
@@ -372,7 +373,7 @@ the predicate defined in Figure~\ref{fig:val}.
 \[\uncolored
 \begin{array}{lll}
 
-\fbox{$\valuep{E}$}
+\fbox{$\valuep{N}$}
 
 \\~\\
 
@@ -380,7 +381,7 @@ the predicate defined in Figure~\ref{fig:val}.
 {}
 {variable}
 {
-  \valuep{\expvar{X_v}}
+  \valuep{\expvar{x}}
 }
 
  &
@@ -396,46 +397,46 @@ the predicate defined in Figure~\ref{fig:val}.
 
 \inference
 {
-   \valuep{E_b}
+   \valuep{N}
 }
 {abstraction}
 {
-  \valuep{\expabs{X_a}{T_a}{E_b}}
+  \valuep{\expabs{x}{A}{N}}
 }
 
 \\~\\
 
 \inference
 {
-  \valuep{E_f} 
+  \valuep{M} 
   &
-  \valuep{E_s} 
+  \valuep{N} 
 }
 {product}
 {
-  \valuep{\expprd{E_f}{E_s}}
+  \valuep{\expprd{M}{N}}
 }
  
 &
 
 \inference
 { 
-  \valuep{E_l} 
+  \valuep{M} 
 }
 {injection-left}
 {
-  \valuep{\explft{E_l}{T_r}}
+  \valuep{\explft{M}{B}}
 }
 
 &
 
 \inference
 { 
-  \valuep{E_r} 
+  \valuep{N} 
 }
 {injection-right}
 {
-  \valuep{\exprgt{T_l}{E_r}}
+  \valuep{\exprgt{A}{N}}
 }
 
 \end{array}
@@ -474,77 +475,81 @@ $\longrightarrow^*$.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{lcll}
-\fbox{$E \longrightarrow E$} \\~\\
+%% \fbox{$M \longrightarrow N$} \\~\\
 
-\expapp{(\expabs{X_a}{T_a}{E_b})}{E_a} & \longrightarrow 
-& \expshr{X_a}{E_a}{E_b} & \\
+\expapp{(\expabs{x}{A}{M})}{N} & \longrightarrow 
+& \expshr{x}{N}{M} & \\
 
-\expapp{(\expshr{X_l}{E_l}{E_b})}{E_a} & \longrightarrow 
-& \expshr{X_l}{E_l}{\expapp{E_b}{E_a}} & if\ X_l \notin \fv{E_a}\\
+\expapp{(\expshr{x}{L}{M})}{N} & \longrightarrow 
+& \expshr{x}{L}{\expapp{M}{N}} & if\ x \notin \fv{N}\\
 
-\expapp{E_a}{(\expshr{X_l}{E_l}{E_b}}) & \longrightarrow 
-& \expshr{X_l}{E_l}{\expapp{E_a}{E_b}} & if\ X_l \notin \fv{E_a}\\
+\expapp{L}{(\expshr{x}{M}{N}}) & \longrightarrow 
+& \expshr{x}{M}{\expapp{L}{N}} & if\ x \notin \fv{L}\\
 
-\expapp{E_a}{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r}}) & \longrightarrow 
-& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expapp{E_a}E_l)\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expapp{E_a}E_r) 
-& if\ X_l \notin \fv{E_a}\ \wedge\\ & & &\ \ \ X_r \notin \fv{E_a} \\
+\expapp{K}{(\expcas{L}{x}{M}{y}{N}}) & \longrightarrow 
+& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expapp{K}{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expapp{K}{N}) 
+& if\ x \notin \fv{K}\ \wedge\\ & & &\ \ \ \ y \notin \fv{K} \\
 
-\expshr{X_l}{E_l}{X_l}                             & \longrightarrow 
-& E_l & \\
+\expshr{x}{M}{x}                             & \longrightarrow 
+& M & \\
 
-\expshr{X_l}{E_l}{E_b}                             & \longrightarrow 
-& \sbs{E_b}{X_l}{E_l} & if\ \valuep{E_l} \\
+\expshr{x}{M}{N}                             & \longrightarrow 
+& \sbs{N}{x}{M} & if\ \valuep{M} \\
 
-\expshr{X_l}{E_l}{E_b}                             & \longrightarrow 
-& E_b                                             & if\ \neg \valuep{E_l}\ \wedge\\ & & &\ \ \ X_l \notin \fv{E_b} \\
+\expshr{x}{M}{N}                             & \longrightarrow 
+& N                                          & if\ x \notin \fv{N} \\
 
-\expshr{X_l}{(\expshr{X_{ll}}{E_{ll}}{E_{lb}})}{E_b} & \longrightarrow 
-& \expshr{X_{ll}}{E_{ll}}{\\&&\expshr{X_l}{E_{lb}}{E_b}} & if\ X_{ll} \notin \fv{E_b}\\
+\expshr{z}{(\expshr{x}{M}{N})}{L} & \longrightarrow 
+& \expshr{x}{M}{\\&&\expshr{z}{N}{L}} & if\ x \notin \fv{L}\\
 
 %%\expprd{E_f}{E_s}                                  & \longrightarrow 
-%%& \expshr{X_l}{E_f}{\expprd{X_l}{E_s}}             & if\ \neg \valuep{E_f} \\       
+%%& \expshr{x}{E_f}{\expprd{x}{E_s}}             & if\ \neg \valuep{E_f} \\       
 %%
 %%\expprd{E_f}{E_s}                                  & \longrightarrow 
-%%& \expshr{X_l}{E_s}{\expprd{E_f}{X_l}}             & if\ \valuep{E_f}\ and\ \neg \valuep{E_s} \\       
+%%& \expshr{x}{E_s}{\expprd{E_f}{x}}             & if\ \valuep{E_f}\ and\ \neg \valuep{E_s} \\       
 
-\expfst{\expprd{E_f}{E_s}}                         & \longrightarrow 
-& E_f                                              & \\
+\expfst{\expprd{M}{N}}                         & \longrightarrow 
+& M                                              & \\
 
-\expfst{(\expshr{X_l}{E_l}{E_b})}                   & \longrightarrow 
-& \expshr{X_l}{E_l}{\expfst E_b}                    & \\
+\expfst{(\expshr{x}{M}{N})}                   & \longrightarrow 
+& \expshr{x}{M}{\expfst{N}}                    & \\
 
-\expfst{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r})}          & \longrightarrow 
-& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expfst{E_l})\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expfst{E_r}) 
+\expfst{(\expcas{L}{x}{M}{y}{N})}          & \longrightarrow 
+& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expfst{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expfst{N}) 
 & \\
 
-\expsnd{\expprd{E_f}{E_s}}                          & \longrightarrow 
-& E_s                                               & \\
+\expsnd{\expprd{M}{N}}                          & \longrightarrow 
+& N                                               & \\
 
-\expsnd{(\expshr{X_l}{E_l}{E_b})}                    & \longrightarrow 
-& \expshr{X_l}{E_l}{\expsnd E_b}                     & \\
+\expsnd{(\expshr{x}{M}{N})}                    & \longrightarrow 
+& \expshr{x}{M}{\expsnd{N}}                     & \\
 
-\expsnd{(\expcas{E_c}{X_l}{E_l}{X_r}{E_r})}          & \longrightarrow 
-& \mathbf{Case}\ E_c\ \mathbf{of}\\& & \ \ \ \mathbf{Inl}\ X_l.\ (\expsnd{E_l})\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ (\expsnd{E_r}) 
+\expsnd{(\expcas{L}{x}{M}{y}{N})}          & \longrightarrow 
+& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expsnd{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expsnd{N}) 
 & \\
 
 %%\explft{E_l}{T_r}                                  & \longrightarrow 
-%%& \expshr{X_l}{E_l}{\explft{X_l}{T_r}}              & if\ \neg \valuep{E_l}\\
+%%& \expshr{x}{E_l}{\explft{x}{T_r}}              & if\ \neg \valuep{E_l}\\
 %%
 %%\exprgt{T_l}{E_r}                                  & \longrightarrow 
-%%& \expshr{X_l}{E_r}{\exprgt{T_l}{X_l}}              & if\ \neg \valuep{E_r}\\
+%%& \expshr{x}{E_r}{\exprgt{T_l}{x}}              & if\ \neg \valuep{E_r}\\
  
-\mathbf{Case}\ (\explft{E_c}{T_c})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+\mathbf{case}\ (\explft{L}{B})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
 & \longrightarrow 
-& \expshr{X_l}{E_c}{E_l}                             & \\
+& \expshr{x}{L}{M}                             & \\
  
-\mathbf{Case}\ (\exprgt{T_c}{E_c})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+\mathbf{case}\ (\exprgt{A}{L})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
 & \longrightarrow 
-& \expshr{X_r}{E_c}{E_r}                             & \\
+& \expshr{y}{L}{N}                             & \\
 
-\mathbf{Case}\ (\expshr{X_{cl}}{E_{cl}}{E_b})\ \mathbf{of}\\\ \  \mathbf{Inl}\ X_l.\ E_l\ \boldsymbol{|}\ \mathbf{Inr}\ X_r.\ E_r 
+\mathbf{case}\ (\expshr{z}{K}{L})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
 & \longrightarrow 
-& \expshr{X_{cl}}{E_{cl}}{\\&&(\expcas{E_b}{X_l}{E_l}{X_r}{E_r})}       & if\ X_l \notin \fv{E_l}\ \wedge \\ & & &\ \ \ X_l \notin \fv{E_r} 
+& \expshr{z}{K}{\\&&(\expcas{L}{x}{M}{y}{N})}       & if\ z \notin \fv{M}\ \wedge \\ & & &\ \ \ \ z \notin \fv{N}  \\
  
+\mathbf{case}\ (\expcas{L}{x}{M}{y}{N})\ \mathbf{of}\\\ \  \mathbf{inl}\ s.\ J\ \boldsymbol{|}\ \mathbf{inr}\ t.\ K 
+& \longrightarrow 
+& \mathbf{case}\ L \ \mathbf{of}\\ & &\ \ \ \ \mathbf{inl}\ x.\ (\expcas{M}{s}{J}{t}{K})\ \\ & &\ \ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expcas{N}{s}{J}{t}{K}) 
+
 
 \end{array}
 \]
@@ -553,32 +558,24 @@ $\longrightarrow^*$.
 \end{figure*} 
 
 \begin{definition}[Normal Form]\ \\
-An expression $E_s$ is in normal form, if and only if, it cannot reduce any further:
-
-$ Norm(E_s) \Leftrightarrow \nexists E_t.\ E_s \longrightarrow E_t$
-
+An expression $M$ is in normal form, denoted as $Norm(M)$, if and only
+if, does not exist an expression $N$ such that $M \longrightarrow
+N$.
 \end{definition}
 
 \begin{theorem}[Preservation]\ \\
 Reduction preserves the type of the source expression:
-
-$(\env \vdash \typing{E_s}{T_s})\wedge(E_s \longrightarrow E_t)\Rightarrow \env \vdash \typing{E_t}{T_s}$
+ 
+ if $\env \vdash \typing{M}{A}$ and $M \longrightarrow N$, then 
+$\env \vdash \typing{N}{A}$.
 \end{theorem}
 
-\begin{theorem}[Original Subformula Property]\ \\
-If an expression $E_s$ reduces to the expression $E_t$ which is in
-normal form, then each subexpression of $E_t$ has a type that is a
-subterm of type of $E_t$ or a type in the environment:
-
-$$(\Gamma_s \vdash \typing{E_s}{T_s}) \wedge (\reduce{E_s}{E_t}) \wedge (Norm(E_t))
-   \Rightarrow
-   \forall\ (\Gamma_i \vdash \typing{E_i}{T_i}) \in E_t.\ (T_i \in T_s) 
-            \vee 
-            (\exists\ T_e \in \Gamma_s. T_i \in T_e)$$
-
-TODO: Define what $\in$ means for types and expressions
+\begin{theorem}[Subformula Property]\ \\
+If $\Gamma_s \vdash \typing{M}{A}$, $\reduce{M}{N}$, and $Norm(N)$;
+then for every expression $L$ in the set of subexpressions of $N$ such
+that $\Gamma_i \vdash \typing{L}{C}$, $C$ is in the set of subterms of
+the type $A$, or in the set of subterms of all types in the
+environment $\Gamma_i$.
 \end{theorem}
-
-
  
 \end{document}
