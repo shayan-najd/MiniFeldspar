@@ -1,4 +1,5 @@
 \documentclass[11p,a4paper]{article}
+%%\usepackage{lua-visual-debug}
 \usepackage[round]{natbib}
 \usepackage{stmaryrd}
 \usepackage{proof}
@@ -8,7 +9,8 @@
 \usepackage{mathtools}
 \usepackage[pdfauthor={Shayan Najd},pdftitle={Modular Lazy Normaliser},pagebackref=true,pdftex]{hyperref}
 \usepackage{titling}
-
+\usepackage{pbox}
+\usepackage{tabularx}
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
  
@@ -87,12 +89,15 @@
 \newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{\colon}#2\boldsymbol{.}\ #3}
 \newcommand{\expapp}[2]{#1\ #2}
 \newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
+\newcommand{\expshrind}[3]{\begin{array}[t]{@{}l}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}} 
 \newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
 \newcommand{\expfst}[1]{\mathbf{fst}\ #1}
 \newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
 \newcommand{\explft}[2]{\mathbf{inl}\ #1\ #2}
 \newcommand{\exprgt}[2]{\mathbf{inr}\ #1\ #2}
 \newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \mathbf{inl}\ #2.\ #3\ \boldsymbol{|}\ \mathbf{inr}\ #4.\ #5}
+\newcommand{\expcasind}[5]{\begin{array}[t]{@{}l}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \mathbf{inl}\ #2.\ #3\ \boldsymbol{|}\ \mathbf{inr}\ #4.\ #5\end{array}}
+\newcommand{\expcasindind}[5]{\begin{array}[t]{@{}l}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \ \ \mathbf{inl}\ #2.\ #3\ \\[-1pt] \ \ \boldsymbol{|}\ \mathbf{inr}\ #4.\ #5\end{array}}
 
 %% Environment
 \newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
@@ -102,11 +107,11 @@
 
 \newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
 \newcommand{\sbs}[3]{#1[#2:=#3]}
-\newcommand{\fv}[1]{FV\ (#1)}
-
+\newcommand{\fv}[1]{\txt{FV}\,(#1)}
+\newcommand{\txt}[1]{\text{\emph{#1}}}
 \newcommand{\reduce}[2]{#1 \longrightarrow^* #2} 
-\newcommand{\valuep}[1]{Value\ (#1)}
-
+\newcommand{\valuep}[1]{\txt{Value}\,(#1)}
+\newcommand{\cnd}[1]{\begin{array}[t]{l}\txt{if}\ #1\end{array}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \setlength{\belowcaptionskip}{0pt}
 \setlength{\abovecaptionskip}{0pt}
@@ -192,7 +197,7 @@ Figure~\ref{fig:exp}.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-\tm{J,K,L,M,N} & \mathbin{\ ::=\ } 
+\tm{P,Q,L,M,N} & \mathbin{\ ::=\ } 
          & \tm{\expvar{x}}       & \textrm{variable}          \\
 & \ |\ \ & \tm{\expunt}          & \textrm{unit}              \\
 & \ |\ \ & \tm{\expabs{x}{A}{N}} & \textrm{abstraction}       \\
@@ -210,7 +215,7 @@ Figure~\ref{fig:exp}.
 \label{fig:exp}
 \end{figure*}
  
-Metavariables $J$, $K$, $L$, $M$, and $N$ range over
+Metavariables $P$, $Q$, $L$, $M$, and $N$ range over
 expressions. Expressions correspond to proofs in minimal propositional
 logic.
 
@@ -222,9 +227,9 @@ set of free variables in $N$.
 % We follow Barendregt convension such that we assume variables in a
 % term are all distinct. 
 Typing, normalisation, and evaluation environments are all maps from
-variable names. The metavariable $\Gamma$ ranges over environments.
-The inference rules are equivalent up to exchange, contraction, and
-weakening operations.
+variable names. The metavariables $\Gamma$, and $\Delta$ range over
+environments.  The inference rules are equivalent up to exchange,
+contraction, and weakening operations.
 
 Typing relations, denoted as $:$ infix operator, are defined by
 the inference rules in Figure~\ref{fig:typing}.
@@ -474,82 +479,90 @@ $\longrightarrow^*$.
    
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}{lcll}
-%% \fbox{$M \longrightarrow N$} \\~\\
+\begin{array}[t]{l@{\ \longrightarrow\ }ll}
+%%\expcasindind{L}{x}{M}{y}{N}  & \expcasind{L}{x}{M}{y}{N} &  if\ non
+%% \fbox{$M \longrightarrow N$} \\~\\[2pt]
 
-\expapp{(\expabs{x}{A}{M})}{N} & \longrightarrow 
-& \expshr{x}{N}{M} & \\
+\expapp{(\expabs{x}{A}{M})}{N} 
+& \expshr{x}{N}{M} 
+& \\[2pt]
 
-\expapp{(\expshr{x}{L}{M})}{N} & \longrightarrow 
-& \expshr{x}{L}{\expapp{M}{N}} & if\ x \notin \fv{N}\\
+\expapp{(\expshr{x}{L}{M})}{N} 
+& \expshr{x}{L}{\expapp{M}{N}} 
+& \cnd{x \notin \fv{N}}\\[2pt]
 
-\expapp{L}{(\expshr{x}{M}{N}}) & \longrightarrow 
-& \expshr{x}{M}{\expapp{L}{N}} & if\ x \notin \fv{L}\\
+\expapp{(\expcasind{L}{x}{M}{y}{N})}{K}
+& \expcasind{L}{x}{\expapp{M}{K}}{y}{\expapp{N}{K}} 
+& \cnd{x \notin \fv{K}\ \wedge \\ \ \ \ \ y \notin \fv{K}}\\[2pt]
 
-\expapp{K}{(\expcas{L}{x}{M}{y}{N}}) & \longrightarrow 
-& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expapp{K}{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expapp{K}{N}) 
-& if\ x \notin \fv{K}\ \wedge\\ & & &\ \ \ \ y \notin \fv{K} \\
+\expapp{L}{(\expshr{x}{M}{N}}) 
+& \expshr{x}{M}{\expapp{L}{N}} 
+& \cnd{x \notin \fv{L}}\\[2pt]
 
-\expshr{x}{M}{x}                             & \longrightarrow 
-& M & \\
+\expapp{K}{(\expcasind{L}{x}{M}{y}{N}})
+& \expcasind{L}{x}{(\expapp{K}{M})}{y}{(\expapp{K}{N})}
+& \cnd{x \notin \fv{K}\ \wedge\\ \ \ \ \ y \notin \fv{K}}\\[2pt]
 
-\expshr{x}{M}{N}                             & \longrightarrow 
-& \sbs{N}{x}{M} & if\ \valuep{M} \\
+\expshr{x}{M}{x}
+& M 
+& \\[2pt]
 
-\expshr{x}{M}{N}                             & \longrightarrow 
-& N                                          & if\ x \notin \fv{N} \\
+\expshr{x}{M}{N}
+& \sbs{N}{x}{M} 
+& \cnd{\valuep{M}} \\[2pt]
 
-\expshr{z}{(\expshr{x}{M}{N})}{L} & \longrightarrow 
-& \expshr{x}{M}{\\&&\expshr{z}{N}{L}} & if\ x \notin \fv{L}\\
+\expshr{x}{M}{N}
+& N
+& \cnd{x \notin \fv{N}} \\[2pt]
 
-%%\expprd{E_f}{E_s}                                  & \longrightarrow 
-%%& \expshr{x}{E_f}{\expprd{x}{E_s}}             & if\ \neg \valuep{E_f} \\       
-%%
-%%\expprd{E_f}{E_s}                                  & \longrightarrow 
-%%& \expshr{x}{E_s}{\expprd{E_f}{x}}             & if\ \valuep{E_f}\ and\ \neg \valuep{E_s} \\       
+\expshr{z}{(\expshr{x}{M}{N})}{L} 
+& \expshrind{x}{M}{\expshr{z}{N}{L}} 
+& \cnd{x \notin \fv{L}}\\[2pt]
 
-\expfst{\expprd{M}{N}}                         & \longrightarrow 
-& M                                              & \\
+\expshrind{z}{(\expcasind{L}{x}{M}{y}{N})}{K} 
+& \expcasindind{L}{x}{\expshr{z}{M}{K}}{y}{\expshr{z}{N}{K}}
+& \cnd{z \notin \fv{M}\ \wedge\\ \ \ \ \ z \notin \fv{N}}\\[2pt]
 
-\expfst{(\expshr{x}{M}{N})}                   & \longrightarrow 
-& \expshr{x}{M}{\expfst{N}}                    & \\
+\expfst{\expprd{M}{N}} 
+& M
+& \\[2pt]
 
-\expfst{(\expcas{L}{x}{M}{y}{N})}          & \longrightarrow 
-& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expfst{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expfst{N}) 
-& \\
+\expfst{(\expshr{x}{M}{N})}
+& \expshr{x}{M}{\expfst{N}} 
+& \\[2pt]
 
-\expsnd{\expprd{M}{N}}                          & \longrightarrow 
-& N                                               & \\
+\expfst{(\expcasind{L}{x}{M}{y}{N})}  
+& \expcasind{L}{x}{\expfst{M}}{y}{\expfst{N}}
+& \\[2pt]
 
-\expsnd{(\expshr{x}{M}{N})}                    & \longrightarrow 
-& \expshr{x}{M}{\expsnd{N}}                     & \\
+\expsnd{\expprd{M}{N}} 
+& N                                               
+& \\[2pt]
 
-\expsnd{(\expcas{L}{x}{M}{y}{N})}          & \longrightarrow 
-& \mathbf{case}\ L\ \mathbf{of}\\& & \ \ \ \mathbf{inl}\ x.\ (\expsnd{M})\ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expsnd{N}) 
-& \\
+\expsnd{(\expshr{x}{M}{N})} 
+& \expshr{x}{M}{\expsnd{N}}                     
+& \\[2pt]
 
-%%\explft{E_l}{T_r}                                  & \longrightarrow 
-%%& \expshr{x}{E_l}{\explft{x}{T_r}}              & if\ \neg \valuep{E_l}\\
-%%
-%%\exprgt{T_l}{E_r}                                  & \longrightarrow 
-%%& \expshr{x}{E_r}{\exprgt{T_l}{x}}              & if\ \neg \valuep{E_r}\\
+\expsnd{(\expcasind{L}{x}{M}{y}{N})}          
+& \expcasind{L}{x}{\expsnd{M}}{y}{\expsnd{N}}
+& \\[2pt]
  
-\mathbf{case}\ (\explft{L}{B})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
-& \longrightarrow 
-& \expshr{x}{L}{M}                             & \\
+\expcasind{(\explft{L}{B})}{x}{M}{y}{N}
+& \expshr{x}{L}{M}                             
+& \\[2pt]
  
-\mathbf{case}\ (\exprgt{A}{L})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
-& \longrightarrow 
-& \expshr{y}{L}{N}                             & \\
+\expcasind{(\exprgt{A}{L})}{x}{M}{y}{N}
+& \expshr{y}{L}{N}                             
+& \\[2pt]
 
-\mathbf{case}\ (\expshr{z}{K}{L})\ \mathbf{of}\\\ \  \mathbf{inl}\ x.\ M\ \boldsymbol{|}\ \mathbf{inr}\ y.\ N 
-& \longrightarrow 
-& \expshr{z}{K}{\\&&(\expcas{L}{x}{M}{y}{N})}       & if\ z \notin \fv{M}\ \wedge \\ & & &\ \ \ \ z \notin \fv{N}  \\
+\expcasind{(\expshr{z}{K}{L})}{x}{M}{y}{N}
  
-\mathbf{case}\ (\expcas{L}{x}{M}{y}{N})\ \mathbf{of}\\\ \  \mathbf{inl}\ s.\ J\ \boldsymbol{|}\ \mathbf{inr}\ t.\ K 
-& \longrightarrow 
-& \mathbf{case}\ L \ \mathbf{of}\\ & &\ \ \ \ \mathbf{inl}\ x.\ (\expcas{M}{s}{J}{t}{K})\ \\ & &\ \ \boldsymbol{|}\ \mathbf{inr}\ y.\ (\expcas{N}{s}{J}{t}{K}) 
-
+& \expshrind{z}{K}{(\expcas{L}{x}{M}{y}{N})}       
+& \cnd{z \notin \fv{M}\ \wedge \\ \ \ \ \ z \notin \fv{N}}  \\[2pt]
+ 
+\expcasindind{(\expcasind{L}{x}{M}{y}{N})}{s}{P}{t}{Q} 
+& \expcasindind{L}{x}{(\expcas{M}{s}{P}{t}{Q})}{y}{(\expcas{N}{s}{P}{t}{Q})} 
+& \\[2pt]
 
 \end{array}
 \]
@@ -571,11 +584,11 @@ $\env \vdash \typing{N}{A}$.
 \end{theorem}
 
 \begin{theorem}[Subformula Property]\ \\
-If $\Gamma_s \vdash \typing{M}{A}$, $\reduce{M}{N}$, and $Norm(N)$;
+If $\Gamma \vdash \typing{M}{A}$, $\reduce{M}{N}$, and $Norm(N)$;
 then for every expression $L$ in the set of subexpressions of $N$ such
-that $\Gamma_i \vdash \typing{L}{C}$, $C$ is in the set of subterms of
+that $\Delta \vdash \typing{L}{C}$, $C$ is in the set of subterms of
 the type $A$, or in the set of subterms of all types in the
-environment $\Gamma_i$.
+environment $\Delta$.
 \end{theorem}
  
 \end{document}
