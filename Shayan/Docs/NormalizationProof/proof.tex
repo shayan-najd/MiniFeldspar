@@ -71,7 +71,7 @@
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{definition}[theorem]{Definition}
-\newcommand{\hole}{[]}
+\newcommand{\hole}{[\ ]}
 \newcommand{\intro}{\mathcal{I}}
 \newcommand{\elim}{\mathcal{E}}
 
@@ -87,6 +87,7 @@
 \newcommand{\expvar}[1]{#1}
 \newcommand{\expunt}{\boldsymbol{\top}}
 \newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{\colon}#2\boldsymbol{.}\ #3}
+\newcommand{\expabsc}[3]{\boldsymbol{\lambda}#1\tm{\boldsymbol{\colon}#2}\boldsymbol{.}\ #3}
 \newcommand{\expapp}[2]{#1\ #2}
 \newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
 \newcommand{\expshrind}[3]{\begin{array}[t]{@{}l}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}} 
@@ -109,7 +110,8 @@
 \newcommand{\sbs}[3]{#1[#2:=#3]}
 \newcommand{\fv}[1]{\txt{FV}\,(#1)}
 \newcommand{\txt}[1]{\text{\emph{#1}}}
-\newcommand{\reduce}[2]{#1 \longrightarrow^* #2} 
+\newcommand{\reduce}[3]{#1 \overset{#2}\longrightarrow #3} 
+\newcommand{\reducestar}[3]{#1 \overset{#2}\longrightarrow^* #3} 
 \newcommand{\valuep}[1]{\txt{Value}\,(#1)}
 \newcommand{\cnd}[1]{\begin{array}[t]{l}\txt{if}\ #1\end{array}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -156,13 +158,13 @@ Figure~\ref{fig:typ}.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-\tp{A,B,C} & \mathbin{\ ::=\ } 
+A,B,C & \mathbin{\ ::=\ } 
 %% & \tp{\typvar{X}}        & \textrm{variable}     \\
 %% & \ |\ \ 
-         & \tp{\typunt}       & \textrm{unit}         \\
-& \ |\ \ & \tp{\typarr{A}{B}} & \textrm{abstraction}  \\
-& \ |\ \ & \tp{\typprd{A}{B}} & \textrm{product}      \\
-& \ |\ \ & \tp{\typsum{A}{B}} & \textrm{sum}       %% \\
+         & \typunt       & \textrm{unit}         \\
+& \ |\ \ & \typarr{A}{B} & \textrm{abstraction}  \\
+& \ |\ \ & \typprd{A}{B} & \textrm{product}      \\
+& \ |\ \ & \typsum{A}{B} & \textrm{sum}       %% \\
 %% & \ |\ \ & \tp{\typrec{X}{T}} & \textrm{recursion} 
 \end{array}
 \]\caption{Types}
@@ -197,18 +199,18 @@ Figure~\ref{fig:exp}.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-\tm{P,Q,L,M,N} & \mathbin{\ ::=\ } 
-         & \tm{\expvar{x}}       & \textrm{variable}          \\
-& \ |\ \ & \tm{\expunt}          & \textrm{unit}              \\
-& \ |\ \ & \tm{\expabs{x}{A}{N}} & \textrm{abstraction}       \\
-& \ |\ \ & \tm{\expapp{L}{M}}    & \textrm{application}       \\
-& \ |\ \ & \tm{\expshr{x}{M}{N}} & \textrm{sharing}           \\
-& \ |\ \ & \tm{\expprd{M}{N}}    & \textrm{product}           \\
-& \ |\ \ & \tm{\expfst{L}}       & \textrm{projection-first}  \\
-& \ |\ \ & \tm{\expsnd{L}}       & \textrm{projection-second} \\ 
-& \ |\ \ & \tm{\explft{M}{B}}    & \textrm{injection-left}    \\
-& \ |\ \ & \tm{\exprgt{A}{N}}    & \textrm{injection-right}   \\
-& \ |\ \ & \tm{\expcas{L}{x}{M}{y}{N}} & \textrm{case}           
+P,Q,L,M,N & \mathbin{\ ::=\ } 
+         & \expvar{x}             & \textrm{variable}          \\
+& \ |\ \ & \expunt                & \textrm{unit}              \\
+& \ |\ \ & \expabsc{x}{A}{N}      & \textrm{abstraction}       \\
+& \ |\ \ & \expapp{L}{M}          & \textrm{application}       \\
+& \ |\ \ & \expshr{x}{M}{N}       & \textrm{sharing}           \\
+& \ |\ \ & \expprd{M}{N}          & \textrm{product}           \\
+& \ |\ \ & \expfst{L}             & \textrm{projection-first}  \\
+& \ |\ \ & \expsnd{L}             & \textrm{projection-second} \\ 
+& \ |\ \ & \explft{M}{\tm{B}}     & \textrm{injection-left}    \\
+& \ |\ \ & \exprgt{\tm{A}}{N}     & \textrm{injection-right}   \\
+& \ |\ \ & \expcas{L}{x}{M}{y}{N} & \textrm{case}           
 \end{array}
 \]
 \caption{Expressions}
@@ -217,7 +219,10 @@ Figure~\ref{fig:exp}.
  
 Metavariables $P$, $Q$, $L$, $M$, and $N$ range over
 expressions. Expressions correspond to proofs in minimal propositional
-logic.
+logic. 
+
+%Erasing the types, colored in red, yields the usual untyped
+%$\lambda$-calculus.
 
 Subsititution is defined as usual and it is denoted as
 $\sbs{N}{x}{M}$ for subtitution of the expression $M$ for the
@@ -449,59 +454,59 @@ the predicate defined in Figure~\ref{fig:val}.
 \caption{Values}
 \label{fig:val}
 \end{figure*}
+
+\subsection*{Call-By-Need}
   
-%% Evaluation frames, denoted as $\Tp{F_x}$, are defined by the
-%% following grammar:
+Evaluation frames are defined by the BNF grammar in Figure~\ref{fig:evlfrm}.
 
-%% \begin{figure*}
-%% \[\uncolored
-%% \begin{array}{llll}
-%% \Tp{F} & \mathbin{\ ::=\ } & \Tp{\expapp{\hole}{E}} & \textrm{application-fun.}     \\
-%% & \ |\ \ & \Tp{\expapp{V}{\hole}}                   & \textrm{application-arg.}     \\
-%% & \ |\ \ & \Tp{\expshr{X}{\hole}{E}}                & \textrm{sharing}              \\
-%% & \ |\ \ & \Tp{\expprd{\hole}{E}}                   & \textrm{product-first}        \\
-%% & \ |\ \ & \Tp{\expprd{V}{\hole}}                   & \textrm{product-second}       \\
-%% & \ |\ \ & \Tp{\expfst{\hole}}                      & \textrm{projection-first}     \\
-%% & \ |\ \ & \Tp{\expsnd{\hole}}                      & \textrm{projection-second}    \\
-%% & \ |\ \ & \Tp{\explft{\hole}{T}}                   & \textrm{injection-left}       \\
-%% & \ |\ \ & \Tp{\exprgt{T}{\hole}}                   & \textrm{injection-right}      \\
-%% & \ |\ \ & \Tp{\expcas{\hole}{E}{E}}                & \textrm{case}                 \\
-%% \end{array}
-%% \]
-%% \caption{Evaluation Frame}
-%% \label{fig:evlfrm}
-%% \end{figure*}
+\begin{figure*}
+\[\uncolored
+\begin{array}{llll}
+\Tp{F} & \mathbin{\ ::=\ } 
+         & \Tp{\expapp{\hole}{M}}                   & \textrm{application-fun.}     \\
+& \ |\ \ & \Tp{\expapp{L}{\hole}}                   & \textrm{application-arg.}     \\
+& \ |\ \ & \Tp{\expshr{x}{\hole}{N}}                & \textrm{sharing}              \\
+& \ |\ \ & \Tp{\expprd{\hole}{N}}                   & \textrm{product-first}        \\
+& \ |\ \ & \Tp{\expprd{M}{\hole}}                   & \textrm{product-second}       \\
+& \ |\ \ & \Tp{\expfst{\hole}}                      & \textrm{projection-first}     \\
+& \ |\ \ & \Tp{\expsnd{\hole}}                      & \textrm{projection-second}    \\
+& \ |\ \ & \Tp{\explft{\hole}{B}}                   & \textrm{injection-left}       \\
+& \ |\ \ & \Tp{\exprgt{A}{\hole}}                   & \textrm{injection-right}      \\
+& \ |\ \ & \Tp{\expcas{\hole}{x}{M}{y}{N}}          & \textrm{case}                 \\
+\end{array}
+\]
+\caption{Evaluation Frame}
+\label{fig:evlfrm}
+\end{figure*}
 
-Reduction rules, denoted by $\longrightarrow$ infix operator, are
-defined in Figure~\ref{fig:red}.Reflexive transivtive closure of the
-reduction relation $\longrightarrow$ is denoted as
-$\longrightarrow^*$.
+Call-by-need reduction rules, denoted by $\reduce{}{l}{}$ infix operator, are
+defined in Figure~\ref{fig:red}. Reflexive transivtive closure of the
+reduction relation $\reduce{}{l}{}$ is denoted as
+$\reducestar{}{l}{}$.
    
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}[t]{l@{\ \longrightarrow\ }ll}
-%%\expcasindind{L}{x}{M}{y}{N}  & \expcasind{L}{x}{M}{y}{N} &  if\ non
-%% \fbox{$M \longrightarrow N$} \\~\\[2pt]
+\begin{array}[t]{l@{\ \reduce{}{l}{}\ }ll} 
 
 \expapp{(\expabs{x}{A}{M})}{N} 
 & \expshr{x}{N}{M} 
 & \\[2pt]
 
-\expapp{(\expshr{x}{L}{M})}{N} 
-& \expshr{x}{L}{\expapp{M}{N}} 
-& \cnd{x \notin \fv{N}}\\[2pt]
+%% \expapp{(\expshr{x}{L}{M})}{N} 
+%% & \expshr{x}{L}{\expapp{M}{N}} 
+%% & \cnd{x \notin \fv{N}}\\[2pt]
 
-\expapp{(\expcasind{L}{x}{M}{y}{N})}{K}
-& \expcasind{L}{x}{\expapp{M}{K}}{y}{\expapp{N}{K}} 
-& \cnd{x \notin \fv{K}\ \wedge \\ \ \ \ \ y \notin \fv{K}}\\[2pt]
+%% \expapp{(\expcasind{L}{x}{M}{y}{N})}{K}
+%% & \expcasind{L}{x}{\expapp{M}{K}}{y}{\expapp{N}{K}} 
+%% & \cnd{x \notin \fv{K}\ \wedge \\ \ \ \ \ y \notin \fv{K}}\\[2pt]
 
-\expapp{L}{(\expshr{x}{M}{N}}) 
-& \expshr{x}{M}{\expapp{L}{N}} 
-& \cnd{x \notin \fv{L}}\\[2pt]
+%% \expapp{L}{(\expshr{x}{M}{N}}) 
+%% & \expshr{x}{M}{\expapp{L}{N}} 
+%% & \cnd{x \notin \fv{L}}\\[2pt]
 
-\expapp{K}{(\expcasind{L}{x}{M}{y}{N}})
-& \expcasind{L}{x}{(\expapp{K}{M})}{y}{(\expapp{K}{N})}
-& \cnd{x \notin \fv{K}\ \wedge\\ \ \ \ \ y \notin \fv{K}}\\[2pt]
+%% \expapp{K}{(\expcasind{L}{x}{M}{y}{N}})
+%% & \expcasind{L}{x}{(\expapp{K}{M})}{y}{(\expapp{K}{N})}
+%% & \cnd{x \notin \fv{K}\ \wedge\\ \ \ \ \ y \notin \fv{K}}\\[2pt]
 
 \expshr{x}{M}{x}
 & M 
@@ -515,37 +520,37 @@ $\longrightarrow^*$.
 & N
 & \cnd{x \notin \fv{N}} \\[2pt]
 
-\expshr{z}{(\expshr{x}{M}{N})}{L} 
-& \expshrind{x}{M}{\expshr{z}{N}{L}} 
-& \cnd{x \notin \fv{L}}\\[2pt]
+%% \expshr{z}{(\expshr{x}{M}{N})}{L} 
+%% & \expshrind{x}{M}{\expshr{z}{N}{L}} 
+%% & \cnd{x \notin \fv{L}}\\[2pt]
 
-\expshrind{z}{(\expcasind{L}{x}{M}{y}{N})}{K} 
-& \expcasindind{L}{x}{\expshr{z}{M}{K}}{y}{\expshr{z}{N}{K}}
-& \cnd{z \notin \fv{M}\ \wedge\\ \ \ \ \ z \notin \fv{N}}\\[2pt]
+%% \expshrind{z}{(\expcasind{L}{x}{M}{y}{N})}{K} 
+%% & \expcasindind{L}{x}{\expshr{z}{M}{K}}{y}{\expshr{z}{N}{K}}
+%% & \cnd{z \notin \fv{M}\ \wedge\\ \ \ \ \ z \notin \fv{N}}\\[2pt]
 
 \expfst{\expprd{M}{N}} 
 & M
 & \\[2pt]
 
-\expfst{(\expshr{x}{M}{N})}
-& \expshr{x}{M}{\expfst{N}} 
-& \\[2pt]
+%% \expfst{(\expshr{x}{M}{N})}
+%% & \expshr{x}{M}{\expfst{N}} 
+%% & \\[2pt]
 
-\expfst{(\expcasind{L}{x}{M}{y}{N})}  
-& \expcasind{L}{x}{\expfst{M}}{y}{\expfst{N}}
-& \\[2pt]
+%% \expfst{(\expcasind{L}{x}{M}{y}{N})}  
+%% & \expcasind{L}{x}{\expfst{M}}{y}{\expfst{N}}
+%% & \\[2pt]
 
 \expsnd{\expprd{M}{N}} 
 & N                                               
 & \\[2pt]
 
-\expsnd{(\expshr{x}{M}{N})} 
-& \expshr{x}{M}{\expsnd{N}}                     
-& \\[2pt]
+%% \expsnd{(\expshr{x}{M}{N})} 
+%% & \expshr{x}{M}{\expsnd{N}}                     
+%% & \\[2pt]
 
-\expsnd{(\expcasind{L}{x}{M}{y}{N})}          
-& \expcasind{L}{x}{\expsnd{M}}{y}{\expsnd{N}}
-& \\[2pt]
+%% \expsnd{(\expcasind{L}{x}{M}{y}{N})}          
+%% & \expcasind{L}{x}{\expsnd{M}}{y}{\expsnd{N}}
+%% & \\[2pt]
  
 \expcasind{(\explft{L}{B})}{x}{M}{y}{N}
 & \expshr{x}{L}{M}                             
@@ -555,14 +560,21 @@ $\longrightarrow^*$.
 & \expshr{y}{L}{N}                             
 & \\[2pt]
 
-\expcasind{(\expshr{z}{K}{L})}{x}{M}{y}{N}
+%% \expcasind{(\expshr{z}{K}{L})}{x}{M}{y}{N}
+%% & \expshrind{z}{K}{(\expcas{L}{x}{M}{y}{N})}       
+%% & \cnd{z \notin \fv{M}\ \wedge \\ \ \ \ \ z \notin \fv{N}}  \\[2pt]
  
-& \expshrind{z}{K}{(\expcas{L}{x}{M}{y}{N})}       
-& \cnd{z \notin \fv{M}\ \wedge \\ \ \ \ \ z \notin \fv{N}}  \\[2pt]
- 
-\expcasindind{(\expcasind{L}{x}{M}{y}{N})}{s}{P}{t}{Q} 
-& \expcasindind{L}{x}{(\expcas{M}{s}{P}{t}{Q})}{y}{(\expcas{N}{s}{P}{t}{Q})} 
-& \\[2pt]
+%% \expcasindind{(\expcasind{L}{x}{M}{y}{N})}{s}{P}{t}{Q} 
+%% & \expcasindind{L}{x}{(\expcas{M}{s}{P}{t}{Q})}{y}{(\expcas{N}{s}{P}{t}{Q})} 
+%% & \\[2pt]
+
+F[\expcasind{L}{x}{M}{y}{N}]
+& \expcasind{L}{x}{F[M]}{y}{F[N]}
+& \cnd{x \notin \fv{F}\ \wedge \\ \ \ \ \ y \notin \fv{F}}  \\[2pt]
+
+F[\expshr{x}{L}{M}]
+& \expshr{x}{L}{F[M]} 
+& \cnd{x \notin \fv{F}} \\[2pt]
 
 \end{array}
 \]
@@ -572,19 +584,18 @@ $\longrightarrow^*$.
 
 \begin{definition}[Normal Form]\ \\
 An expression $M$ is in normal form, denoted as $Norm(M)$, if and only
-if, does not exist an expression $N$ such that $M \longrightarrow
-N$.
+if, does not exist an expression $N$ such that $\reduce{M}{l}{N}$.
 \end{definition}
 
 \begin{theorem}[Preservation]\ \\
 Reduction preserves the type of the source expression:
  
- if $\env \vdash \typing{M}{A}$ and $M \longrightarrow N$, then 
+ if $\env \vdash \typing{M}{A}$ and $\reduce{M}{l}{N}$, then 
 $\env \vdash \typing{N}{A}$.
 \end{theorem}
 
 \begin{theorem}[Subformula Property]\ \\
-If $\Gamma \vdash \typing{M}{A}$, $\reduce{M}{N}$, and $Norm(N)$;
+If $\Gamma \vdash \typing{M}{A}$, $\reducestar{M}{l}{N}$, and $Norm(N)$;
 then for every expression $L$ in the set of subexpressions of $N$ such
 that $\Delta \vdash \typing{L}{C}$, $C$ is in the set of subterms of
 the type $A$, or in the set of subterms of all types in the
