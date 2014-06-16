@@ -12,6 +12,8 @@
 \usepackage{pbox}
 \usepackage{tabularx}
 \usepackage{amsthm}
+\usepackage{enumerate}
+
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
  
@@ -153,7 +155,7 @@ functions and built-in types.
 \section*{Step I -- No Polymorphism}
 Variables are distinct set of names. Metavariables $x$, $y$, and $z$
 range over variables. Wherever variables are used, renaming of bound
-variables is allowed ; presentations are valid up to renamings.  
+variables is allowed; presentations are valid up to renamings.  
 
 Types are \textbf{closed} terms defined by the abstract syntax in
 Figure~\ref{fig:typ}.
@@ -161,7 +163,7 @@ Figure~\ref{fig:typ}.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-A,B,C & \mathbin{\ ::=\ } 
+A,B,C,D & \mathbin{\ ::=\ } 
 %% & \tp{\typvar{X}}        & \textrm{variable}     \\
 %% & \ |\ \ 
          & \typunt       & \textrm{unit}         \\
@@ -174,7 +176,7 @@ A,B,C & \mathbin{\ ::=\ }
 \label{fig:typ}
 \end{figure*}
 
-Metavariables $A$, $B$, and $C$ range over types. Types correspond to
+Metavariables $A$, $B$, $C$, and $D$ range over types. Types correspond to
 formule in minimal propositional logic.
 
 %% and we restrict them to occure strictly
@@ -230,7 +232,7 @@ Capture-free subsititution is defined as usual and it is denoted
 as $\sbs{N}{x}{M}$ for subtitution of the expression $M$ for the
 variable $x$ in the expression $N$. Set of free variables in an
 expression is calculated as usual and it is denote as $\fv{N}$ for set
-of free variables in $N$. Moreover, notion $count(x,N)$ is used to
+of free variables in $N$. Moreover, notation $count(x,N)$ is used to
 denote a metafunction returning the number of times the free variable
 $x$ is used in the term $N$.
 % We follow Barendregt convension such that we assume variables in a
@@ -359,7 +361,7 @@ the inference rules in Figure~\ref{fig:typing}.
 
 Typing rules are syntax-directed and algorithmic. The consistency of
 the type system can be established by its correspondence (under
-Curry-Howard) to minimal logic.\\
+Curry-Howard) to minimal logic. The correspondece is made evident by using colored fonts in typing rules; removing the red bits (i.e. expressions) from the typing rules yields the corresponding logical inference rules.\\
 
 Values are expressions that do not compute and they are identified by
 the predicate defined in Figure~\ref{fig:val}.
@@ -496,6 +498,7 @@ G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\
 \end{figure*} 
 
 \begin{proposition}[Confluency of Rewrite Rules]\ \\
+\label{prop_confluency}
 The rewrite rules in Figure~\ref{fig:red} form a confluent rewrite theory.
 \end{proposition}
 
@@ -505,6 +508,7 @@ if, does not exist an expression $N$ such that $\reduce{M}{}{N}$.
 \end{definition}
 
 \begin{proposition}[Normal Form Syntax]\ \\
+\label{prop_normal}
 An expression $M$ is in normal form, if and only if, it follows the
 grammer in Figure~\ref{fig:nf}, by the entry $P$.
 \end{proposition}
@@ -527,6 +531,7 @@ grammer in Figure~\ref{fig:nf}, by the entry $P$.
 \end{figure*} 
 
 \begin{proposition}[Preservation]\ \\
+\label{prop_preservation}
 One-step reduction preserves the type of the source expression:
  
  if $\env \vdash \typing{M}{A}$ and $\reduce{M}{}{N}$, then 
@@ -580,7 +585,117 @@ By structural induction on $R$, we have the following cases:
 
 \end{proof}
 
+\begin{lemma}\ \\
+\label{sub_V}
+For a normal value $V$ and environment $\Gamma$, if $\Gamma \vdash \typing{V}{A}$,
+then for every expression $V_i$ in the set of subexpressions of $V$ such
+that $\Delta \vdash \typing{V_i}{A_i}$, $A_i$ is in the set of subformulae of
+the type $A$, or in the set of subformulae of types in the
+environment $\Gamma$.
+\end{lemma}
+\begin{proof}
+By structural induction on $V$, we have the following cases:
+\begin{description}
+\item[Case ($\expvar{x}$):]\ \\ 
+  The corresponding typing derivation concludes the result. 
+\item[Case ($\expabs{x}{A}{Q}$):]\ \\ 
+  By the corresponding typing derivation and lemma \ref{sub_P}, we
+  have for every $A_i$ (type of the subexpression $Q_i$ in $Q$), that
+  $A_i \in \subformulae{(\typenvcon{x}{A})}$, or $A_i \in
+  \subformulae{B}$, where $\typarr{A}{B}$ is type of the whole
+  expression. Since for every type $C$, we have
+  \begin{enumerate}[(a)] 
+     \item $(C \in \subformulae{A}) \vee (C \in \subformulae{B})$ implies $C \in \subformulae{\typarr{A}{B}}$
+     \item $C \in \subformulae{(\typenvcon{x}{A})}$ implies $(C \in \subformulae{\Gamma}) \vee (C \in \subformulae{A})$
+  \end{enumerate}
+  it concludes the result.
+\item[Case ($\expunt$):]\ \\ 
+  The corresponding typing derivation concludes the result. 
+\item[Case ($\expprd{V}{W}$):]\ \\ 
+  By the corresponding typing derivation and lemma \ref{sub_V}
+  (i.e. the induction hypothesis), we have for every $A_i$ (type of
+  the subexpression $V_i$ in $V$), that $A_i \in
+  \subformulae{\Gamma}$, or $A_i \in \subformulae{A}$,
+  where $\typprd{A}{B}$ is type of the whole expression. We also have
+  for every $B_i$ (type of the subexpression $W_i$ in $W$), that $B_i \in
+  \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$.
+  Since for every type $C$, we have
+  \begin{enumerate}[(a)] 
+     \item $C \in \subformulae{A}$ implies $C \in \subformulae{\typprd{A}{B}}$
+     \item $C \in \subformulae{B}$ implies $C \in \subformulae{\typprd{A}{B}}$
+  \end{enumerate}
+  it concludes the result.
+\item[Case ($\explft{V}{B}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_V}
+  (i.e. the induction hypothesis), we have for every $A_i$ (type of
+  the subexpression $V_i$ in $V$), that $A_i \in
+  \subformulae{\Gamma}$, or $A_i \in \subformulae{A}$,
+  where $\typsum{A}{B}$ is type of the whole expression.
+  Since for every type $C$, we have
+  \begin{enumerate}[(a)] 
+     \item $C \in \subformulae{A}$ implies $C \in \subformulae{\typsum{A}{B}}$
+  \end{enumerate}
+  it concludes the result. 
+\item[Case ($\exprgt{A}{W}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_V}
+  (i.e. the induction hypothesis), we have for every $B_i$ (type of
+  the subexpression $W_i$ in $W$), that $B_i \in
+  \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$,
+  where $\typsum{A}{B}$ is type of the whole expression.
+  Since for every type $C$, we have
+  \begin{enumerate}[(a)] 
+     \item $C \in \subformulae{B}$ implies $C \in \subformulae{\typsum{A}{B}}$
+  \end{enumerate}
+  it concludes the result.
+\end{description}
+\end{proof}
+
+\begin{lemma}\ \\
+\label{sub_P}
+For a normal form $P$ and environment $\Gamma$, if $\Gamma \vdash \typing{P}{A}$,
+then for every expression $P_i$ in the set of subexpressions of $P$ such
+that $\Delta \vdash \typing{P_i}{A_i}$, $A_i$ is in the set of subformulae of
+the type $A$, or in the set of subformulae of types in the
+environment $\Gamma$.
+\end{lemma}
+\begin{proof}
+By structural induction on $P$, we have the following cases:
+\begin{description}
+\item[Case ($V$):]\ \\
+  Lemma \ref{sub_V} concludes the result.
+\item[Case ($R$):]\ \\
+  Lemma \ref{sub_R} concludes the result.
+\item[Case ($\expcas{S}{x}{P}{y}{Q}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_S}, we
+  have $\typsum{A}{B} \in \subformulae{\Gamma}$. We also have,
+  together with lemma \ref{sub_P} (i.e. the induction hypothesis), for
+  every $A_i$ (type of the subexpression $P_i$ in $P$), that $A_i \in
+  \subformulae{\typenvcon{x}{A}}$, or $A_i \in \subformulae{C}$, where
+  $C$ is type of the whole expression. Moreover, we have, together
+  with lemma \ref{sub_P} (i.e. the induction hypothesis), for every
+  $B_i$ (type of the subexpression $Q_i$ in $Q$), that $B_i \in
+  \subformulae{\typenvcon{x}{B}}$, or $B_i \in \subformulae{C}$.
+  Since for every type $D$, we have
+  \begin{enumerate}[(a)] 
+     \item $D \in \subformulae{\typsum{A}{B}}$ implies $(D \in \subformulae{A}) \vee (D \in \subformulae{B})$
+     \item $D \in \subformulae{\typenvcon{x}{A}}$ implies $(D \in \subformulae{\Gamma}) \vee (D \in \subformulae{A})$\\ (for every variable $x$ and type $A$) 
+  \end{enumerate}
+  it concludes the result. 
+\item[Case ($\expshr{x}{R}{Q}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_R}, we
+  have $A \in \subformulae{\Gamma}$, where $A$ is type of $R$. We also have, together with lemma \ref{sub_P} (i.e. the induction hypothesis), for
+  every $B_i$ (type of the subexpression $Q_i$ in $Q$), that $B_i \in
+  \subformulae{\typenvcon{x}{A}}$, or $B_i \in \subformulae{B}$, where
+  $B$ is type of the whole expression. Since for every type $C$, we have
+  \begin{enumerate}[(a)] 
+     \item $C \in \subformulae{\typenvcon{x}{A}}$ implies $(C \in \subformulae{\Gamma}) \vee (C \in \subformulae{A})$
+  \end{enumerate}
+  it concludes the result.
+\end{description}
+\end{proof}
+
 \begin{proposition}[Subformula Property]\ \\
+\label{prop_subformula}
 If $\Gamma \vdash \typing{M}{A}$, $\reducestar{M}{}{N}$, and $Norm(N)$;
 then for every expression $L$ in the set of subexpressions of $N$ such
 that $\Delta \vdash \typing{L}{C}$, $C$ is in the set of subterms of
@@ -588,7 +703,7 @@ the type $A$, or in the set of subterms of all types in the
 environment $\Gamma$.
 \end{proposition}
 \begin{proof}
-Proof is done by mutual induction on the normal forms.
+Proof is done by using proposition \ref{prop_preservation}, propostion \ref{prop_normal}, and lemma \ref{sub_P}.
 \end{proof}
  
 \end{document}
