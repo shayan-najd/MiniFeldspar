@@ -165,7 +165,7 @@ Figure~\ref{fig:typ}.
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{llll}
-A,B,C,D & \mathbin{\ ::=\ } 
+A,B,C & \mathbin{\ ::=\ } 
 %% & \tp{\typvar{X}}        & \textrm{variable}     \\
 %% & \ |\ \ 
          & \typunt       & \textrm{unit}         \\
@@ -178,7 +178,7 @@ A,B,C,D & \mathbin{\ ::=\ }
 \label{fig:typ}
 \end{figure*}
 
-Metavariables $A$, $B$, $C$, and $D$ range over types. Types
+Metavariables $A$, $B$, and $C$ range over types. Types
 correspond to formule in minimal propositional logic. 
 %% and we restrict them to occure strictly
 %% positive:
@@ -712,10 +712,11 @@ by structural induction on the expression, we have the following cases:
   with lemma~\ref{sub_P} (i.e. the induction hypothesis), for every
   $B_i$ (type of the subexpression $Q_i$ in $Q$), that $B_i \in
   \subformulae{\typenvcon{x}{B}}$, or $B_i \in \subformulae{C}$.
-  Since, by the definition of $\subformulae{}$, for every type $D$, we have
+  Since, by the definition of $\subformulae{}$, we have
   \begin{enumerate}[(a)] 
-     \item $D \in \subformulae{\typsum{A}{B}}$ implies $(D \in \subformulae{A})$, $(D \in \subformulae{B})$, or $(D \in \{A,B\}$, and
-     \item $D \in \subformulae{\typenvcon{x}{A}}$ implies $(D \in \subformulae{\Gamma})$ or $(D \in \subformulae{A})$\\ (for every variable $x$ and type $A$); 
+     \item $\typsum{A}{B} \in \subformulae{\Gamma}$ implies $(A \in \subformulae{\Gamma})$ and $(B \in \subformulae{\Gamma})$,
+     \item $A_i \in \subformulae{\typenvcon{x}{A}}$ implies $(A_i \in \subformulae{\Gamma})$ or $(A_i \in \subformulae{A})$, and
+     \item $B_i \in \subformulae{\typenvcon{x}{B}}$ implies $(B_i \in \subformulae{\Gamma})$ or $(B_i \in \subformulae{B})$; 
   \end{enumerate}
   it concludes the result. 
 \item[Case ($\expshr{x}{R}{Q}$):]\ \\
@@ -726,7 +727,7 @@ by structural induction on the expression, we have the following cases:
   $Q$), that $B_i \in \subformulae{\typenvcon{x}{A}}$, or $B_i \in
   \subformulae{B}$, where $B$ is type of the whole expression. Since, by the defition of $\subformulae{}$, we have
   \begin{enumerate}[(a)] 
-     \item $B_i \in \subformulae{\typenvcon{x}{A}}$ implies $(B_i \in \subformulae{\Gamma})$ or $(C \in \subformulae{A})$,
+     \item $B_i \in \subformulae{\typenvcon{x}{A}}$ implies $(B_i \in \subformulae{\Gamma})$ or $(B_i \in \subformulae{A})$,
   \end{enumerate}
   it concludes the result.
 \end{description}
