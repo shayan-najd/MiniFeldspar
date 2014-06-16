@@ -11,6 +11,7 @@
 \usepackage{titling}
 \usepackage{pbox}
 \usepackage{tabularx}
+\usepackage{amsthm}
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
  
@@ -109,10 +110,12 @@
 \newcommand{\sbs}[3]{#1[#2:=#3]}
 \newcommand{\fv}[1]{\txt{FV}\,(#1)}
 \newcommand{\txt}[1]{\text{\emph{#1}}}
-\newcommand{\reduce}[3]{#1 \overset{#2}\longrightarrow #3} 
-\newcommand{\reducestar}[3]{#1 \overset{#2}\longrightarrow^* #3} 
+\newcommand{\rewrite}[3]{#1 \overset{#2}\mapsto #3} 
+\newcommand{\reduce}[3]{#1 \overset{#2}\rightarrow #3} 
+\newcommand{\reducestar}[3]{#1 \overset{#2}\twoheadrightarrow #3} 
 \newcommand{\valuep}[1]{\txt{Value}\,(#1)}
 \newcommand{\cnd}[1]{\begin{array}[t]{@{}l@{}}\txt{if}\ #1\end{array}}
+\newcommand{\subformulae}[1]{\txt{subformulae}\,(#1)}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \setlength{\belowcaptionskip}{0pt}
 \setlength{\abovecaptionskip}{0pt}
@@ -422,24 +425,16 @@ the predicate defined in Figure~\ref{fig:val}.
 \caption{Values}
 \label{fig:val}
 \end{figure*}
-
-\subsection*{Call-By-Need}
   
-%% Evaluation frames are defined by the abstract syntax in Figure~\ref{fig:evlfrm}.
-
-%% \begin{figure*}
-%% \[\uncolored
-%% F \mathbin{\ ::=\ } \expapp{\hole}{M}\ |\ \expshr{x}{\hole}{N}\ |\ \expfst{\hole}\ |\ \expsnd{\hole}\ |\ \expcas{\hole}{x}{M}{y}{N}
-%% \]
-%% \caption{Evaluation Frame}
-%% \label{fig:evlfrm}
-%% \end{figure*}
-
-Call-by-need reduction rules, denoted by $\reduce{}{l}{}$ infix
-operator, are defined in Figure~\ref{fig:red}. Reflexive transivtive
-closure of the reduction relation $\reduce{}{l}{}$ is denoted as
-$\reducestar{}{l}{}$.
-   
+Operational semantics is defined in Figure~\ref{fig:red}. The rewrite
+rules are denoted as $\rewrite{}{}{}$. One-step reduction relaion,
+denoted as $\reduce{}{}{}$, is compatible closure of rewrite
+rules. Reduction relation, denoted as $\reducestar{}{}{}$, is
+reflexive transitive closure of the one-step reduction relation. The
+metavariables $F$ and $G$ denote capture-allowing evaluation frames,
+used in rewrite rules. The metafunctions defined for expressions carry
+over to evaluation frames trivially.
+    
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}{@{}l@{}}
@@ -447,7 +442,8 @@ F \mathbin{\ ::=\ } \expapp{\hole}{M}\ |\ \expshr{x}{\hole}{N}\ |\ \expfst{\hole
 \\[2pt]
 G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\ \expprd{M}{\hole},\ \txt{if}\ \valuep{M}
 \\[2pt]
-\begin{array}[t]{@{}ll@{\ \reduce{}{l}{}\ \ }ll@{}} 
+
+\begin{array}[t]{@{}ll@{\ \rewrite{}{}{}\ \ }ll@{}} 
 (let_{\rightarrow})  
 & \expapp{(\expabs{x}{A}{N})}{M} 
 & \expshr{x}{M}{N} 
@@ -505,7 +501,7 @@ The rewrite rules in Figure~\ref{fig:red} form a confluent rewrite theory.
 
 \begin{definition}[Normal Form]\ \\
 An expression $M$ is in normal form, denoted as $Norm(M)$, if and only
-if, does not exist an expression $N$ such that $\reduce{M}{l}{N}$.
+if, does not exist an expression $N$ such that $\reduce{M}{}{N}$.
 \end{definition}
 
 \begin{proposition}[Normal Form Syntax]\ \\
@@ -515,15 +511,15 @@ grammer in Figure~\ref{fig:nf}, by the entry $P$.
  
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}[t]{lll} 
-S   & \mathbin{\ ::=\ } & \expvar{x}\ |\ R
+\begin{array}[t]{llll} 
+(\txt{Neutral Forms}) & S & \mathbin{\ ::=\ } & \expvar{x}\ |\ R
 \\
-R   & \mathbin{\ ::=\ } & \expapp{S}{P}\ |\ \expfst{S}\ |\ \expsnd{S}
+(\txt{Non-Value Neutral Forms}) & R & \mathbin{\ ::=\ } & \expapp{S}{P}\ |\ \expfst{S}\ |\ \expsnd{S}
 \\
-V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{Q}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
+(\txt{Normal Values}) & V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{Q}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
 \\
-P,Q & \mathbin{\ ::=\ } & V\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
-& \ | & \expshr{x}{R}{Q},\ \txt{if}\ count(x,Q)\geq2
+(\txt{Normal Forms}) & P,Q & \mathbin{\ ::=\ } & V\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
+& & \ | & \expshr{x}{R}{Q},\ \txt{if}\ count(x,Q)\geq2
 \end{array}
 \] 
 \caption{Normal Forms}
@@ -531,18 +527,68 @@ P,Q & \mathbin{\ ::=\ } & V\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
 \end{figure*} 
 
 \begin{proposition}[Preservation]\ \\
-Reduction preserves the type of the source expression:
+One-step reduction preserves the type of the source expression:
  
- if $\env \vdash \typing{M}{A}$ and $\reduce{M}{l}{N}$, then 
+ if $\env \vdash \typing{M}{A}$ and $\reduce{M}{}{N}$, then 
 $\env \vdash \typing{N}{A}$.
 \end{proposition}
 
+\begin{lemma}\ \\
+\label{sub_S}
+Type of an expression of neutral form, i.e. syntactic category $S$, is in the set of subformulae of types in the environment:
+ 
+ if $\env \vdash \typing{S}{A}$, then $A \in \subformulae{\env}$.
+\end{lemma}
+
+\begin{proof}\ \\
+By structural induction on $S$, we have the following cases:
+\begin{description}
+\item[Case ($\expvar{x}$):]\ \\ 
+  The corresponding typing derivation concludes the result.
+\item[Case ($R$):]\ \\
+  Lemma \ref{sub_R} concludes the result.   
+\end{description}
+
+\end{proof}
+
+\begin{lemma}\ \\
+\label{sub_R}
+Type of an expression of non-value neutral form, i.e. syntactic category $R$, is in the set of subformulae of types in the environment:
+ 
+ if $\env \vdash \typing{R}{A}$, then $A \in \subformulae{\env}$.
+\end{lemma}
+
+\begin{proof}\ \\
+By structural induction on $R$, we have the following cases:
+\begin{description}
+\item[Case ($\expapp{S}{P}$):]\ \\ 
+  By the corresponding typing derivation and lemma \ref{sub_S}, we
+  have $\typarr{A}{B} \in \subformulae{\Gamma}$, where $\typarr{A}{B}$
+  is type of $S$ and $B$ type of the whole expression. Since $B \in
+  \subformulae{\typarr{A}{B}}$, it concludes the result.
+\item[Case ($\expfst{S}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_S}, we
+  have $\typprd{A}{B} \in \subformulae{\Gamma}$, where $\typprd{A}{B}$
+  is type of $S$ and $A$ type of the whole expression. Since $A \in
+  \subformulae{\typprd{A}{B}}$, it concludes the result.
+\item[Case ($\expsnd{S}$):]\ \\
+  By the corresponding typing derivation and lemma \ref{sub_S}, we
+  have $\typprd{A}{B} \in \subformulae{\Gamma}$, where $\typprd{A}{B}$
+  is type of $S$ and $B$ type of the whole expression. Since $B \in
+  \subformulae{\typprd{A}{B}}$, it concludes the result.
+\end{description}
+
+\end{proof}
+
 \begin{proposition}[Subformula Property]\ \\
-If $\Gamma \vdash \typing{M}{A}$, $\reducestar{M}{l}{N}$, and $Norm(N)$;
+If $\Gamma \vdash \typing{M}{A}$, $\reducestar{M}{}{N}$, and $Norm(N)$;
 then for every expression $L$ in the set of subexpressions of $N$ such
 that $\Delta \vdash \typing{L}{C}$, $C$ is in the set of subterms of
 the type $A$, or in the set of subterms of all types in the
 environment $\Gamma$.
 \end{proposition}
+\begin{proof}
+Proof is done by mutual induction on the normal forms.
+\end{proof}
  
 \end{document}
