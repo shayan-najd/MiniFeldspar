@@ -73,6 +73,7 @@
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{scheme}[theorem]{Proposition Scheme}
 \newtheorem{definition}{Definition}
 \newcommand{\hole}{[\ ]}
 \newcommand{\intro}{\mathcal{I}}
@@ -131,6 +132,10 @@
 \setlength{\evensidemargin}{0pt}
 %%\setlength{\marginparsep}{0pt}
 %%\setlength{\marginparwidth}{0pt}
+
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
 
 \begin{document}
 \title{Modular Lazy Normalisation}
@@ -559,7 +564,7 @@ subformulae of types in the environment:
  if $\env \vdash \typing{S}{A}$, then $A \in \subformulae{\Gamma}$.
 \end{lemma}
 
-\begin{proof}\ \\
+\begin{proof}
 Provided an expression of neutral form and environment $\Gamma$,
 by structural induction on the expression, we have the following cases:
 \begin{description}
@@ -580,7 +585,7 @@ of subformulae of types in the environment:
  if $\Gamma \vdash \typing{R}{A}$, then $A \in \subformulae{\Gamma}$.
 \end{lemma}
 
-\begin{proof}\ \\
+\begin{proof}
 Provided an expression of non-value neutral form and environment
 $\Gamma$, by structural induction on the expression, we have the following cases:
 \begin{description}
@@ -735,14 +740,68 @@ by structural induction on the expression, we have the following cases:
 
 \begin{proposition}[Subformula Property]\ \\
 \label{prop_subformula}
-If $\Gamma \vdash \typing{M}{A}$, $\reducestar{M}{}{N}$, and $\norm{N}$;
-then for every expression $L$ in the set of subexpressions of $N$ such
-that $\Delta \vdash \typing{L}{C}$, $C$ is in the set of subformulae of
+If $\Gamma \vdash \typing{N}{A}$, $\reducestar{N}{}{Q}$, and $\norm{Q}$;
+then for every expression $Q_i$ in the set of subexpressions of $Q$ such
+that $\Delta \vdash \typing{Q}{A_i}$, $A_i$ is in the set of subformulae of
 the type $A$, or in the set of subformulae of all types in the
 environment $\Gamma$.
 \end{proposition}
 \begin{proof}
-Proof is done by using proposition~\ref{prop_preservation}, propostion~\ref{prop_normal}, and lemma~\ref{sub_P}.
+Proof is done by using proposition~\ref{prop_preservation},
+propostion~\ref{prop_normal}, and lemma~\ref{sub_P}.
 \end{proof}
+
+So far, we have proven the subformula property for the calculus;
+however, we require some stronger properties in practice. For
+instance, consider the situation where normalised terms in our
+higher-order language is compiled to terms of a first-order
+language. In such a scenario, we would like to provide a form of
+gaurantee at compile-time, indicating absence of lambda abstractions
+in a normalised term. Therefore, we start by formulating the following
+proposition scheme, parameterised over a predicate on the typing
+environment.
+
+\begin{scheme}[$\Phi-$Strong Subformula Property]\ \\
+\label{sub_scheme}
+Provided the predicate $\Phi(.)$, expression $N$, and environment
+$\Gamma$ such that $\Phi(\Gamma)$; if $\Gamma \vdash \typing{N}{A}$,
+$\reducestar{N}{}{Q}$, and $\norm{Q}$; then for every expression $Q_i$
+in the set of subexpressions of $Q$ such that $\Delta \vdash
+\typing{Q_i}{A_i}$, $A_i$ is in the set of subformulae of the type
+$A$.
+\end{scheme}
+
+Now, we start with a simple predicate to only allow closed expressions.
+ 
+\begin{proposition}[Nil$-$Strong Subformula Property]\ \\
+Having $\Phi(.)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
+proposition~scheme~\ref{sub_scheme} holds.
+\end{proposition}
+\begin{proof}
+The proposition~\ref{prop_subformula} concludes the proof.
+\end{proof}
+
+\textbf{Warning: the remaning is only a sketch, possibly non-sense!}
+
+\begin{definition}[Rank$_n$]\ \\
+Rank$_n$ type is a type that only allows each type constructor inside
+it to be nested inside itself no more than $n - 1$ times. Similarly,
+rank$_{n}^{\,\circledast}$ type is a type, inside which nesting of the
+type constructor $\circledast$ is restricted to maximum $n - 1$ times.
+For example, rank$_{0}^{\,\typarr{}{}}$ type is a type that does not have
+function type $\typarr{}{}$ anywhere inside it.
+\end{definition}
+
+\begin{proposition}[Rank$_{1}-$Strong Subformula Property]\ \\
+Having $\Phi(\Gamma)$ instantiated to the following statement, the
+proposition~scheme~\ref{sub_scheme} holds:
+ 
+ forall type $A_i$ in $\Gamma$, $A_i$ is of rank$_{1}$.
+ 
+\end{proposition}
+\begin{proof}
+To be investigated...
+\end{proof}
+
  
 \end{document}
