@@ -119,6 +119,7 @@
 \newcommand{\valuep}[1]{\txt{Value}\,(#1)}
 \newcommand{\cnd}[1]{\begin{array}[t]{@{}l@{}}\txt{if}\ #1\end{array}}
 \newcommand{\subformulae}[1]{\txt{Subformulae}\,(#1)}
+\newcommand{\psubformulae}[1]{\txt{ProperSubformulae}\,(#1)}
 \newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
 \newcommand{\norm}[1]{\txt{Norm}\,(#1)}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -148,8 +149,8 @@ algorithm.
 The normalisation algorithm takes as input an expression and returns a
 ``semantically equivalent'' expression in ``normal form''. In
 particular, we are interested in a normal form where all
-$\beta$-redexes, and $\delta$-redexes corresponding to data
-desctructors are eliminated.
+$\beta$-redexes, including the ones related to data destructors, are
+eliminated.
 
 Normalisation algorithm is ``lazy'' in the sense that elimination of
 redexes does not duplicate expressions; it preserves sharing.
@@ -373,70 +374,83 @@ using colored fonts in typing rules; removing the red bits
 (i.e. expressions) from the typing rules yields the corresponding
 logical inference rules.\\
 
-Values are expressions that do not compute and they are identified by
-the predicate defined in Figure~\ref{fig:val}.
+Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
 
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}{lll}
-
-\fbox{$\valuep{N}$}
-\\~\\
-\inference
-{}
-{variable}
-{
-  \valuep{\expvar{x}}
-}
-&
-\inference
-{}
-{unit}
-{
-  \valuep{\expunt}
-}
-&
-\inference
-{
-}
-{abstraction}
-{
-  \valuep{\expabs{x}{A}{N}}
-}
-\\~\\
-\inference
-{
-  \valuep{M} 
-  &
-  \valuep{N} 
-}
-{product}
-{
-  \valuep{\expprd{M}{N}}
-}
-&
-\inference
-{ 
-  \valuep{M} 
-}
-{injection-left}
-{
-  \valuep{\explft{M}{B}}
-}
-&
-\inference
-{ 
-  \valuep{N} 
-}
-{injection-right}
-{
-  \valuep{\exprgt{A}{N}}
-}
+\begin{array}[t]{lll} 
+V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{W}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
 \end{array}
-\]
+\] 
 \caption{Values}
 \label{fig:val}
-\end{figure*}
+\end{figure*} 
+
+The metavariables $V$, and $W$ range over values. The notation
+$\valuep(N)$ is used to denote a predicate indicating whether the
+expression $N$ is a value.
+
+%% \begin{figure*}[h]
+%% \[\uncolored
+%% \begin{array}{lll}
+
+%% \fbox{$\valuep{N}$}
+%% \\~\\
+%% \inference
+%% {}
+%% {variable}
+%% {
+%%   \valuep{\expvar{x}}
+%% }
+%% &
+%% \inference
+%% {}
+%% {unit}
+%% {
+%%   \valuep{\expunt}
+%% }
+%% &
+%% \inference
+%% {
+%% }
+%% {abstraction}
+%% {
+%%   \valuep{\expabs{x}{A}{N}}
+%% }
+%% \\~\\
+%% \inference
+%% {
+%%   \valuep{M} 
+%%   &
+%%   \valuep{N} 
+%% }
+%% {product}
+%% {
+%%   \valuep{\expprd{M}{N}}
+%% }
+%% &
+%% \inference
+%% { 
+%%   \valuep{M} 
+%% }
+%% {injection-left}
+%% {
+%%   \valuep{\explft{M}{B}}
+%% }
+%% &
+%% \inference
+%% { 
+%%   \valuep{N} 
+%% }
+%% {injection-right}
+%% {
+%%   \valuep{\exprgt{A}{N}}
+%% }
+%% \end{array}
+%% \]
+%% \caption{Values}
+%% \label{fig:val}
+%% \end{figure*}
   
 Operational semantics is defined in Figure~\ref{fig:red}. The rewrite
 rules are denoted as $\rewrite{}{}{}$. One-step reduction relaion,
@@ -452,7 +466,7 @@ over to evaluation frames trivially.
 \begin{array}{@{}l@{}}
 F \mathbin{\ ::=\ } \expapp{\hole}{M}\ |\ \expshr{x}{\hole}{N}\ |\ \expfst{\hole}\ |\ \expsnd{\hole}\ |\ \expcas{\hole}{x}{M}{y}{N}
 \\[2pt]
-G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\ \expprd{M}{\hole},\ \txt{if}\ \valuep{M}
+G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\ \expprd{V}{\hole} %% ,\ \txt{if}\ \valuep{M}
 \\[2pt]
 
 \begin{array}[t]{@{}ll@{\ \rewrite{}{}{}\ \ }ll@{}} 
@@ -466,37 +480,42 @@ G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\
 & \expshr{x}{M}{G[x]}
 & \cnd{x\ \txt{is\ fresh}}\\[0pt]
 
-(\delta_{\times_1})  
-& \expfst{\expprd{M}{N}} 
-& M
+(\beta_{\times_1})  
+& \expfst{\expprd{V}{W}} 
+& V
 & \\[0pt]
 
-(\delta_{\times_2})  
-& \expsnd{\expprd{M}{N}} 
-& N                                               
+(\beta_{\times_2})  
+& \expsnd{\expprd{V}{W}} 
+& W                                               
 & \\[0pt]
 
-(\delta_{+_1}) 
-& \expcasind{(\explft{L}{B})}{x}{M}{y}{N}
-& \expshr{x}{L}{M}                             
+(\beta_{+_1}) 
+& \expcasind{(\explft{V}{B})}{x}{M}{y}{N}
+& \sbs{M}{x}{V} 
 & \\[0pt]
 
-(\delta_{+_2})  
-& \expcasind{(\exprgt{A}{L})}{x}{M}{y}{N}
-& \expshr{y}{L}{N}                             
+(\beta_{+_2})  
+& \expcasind{(\exprgt{A}{W})}{x}{M}{y}{N}
+& \sbs{N}{y}{W}
 & \\[0pt]
 
-(\beta/\eta_{let}) 
+(\beta_{let}) 
+& \expshr{x}{V}{N}
+& \sbs{N}{x}{V}  
+& \\[0pt]
+
+(need) 
 & \expshr{x}{M}{N}
 & \sbs{N}{x}{M}  
-& \cnd{Count(x,N) < 2,\ or\\\ \ \ \valuep{M}}\\[0pt]
+& \cnd{Count(x,N) < 2,\ and\\\ \ \ \neg\valuep{M}}\\[0pt]
 
-(\Uparrow_{case})
+(\kappa_{case})
 & F[\expcasind{L}{x}{M}{y}{N}]
 & \expcasind{L}{x}{F[M]}{y}{F[N]}
 & \cnd{x \notin \fv{F},\ and\\\ \ \ y \notin \fv{F}}  \\[0pt]
 
-(\Uparrow_{let})
+(\kappa_{let})
 & F[\expshr{x}{L}{M}]
 & \expshr{x}{L}{F[M]} 
 & \cnd{x \notin \fv{F}} \\[0pt]
@@ -530,10 +549,10 @@ abstract syntax in Figure~\ref{fig:nf}, by the entry $P$.
 \\
 (\txt{Non-Value Neutral Forms}) & R & \mathbin{\ ::=\ } & \expapp{S}{P}\ |\ \expfst{S}\ |\ \expsnd{S}
 \\
-(\txt{Value Normal Forms}) & V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{Q}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{Q}\ |\ \expunt\ |\ \expprd{T}{U}\ |\ \explft{T}{B}\ |\ \exprgt{A}{U}
 \\
-(\txt{Normal Forms}) & P,Q & \mathbin{\ ::=\ } & V\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
-& & \ | & \expshr{x}{R}{Q},\ \txt{if}\ count(x,Q)\geq2
+(\txt{Normal Forms}) & P,Q & \mathbin{\ ::=\ } & T\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
+& & \ | & \expshr{x}{R}{Q} %% ,\ \txt{if}\ count(x,Q)\geq2
 \end{array}
 \] 
 \caption{Normal Forms}
@@ -549,10 +568,19 @@ $\env \vdash \typing{N}{A}$.
 \end{proposition}
 
 \begin{definition}[Subterms]\ \\
-The set of subterms of a term is defined trivially based on its syntax. A term is not subterm of itself.
-Subterms of an expression term are called subexpressions of the expression term.
-Subterms of a type term are called subformula of the type term, denoted as $\subformulae$.  
-Union of subformulae of all types in a typing environment is also called subformulae of the environment, denoted as $\subformulae$.
+The set of subterms of a term is defined trivially based on its
+syntax. Subterms of an expression term are called subexpressions of
+the expression term.  Subterms of a type term are called subformula of
+the type term, denoted as $\subformulae{\_}$.  Union of subformulae of all
+types in a typing environment is also called subformulae of the
+environment, denoted as $\subformulae{\_}$.
+\end{definition}
+
+\begin{definition}[Proper Subterms]\ \\
+A set of subterms of a term that does not include the term itself is
+called the set of proper subterms. The set of proper subexpressions,
+and proper subformulae, denoted as $\psubformulae{\_}$, are defined
+in the same manner.
 \end{definition}
 
 \begin{lemma}\ \\
@@ -622,12 +650,12 @@ $\Gamma$, by structural induction on the expression, we have the following cases
 \begin{lemma}\ \\
 \label{sub_V}
 Provided an expression of value normal form, i.e. syntactic
-category $V$, type of each subrexpression inside the expression is
+category $T$, type of each subrexpression inside the expression is
 either in the set of subformulae of the type of the expression, or in
 the set of subformulae of types in the environment:
 
- if $\Gamma \vdash \typing{V}{A}$, then for every subexpression $V_i$
- in $V$, such that $\Delta \vdash \typing{V_i}{A_i}$, we have $A_i \in
+ if $\Gamma \vdash \typing{T}{A}$, then for every subexpression $T_i$
+ in $T$, such that $\Delta \vdash \typing{T_i}{A_i}$, we have $A_i \in
  \subformulae{A}$ or $A_i \in \subformulae{\Gamma}$. 
 \end{lemma}
 \begin{proof}
@@ -649,13 +677,13 @@ by structural induction on the expression, we have the following cases:
   it concludes the result.
 \item[Case ($\expunt$):]\ \\ 
   The corresponding typing derivation concludes the result. 
-\item[Case ($\expprd{V}{W}$):]\ \\ 
+\item[Case ($\expprd{T}{U}$):]\ \\ 
   By the corresponding typing derivation and lemma~\ref{sub_V}
   (i.e. the induction hypothesis), we have for every $A_i$ (type of
-  the subexpression $V_i$ in $V$), that $A_i \in
+  the subexpression $T_i$ in $T$), that $A_i \in
   \subformulae{\Gamma}$, or $A_i \in \subformulae{A}$, where
   $\typprd{A}{B}$ is type of the whole expression. We also have for
-  every $B_i$ (type of the subexpression $W_i$ in $W$), that $B_i \in
+  every $B_i$ (type of the subexpression $U_i$ in $U$), that $B_i \in
   \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$. Since, by the
   definition of $\subformulae{}$, we have
   \begin{enumerate}[(a)] 
@@ -663,10 +691,10 @@ by structural induction on the expression, we have the following cases:
      \item $B_i \in \subformulae{B}$ implies $B_i \in \subformulae{\typprd{A}{B}}$;
   \end{enumerate}
   it concludes the result.
-\item[Case ($\explft{V}{B}$):]\ \\
+\item[Case ($\explft{T}{B}$):]\ \\
   By the corresponding typing derivation and lemma~\ref{sub_V}
   (i.e. the induction hypothesis), we have for every $A_i$ (type of
-  the subexpression $V_i$ in $V$), that $A_i \in
+  the subexpression $T_i$ in $T$), that $A_i \in
   \subformulae{\Gamma}$, or $A_i \in \subformulae{A}$,
   where $\typsum{A}{B}$ is type of the whole expression.
   Since, by the definition of $\subformulae{}$, we have
@@ -674,10 +702,10 @@ by structural induction on the expression, we have the following cases:
      \item $A_i \in \subformulae{A}$ implies $A_i \in \subformulae{\typsum{A}{B}}$,
   \end{enumerate}
   it concludes the result. 
-\item[Case ($\exprgt{A}{W}$):]\ \\
+\item[Case ($\exprgt{A}{U}$):]\ \\
   By the corresponding typing derivation and lemma~\ref{sub_V}
   (i.e. the induction hypothesis), we have for every $B_i$ (type of
-  the subexpression $W_i$ in $W$), that $B_i \in
+  the subexpression $U_i$ in $U$), that $B_i \in
   \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$,
   where $\typsum{A}{B}$ is type of the whole expression.
   Since, by the definition of $\subformulae{}$, we have
@@ -703,7 +731,7 @@ of subformulae of types in the environment:
 Provided an expression of normal form and environment $\Gamma$,
 by structural induction on the expression, we have the following cases:
 \begin{description}
-\item[Case ($V$):]\ \\
+\item[Case ($T$):]\ \\
   Lemma~\ref{sub_V} concludes the result.
 \item[Case ($R$):]\ \\
   Lemma~\ref{sub_R} concludes the result.
