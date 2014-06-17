@@ -1,4 +1,4 @@
-\documentclass[11p,a4paper]{article}
+\documentclass[a4paper]{article}
 %%\usepackage{lua-visual-debug}
 \usepackage[round]{natbib}
 \usepackage{stmaryrd}
@@ -81,7 +81,8 @@
 
 %% Types
 \newcommand{\typvar}[1]{#1}
-\newcommand{\typunt}{\boldsymbol{\top}}
+\newcommand{\typzro}{\mathbf{0}}
+\newcommand{\typone}{\mathbf{1}}
 \newcommand{\typarr}[2]{#1\boldsymbol{\rightarrow}#2}
 \newcommand{\typprd}[2]{#1\boldsymbol{\times}#2}
 \newcommand{\typsum}[2]{#1\boldsymbol{+}#2}
@@ -89,7 +90,7 @@
 
 %% Expressions
 \newcommand{\expvar}[1]{#1}
-\newcommand{\expunt}{\boldsymbol{\top}}
+\newcommand{\expunt}{\boldsymbol{()}}
 \newcommand{\expabs}[3]{\boldsymbol{\lambda}\,#1\boldsymbol{\colon}#2\boldsymbol{.}\ #3}
 \newcommand{\expapp}[2]{#1\ #2}
 \newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
@@ -174,7 +175,7 @@ Figure~\ref{fig:typ}.
 A,B,C & \mathbin{\ ::=\ } 
 %% & \tp{\typvar{X}}        & \textrm{variable}     \\
 %% & \ |\ \ 
-         & \typunt       & \textrm{unit}         \\
+         & \typone       & \textrm{unit}         \\
 & \ |\ \ & \typarr{A}{B} & \textrm{abstraction}  \\
 & \ |\ \ & \typprd{A}{B} & \textrm{product}      \\
 & \ |\ \ & \typsum{A}{B} & \textrm{sum}       %% \\
@@ -267,9 +268,9 @@ the inference rules in Figure~\ref{fig:typing}.
 &
 \inference
 {}
-{\typunt}
+{\typone}
 {
-   \env \vdash \typing{\expunt}{\typunt}
+   \env \vdash \typing{\expunt}{\typone}
 }
 \\~\\
 \inference
@@ -387,7 +388,7 @@ V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{W}\ |\ \expunt\ |\ \exppr
 \end{figure*} 
 
 The metavariables $V$, and $W$ range over values. The notation
-$\valuep(N)$ is used to denote a predicate indicating whether the
+$\valuep{N}$ is used to denote a predicate indicating whether the
 expression $N$ is a value.
 
 %% \begin{figure*}[h]
@@ -791,7 +792,7 @@ environment.
 
 \begin{scheme}[$\Phi-$Strong Subformula Property]\ \\
 \label{sub_scheme}
-Provided the predicate $\Phi(.)$, expression $N$, and environment
+Provided the predicate $\Phi(\_)$, expression $N$, and environment
 $\Gamma$ such that $\Phi(\Gamma)$; if $\Gamma \vdash \typing{N}{A}$,
 $\reducestar{N}{}{Q}$, and $\norm{Q}$; then for every expression $Q_i$
 in the set of subexpressions of $Q$ such that $\Delta \vdash
@@ -802,7 +803,7 @@ $A$.
 Now, we start with a simple predicate to only allow closed expressions.
  
 \begin{proposition}[Nil$-$Strong Subformula Property]\ \\
-Having $\Phi(.)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
+Having $\Phi(\_)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
 proposition~scheme~\ref{sub_scheme} holds.
 \end{proposition}
 \begin{proof}
