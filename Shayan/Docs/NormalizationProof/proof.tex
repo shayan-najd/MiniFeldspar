@@ -13,7 +13,8 @@
 \usepackage{tabularx}
 \usepackage{amsthm}
 \usepackage{enumerate}
-
+\usepackage{ulem}
+%%\usepackage{soul}
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
  
@@ -380,7 +381,7 @@ Values are expressions that do not compute and they follow the abstract syntax i
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}[t]{lll} 
-V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{W}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
+V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
 \end{array}
 \] 
 \caption{Values}
@@ -479,7 +480,7 @@ G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\
 (let_{+/\times})
 & G[M]
 & \expshr{x}{M}{G[x]}
-& \cnd{x\ \txt{is\ fresh}}\\[0pt]
+& \cnd{\neg\valuep{M},\ and\\\ \ \ x\ \txt{is\ fresh}}\\[0pt]
 
 (\beta_{\times_1})  
 & \expfst{\expprd{V}{W}} 
@@ -509,7 +510,7 @@ G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\
 (need) 
 & \expshr{x}{M}{N}
 & \sbs{N}{x}{M}  
-& \cnd{Count(x,N) < 2,\ and\\\ \ \ \neg\valuep{M}}\\[0pt]
+& \cnd{\neg\valuep{M},\ and\\\ \ \ Count(x,N) < 2}\\[0pt]
 
 (\kappa_{case})
 & F[\expcasind{L}{x}{M}{y}{N}]
@@ -622,7 +623,7 @@ $\Gamma$, by structural induction on the expression, we have the following cases
   By the corresponding typing derivation and lemma~\ref{sub_S}, we
   have $\typarr{A}{B} \in \subformulae{\Gamma}$, where $\typarr{A}{B}$
   is type of $S$ and $B$ type of the whole expression. Since, by the
-  definition of $\subformulae{}$, we have
+  definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
   \item  $B \in \subformulae{\typarr{A}{B}}$,
   \end{enumerate}
@@ -631,7 +632,7 @@ $\Gamma$, by structural induction on the expression, we have the following cases
   By the corresponding typing derivation and lemma~\ref{sub_S}, we
   have $\typprd{A}{B} \in \subformulae{\Gamma}$, where $\typprd{A}{B}$
   is type of $S$ and $A$ type of the whole expression. Since, by the
-  definition of $\subformulae{}$, we have
+  definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
   \item $A \in \subformulae{\typprd{A}{B}}$,
   \end{enumerate}
@@ -640,7 +641,7 @@ $\Gamma$, by structural induction on the expression, we have the following cases
   By the corresponding typing derivation and lemma~\ref{sub_S}, we
   have $\typprd{A}{B} \in \subformulae{\Gamma}$, where $\typprd{A}{B}$
   is type of $S$ and $B$ type of the whole expression. Since, by the
-  definition of $\subformulae{}$, we have
+  definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
   \item $B \in \subformulae{\typprd{A}{B}}$,
   \end{enumerate}
@@ -670,7 +671,7 @@ by structural induction on the expression, we have the following cases:
   have for every $A_i$ (type of the subexpression $Q_i$ in $Q$), that
   $A_i \in \subformulae{(\typenvcon{x}{A})}$, or $A_i \in
   \subformulae{B}$, where $\typarr{A}{B}$ is type of the whole
-  expression. Since, by the definition of $\subformulae{}$, we have
+  expression. Since, by the definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $(A_i \in \subformulae{A})$ or $(A_i \in \subformulae{B})$ implies $A_i \in \subformulae{\typarr{A}{B}}$, and
      \item $A_i \in \subformulae{(\typenvcon{x}{A})}$ implies $(A_i \in \subformulae{\Gamma})$ or $(A_i \in \subformulae{A})$;
@@ -686,7 +687,7 @@ by structural induction on the expression, we have the following cases:
   $\typprd{A}{B}$ is type of the whole expression. We also have for
   every $B_i$ (type of the subexpression $U_i$ in $U$), that $B_i \in
   \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$. Since, by the
-  definition of $\subformulae{}$, we have
+  definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $A_i \in \subformulae{A}$ implies $A_i \in \subformulae{\typprd{A}{B}}$, and
      \item $B_i \in \subformulae{B}$ implies $B_i \in \subformulae{\typprd{A}{B}}$;
@@ -698,7 +699,7 @@ by structural induction on the expression, we have the following cases:
   the subexpression $T_i$ in $T$), that $A_i \in
   \subformulae{\Gamma}$, or $A_i \in \subformulae{A}$,
   where $\typsum{A}{B}$ is type of the whole expression.
-  Since, by the definition of $\subformulae{}$, we have
+  Since, by the definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $A_i \in \subformulae{A}$ implies $A_i \in \subformulae{\typsum{A}{B}}$,
   \end{enumerate}
@@ -709,7 +710,7 @@ by structural induction on the expression, we have the following cases:
   the subexpression $U_i$ in $U$), that $B_i \in
   \subformulae{\Gamma}$, or $B_i \in \subformulae{B}$,
   where $\typsum{A}{B}$ is type of the whole expression.
-  Since, by the definition of $\subformulae{}$, we have
+  Since, by the definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $B_i \in \subformulae{B}$ implies $B_i \in \subformulae{\typsum{A}{B}}$,
   \end{enumerate}
@@ -746,7 +747,7 @@ by structural induction on the expression, we have the following cases:
   with lemma~\ref{sub_P} (i.e. the induction hypothesis), for every
   $B_i$ (type of the subexpression $Q_i$ in $Q$), that $B_i \in
   \subformulae{\typenvcon{x}{B}}$, or $B_i \in \subformulae{C}$.
-  Since, by the definition of $\subformulae{}$, we have
+  Since, by the definition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $\typsum{A}{B} \in \subformulae{\Gamma}$ implies $(A \in \subformulae{\Gamma})$ and $(B \in \subformulae{\Gamma})$,
      \item $A_i \in \subformulae{\typenvcon{x}{A}}$ implies $(A_i \in \subformulae{\Gamma})$ or $(A_i \in \subformulae{A})$, and
@@ -759,7 +760,7 @@ by structural induction on the expression, we have the following cases:
   have, together with lemma~\ref{sub_P} (i.e. the induction
   hypothesis), for every $B_i$ (type of the subexpression $Q_i$ in
   $Q$), that $B_i \in \subformulae{\typenvcon{x}{A}}$, or $B_i \in
-  \subformulae{B}$, where $B$ is type of the whole expression. Since, by the defition of $\subformulae{}$, we have
+  \subformulae{B}$, where $B$ is type of the whole expression. Since, by the defition of $\subformulae{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $B_i \in \subformulae{\typenvcon{x}{A}}$ implies $(B_i \in \subformulae{\Gamma})$ or $(B_i \in \subformulae{A})$,
   \end{enumerate}
