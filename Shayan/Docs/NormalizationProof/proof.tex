@@ -13,10 +13,12 @@
 \usepackage{tabularx}
 \usepackage{amsthm}
 \usepackage{enumerate}
-\usepackage{ulem}
+%%\usepackage{ulem}
 \usepackage{graphicx}
 \usepackage{url}
 %%\usepackage{soul}
+\usepackage{cancel}
+
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
  
@@ -126,6 +128,12 @@
 \newcommand{\psubformulas}[1]{\txt{ProperSubformulas}\,(#1)}
 \newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
 \newcommand{\norm}[1]{\txt{Norm}\,(#1)}
+
+\newcommand{\nv}{\widetilde{V}}
+               %% {\txt{N\kern-3ptV}}
+\newcommand{\nw}{\widetilde{W}}
+               %% {\txt{N\kern-3ptW}}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \setlength{\belowcaptionskip}{0pt}
 \setlength{\abovecaptionskip}{0pt}
@@ -137,6 +145,8 @@
 \setlength{\evensidemargin}{0pt}
 %%\setlength{\marginparsep}{0pt}
 %%\setlength{\marginparwidth}{0pt}
+
+\newcommand{\st}[1]{\setbox0=\hbox{$#1$}\rlap{\raisebox{.50\ht0}{\rule{\wd0}{0.1mm}}}#1}
 
 \makeatletter
 \newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
@@ -260,10 +270,10 @@ Figure~\ref{fig:typing}.
 \fbox{$\env \vdash \typing{M}{A}$}
 \\~\\
 \inference
-{}
+{\typing{x}{A} \in \env}
 {\mathbf{Ax}}
 {
-  \typenvcon{x}{A} \vdash \typing{x}{A}
+  \env \vdash \typing{x}{A}
 }
 &
 \inference
@@ -388,9 +398,13 @@ V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \exppr
 \label{fig:val}
 \end{figure*} 
 
-The metavariables $V$, and $W$ range over values. The notation
-$\valuep{N}$ is used to denote a predicate indicating whether the
-expression $N$ is a value.
+The metavariables $V$, and $W$ range over values. The metavariables
+$\nv$, and $\nw$ range over expressions that are not values,
+also referred to as non-values.
+
+%% The notation
+%% $\valuep{N}$ is used to denote a predicate indicating whether the
+%% expression $N$ is a value.
 
 %% \begin{figure*}[h]
 %% \[\uncolored
@@ -461,70 +475,100 @@ defined in Figure~\ref{fig:red}. The rewrite rules are denoted as
 $\rewrite{}{}{}$. One-step reduction relation, denoted as
 $\reduce{}{}{}$, is compatible closure of rewrite rules. Reduction
 relation, denoted as $\reducestar{}{}{}$, is reflexive transitive
-closure of the one-step reduction relation. The metavariables $F$ and
-$G$ denote capture-allowing evaluation frames, used in rewrite
+closure of the one-step reduction relation. The metavariables $F$, $G$, and
+$H$ denote capture-allowing evaluation frames, used in rewrite
 rules. The metafunctions defined for expressions carry over to
 evaluation frames trivially.
     
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}{@{}l@{}}
-F \mathbin{\ ::=\ } \expapp{\hole}{M}\ |\ \expshr{x}{\hole}{N}\ |\ \expfst{\hole}\ |\ \expsnd{\hole}\ |\ \expcas{\hole}{x}{M}{y}{N}
-\\[2pt]
-G \mathbin{\ ::=\ } \explft{\hole} \ |\ \exprgt{\hole}\ |\ \expprd{\hole}{N}\ |\ \expprd{V}{\hole} %% ,\ \txt{if}\ \valuep{M}
-\\[2pt]
+\begin{array}[t]{@{}lllll@{}} 
 
-\begin{array}[t]{@{}ll@{\ \rewrite{}{}{}\ \ }ll@{}} 
-(let_{\rightarrow})  
+\multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ } 
+    \expapp{M}{\hole}\ 
+ |\ \expprd{\hole}{N}\ 
+ |\ \expprd{V}{\hole}\ 
+ |\ \expfst{\hole}\ 
+ |\ \expsnd{\hole}\
+ |\ \explft{\hole}\ 
+ |\ \exprgt{\hole}\
+ |\ \expcas{\hole}{x}{M}{y}{N}}\\[1pt]
+
+(\txt{let}_{\rightarrow\times+})
+& G[\nv]
+& \ \rewrite{}{}{}\ \ 
+& \expshr{x}{\nv}{G[x]}
+& \cnd{%% \neg\valuep{M},\ and\\\ \ \ 
+       x\ \txt{is\ fresh}}\\[0pt]
+
+(\txt{let}_{\lambda})  
 & \expapp{(\expabs{x}{A}{N})}{M} 
+& \ \rewrite{}{}{}\ \ 
 & \expshr{x}{M}{N} 
 & \\[0pt]  
 
-(let_{+/\times})
-& G[M]
-& \expshr{x}{M}{G[x]}
-& \cnd{\neg\valuep{M},\ and\\\ \ \ x\ \txt{is\ fresh}}\\[0pt]
-
 (\beta_{\times_1})  
 & \expfst{\expprd{V}{W}} 
+& \ \rewrite{}{}{}\ \ 
 & V
 & \\[0pt]
 
 (\beta_{\times_2})  
 & \expsnd{\expprd{V}{W}} 
+& \ \rewrite{}{}{}\ \ 
 & W                                               
 & \\[0pt]
 
 (\beta_{+_1}) 
 & \expcasind{(\explft{V}{B})}{x}{M}{y}{N}
+& \ \rewrite{}{}{}\ \ 
 & \sbs{M}{x}{V} 
 & \\[0pt]
 
 (\beta_{+_2})  
 & \expcasind{(\exprgt{A}{W})}{x}{M}{y}{N}
+& \ \rewrite{}{}{}\ \ 
 & \sbs{N}{y}{W}
 & \\[0pt]
 
-(\beta_{let}) 
+(\beta_{\txt{let}}) 
 & \expshr{x}{V}{N}
+& \ \rewrite{}{}{}\ \ 
 & \sbs{N}{x}{V}  
 & \\[0pt]
 
-(need) 
-& \expshr{x}{M}{N}
-& \sbs{N}{x}{M}  
-& \cnd{\neg\valuep{M},\ and\\\ \ \ Count(x,N) < 2}\\[0pt]
+(\txt{need}) 
+& \expshr{x}{\nv}{N}
+& \ \rewrite{}{}{}\ \ 
+& N %%\sbs{N}{x}{\nv}  
+& \cnd{%% \neg\valuep{M},\ and\\\ \ \ 
+       %%Count(x,N) < 2
+       x \notin \fv{N}}\\[8pt]
 
-(\kappa_{case})
+\multicolumn{5}{@{}l@{}}{F \mathbin{\ ::=\ } 
+    \expapp{\hole}{M}\ 
+ |\ \expshr{x}{\hole}{N}}\\[0pt]
+
+(\kappa_{\txt{case}})
 & F[\expcasind{L}{x}{M}{y}{N}]
+& \ \rewrite{}{}{}\ \ 
 & \expcasind{L}{x}{F[M]}{y}{F[N]}
-& \cnd{x \notin \fv{F},\ and\\\ \ \ y \notin \fv{F}}  \\[0pt]
+& \cnd{x \notin \fv{F},\ \txt{and}\\\ \ \ \, y \notin \fv{F}}  \\[0pt]
 
-(\kappa_{let})
-& F[\expshr{x}{L}{M}]
-& \expshr{x}{L}{F[M]} 
-& \cnd{x \notin \fv{F}} \\[0pt]
-\end{array}
+(\kappa_{\txt{let}})
+& F[\expshr{x}{M}{N}]
+& \ \rewrite{}{}{}\ \ 
+& \expshr{x}{M}{F[N]} 
+& \cnd{x \notin \fv{F}} \\[8pt]
+
+\multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{L}{x}{\hole}{y}{N}\ |\ \expcas{L}{x}{M}{y}{\hole}}\\[0pt]
+
+(\kappa_{\lambda})
+& H[\expabs{x}{A}{N}]
+& \ \rewrite{}{}{}\ \ 
+& \expabs{x}{A}{H[N]}
+& \cnd{x \notin \fv{H}} \\[0pt]
+
 \end{array}
 \]
 \caption{Reduction Rules}
@@ -542,7 +586,6 @@ for all expression $L$ such that $\reducestar{L}{}{M_1}$ and
 $\reducestar{L}{}{M_2}$, there exists an expression $N$ such that
 $\reducestar{M_1}{}{N}$ and $\reducestar{M_2}{}{N}$.
 
-
 \end{proposition}
  
 \begin{definition}[Normal Form]\ \\
@@ -553,7 +596,7 @@ if, there exists no expression $N$ such that $\reduce{M}{}{N}$.
 \begin{proposition}[Normal Form Syntax]\ \\
 \label{prop_normal}
 An expression $M$ is in normal form, if and only if, it matches the
-abstract syntax in Figure~\ref{fig:nf}, given by the entry $P$.
+abstract syntax in Figure~\ref{fig:nf}, given by the entry $K$.
 \end{proposition}
  
 \begin{figure*}[h]
@@ -561,12 +604,15 @@ abstract syntax in Figure~\ref{fig:nf}, given by the entry $P$.
 \begin{array}[t]{llll} 
 (\txt{Neutral Forms}) & S & \mathbin{\ ::=\ } & \expvar{x}\ |\ R
 \\
-(\txt{Non-Value Neutral Forms}) & R & \mathbin{\ ::=\ } & \expapp{S}{P}\ |\ \expfst{S}\ |\ \expsnd{S}
+(\txt{Non-Value Neutral Forms}) & R & \mathbin{\ ::=\ } & \expapp{S}{U}\ |\ \expfst{z}\ |\ \expsnd{z}
 \\
-(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{Q}\ |\ \expunt\ |\ \expprd{T}{U}\ |\ \explft{T}{B}\ |\ \exprgt{A}{U}
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & \expabs{x}{A}{K}\ |\ J 
 \\
-(\txt{Normal Forms}) & P,Q & \mathbin{\ ::=\ } & T\ |\ R\ |\ \expcas{S}{x}{P}{y}{Q} \\
-& & \ | & \expshr{x}{R}{Q} %% ,\ \txt{if}\ count(x,Q)\geq2
+(\txt{Non-Abstraction Value Normal Forms}) & J & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expunt\ |\ \expprd{T}{U}\ |\ \explft{T}{B}\ |\ \exprgt{A}{U}
+\\
+(\txt{Non-Abstraction Normal Forms}) & P,Q & \mathbin{\ ::=\ } & \expcasind{z}{x}{P}{y}{Q}\ |\ \expshr{x}{R}{Q}\ |\ R\ |\ J
+\\
+(\txt{Normal Forms}) & K & \mathbin{\ ::=\ } & \expabs{x}{A}{K}\ |\ P
 \end{array}
 \] 
 \caption{Normal Forms}
@@ -627,7 +673,7 @@ following cases:
 
 \item[Non-Value Neutral Form]\ \\
 \begin{description}
-\item[Case ($\expapp{S}{P}$):]\ \\ 
+\item[Case ($\expapp{S}{U}$):]\ \\ 
   By the corresponding typing derivation and lemma~\ref{sub_S}, we
   have $\typarr{A}{B} \in \subformulas{\Gamma}$, where $\typarr{A}{B}$
   is type of $S$ and $B$ type of the whole expression. Since, by the
@@ -793,57 +839,74 @@ Proof is established by using proposition~\ref{prop_preservation},
 proposition~\ref{prop_normal}, and lemma~\ref{sub_P}.
 \end{proof}
 
-So far, we have proven the subformula property for the calculus;
-however, we require some stronger properties in practice. For
-instance, consider the situation where normalised terms in our
-higher-order language is compiled to terms of a first-order
-language. In such a scenario, we would like to provide a form of
-gaurantee at compile-time, indicating absence of lambda abstractions
-in a normalised term. Therefore, we start by formulating the following
-proposition scheme, parameterised over a predicate on the typing
-environment.
+\section{Second Phase}
+We further introduce the eta expansion rule in
+Figure~\ref{fig:add_red}, where $L$ is not an abstraction and not on
+the left side of an application:
 
-\begin{scheme}[$\Phi-$Strong Subformula Property]\ \\
-\label{sub_scheme}
-Provided the predicate $\Phi(\_)$, expression $N$, and environment
-$\Gamma$ such that $\Phi(\Gamma)$; if $\Gamma \vdash \typing{N}{A}$,
-$\reducestar{N}{}{Q}$, and $\norm{Q}$; then for every expression $Q_i$
-in the set of subexpressions of $Q$ such that $\Delta \vdash
-\typing{Q_i}{A_i}$, $A_i$ is in the set of subformulae of the type
-$A$.
-\end{scheme}
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}lllll@{}} 
+(\eta)
+& L 
+&\ \rewrite{}{}{}\ 
+& \expabs{x}{A}{\expapp{L}{x}} 
+& \cnd{\env \vdash \typing{L}{\typarr{A}{B}},\ and\ x\ \txt{is\ fresh}}\\[0pt]
+\end{array}
+\]
+\caption{Additional Reduction Rules}
+\label{fig:add_red}
+\end{figure*} 
 
-Now, we start with a simple predicate to only allow closed expressions.
+%% For instance, consider the situation where normalised terms in our
+%% higher-order language is compiled to terms of a first-order
+%% language. In such a scenario, we would like to provide a form of
+%% gaurantee at compile-time, indicating absence of lambda abstractions
+%% in a normalised term. Therefore, we start by formulating the following
+%% proposition scheme, parameterised over a predicate on the typing
+%% environment.
+
+%% \begin{scheme}[$\Phi-$Strong Subformula Property]\ \\
+%% \label{sub_scheme}
+%% Provided the predicate $\Phi(\_)$, expression $N$, and environment
+%% $\Gamma$ such that $\Phi(\Gamma)$; if $\Gamma \vdash \typing{N}{A}$,
+%% $\reducestar{N}{}{Q}$, and $\norm{Q}$; then for every expression $Q_i$
+%% in the set of subexpressions of $Q$ such that $\Delta \vdash
+%% \typing{Q_i}{A_i}$, $A_i$ is in the set of subformulae of the type
+%% $A$.
+%% \end{scheme}
+
+%% Now, we start with a simple predicate to only allow closed expressions.
  
-\begin{proposition}[Nil$-$Strong Subformula Property]\ \\
-Having $\Phi(\_)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
-proposition~scheme~\ref{sub_scheme} holds.
-\end{proposition}
-\begin{proof}
-The proposition~\ref{prop_subformula} concludes the proof.
-\end{proof}
+%% \begin{proposition}[Nil$-$Strong Subformula Property]\ \\
+%% Having $\Phi(\_)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
+%% proposition~scheme~\ref{sub_scheme} holds.
+%% \end{proposition}
+%% \begin{proof}
+%% The proposition~\ref{prop_subformula} concludes the proof.
+%% \end{proof}
 
-\textbf{Warning: the remaning is only a sketch, possibly non-sense!}
+%% \textbf{Warning: the remaning is only a sketch, possibly non-sense!}
 
-\begin{definition}[Rank$_n$]\ \\
-Rank$_n$ type is a type that only allows each type constructor inside
-it to be nested inside itself no more than $n - 1$ times. Similarly,
-rank$_{n}^{\,\circledast}$ type is a type, inside which nesting of the
-type constructor $\circledast$ is restricted to maximum $n - 1$ times.
-For example, rank$_{0}^{\,\typarr{}{}}$ type is a type that does not have
-function type $\typarr{}{}$ anywhere inside it.
-\end{definition}
+%% \begin{definition}[Rank$_n$]\ \\
+%% Rank$_n$ type is a type that only allows each type constructor inside
+%% it to be nested inside itself no more than $n - 1$ times. Similarly,
+%% rank$_{n}^{\,\circledast}$ type is a type, inside which nesting of the
+%% type constructor $\circledast$ is restricted to maximum $n - 1$ times.
+%% For example, rank$_{0}^{\,\typarr{}{}}$ type is a type that does not have
+%% function type $\typarr{}{}$ anywhere inside it.
+%% \end{definition}
 
-\begin{proposition}[Rank$_{1}-$Strong Subformula Property]\ \\
-Having $\Phi(\Gamma)$ instantiated to the following statement, the
-proposition~scheme~\ref{sub_scheme} holds:
+%% \begin{proposition}[Rank$_{1}-$Strong Subformula Property]\ \\
+%% Having $\Phi(\Gamma)$ instantiated to the following statement, the
+%% proposition~scheme~\ref{sub_scheme} holds:
  
- forall type $A_i$ in $\Gamma$, $A_i$ is of rank$_{1}$.
+%%  forall type $A_i$ in $\Gamma$, $A_i$ is of rank$_{1}$.
  
-\end{proposition}
-\begin{proof}
-To be investigated...
-\end{proof}
+%% \end{proposition}
+%% \begin{proof}
+%% To be investigated...
+%% \end{proof}
 
  
 \end{document}
