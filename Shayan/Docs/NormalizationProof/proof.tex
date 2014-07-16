@@ -18,6 +18,8 @@
 \usepackage{url}
 %%\usepackage{soul}
 \usepackage{cancel}
+\usepackage{tipa}
+
 
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
@@ -118,6 +120,7 @@
 \newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
 \newcommand{\sbs}[3]{#1[#2:=#3]}
 \newcommand{\fv}[1]{\txt{FV}\,(#1)}
+\newcommand{\fresh}[1]{\txt{Fresh}\,(#1)}
 \newcommand{\txt}[1]{\text{\textit{#1}}}
 \newcommand{\rewrite}[3]{#1 \overset{#2}\mapsto #3} 
 \newcommand{\reduce}[3]{#1 \overset{#2}\rightarrow #3} 
@@ -133,7 +136,7 @@
                %% {\txt{N\kern-3ptV}}
 \newcommand{\nw}{\widetilde{W}}
                %% {\txt{N\kern-3ptW}}
-
+\newcommand{\na}{L^{\text{\textcrlambda}}}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 \setlength{\belowcaptionskip}{0pt}
 \setlength{\abovecaptionskip}{0pt}
@@ -390,7 +393,7 @@ Values are expressions that do not compute and they follow the abstract syntax i
 
 \begin{figure*}[h]
 \[\uncolored
-\begin{array}[t]{lll} 
+\begin{array}[t]{@{}lll@{}} 
 V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
 \end{array}
 \] 
@@ -399,112 +402,99 @@ V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \exppr
 \end{figure*} 
 
 The metavariables $V$, and $W$ range over values. The metavariables
-$\nv$, and $\nw$ range over expressions that are not values,
-also referred to as non-values.
-
-%% The notation
-%% $\valuep{N}$ is used to denote a predicate indicating whether the
-%% expression $N$ is a value.
-
-%% \begin{figure*}[h]
-%% \[\uncolored
-%% \begin{array}{lll}
-
-%% \fbox{$\valuep{N}$}
-%% \\~\\
-%% \inference
-%% {}
-%% {variable}
-%% {
-%%   \valuep{\expvar{x}}
-%% }
-%% &
-%% \inference
-%% {}
-%% {unit}
-%% {
-%%   \valuep{\expunt}
-%% }
-%% &
-%% \inference
-%% {
-%% }
-%% {abstraction}
-%% {
-%%   \valuep{\expabs{x}{A}{N}}
-%% }
-%% \\~\\
-%% \inference
-%% {
-%%   \valuep{M} 
-%%   &
-%%   \valuep{N} 
-%% }
-%% {product}
-%% {
-%%   \valuep{\expprd{M}{N}}
-%% }
-%% &
-%% \inference
-%% { 
-%%   \valuep{M} 
-%% }
-%% {injection-left}
-%% {
-%%   \valuep{\explft{M}{B}}
-%% }
-%% &
-%% \inference
-%% { 
-%%   \valuep{N} 
-%% }
-%% {injection-right}
-%% {
-%%   \valuep{\exprgt{A}{N}}
-%% }
-%% \end{array}
-%% \]
-%% \caption{Values}
-%% \label{fig:val}
-%% \end{figure*}
-
+$\nv$, and $\nw$ range over expressions that are not values, also
+referred to as non-values. 
+%% The metavariable $\na$ range over expressions that are not abstraction.
+ 
 \section{Normalisation}
-  
-The reduction rules corresponding to the normalisation algorithm is
-defined in Figure~\ref{fig:red}. The rewrite rules are denoted as
-$\rewrite{}{}{}$. One-step reduction relation, denoted as
-$\reduce{}{}{}$, is compatible closure of rewrite rules. Reduction
-relation, denoted as $\reducestar{}{}{}$, is reflexive transitive
-closure of the one-step reduction relation. The metavariables $F$, $G$, and
-$H$ denote capture-allowing evaluation frames, used in rewrite
-rules. The metafunctions defined for expressions carry over to
+Evaluation context, denoted as $E$ or ${E}'$, is defined in Figure~\ref{fig:ec}.
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}l@{\ }l@{\ }l@{}} 
+E,{E}' & \mathbin{::=} &
+ \hole\\
+ & \ \ \ |&   
+ \expabs{x}{A}{E}\\
+ & \ \ \ |&  
+ \expapp{M}{E}\ |\ \expapp{E}{N}\\ 
+ & \ \ \ |&  
+ \expshr{x}{E}{N}\ |\ \expshr{x}{M}{E}\\  
+ & \ \ \ |&  
+ \expprd{E}{N}\ |\ \expprd{M}{E}\\
+ & \ \ \ |&
+ \expfst{E}\\
+ & \ \ \ |&
+ \expsnd{E}\\
+ & \ \ \ |&  
+ \explft{E}{B}\\ 
+ & \ \ \ |&
+ \exprgt{A}{E}\\ 
+ & \ \ \ |&
+ \expcasind{E}{x}{M}{y}{N}\ 
+ |\ \expcasind{L}{x}{E}{y}{N}\ 
+ |\ \expcasind{L}{x}{M}{y}{E}\ 
+\end{array}
+\]
+\caption{Evaluation Context}
+\label{fig:ec}
+\end{figure*} 
+
+Rewrite rules, denoted as $\rewrite{}{}{}$, is defined in
+Figure~\ref{fig:red}.
+
+The metavariables $F$, and $G$ denote capture-allowing evaluation
+frames. The metafunctions defined for expressions carry over to
 evaluation frames trivially.
     
 \begin{figure*}[h]
 \[\uncolored
 \begin{array}[t]{@{}lllll@{}} 
-
-\multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ } 
+\multicolumn{5}{@{}l@{}}{F \mathbin{\ ::=\ } 
     \expapp{M}{\hole}\ 
  |\ \expprd{\hole}{N}\ 
  |\ \expprd{V}{\hole}\ 
  |\ \expfst{\hole}\ 
  |\ \expsnd{\hole}\
- |\ \explft{\hole}\ 
- |\ \exprgt{\hole}\
+ |\ \explft{\hole}{B}\ 
+ |\ \exprgt{A}{\hole}\
  |\ \expcas{\hole}{x}{M}{y}{N}}\\[1pt]
 
 (\txt{let}_{\rightarrow\times+})
-& G[\nv]
+& F[\nv]
 & \ \rewrite{}{}{}\ \ 
-& \expshr{x}{\nv}{G[x]}
+& \expshr{x}{\nv}{F[x]}
 & \cnd{%% \neg\valuep{M},\ and\\\ \ \ 
-       x\ \txt{is\ fresh}}\\[0pt]
+       \fresh{x}} \\[8pt]
 
-(\txt{let}_{\lambda})  
-& \expapp{(\expabs{x}{A}{N})}{M} 
+\multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ } 
+    \expapp{\hole}{V}\ 
+ |\ \expshr{x}{\hole}{N}}\\[1pt]
+
+(\kappa_{\txt{let}})
+& G[\expshr{x}{M}{N}]
 & \ \rewrite{}{}{}\ \ 
-& \expshr{x}{M}{N} 
+& \expshr{x}{M}{G[N]} 
+& \cnd{x \notin \fv{G}}\\[0pt]
+
+(\kappa_{\txt{case}})
+& G[\expcasind{z}{x}{M}{y}{N}]
+& \ \rewrite{}{}{}\ \ 
+& \expcasind{z}{x}{G[M]}{y}{G[N]}
+& \cnd{x \notin \fv{G},\ \txt{and}\\\ \ \ \, y \notin \fv{G}} \\[20pt]
+
+%% \multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{z}{x}{\hole}{y}{N}\ |\ \expcas{z}{x}{M}{y}{\hole}}\\[1pt]
+
+%% (\kappa_{\lambda})
+%% & H[\expabs{x}{A}{N}]
+%% & \ \rewrite{}{}{}\ \ 
+%% & \expabs{x}{A}{H[N]}
+%% & \cnd{x \notin \fv{H}} \\[8pt]
+
+
+(\beta_{\rightarrow})  
+& \expapp{(\expabs{x}{A}{N})}{V} 
+& \ \rewrite{}{}{}\ \ 
+& \sbs{N}{x}{V} 
 & \\[0pt]  
 
 (\beta_{\times_1})  
@@ -543,37 +533,40 @@ evaluation frames trivially.
 & N %%\sbs{N}{x}{\nv}  
 & \cnd{%% \neg\valuep{M},\ and\\\ \ \ 
        %%Count(x,N) < 2
-       x \notin \fv{N}}\\[8pt]
-
-\multicolumn{5}{@{}l@{}}{F \mathbin{\ ::=\ } 
-    \expapp{\hole}{M}\ 
- |\ \expshr{x}{\hole}{N}}\\[0pt]
-
-(\kappa_{\txt{case}})
-& F[\expcasind{L}{x}{M}{y}{N}]
-& \ \rewrite{}{}{}\ \ 
-& \expcasind{L}{x}{F[M]}{y}{F[N]}
-& \cnd{x \notin \fv{F},\ \txt{and}\\\ \ \ \, y \notin \fv{F}}  \\[0pt]
-
-(\kappa_{\txt{let}})
-& F[\expshr{x}{M}{N}]
-& \ \rewrite{}{}{}\ \ 
-& \expshr{x}{M}{F[N]} 
-& \cnd{x \notin \fv{F}} \\[8pt]
-
-\multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{L}{x}{\hole}{y}{N}\ |\ \expcas{L}{x}{M}{y}{\hole}}\\[0pt]
-
-(\kappa_{\lambda})
-& H[\expabs{x}{A}{N}]
-& \ \rewrite{}{}{}\ \ 
-& \expabs{x}{A}{H[N]}
-& \cnd{x \notin \fv{H}} \\[0pt]
-
+       x \notin \fv{N}}\\[0pt]
 \end{array}
 \]
-\caption{Reduction Rules}
+\caption{Rewrite Rules}
 \label{fig:red}
 \end{figure*} 
+
+One-step reduction relation, denoted as $\reduce{}{}{}$, is defined in
+Figure~\ref{fig:one}. 
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}ll@{}} 
+\inference
+{
+ \rewrite{M}{}{N} 
+}
+{reduction}
+{
+  \reduce{E[M]}{}{E[N]}  
+}
+&
+\inference
+{\env \vdash \typing{L}{\typarr{A}{B}} & L \neq \expabs{x}{A}{N} & E \neq {E}'[\expapp{\hole}{M}] & \fresh{z}}
+{expansion}
+{\reduce{E[L]}{}{E[\expabs{z}{A}{\expapp{L}{z}}]}}
+\end{array}
+\]
+\caption{One-Step Reduction}
+\label{fig:one}
+\end{figure*} 
+ 
+Reduction relation, denoted as $\reducestar{}{}{}$, is reflexive
+transitive closure of the one-step reduction relation.
 
 \section{Theorems and Proofs}
 
@@ -839,24 +832,24 @@ Proof is established by using proposition~\ref{prop_preservation},
 proposition~\ref{prop_normal}, and lemma~\ref{sub_P}.
 \end{proof}
 
-\section{Second Phase}
-We further introduce the eta expansion rule in
-Figure~\ref{fig:add_red}, where $L$ is not an abstraction and not on
-the left side of an application:
+%% \section{Second Phase}
+%% We further introduce the eta expansion rule in
+%% Figure~\ref{fig:add_red}, where $L$ is not an abstraction and not on
+%% the left side of an application:
 
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}[t]{@{}lllll@{}} 
-(\eta)
-& L 
-&\ \rewrite{}{}{}\ 
-& \expabs{x}{A}{\expapp{L}{x}} 
-& \cnd{\env \vdash \typing{L}{\typarr{A}{B}},\ and\ x\ \txt{is\ fresh}}\\[0pt]
-\end{array}
-\]
-\caption{Additional Reduction Rules}
-\label{fig:add_red}
-\end{figure*} 
+%% \begin{figure*}[h]
+%% \[\uncolored
+%% \begin{array}[t]{@{}lllll@{}} 
+%% (\eta)
+%% & L 
+%% &\ \rewrite{}{}{}\ 
+%% & \expabs{x}{A}{\expapp{L}{x}} 
+%% & \cnd{\env \vdash \typing{L}{\typarr{A}{B}},\ and\ x\ \txt{is\ fresh}}\\[0pt]
+%% \end{array}
+%% \]
+%% \caption{Additional Reduction Rules}
+%% \label{fig:add_red}
+%% \end{figure*} 
 
 %% For instance, consider the situation where normalised terms in our
 %% higher-order language is compiled to terms of a first-order
