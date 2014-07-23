@@ -19,7 +19,7 @@
 %%\usepackage{soul}
 \usepackage{cancel}
 \usepackage{tipa}
-
+\usepackage{mdframed}
 
 \newcommand{\incolor}[1]{#1}    % Use to typeset in color
 %\newcommand{\incolor}[1]{}     % Use to typeset in black and white
@@ -183,6 +183,7 @@ Types are \textbf{closed} terms defined by the abstract syntax in
 Figure~\ref{fig:typ}.
 
 \begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}{llll}
 A,B,C & \mathbin{\ ::=\ } 
@@ -194,7 +195,9 @@ A,B,C & \mathbin{\ ::=\ }
 & \ |\ \ & \typsum{A}{B} & \textrm{sum}       %% \\
 %% & \ |\ \ & \tp{\typrec{X}{T}} & \textrm{recursion} 
 \end{array}
-\]\caption{Types}
+\]
+\end{mdframed}
+\caption{Types}
 \label{fig:typ}
 \end{figure*}
 
@@ -223,6 +226,7 @@ Expressions are \textbf{open} terms defined by the abstract syntax in
 Figure~\ref{fig:exp}.
 
 \begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}{llll}
 L,M,N & \mathbin{\ ::=\ } 
@@ -239,6 +243,7 @@ L,M,N & \mathbin{\ ::=\ }
 & \ |\ \ & \expcas{L}{x}{M}{y}{N} & \textrm{case}           
 \end{array}
 \]
+\end{mdframed}
 \caption{Expressions}
 \label{fig:exp}
 \end{figure*}
@@ -268,8 +273,9 @@ The typing judgement is defined by the inference rules in
 Figure~\ref{fig:typing}.
 
 \begin{figure*}[h]
+\begin{mdframed}
 \[\colored
-\begin{array}{ll}
+\begin{array}{@{}ll@{}}
 \fbox{$\env \vdash \typing{M}{A}$}
 \\~\\
 \inference
@@ -377,6 +383,7 @@ Figure~\ref{fig:typing}.
 } 
 \end{array}
 \]
+\end{mdframed}
 \caption{Typing Rules}
 \label{fig:typing}
 \end{figure*}
@@ -392,11 +399,13 @@ the typing rules yields the corresponding logical inference rules.\\
 Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
 
 \begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}[t]{@{}lll@{}} 
 V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
 \end{array}
 \] 
+\end{mdframed}
 \caption{Values}
 \label{fig:val}
 \end{figure*} 
@@ -405,10 +414,128 @@ The metavariables $V$, and $W$ range over values. The metavariables
 $\nv$, and $\nw$ range over expressions that are not values, also
 referred to as non-values. 
 %% The metavariable $\na$ range over expressions that are not abstraction.
- 
-\section{Normalisation}
-Evaluation context, denoted as $E$ or ${E}'$, is defined in Figure~\ref{fig:ec}.
+
+\newpage
+%% I,J,K,O,P,Q,R,S,T,U
+\section{Normal Forms and Restrictions}
+The normal forms that we are interested about, denoted as $K$, is defined in Figure~\ref{fig:nf}.
 \begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}} 
+\ \\[-22pt]
+(\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{U} & \ |\ \  & \expapp{Q}{U} & \ |\ \  & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+\\
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}} 
+\\
+(\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{T}{U} & \ |\ \ & \explft{T}{B} & \ |\ \ & \exprgt{A}{U}
+\\
+(\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+\\ 
+ & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+\\
+(\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+\end{array}
+\] 
+\end{mdframed}
+\caption{Normal Forms}
+\label{fig:nf}
+\end{figure*} 
+
+Restricting the types of free variables, and the type of a term yields
+a term with interesting normal form. 
+
+For a normal form which is easily compilable to \emph{C}, the
+restriction $\Phi$ is applied. The restriction $\Phi$ is defined in
+Figure~\ref{fig:phi}.
+ 
+\begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}[t]{@{}llll@{}} 
+
+\inference
+{}
+{\Psi\typone}
+{\Psi(\typone)} 
+
+&
+
+&
+\inference
+{\Psi(A) & \Psi(B)}
+{\Psi\times}
+{\Psi(\typprd{A}{B})} 
+&
+\inference
+{\Psi(A) & \Psi(B)}
+{\Psi+}
+{\Psi(\typsum{A}{B})} 
+
+
+\\~\\
+
+\inference
+{}
+{\Phi\typone}
+{\Phi(\typone)} 
+&
+\inference
+{\Phi(A) & \Phi(B)}
+{\Phi\rightarrow}
+{\Phi(\typarr{A}{B})} 
+&
+\inference
+{\Psi(A) & \Psi(B)}
+{\Phi\times}
+{\Phi(\typprd{A}{B})} 
+&
+\inference
+{\Psi(A) & \Psi(B)}
+{\Phi+}
+{\Phi(\typsum{A}{B})} 
+
+
+\end{array}
+\] 
+\end{mdframed}
+\caption{$\Phi$ Restriction}
+\label{fig:phi}
+\end{figure*} 
+
+Applying the restriction $\Phi$ to the types of free variables and the
+term, results in the restricted normal form defined in
+Figure~\ref{fig:rnf}.
+
+\begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}} 
+\ \\[-22pt]
+(\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{\overline{U}} & \ |\ \ & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+\\
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}} 
+\\
+(\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{R}{S} & \ |\ \ & \explft{R}{B} & \ |\ \ & \exprgt{A}{S}
+\\
+(\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+\\ 
+ & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+\\
+(\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+\end{array}
+\] 
+\end{mdframed}
+\caption{$\Phi-$Restricted Normal Forms}
+\label{fig:rnf}
+\end{figure*} 
+
+\section{Normalisation}
+Context, denoted as $E$ or ${E}'$, is defined in Figure~\ref{fig:ec}.
+\begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}[t]{@{}l@{\ }l@{\ }l@{}} 
 E,{E}' & \mathbin{::=} &
@@ -435,7 +562,8 @@ E,{E}' & \mathbin{::=} &
  |\ \expcasind{L}{x}{M}{y}{E}\ 
 \end{array}
 \]
-\caption{Evaluation Context}
+\end{mdframed}
+\caption{Context}
 \label{fig:ec}
 \end{figure*} 
 
@@ -447,8 +575,12 @@ frames. The metafunctions defined for expressions carry over to
 evaluation frames trivially.
     
 \begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}[t]{@{}lllll@{}} 
+\multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+
 \multicolumn{5}{@{}l@{}}{F \mathbin{\ ::=\ } 
     \expapp{M}{\hole}\ 
  |\ \expprd{\hole}{N}\ 
@@ -457,7 +589,7 @@ evaluation frames trivially.
  |\ \expsnd{\hole}\
  |\ \explft{\hole}{B}\ 
  |\ \exprgt{A}{\hole}\
- |\ \expcas{\hole}{x}{M}{y}{N}}\\[1pt]
+ |\ \expcasind{\hole}{x}{M}{y}{N}}\\[1pt]
 
 (\txt{let}_{\rightarrow\times+})
 & F[\nv]
@@ -466,14 +598,17 @@ evaluation frames trivially.
 & \cnd{%% \neg\valuep{M},\ and\\\ \ \ 
        \fresh{x}} \\[8pt]
 
+\multicolumn{5}{@{}c@{}}{\txt{Phase 2}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+
 \multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ } 
     \expapp{\hole}{V}\ 
  |\ \expshr{x}{\hole}{N}}\\[1pt]
 
 (\kappa_{\txt{let}})
-& G[\expshr{x}{M}{N}]
+& G[\expshr{x}{\nv}{N}]
 & \ \rewrite{}{}{}\ \ 
-& \expshr{x}{M}{G[N]} 
+& \expshr{x}{\nv}{G[N]} 
 & \cnd{x \notin \fv{G}}\\[0pt]
 
 (\kappa_{\txt{case}})
@@ -525,7 +660,10 @@ evaluation frames trivially.
 & \expshr{x}{V}{N}
 & \ \rewrite{}{}{}\ \ 
 & \sbs{N}{x}{V}  
-& \\[0pt]
+& \\[8pt]
+
+\multicolumn{5}{@{}c@{}}{\txt{Phase 3}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
 
 (\txt{need}) 
 & \expshr{x}{\nv}{N}
@@ -536,6 +674,7 @@ evaluation frames trivially.
        x \notin \fv{N}}\\[0pt]
 \end{array}
 \]
+\end{mdframed}
 \caption{Rewrite Rules}
 \label{fig:red}
 \end{figure*} 
@@ -544,6 +683,7 @@ One-step reduction relation, denoted as $\reduce{}{}{}$, is defined in
 Figure~\ref{fig:one}. 
 
 \begin{figure*}[h]
+\begin{mdframed}
 \[\uncolored
 \begin{array}[t]{@{}ll@{}} 
 \inference
@@ -561,6 +701,7 @@ Figure~\ref{fig:one}.
 {\reduce{E[L]}{}{E[\expabs{z}{A}{\expapp{L}{z}}]}}
 \end{array}
 \]
+\end{mdframed}
 \caption{One-Step Reduction}
 \label{fig:one}
 \end{figure*} 
@@ -592,25 +733,6 @@ An expression $M$ is in normal form, if and only if, it matches the
 abstract syntax in Figure~\ref{fig:nf}, given by the entry $K$.
 \end{proposition}
  
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}[t]{llll} 
-(\txt{Neutral Forms}) & S & \mathbin{\ ::=\ } & \expvar{x}\ |\ R
-\\
-(\txt{Non-Value Neutral Forms}) & R & \mathbin{\ ::=\ } & \expapp{S}{U}\ |\ \expfst{z}\ |\ \expsnd{z}
-\\
-(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & \expabs{x}{A}{K}\ |\ J 
-\\
-(\txt{Non-Abstraction Value Normal Forms}) & J & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expunt\ |\ \expprd{T}{U}\ |\ \explft{T}{B}\ |\ \exprgt{A}{U}
-\\
-(\txt{Non-Abstraction Normal Forms}) & P,Q & \mathbin{\ ::=\ } & \expcasind{z}{x}{P}{y}{Q}\ |\ \expshr{x}{R}{Q}\ |\ R\ |\ J
-\\
-(\txt{Normal Forms}) & K & \mathbin{\ ::=\ } & \expabs{x}{A}{K}\ |\ P
-\end{array}
-\] 
-\caption{Normal Forms}
-\label{fig:nf}
-\end{figure*} 
 
 \begin{proposition}[Preservation]\ \\
 \label{prop_preservation}
@@ -619,6 +741,8 @@ One-step reduction preserves the type of the source expression:
  if $\env \vdash \typing{M}{A}$ and $\reduce{M}{}{N}$, then 
 $\env \vdash \typing{N}{A}$.
 \end{proposition}
+
+\section{Subformula Property}
 
 \begin{definition}[Subterms]\ \\
 The set of subterms of a term is defined trivially based on its
@@ -675,19 +799,19 @@ following cases:
   \item  $B \in \subformulas{\typarr{A}{B}}$,
   \end{enumerate}
   it concludes the result.
-\item[Case ($\expfst{S}$):]\ \\
-  By the corresponding typing derivation and lemma~\ref{sub_S}, we
+\item[Case ($\expfst{z}$):]\ \\
+  By the corresponding typing derivation, we
   have $\typprd{A}{B} \in \subformulas{\Gamma}$, where $\typprd{A}{B}$
-  is type of $S$ and $A$ type of the whole expression. Since, by the
+  is type of $z$ and $A$ type of the whole expression. Since, by the
   definition of $\subformulas{\_}$, we have
   \begin{enumerate}[] 
   \item $A \in \subformulas{\typprd{A}{B}}$,
   \end{enumerate}
   it concludes the result.
-\item[Case ($\expsnd{S}$):]\ \\
-  By the corresponding typing derivation and lemma~\ref{sub_S}, we
+\item[Case ($\expsnd{z}$):]\ \\
+  By the corresponding typing derivation, we
   have $\typprd{A}{B} \in \subformulas{\Gamma}$, where $\typprd{A}{B}$
-  is type of $S$ and $B$ type of the whole expression. Since, by the
+  is type of $z$ and $B$ type of the whole expression. Since, by the
   definition of $\subformulas{\_}$, we have
   \begin{enumerate}[] 
   \item $B \in \subformulas{\typprd{A}{B}}$,
@@ -698,7 +822,7 @@ following cases:
 \end{proof}
 
 \begin{lemma}\ \\
-\label{sub_V}
+\label{sub_T}
 Provided an expression of value normal form, i.e. syntactic
 category $T$, type of each subrexpression inside the expression is
 either in the set of subformulas of the type of the expression, or in
@@ -710,8 +834,20 @@ the set of subformulas of types in the environment:
 \end{lemma}
 
 \begin{lemma}\ \\
+\label{sub_J}
+Provided an expression of non-abstraction value normal form, i.e. syntactic
+category $J$, type of each subrexpression inside the expression is
+either in the set of subformulas of the type of the expression, or in
+the set of subformulas of types in the environment:
+
+ if $\Gamma \vdash \typing{J}{A}$, then for every subexpression $J_i$
+ in $J$, such that $\Delta \vdash \typing{J_i}{A_i}$, we have $A_i \in
+ \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+\end{lemma}
+
+\begin{lemma}\ \\
 \label{sub_P}
-Provided an expression of normal form, i.e. syntactic category $P$,
+Provided an expression of non-abstraction normal form, i.e. syntactic category $P$,
 type of each subrexpression inside the expression is either in the set of
 subformulas of the type of the expression, or in the set
 of subformulas of types in the environment:
@@ -720,21 +856,32 @@ of subformulas of types in the environment:
  in $P$, such that $\Delta \vdash \typing{P_i}{A_i}$, we have $A_i \in
  \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
 \end{lemma}
+
+\begin{lemma}\ \\
+\label{sub_K}
+Provided an expression of normal form, i.e. syntactic category $K$,
+type of each subrexpression inside the expression is either in the set of
+subformulas of the type of the expression, or in the set
+of subformulas of types in the environment:
+
+ if $\Gamma \vdash \typing{K}{A}$, then for every subexpression $K_i$
+ in $K$, such that $\Delta \vdash \typing{K_i}{A_i}$, we have $A_i \in
+ \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+\end{lemma}
  
-\begin{proof}[Proof of Lemma~\ref{sub_V} and Lemma~\ref{sub_P}]
+\begin{proof}[Proof of Lemma~\ref{sub_T}, Lemma~\ref{sub_J}, Lemma~\ref{sub_P}, and Lemma~\ref{sub_K}]
 Provided an environment $\Gamma$, by mutual induction on the structure
-of expressions in value normal form and normal form, we have the
+of expressions in value normal form, non-abstraction value normal
+form, non-abstraction normal form, and normal form, we have the
 following cases:
 
 \begin{description}
 
 \item[Value Normal Form]\ \\
 \begin{description}
-\item[Case ($\expvar{x}$):]\ \\ 
-  The corresponding typing derivation concludes the result. 
-\item[Case ($\expabs{x}{A}{Q}$):]\ \\ 
-  By the corresponding typing derivation and lemma~\ref{sub_P}, we
-  have for every $A_i$ (type of the subexpression $Q_i$ in $Q$), that
+\item[Case ($\expabs{x}{A}{K}$):]\ \\ 
+  By the corresponding typing derivation and lemma~\ref{sub_K}, we
+  have for every $A_i$ (type of the subexpression $K_i$ in $K$), that
   $A_i \in \subformulas{(\typenvcon{x}{A})}$, or $A_i \in
   \subformulas{B}$, where $\typarr{A}{B}$ is type of the whole
   expression. Since, by the definition of $\subformulas{\_}$, we have
@@ -743,10 +890,18 @@ following cases:
      \item $A_i \in \subformulas{(\typenvcon{x}{A})}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$;
   \end{enumerate}
   it concludes the result.
+\item[Case ($J$):]\ \\
+  Lemma~\ref{sub_J} concludes the result.   
+\end{description}
+
+\item[Non-Abstraction Value Normal Form]\ \\
+\begin{description}
+\item[Case ($\expvar{x}$):]\ \\ 
+  The corresponding typing derivation concludes the result. 
 \item[Case ($\expunt$):]\ \\ 
   The corresponding typing derivation concludes the result. 
 \item[Case ($\expprd{T}{U}$):]\ \\ 
-  By the corresponding typing derivation and lemma~\ref{sub_V}, we
+  By the corresponding typing derivation and lemma~\ref{sub_T}, we
   have for every $A_i$ (type of the subexpression $T_i$ in $T$), that
   $A_i \in \subformulas{\Gamma}$, or $A_i \in \subformulas{A}$, where
   $\typprd{A}{B}$ is type of the whole expression. We also have for
@@ -759,7 +914,7 @@ following cases:
   \end{enumerate}
   it concludes the result.
 \item[Case ($\explft{T}{B}$):]\ \\
-  By the corresponding typing derivation and lemma~\ref{sub_V}, we
+  By the corresponding typing derivation and lemma~\ref{sub_T}, we
   have for every $A_i$ (type of the subexpression $T_i$ in $T$), that
   $A_i \in \subformulas{\Gamma}$, or $A_i \in \subformulas{A}$, where
   $\typsum{A}{B}$ is type of the whole expression.  Since, by the
@@ -769,7 +924,7 @@ following cases:
   \end{enumerate}
   it concludes the result. 
 \item[Case ($\exprgt{A}{U}$):]\ \\
-  By the corresponding typing derivation and lemma~\ref{sub_V}
+  By the corresponding typing derivation and lemma~\ref{sub_T}
   (i.e. the induction hypothesis), we have for every $B_i$ (type of
   the subexpression $U_i$ in $U$), that $B_i \in
   \subformulas{\Gamma}$, or $B_i \in \subformulas{B}$,
@@ -781,23 +936,19 @@ following cases:
   it concludes the result.
 \end{description}
 
-\item[Normal Form]\ \\
+\item[Non-Abstraction Normal Form]\ \\
 \begin{description}
-\item[Case ($T$):]\ \\
-  Lemma~\ref{sub_V} concludes the result.
-\item[Case ($R$):]\ \\
-  Lemma~\ref{sub_R} concludes the result.
-\item[Case ($\expcas{S}{x}{P}{y}{Q}$):]\ \\
-  By the corresponding typing derivation and lemma~\ref{sub_S}, we
-  have $\typsum{A}{B} \in \subformulas{\Gamma}$. We also have,
-  together with lemma~\ref{sub_P} (i.e. the induction hypothesis), for
-  every $A_i$ (type of the subexpression $P_i$ in $P$), that $A_i \in
+\item[Case ($\expcas{z}{x}{P}{y}{Q}$):]\ \\
+  By the corresponding typing derivation, we have $\typsum{A}{B} \in
+  \subformulas{\Gamma}$, where $\typsum{A}{B}$ is type of $z$. We also
+  have, together with lemma~\ref{sub_P}, for every $A_i$ (type of the
+  subexpression $P_i$ in $P$), that $A_i \in
   \subformulas{\typenvcon{x}{A}}$, or $A_i \in \subformulas{C}$, where
   $C$ is type of the whole expression. Moreover, we have, together
-  with lemma~\ref{sub_P} (i.e. the induction hypothesis), for every
-  $B_i$ (type of the subexpression $Q_i$ in $Q$), that $B_i \in
-  \subformulas{\typenvcon{x}{B}}$, or $B_i \in \subformulas{C}$.
-  Since, by the definition of $\subformulas{\_}$, we have
+  with lemma~\ref{sub_P}, for every $B_i$ (type of the subexpression
+  $Q_i$ in $Q$), that $B_i \in \subformulas{\typenvcon{x}{B}}$, or
+  $B_i \in \subformulas{C}$.  Since, by the definition of
+  $\subformulas{\_}$, we have
   \begin{enumerate}[(a)] 
      \item $\typsum{A}{B} \in \subformulas{\Gamma}$ implies $(A \in \subformulas{\Gamma})$ and $(B \in \subformulas{\Gamma})$,
      \item $A_i \in \subformulas{\typenvcon{x}{A}}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$, and
@@ -807,29 +958,48 @@ following cases:
 \item[Case ($\expshr{x}{R}{Q}$):]\ \\
   By the corresponding typing derivation and lemma~\ref{sub_R}, we
   have $A \in \subformulas{\Gamma}$, where $A$ is type of $R$. We also
-  have, together with lemma~\ref{sub_P} (i.e. the induction
-  hypothesis), for every $B_i$ (type of the subexpression $Q_i$ in
+  have, together with lemma~\ref{sub_P}, for every $B_i$ (type of the subexpression $Q_i$ in
   $Q$), that $B_i \in \subformulas{\typenvcon{x}{A}}$, or $B_i \in
   \subformulas{B}$, where $B$ is type of the whole expression. Since, by the definition of $\subformulas{\_}$, we have
   \begin{enumerate}[] 
      \item $B_i \in \subformulas{\typenvcon{x}{A}}$ implies $(B_i \in \subformulas{\Gamma})$ or $(B_i \in \subformulas{A})$,
   \end{enumerate}
   it concludes the result.
+\item[Case ($R$):]\ \\
+  Lemma~\ref{sub_R} concludes the result.
+\item[Case ($J$):]\ \\
+  Lemma~\ref{sub_J} concludes the result.
+\end{description}
+\item[Normal Form]\ \\
+\begin{description}
+\item[Case ($\expabs{x}{A}{K}$):]\ \\ 
+  By the corresponding typing derivation and lemma~\ref{sub_K}, we
+  have for every $A_i$ (type of the subexpression $K_i$ in $K$), that
+  $A_i \in \subformulas{(\typenvcon{x}{A})}$, or $A_i \in
+  \subformulas{B}$, where $\typarr{A}{B}$ is type of the whole
+  expression. Since, by the definition of $\subformulas{\_}$, we have
+  \begin{enumerate}[(a)] 
+     \item $(A_i \in \subformulas{A})$ or $(A_i \in \subformulas{B})$ implies $A_i \in \subformulas{\typarr{A}{B}}$, and
+     \item $A_i \in \subformulas{(\typenvcon{x}{A})}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$;
+  \end{enumerate}
+  it concludes the result.
+\item[Case ($P$):]\ \\
+  Lemma~\ref{sub_P} concludes the result.   
 \end{description}
 \end{description}
 \end{proof}
 
 \begin{proposition}[Subformula Property]\ \\
 \label{prop_subformula}
-If $\Gamma \vdash \typing{N}{A}$, $\reducestar{N}{}{Q}$, and $\norm{Q}$;
-then for every expression $Q_i$ in the set of subexpressions of $Q$ such
-that $\Delta \vdash \typing{Q}{A_i}$, $A_i$ is in the set of subformulas of
+If $\Gamma \vdash \typing{N}{A}$, $\reducestar{N}{}{K}$, and $\norm{K}$;
+then for every expression $K_i$ in the set of subexpressions of $K$ such
+that $\Delta \vdash \typing{K}{A_i}$, $A_i$ is in the set of subformulas of
 the type $A$, or in the set of subformulas of all types in the
 environment $\Gamma$.
 \end{proposition}
 \begin{proof}
 Proof is established by using proposition~\ref{prop_preservation},
-proposition~\ref{prop_normal}, and lemma~\ref{sub_P}.
+proposition~\ref{prop_normal}, and lemma~\ref{sub_K}.
 \end{proof}
 
 %% \section{Second Phase}
