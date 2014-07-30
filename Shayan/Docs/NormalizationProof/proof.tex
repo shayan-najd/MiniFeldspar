@@ -175,7 +175,9 @@ prove the subformula property for it.
 The normalisation algorithm takes as input an expression and returns a
 semantically equivalent expression in normal form. In particular, we
 are interested in a normal form where all $\beta$-redexes, including
-the ones related to data destructors, are eliminated.
+the ones related to data destructors, are eliminated. Moreover, under
+certain restrictions on types, we expect the normal terms to be easily
+compilable to first-order target languages like \emph{C} or \emph{SQL}.
 
 The normalisation algorithm is call-by-need in the sense that
 elimination of redexes does not duplicate expressions that have
