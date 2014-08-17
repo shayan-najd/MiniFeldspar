@@ -1,0 +1,1146 @@
+\documentclass[a4paper]{article}
+%%\usepackage{lua-visual-debug}
+\usepackage[round]{natbib}
+\usepackage{stmaryrd}
+\usepackage{proof}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
+\usepackage{mathtools}
+\usepackage[pdfauthor={Shayan Najd},pdftitle={Sharing-Preserving Normaliser},pagebackref=true,pdftex]{hyperref}
+\usepackage{titling}
+\usepackage{pbox}
+\usepackage{tabularx}
+\usepackage{amsthm}
+\usepackage{enumerate}
+%%\usepackage{ulem}
+\usepackage{graphicx}
+\usepackage{url}
+%%\usepackage{soul}
+\usepackage{cancel}
+\usepackage{tipa}
+\usepackage{mdframed}
+
+\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+ 
+% color framework
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\jd}[1]{{\judgecolor #1}}
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+\newcommand{\Tp}[1]{{\Typecolor #1}}
+\newcommand{\Tm}[1]{{\Termcolor #1}}
+
+\newcommand{\tmof}[1]{\tm{#1:{}}}
+\newcommand{\Tmof}[1]{\Tm{#1:{}}}
+\newcommand{\tmsem}[1]{\tm{\sem{\Tm{#1}}}}
+\newcommand{\tpsem}[1]{\tp{\sem{\Tp{#1}}}}
+\newcommand{\tmSem}[1]{{\termcolor \left\llbracket
+                        \judgecolor #1
+                        \termcolor \right\rrbracket}}
+
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+\definecolor{lightgray}{gray}{0.7}
+\newcommand{\highlight}[1]{%
+  \begingroup
+  \setlength{\fboxsep}{0pt}%  
+  \colorbox{lightgray}{\reducedstrut\ensuremath{#1}\/}%
+  \endgroup
+}
+%%\newcommand{\highlight}[1]{\colorbox{gray}{\ensuremath{#1}}}
+%%
+\newenvironment{note}{\begin{trivlist} \item \textbf{Note. }}{\end{trivlist}}
+\newcommand{\todo}[1]{\textbf{#1}}
+\newcommand{\etal}{\emph{et~al.}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\spacer}{\quad\quad\quad\quad}
+\newcommand{\filler}{\hspace{0.9\textwidth}}
+\newcommand{\tighten}{\vspace{-1ex}}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{scheme}[theorem]{Proposition Scheme}
+\newtheorem{definition}{Definition}
+\newcommand{\hole}{[\ ]}
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
+
+%% Types
+\newcommand{\typvar}[1]{#1}
+\newcommand{\typzro}{\mathbf{0}}
+\newcommand{\typone}{\mathbf{1}}
+\newcommand{\typarr}[2]{#1\boldsymbol{\rightarrow}#2}
+\newcommand{\typprd}[2]{#1\boldsymbol{\times}#2}
+\newcommand{\typsum}[2]{#1\boldsymbol{+}#2}
+\newcommand{\typrec}[2]{\boldsymbol{\mu}#1\boldsymbol{.}#2}
+
+%% Expressions
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expunt}{\boldsymbol{()}}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}\,#1\boldsymbol{\colon}\kern-3pt#2\>\boldsymbol{.}\,#3}
+\newcommand{\expapp}[2]{#1\ #2}
+\newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3} 
+\newcommand{\expshrind}[3]{\begin{array}[t]{@{}l@{}}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}} 
+\newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
+\newcommand{\expfst}[1]{\mathbf{fst}\ #1}
+\newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
+\newcommand{\explft}[2]{\mathbf{inl}\ #1\ #2}
+\newcommand{\exprgt}[2]{\mathbf{inr}\ #1\ #2}
+\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}}
+\newcommand{\expcasind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
+\newcommand{\expcasindind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \boldsymbol{\{}\, \mathbf{inl}\ #2.\ #3\ \\[-1pt] \ \ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
+
+%% Environment
+\newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
+\newcommand{\envcon}[2]{\tp{#1,}\ #2}
+\newcommand{\env}{\tp{\Gamma}}
+\newcommand{\typing}[2]{\tm{#1:\ }\tp{#2}}
+
+\newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
+\newcommand{\sbs}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{\txt{FV}\,(#1)}
+\newcommand{\fresh}[1]{\txt{Fresh}\,(#1)}
+\newcommand{\txt}[1]{\text{\textit{#1}}}
+\newcommand{\rewrite}[3]{#1 \mapsto_{#2} #3} 
+\newcommand{\reduce}[3]{#1 \rightarrow_{#2} #3} 
+\newcommand{\reducestar}[3]{#1 \twoheadrightarrow_{#2} #3} 
+\newcommand{\valuep}[1]{\txt{Value}\,(#1)}
+\newcommand{\cnd}[1]{\begin{array}[t]{@{}l@{}}\txt{if}\ #1\end{array}}
+\newcommand{\subformulas}[1]{\txt{Subformulas}\,(#1)}
+\newcommand{\psubformulas}[1]{\txt{ProperSubformulas}\,(#1)}
+\newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
+\newcommand{\norm}[1]{\txt{Norm}\,(#1)}
+
+\newcommand{\nv}{\widetilde{V}}
+               %% {\txt{N\kern-3ptV}}
+\newcommand{\nw}{\widetilde{W}}
+               %% {\txt{N\kern-3ptW}}
+\newcommand{\na}{L^{\text{\textcrlambda}}}
+\newcommand{\nx}{\widetilde{x}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+\setlength{\belowcaptionskip}{0pt}
+\setlength{\abovecaptionskip}{0pt}
+\setlength{\droptitle}{0pt} 
+\addtolength{\droptitle}{-60pt}
+\addtolength{\textheight}{50pt}
+\addtolength{\textwidth}{125pt}
+\setlength{\oddsidemargin}{0pt}
+\setlength{\evensidemargin}{0pt}
+%%\setlength{\marginparsep}{0pt}
+%%\setlength{\marginparwidth}{0pt}
+
+\newcommand{\st}[1]{\setbox0=\hbox{$#1$}\rlap{\raisebox{.50\ht0}{\rule{\wd0}{0.1mm}}}#1}
+
+\makeatletter
+\newcommand*{\rom}[1]{\expandafter\@slowromancap\romannumeral #1@}
+\makeatother
+
+\begin{document}
+\title{Sharing-Preserving Normalisation}
+\author{Shayan Najd}
+\maketitle 
+\section*{Introduction} 
+In this report, I describe a sharing-preserving normalisation algorithm.
+
+The normalisation algorithm takes as input a term and returns a
+semantically equivalent term in normal form. In particular, we
+are interested in a normal form where all $\beta$-redexes, including
+the ones related to data destructors, are eliminated. Moreover, under
+certain restrictions on types, we expect the normal terms to be easily
+compilable to first-order target languages like \emph{C} or \emph{SQL}.
+
+The normalisation algorithm is sharing-preserving in the sense that
+elimination of redexes does not duplicate terms; the normalisation
+process preserves (most of) computational and syntactic sharing. That
+is, (most of) originally shared computations are not computed twice at
+runtime, and the size of abstract syntax tree does not increase. 
+ 
+ 
+\section{The Source Language}
+Metavariables $x$, $y$, $z$, and $k$ range over variables. Wherever
+variables are used, renaming of bound variables is allowed;
+we work up to renamings.
+
+When needed, metavariables (of any kind) are decorated with indices.
+
+Types are \textbf{closed} expressions defined by the abstract syntax in
+Figure~\ref{fig:typ}.
+
+\begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}{llll}
+A,B,C & \mathbin{\ ::=\ } 
+%% & \tp{\typvar{X}}        & \textrm{variable}     \\
+%% & \ |\ \ 
+         & \typone       & \textrm{unit}         \\
+& \ |\ \ & \typarr{A}{B} & \textrm{function}  \\
+& \ |\ \ & \typprd{A}{B} & \textrm{product}      \\
+& \ |\ \ & \typsum{A}{B} & \textrm{sum}       %% \\
+%% & \ |\ \ & \tp{\typrec{X}{T}} & \textrm{recursion} 
+\end{array}
+\]
+\end{mdframed}
+\caption{Types}
+\label{fig:typ}
+\end{figure*}
+
+Metavariables $A$, $B$, and $C$ range over types. Types
+correspond to formulas in minimal propositional logic. 
+%% and we restrict them to occur strictly
+%% positive:
+%% \todo{definition of strictly positive here}  
+%% With exception of the recursion type, 
+%% The recursion type is included to be able
+%% to encode a wide range of datatypes which are otherwise built-in in
+%% the language; every monomorphic datatype can be viewed as a recursive
+%% sums of products. This general encoding enables us to provide
+%% generic normalisation rules for data destructors. The generic rules
+%% need to only consider three data destructors: two destructors for
+%% products and one for sums. Since all data destructors are a combination
+%% of the mentioned three data destructors, their corresponding
+%% $\delta$-redexes are combinations of $\delta$-redexes corresponding to
+%% the three data destructors. Therefore, by cooking in a set of
+%% normalisation rules to eliminate $\delta$-redexes corresponding to the
+%% three data destructors, we guarantee removal of all $\delta$-redexes
+%% corresponding to data destructors; there is no need to provide and
+%% build in a separate set of $\delta-$reduction rules per each datatype.
+ 
+Terms are \textbf{open} expressions defined by the abstract syntax in
+Figure~\ref{fig:exp}.
+
+\begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}{llll}
+L,M,N & \mathbin{\ ::=\ } 
+         & \expvar{x}             & \textrm{variable}          \\
+& \ |\ \ & \expunt                & \textrm{unit}              \\
+& \ |\ \ & \expabs{x}{A}{N}       & \textrm{abstraction}       \\
+& \ |\ \ & \expapp{L}{M}          & \textrm{application}       \\
+& \ |\ \ & \expshr{x}{M}{N}       & \textrm{sharing}           \\
+& \ |\ \ & \expprd{M}{N}          & \textrm{product}           \\
+& \ |\ \ & \expfst{L}             & \textrm{projection-first}  \\
+& \ |\ \ & \expsnd{L}             & \textrm{projection-second} \\ 
+& \ |\ \ & \explft{M}{\tm{B}}     & \textrm{injection-left}    \\
+& \ |\ \ & \exprgt{\tm{A}}{N}     & \textrm{injection-right}   \\
+& \ |\ \ & \expcas{L}{x}{M}{y}{N} & \textrm{case}           
+\end{array}
+\]
+\end{mdframed}
+\caption{Terms}
+\label{fig:exp}
+\end{figure*}
+ 
+Metavariables $L$, $M$, and $N$ range over terms. Terms
+correspond to proofs in minimal propositional logic.
+
+%Erasing the types, colored in red, yields the usual untyped
+%$\lambda$-calculus.
+
+Capture-free substitution is defined as usual and it is denoted as
+$\sbs{N}{x}{M}$ for substitution of the term $M$ for the variable
+$x$ in the term $N$. Set of free variables in a term is
+calculated as usual and it is denote as $\fv{N}$ for set of free
+variables in $N$. 
+
+%Moreover, the notation $count(x,N)$ is used to denote a
+%metafunction returning the number of times the free variable $x$ is
+% used syntactically in the expression $N$.
+% We follow Barendregt convension such that we assume variables in a
+% term are all distinct. 
+Type %, normalisation, and evaluation 
+ environments are all maps from
+variable names. The metavariables $\Gamma$, and $\Delta$ range over
+type environments.  The inference rules are equivalent up to exchange,
+contraction, and weakening operations. 
+
+The typing judgement is defined by the inference rules in
+Figure~\ref{fig:typing}.
+
+\begin{figure*}[h]
+\begin{mdframed}
+\[\colored
+\begin{array}{@{}ll@{}}
+\fbox{$\env \vdash \typing{M}{A}$}
+\\~\\
+\inference
+{\typing{x}{A} \in \env}
+{\mathbf{Ax}}
+{
+  \env \vdash \typing{x}{A}
+}
+&
+\inference
+{}
+{\typone}
+{
+   \env \vdash \typing{\expunt}{\typone}
+}
+\\~\\
+\inference
+{
+  \typenvcon{x}{A} \vdash \typing{N}{B} 
+}
+{{\to}\intro}
+{
+  \env \vdash \typing{\expabs{x}{A}{N}}{\typarr{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typarr{A}{B}} 
+& \env \vdash \typing{M}{A} 
+}
+{{\to}\elim}
+{
+  \env \vdash \typing{\expapp{L}{M}}{B} 
+}
+\\~\\ 
+\inference
+{
+  \env \vdash \typing{M}{A}
+  &
+  \typenvcon{x}{A} \vdash \typing{N}{B}
+}
+{\mathbf{let}}
+{
+  \env \vdash \typing{\expshr{x}{M}{N}}{B}
+}
+&
+\inference
+{
+  \env \vdash \typing{M}{A}
+  & 
+  \env \vdash \typing{N}{B} 
+}
+{{\times}\intro}
+{
+  \env \vdash \typing{\expprd{M}{N}}{\typprd{A}{B}} 
+}
+\\~\\ 
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}} 
+}
+{{\times}\elim_1}
+{
+  \env \vdash \typing{\expfst{L}}{A}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}} 
+}
+{{\times}\elim_2}
+{
+  \env \vdash \typing{\expsnd{L}}{B}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{M}{A}
+}
+{{+}\intro_1}
+{
+  \env \vdash \typing{\explft{M}{B}}{\typsum{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{N}{B} 
+}
+{{+}\intro_2}
+{
+  \env \vdash \typing{\exprgt{A}{N}}{\typsum{A}{B}}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{L}{\typsum{A}{B}} 
+& 
+  \typenvcon{x}{A} \vdash \typing{M}{C}  
+& 
+  \typenvcon{y}{B} \vdash \typing{N}{C}
+}
+{{+}\elim}
+{
+  \env \vdash \typing{\expcas{L}{x}{M}{y}{N}}{C} 
+} 
+\end{array}
+\]
+\end{mdframed}
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+
+Typing rules are syntax-directed and algorithmic. 
+%% The consistency of
+%% the type system can be established by its correspondence (under
+%% Curry-Howard) to minimal logic. 
+The correspondence to minimal logic is made evident by using colored
+fonts in typing rules; removing the red bits (i.e. terms and typing
+relation symbol $:$) from the typing rules yields the corresponding
+logical inference rules.\\
+
+%% Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
+
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}lll@{}} 
+%% V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
+%% \end{array}
+%% \] 
+%% \end{mdframed}
+%% \caption{Values}
+%% \label{fig:val}
+%% \end{figure*} 
+
+%% The metavariables $V$, and $W$ range over values. The metavariables
+%% $\nv$, and $\nw$ range over expressions that are not values, also
+%% referred to as non-values. 
+%% The metavariable $\na$ range over expressions that are not abstraction.
+
+\newpage
+%% \section{Normal Forms and Restrictions}
+%% The normal forms that we are interested about, denoted as $P$, is defined in Figure~\ref{fig:nf}.
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}} 
+%% \ \\[-22pt]
+%% (\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{U} & \ |\ \  & \expapp{Q}{U} & \ |\ \  & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+%% \\
+%% (\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}} 
+%% \\
+%% (\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{T}{U} & \ |\ \ & \explft{T}{B} & \ |\ \ & \exprgt{A}{U}
+%% \\
+%% (\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+%% \\ 
+%%  & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+%% \\
+%% (\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% \end{array}
+%% \] 
+%% \end{mdframed}
+%% \caption{Normal Forms}
+%% \label{fig:nf}
+%% \end{figure*} 
+
+%% Restricting the types of free variables, and the type of terms results
+%% in interesting normal forms.
+
+%% For a normal form which is easily compilable to \emph{C}, the
+%% restriction $\Phi$ is applied. The restriction $\Phi$ is defined in
+%% Figure~\ref{fig:phi}.
+ 
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}llll@{}} 
+
+%% \inference
+%% {}
+%% {\Phi_0\typone}
+%% {\Phi_0(\typone)} 
+
+%% &
+
+%% &
+%% \inference
+%% {\Phi_0(A) & \Phi_0(B)}
+%% {\Phi_0\times}
+%% {\Phi_0(\typprd{A}{B})} 
+%% &
+%% \inference
+%% {\Phi_0(A) & \Phi_0(B)}
+%% {\Phi_0+}
+%% {\Phi_0(\typsum{A}{B})} 
+
+
+%% \\~\\
+
+%% \inference
+%% {}
+%% {\Phi_{n+1}\typone}
+%% {\Phi_{n+1}(\typone)} 
+%% &
+%% \inference
+%% {\Phi_n(A) & \Phi_{n+1}(B)}
+%% {\Phi_{n+1}\rightarrow}
+%% {\Phi_{n+1}(\typarr{A}{B})} 
+%% &
+%% \inference
+%% {\Phi_0(A) & \Phi_0(B)}
+%% {\Phi_{n+1}\times}
+%% {\Phi_{n+1}(\typprd{A}{B})} 
+%% &
+%% \inference
+%% {\Phi_0(A) & \Phi_0(B)}
+%% {\Phi_{n+1}+}
+%% {\Phi_{n+1}(\typsum{A}{B})} 
+
+
+%% \end{array}
+%% \] 
+%% \end{mdframed}
+%% \caption{$\Phi$ Restriction}
+%% \label{fig:phi}
+%% \end{figure*} 
+
+%% Having $\Gamma \vdash M : B$, by restricting the type of every free
+%% variable $\typing{x_i}{A_i} \in \Gamma$ such that $\Phi_2(A_i)$, and
+%% by restricting the type of the term $M$ such that $\Phi_1(B)$, we have
+%% the normal form defined in Figure~\ref{fig:rnf}. The terms of this
+%% normal form are easily compilable to \emph{C}.  The notation
+%% $\overline{M}$ is used to denote a non-empty sequence of terms $M_i$.
+
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}} 
+%% \ \\[-22pt]
+%% (\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{\highlight{\overline{U}}} & \ |\ \ & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+%% \\
+%% (\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}} 
+%% \\
+%% (\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{\highlight{R}}{\highlight{S}} & \ |\ \ & \explft{\highlight{R}}{B} & \ |\ \ & \exprgt{A}{\highlight{S}}
+%% \\
+%% (\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+%% \\ 
+%%  & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+%% \\
+%% (\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% \end{array}
+%% \] 
+%% \end{mdframed}
+%% \caption{$\Phi-$Restricted Normal Forms}
+%% \label{fig:rnf}
+%% \end{figure*} 
+%% \newpage
+
+\section{Normalisation}
+Rewrite rules, denoted as $\rewrite{}{i}{}$ for phase $i$, are defined
+in Figure~\ref{fig:red}. The metavariables $\mathbb{C}$, and
+$\mathbb{F}$ denote capture-allowing evaluation frames.  The
+evaluation frame $\mathbb{C}$, whose definition is ommited, is the
+standard complatible frame, where a hole can possibly appear in place
+of every single subterm. The metafunctions defined for terms carry
+over to evaluation frames trivially. The metavariable $\nx$ denotes
+terms that are not variable.
+
+ 
+
+%% Context, denoted as $E$ or ${E}'$, is defined in Figure~\ref{fig:ec}.
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}l@{\ }l@{\ }l@{}} 
+%% E,{E}' & \mathbin{::=} &
+%%  \hole\\
+%%  & \ \ \ |&   
+%%  \expabs{x}{A}{E}\\
+%%  & \ \ \ |&  
+%%  \expapp{M}{E}\ |\ \expapp{E}{N}\\ 
+%%  & \ \ \ |&  
+%%  \expshr{x}{E}{N}\ |\ \expshr{x}{M}{E}\\  
+%%  & \ \ \ |&  
+%%  \expprd{E}{N}\ |\ \expprd{M}{E}\\
+%%  & \ \ \ |&
+%%  \expfst{E}\\
+%%  & \ \ \ |&
+%%  \expsnd{E}\\
+%%  & \ \ \ |&  
+%%  \explft{E}{B}\\ 
+%%  & \ \ \ |&
+%%  \exprgt{A}{E}\\ 
+%%  & \ \ \ |&
+%%  \expcasind{E}{x}{M}{y}{N}\ 
+%%  |\ \expcasind{L}{x}{E}{y}{N}\ 
+%%  |\ \expcasind{L}{x}{M}{y}{E}\ 
+%% \end{array}
+%% \]
+%% \end{mdframed}
+%% \caption{Context}
+%% \label{fig:ec}
+%% \end{figure*} 
+
+
+    
+\begin{figure*}[h]
+\begin{mdframed}
+\[\uncolored
+\begin{array}[t]{@{}llll@{}} 
+
+ %-------------------------------------------------
+\multicolumn{4}{@{}c@{}}{\txt{Phase 1}}\\[-8pt]
+\multicolumn{4}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%-------------------------------------------------
+
+\multicolumn{4}{@{}l@{}}{\mathbb{F} \mathbin{\ ::=\ } 
+    \expapp{\hole}{M}\
+ |\ \expapp{z}{\hole}\ 
+ |\ \expprd{\hole}{N}\ 
+ |\ \expprd{x}{\hole}\ 
+ |\ \expfst{\hole}\ 
+ |\ \expsnd{\hole}\
+ |\ \explft{\hole}{B}\ 
+ |\ \exprgt{A}{\hole}\
+ |\ \expcasind{\hole}{x}{M}{y}{N}}\\[0pt]
+
+(\txt{let}_{\rightarrow\times+})
+& \mathbb{F}[\nx]
+& \ \rewrite{}{1}{}\ \ 
+& \expshr{z}{\nx}{\mathbb{F}[z]}
+\\[0pt]
+\multicolumn{4}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\fresh{z}}\\[0pt]
+
+%-------------------------------------------------
+\multicolumn{4}{@{}c@{}}{\txt{Phase 2}}\\[-8pt]
+\multicolumn{4}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%-------------------------------------------------
+
+(\kappa_{\lambda\txt{-let}})
+& \expabs{x}{A}{\mathbb{C}[\expshr{y}{M}{N}]}
+& \ \rewrite{}{2}{}\ \ 
+& \expshr{y}{M}{\expabs{x}{A}{\mathbb{C}[N]}}
+\\[0pt]
+\multicolumn{4}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }x \notin \fv{M}\txt{, and }\fv{M} \subset \mathbb{C}[N]}
+\\[10pt]
+
+%-------------------------------------------------
+\multicolumn{4}{@{}c@{}}{\txt{Phase 3}}\\[-8pt]
+\multicolumn{4}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%-------------------------------------------------
+
+(\kappa_{\txt{let-let}})
+& \expshr{z}{(\expshr{x}{\nx}{M})}{N}
+& \ \rewrite{}{3}{}\ \ 
+& \expshr{x}{\nx}{\expshr{z}{M}{N}} 
+\\[10pt]
+
+(\kappa_{\txt{let-case}})
+& \expshrind{z}{\expcasind{z_0}{x}{M}{y}{N}}{L}
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{k}{\expabs{z}{A}{L}}{\expcasindind{z_0}{x}{\expshr{z}{M}{\expapp{k}{z}}}{y}{\expshr{z}{N}{\expapp{k}{z}}}}
+%% \\[0pt]
+%% \multicolumn{4}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\fresh{k}}
+\\[10pt]
+
+ 
+(\beta_{\rightarrow})  
+& \expshrind{z}{\expabs{x}{A}{N}}{\mathbb{C}[\expapp{z}{y}]} %%  \expapp{(\expabs{x}{A}{N})}{V} 
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{z}{\expabs{x}{A}{N}}{\mathbb{C}[\sbs{N}{x}{y}]} 
+\\[10pt]  
+
+(\beta_{\times_1})  
+& \expshrind{z}{\expprd{x}{y}}{\mathbb{C}[\expfst{z}]} 
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{z}{\expprd{x}{y}}{\mathbb{C}[x]} 
+\\[10pt]
+
+(\beta_{\times_2})  
+& \expshrind{z}{\expprd{x}{y}}{\mathbb{C}[\expsnd{z}]} 
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{z}{\expprd{x}{y}}{\mathbb{C}[y]} 
+\\[10pt]
+
+(\beta_{+_1}) 
+& \expshrind{z}{\explft{x_1}{B}}{\mathbb{C}[\expcas{z}{x}{M}{y}{N}]} 
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{z}{\explft{x_1}{B}}{\mathbb{C}[\sbs{M}{x}{x_1}]}
+\\[10pt]
+
+(\beta_{+_2})  
+& \expshrind{z}{\exprgt{A}{x_2}}{\mathbb{C}[\expcas{z}{x}{M}{y}{N}]} 
+& \ \rewrite{}{3}{}\ \ 
+& \expshrind{z}{\explft{A}{x_2}}{\mathbb{C}[\sbs{N}{y}{x_2}]}
+\\[10pt]
+
+(\beta_{let-var})  
+& \expshrind{z}{x}{N} 
+& \ \rewrite{}{3}{}\ \ 
+& \sbs{N}{z}{x}
+\\[0pt]
+
+%-------------------------------------------------
+\multicolumn{4}{@{}c@{}}{\txt{Phase 4}}\\[-8pt]
+\multicolumn{4}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%-------------------------------------------------
+
+(\txt{need}) 
+& \expshr{x}{\nx}{N}
+& \ \rewrite{}{4}{}\ \ 
+& N %%\sbs{N}{x}{\nv}
+\\[0pt]
+\multicolumn{4}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }x \notin \fv{N}}
+\\[0pt]
+
+%-------------------------------------------------
+\multicolumn{4}{@{}c@{}}{\txt{Phase 5}}\\[-8pt]
+\multicolumn{4}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%-------------------------------------------------
+
+(\eta_{\rightarrow})
+& L
+& \ \rewrite{}{5}{}\ \ 
+& \expabs{x}{A}{\expapp{L}{x}}
+\\[0pt]
+\multicolumn{4}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\env \vdash \typing{L}{\typarr{A}{B}},\ L \neq \expabs{y}{A}{N}\txt{, and }\fresh{x}}
+\\[0pt]
+ 
+(\beta_{let-\lambda})  
+& \expshrind{z}{(\expabs{x}{A}{M})}{N} 
+& \ \rewrite{}{5}{}\ \ 
+& \sbs{N}{z}{(\expabs{x}{A}{M})}
+\\[0pt]
+
+\end{array}
+\]
+\end{mdframed}
+\caption{Rewrite Rules}
+\label{fig:red}
+\end{figure*} 
+
+One-step reduction relation for each phase, denoted as
+$\reduce{}{i}{}$ for phase $i$, is compatible closure of the
+corresponding rewrite rule $\rewrite{}{i}{}$. One-step reduction
+relation for phase 5 has an extra condition such that a redex should
+not be immediately at the left-hand side of an application,
+i.e. $\mathbb{E} \neq \mathbb{{E}'}[\expapp{\hole}{M}]$ for the
+compatible contexts $\mathbb{E}$ and $\mathbb{{E}'}$.
+
+
+
+%defined in Figure~\ref{fig:one}. 
+
+%% \begin{figure*}[h]
+%% \begin{mdframed}
+%% \[\uncolored
+%% \begin{array}[t]{@{}ll@{}} 
+%% \inference
+%% {
+%%  \rewrite{M}{}{N} 
+%% }
+%% {reduction}
+%% {
+%%   \reduce{E[M]}{}{E[N]}  
+%% }
+%% &
+%% \inference
+%% {\env \vdash \typing{L}{\typarr{A}{B}} & L \neq \expabs{x}{A}{N} & E \neq {E}'[\expapp{\hole}{M}] & \fresh{z}}
+%% {expansion}
+%% {\reduce{E[L]}{}{E[\expabs{z}{A}{\expapp{L}{z}}]}}
+%% \end{array}
+%% \]
+%% \end{mdframed}
+%% \caption{One-Step Reduction}
+%% \label{fig:one}
+%% \end{figure*} 
+ 
+Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
+reflexive transitive closure of the corresponding one-step reduction
+relation $\reduce{}{i}{}$. The overall normalisation, denoted as
+$\reducestar{}{}{}$, is composition of the reduction for all five
+phases,
+i.e. $\reducestar{}{5}{}\circ\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
+
+%% \section{Theorems and Proofs}
+
+%% %% \begin{proposition}[Weak Confluence]\ \\
+%% %% \label{prop_confluency}
+%% %% The compatible closure of Phase 1 rewrite rules  Figure~\ref{fig:red} form a weakly confluent rewrite
+%% %% theory:
+
+%% %% for all expression $L$ such that $\reducestar{L}{}{M_1}$ and
+%% %% $\reducestar{L}{}{M_2}$, there exists an expression $N$ such that
+%% %% $\reducestar{M_1}{}{N}$ and $\reducestar{M_2}{}{N}$.
+
+%% %% \end{proposition}
+ 
+%% %% \begin{definition}[Normal Form]\ \\
+%% %% An expression $M$ is in normal form, denoted as $\norm{M}$, if and only
+%% %% if, there exists no expression $N$ such that $\reduce{M}{}{N}$.
+%% %% \end{definition}
+
+%% \begin{proposition}[Normal Form Syntax]\ \\
+%% \label{prop_normal}
+%% A term $M$ is in normal form, if and only if, it matches the
+%% abstract syntax in Figure~\ref{fig:nf}, given by the entry $P$.
+%% \end{proposition}
+ 
+
+%% \begin{proposition}[Preservation]\ \\
+%% \label{prop_preservation}
+%% Reduction preserves the type of the source term:
+ 
+%%  if $\env \vdash \typing{M}{A}$ and $\reducestar{M}{}{N}$, then 
+%% $\env \vdash \typing{N}{A}$.
+%% \end{proposition}
+
+%% \section{Subformula Property}
+
+%% \begin{definition}[Subterms]\ \\
+%% The set of subterms of a term is defined trivially based on its
+%% syntax. A term is a subterm of itself. Subterms of an expression term
+%% are called subexpressions of the expression term. Subterms of a type
+%% term are called subformula of the type term, denoted as
+%% $\subformulas{\_}$. The union of the subformulas of all types in a typing
+%% environment is also called subformulas of the environment, denoted as
+%% $\subformulas{\_}$.
+%% \end{definition}
+ 
+%% \begin{lemma}\ \\
+%% \label{sub_S}
+%% Provided an expression of neutral form, i.e. syntactic category $S$,
+%% and an environment, type of the expression is in the set of
+%% subformulas of types in the environment:
+ 
+%%  if $\env \vdash \typing{S}{A}$, then $A \in \subformulas{\Gamma}$.
+%% \end{lemma}
+
+%% \begin{lemma}\ \\
+%% \label{sub_R}
+%% Provided an expression of non-value neutral form, i.e. syntactic
+%% category $R$, and an environment, type of the expression is in the set
+%% of subformulas of types in the environment:
+ 
+%%  if $\Gamma \vdash \typing{R}{A}$, then $A \in \subformulas{\Gamma}$.
+%% \end{lemma}
+ 
+%% \begin{proof}[Proof of Lemma~\ref{sub_S} and Lemma~\ref{sub_R}]
+%% Provided an environment $\Gamma$, by mutual induction on the structure
+%% of expressions in neutral form and non-value neutral form, we have the
+%% following cases:
+
+%% \begin{description}
+
+%% \item[Neutral Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expvar{x}$):]\ \\ 
+%%   The corresponding typing derivation concludes the result.
+%% \item[Case ($R$):]\ \\
+%%   Lemma~\ref{sub_R} concludes the result.   
+%% \end{description}
+
+
+%% \item[Non-Value Neutral Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expapp{S}{U}$):]\ \\ 
+%%   By the corresponding typing derivation and lemma~\ref{sub_S}, we
+%%   have $\typarr{A}{B} \in \subformulas{\Gamma}$, where $\typarr{A}{B}$
+%%   is type of $S$ and $B$ type of the whole expression. Since, by the
+%%   definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%   \item  $B \in \subformulas{\typarr{A}{B}}$,
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($\expfst{z}$):]\ \\
+%%   By the corresponding typing derivation, we
+%%   have $\typprd{A}{B} \in \subformulas{\Gamma}$, where $\typprd{A}{B}$
+%%   is type of $z$ and $A$ type of the whole expression. Since, by the
+%%   definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%   \item $A \in \subformulas{\typprd{A}{B}}$,
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($\expsnd{z}$):]\ \\
+%%   By the corresponding typing derivation, we
+%%   have $\typprd{A}{B} \in \subformulas{\Gamma}$, where $\typprd{A}{B}$
+%%   is type of $z$ and $B$ type of the whole expression. Since, by the
+%%   definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%   \item $B \in \subformulas{\typprd{A}{B}}$,
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \end{description}
+%% \end{description}
+%% \end{proof}
+
+%% \begin{lemma}\ \\
+%% \label{sub_T}
+%% Provided an expression of value normal form, i.e. syntactic
+%% category $T$, type of each subrexpression inside the expression is
+%% either in the set of subformulas of the type of the expression, or in
+%% the set of subformulas of types in the environment:
+
+%%  if $\Gamma \vdash \typing{T}{A}$, then for every subexpression $T_i$
+%%  in $T$, such that $\Delta \vdash \typing{T_i}{A_i}$, we have $A_i \in
+%%  \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+%% \end{lemma}
+
+%% \begin{lemma}\ \\
+%% \label{sub_J}
+%% Provided an expression of non-abstraction value normal form, i.e. syntactic
+%% category $J$, type of each subrexpression inside the expression is
+%% either in the set of subformulas of the type of the expression, or in
+%% the set of subformulas of types in the environment:
+
+%%  if $\Gamma \vdash \typing{J}{A}$, then for every subexpression $J_i$
+%%  in $J$, such that $\Delta \vdash \typing{J_i}{A_i}$, we have $A_i \in
+%%  \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+%% \end{lemma}
+
+%% \begin{lemma}\ \\
+%% \label{sub_P}
+%% Provided an expression of non-abstraction normal form, i.e. syntactic category $P$,
+%% type of each subrexpression inside the expression is either in the set of
+%% subformulas of the type of the expression, or in the set
+%% of subformulas of types in the environment:
+
+%%  if $\Gamma \vdash \typing{P}{A}$, then for every subexpression $P_i$
+%%  in $P$, such that $\Delta \vdash \typing{P_i}{A_i}$, we have $A_i \in
+%%  \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+%% \end{lemma}
+
+%% \begin{lemma}\ \\
+%% \label{sub_K}
+%% Provided an expression of normal form, i.e. syntactic category $K$,
+%% type of each subrexpression inside the expression is either in the set of
+%% subformulas of the type of the expression, or in the set
+%% of subformulas of types in the environment:
+
+%%  if $\Gamma \vdash \typing{K}{A}$, then for every subexpression $K_i$
+%%  in $K$, such that $\Delta \vdash \typing{K_i}{A_i}$, we have $A_i \in
+%%  \subformulas{A}$ or $A_i \in \subformulas{\Gamma}$. 
+%% \end{lemma}
+ 
+%% \begin{proof}[Proof of Lemma~\ref{sub_T}, Lemma~\ref{sub_J}, Lemma~\ref{sub_P}, and Lemma~\ref{sub_K}]
+%% Provided an environment $\Gamma$, by mutual induction on the structure
+%% of expressions in value normal form, non-abstraction value normal
+%% form, non-abstraction normal form, and normal form, we have the
+%% following cases:
+
+%% \begin{description}
+
+%% \item[Value Normal Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expabs{x}{A}{K}$):]\ \\ 
+%%   By the corresponding typing derivation and lemma~\ref{sub_K}, we
+%%   have for every $A_i$ (type of the subexpression $K_i$ in $K$), that
+%%   $A_i \in \subformulas{(\typenvcon{x}{A})}$, or $A_i \in
+%%   \subformulas{B}$, where $\typarr{A}{B}$ is type of the whole
+%%   expression. Since, by the definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[(a)] 
+%%      \item $(A_i \in \subformulas{A})$ or $(A_i \in \subformulas{B})$ implies $A_i \in \subformulas{\typarr{A}{B}}$, and
+%%      \item $A_i \in \subformulas{(\typenvcon{x}{A})}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$;
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($J$):]\ \\
+%%   Lemma~\ref{sub_J} concludes the result.   
+%% \end{description}
+
+%% \item[Non-Abstraction Value Normal Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expvar{x}$):]\ \\ 
+%%   The corresponding typing derivation concludes the result. 
+%% \item[Case ($\expunt$):]\ \\ 
+%%   The corresponding typing derivation concludes the result. 
+%% \item[Case ($\expprd{T}{U}$):]\ \\ 
+%%   By the corresponding typing derivation and lemma~\ref{sub_T}, we
+%%   have for every $A_i$ (type of the subexpression $T_i$ in $T$), that
+%%   $A_i \in \subformulas{\Gamma}$, or $A_i \in \subformulas{A}$, where
+%%   $\typprd{A}{B}$ is type of the whole expression. We also have for
+%%   every $B_i$ (type of the subexpression $U_i$ in $U$), that $B_i \in
+%%   \subformulas{\Gamma}$, or $B_i \in \subformulas{B}$. Since, by the
+%%   definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[(a)] 
+%%      \item $A_i \in \subformulas{A}$ implies $A_i \in \subformulas{\typprd{A}{B}}$, and
+%%      \item $B_i \in \subformulas{B}$ implies $B_i \in \subformulas{\typprd{A}{B}}$;
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($\explft{T}{B}$):]\ \\
+%%   By the corresponding typing derivation and lemma~\ref{sub_T}, we
+%%   have for every $A_i$ (type of the subexpression $T_i$ in $T$), that
+%%   $A_i \in \subformulas{\Gamma}$, or $A_i \in \subformulas{A}$, where
+%%   $\typsum{A}{B}$ is type of the whole expression.  Since, by the
+%%   definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%      \item $A_i \in \subformulas{A}$ implies $A_i \in \subformulas{\typsum{A}{B}}$,
+%%   \end{enumerate}
+%%   it concludes the result. 
+%% \item[Case ($\exprgt{A}{U}$):]\ \\
+%%   By the corresponding typing derivation and lemma~\ref{sub_T}
+%%   (i.e. the induction hypothesis), we have for every $B_i$ (type of
+%%   the subexpression $U_i$ in $U$), that $B_i \in
+%%   \subformulas{\Gamma}$, or $B_i \in \subformulas{B}$,
+%%   where $\typsum{A}{B}$ is type of the whole expression.
+%%   Since, by the definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%      \item $B_i \in \subformulas{B}$ implies $B_i \in \subformulas{\typsum{A}{B}}$,
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \end{description}
+
+%% \item[Non-Abstraction Normal Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expcas{z}{x}{P}{y}{Q}$):]\ \\
+%%   By the corresponding typing derivation, we have $\typsum{A}{B} \in
+%%   \subformulas{\Gamma}$, where $\typsum{A}{B}$ is type of $z$. We also
+%%   have, together with lemma~\ref{sub_P}, for every $A_i$ (type of the
+%%   subexpression $P_i$ in $P$), that $A_i \in
+%%   \subformulas{\typenvcon{x}{A}}$, or $A_i \in \subformulas{C}$, where
+%%   $C$ is type of the whole expression. Moreover, we have, together
+%%   with lemma~\ref{sub_P}, for every $B_i$ (type of the subexpression
+%%   $Q_i$ in $Q$), that $B_i \in \subformulas{\typenvcon{x}{B}}$, or
+%%   $B_i \in \subformulas{C}$.  Since, by the definition of
+%%   $\subformulas{\_}$, we have
+%%   \begin{enumerate}[(a)] 
+%%      \item $\typsum{A}{B} \in \subformulas{\Gamma}$ implies $(A \in \subformulas{\Gamma})$ and $(B \in \subformulas{\Gamma})$,
+%%      \item $A_i \in \subformulas{\typenvcon{x}{A}}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$, and
+%%      \item $B_i \in \subformulas{\typenvcon{x}{B}}$ implies $(B_i \in \subformulas{\Gamma})$ or $(B_i \in \subformulas{B})$; 
+%%   \end{enumerate}
+%%   it concludes the result. 
+%% \item[Case ($\expshr{x}{R}{Q}$):]\ \\
+%%   By the corresponding typing derivation and lemma~\ref{sub_R}, we
+%%   have $A \in \subformulas{\Gamma}$, where $A$ is type of $R$. We also
+%%   have, together with lemma~\ref{sub_P}, for every $B_i$ (type of the subexpression $Q_i$ in
+%%   $Q$), that $B_i \in \subformulas{\typenvcon{x}{A}}$, or $B_i \in
+%%   \subformulas{B}$, where $B$ is type of the whole expression. Since, by the definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[] 
+%%      \item $B_i \in \subformulas{\typenvcon{x}{A}}$ implies $(B_i \in \subformulas{\Gamma})$ or $(B_i \in \subformulas{A})$,
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($R$):]\ \\
+%%   Lemma~\ref{sub_R} concludes the result.
+%% \item[Case ($J$):]\ \\
+%%   Lemma~\ref{sub_J} concludes the result.
+%% \end{description}
+%% \item[Normal Form]\ \\
+%% \begin{description}
+%% \item[Case ($\expabs{x}{A}{K}$):]\ \\ 
+%%   By the corresponding typing derivation and lemma~\ref{sub_K}, we
+%%   have for every $A_i$ (type of the subexpression $K_i$ in $K$), that
+%%   $A_i \in \subformulas{(\typenvcon{x}{A})}$, or $A_i \in
+%%   \subformulas{B}$, where $\typarr{A}{B}$ is type of the whole
+%%   expression. Since, by the definition of $\subformulas{\_}$, we have
+%%   \begin{enumerate}[(a)] 
+%%      \item $(A_i \in \subformulas{A})$ or $(A_i \in \subformulas{B})$ implies $A_i \in \subformulas{\typarr{A}{B}}$, and
+%%      \item $A_i \in \subformulas{(\typenvcon{x}{A})}$ implies $(A_i \in \subformulas{\Gamma})$ or $(A_i \in \subformulas{A})$;
+%%   \end{enumerate}
+%%   it concludes the result.
+%% \item[Case ($P$):]\ \\
+%%   Lemma~\ref{sub_P} concludes the result.   
+%% \end{description}
+%% \end{description}
+%% \end{proof}
+
+%% \begin{proposition}[Subformula Property]\ \\
+%% \label{prop_subformula}
+%% If $\Gamma \vdash \typing{N}{A}$, $\reducestar{N}{}{K}$, and $\norm{K}$;
+%% then for every expression $K_i$ in the set of subexpressions of $K$ such
+%% that $\Delta \vdash \typing{K}{A_i}$, $A_i$ is in the set of subformulas of
+%% the type $A$, or in the set of subformulas of all types in the
+%% environment $\Gamma$.
+%% \end{proposition}
+%% \begin{proof}
+%% Proof is established by using proposition~\ref{prop_preservation},
+%% proposition~\ref{prop_normal}, and lemma~\ref{sub_K}.
+%% \end{proof}
+
+%% \section{Second Phase}
+%% We further introduce the eta expansion rule in
+%% Figure~\ref{fig:add_red}, where $L$ is not an abstraction and not on
+%% the left side of an application:
+
+%% \begin{figure*}[h]
+%% \[\uncolored
+%% \begin{array}[t]{@{}lllll@{}} 
+%% (\eta)
+%% & L 
+%% &\ \rewrite{}{}{}\ 
+%% & \expabs{x}{A}{\expapp{L}{x}} 
+%% & \cnd{\env \vdash \typing{L}{\typarr{A}{B}},\ and\ x\ \txt{is\ fresh}}\\[0pt]
+%% \end{array}
+%% \]
+%% \caption{Additional Reduction Rules}
+%% \label{fig:add_red}
+%% \end{figure*} 
+
+%% For instance, consider the situation where normalised terms in our
+%% higher-order language is compiled to terms of a first-order
+%% language. In such a scenario, we would like to provide a form of
+%% gaurantee at compile-time, indicating absence of lambda abstractions
+%% in a normalised term. Therefore, we start by formulating the following
+%% proposition scheme, parameterised over a predicate on the typing
+%% environment.
+
+%% \begin{scheme}[$\Phi-$Strong Subformula Property]\ \\
+%% \label{sub_scheme}
+%% Provided the predicate $\Phi(\_)$, expression $N$, and environment
+%% $\Gamma$ such that $\Phi(\Gamma)$; if $\Gamma \vdash \typing{N}{A}$,
+%% $\reducestar{N}{}{Q}$, and $\norm{Q}$; then for every expression $Q_i$
+%% in the set of subexpressions of $Q$ such that $\Delta \vdash
+%% \typing{Q_i}{A_i}$, $A_i$ is in the set of subformulae of the type
+%% $A$.
+%% \end{scheme}
+
+%% Now, we start with a simple predicate to only allow closed expressions.
+ 
+%% \begin{proposition}[Nil$-$Strong Subformula Property]\ \\
+%% Having $\Phi(\_)$ instantiated to $\Phi(\envemp)$ (i.e. accepting empty environments only), the
+%% proposition~scheme~\ref{sub_scheme} holds.
+%% \end{proposition}
+%% \begin{proof}
+%% The proposition~\ref{prop_subformula} concludes the proof.
+%% \end{proof}
+
+%% \textbf{Warning: the remaning is only a sketch, possibly non-sense!}
+
+%% \begin{definition}[Rank$_n$]\ \\
+%% Rank$_n$ type is a type that only allows each type constructor inside
+%% it to be nested inside itself no more than $n - 1$ times. Similarly,
+%% rank$_{n}^{\,\circledast}$ type is a type, inside which nesting of the
+%% type constructor $\circledast$ is restricted to maximum $n - 1$ times.
+%% For example, rank$_{0}^{\,\typarr{}{}}$ type is a type that does not have
+%% function type $\typarr{}{}$ anywhere inside it.
+%% \end{definition}
+
+%% \begin{proposition}[Rank$_{1}-$Strong Subformula Property]\ \\
+%% Having $\Phi(\Gamma)$ instantiated to the following statement, the
+%% proposition~scheme~\ref{sub_scheme} holds:
+ 
+%%  forall type $A_i$ in $\Gamma$, $A_i$ is of rank$_{1}$.
+ 
+%% \end{proposition}
+%% \begin{proof}
+%% To be investigated...
+%% \end{proof}
+
+ 
+\end{document}
