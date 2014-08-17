@@ -1,6 +1,5 @@
 module Expression.Feldspar.GADTFirstOrder where
  
-import Prelude ()
 import MyPrelude
 
 import Variable.Typed

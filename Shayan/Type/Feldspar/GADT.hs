@@ -1,6 +1,5 @@
 module Type.Feldspar.GADT where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Type.Feldspar.ADT as A

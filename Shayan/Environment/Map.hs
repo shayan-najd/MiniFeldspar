@@ -1,6 +1,5 @@
 module Environment.Map where
  
-import Prelude ()
 import MyPrelude 
 
 type Env a b = [(a , b)]

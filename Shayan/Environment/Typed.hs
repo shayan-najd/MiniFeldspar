@@ -1,6 +1,5 @@
 module Environment.Typed where
 
-import Prelude ()
 import MyPrelude hiding (mapM)
 
 import Singleton

@@ -1,6 +1,5 @@
 module InferenceMonad where
 
-import Prelude ()
 import MyPrelude
 
 import Type.Herbrand

@@ -1,6 +1,5 @@
 module Environment.Plain where
 
-import Prelude ()
 import MyPrelude 
 
 import Variable.Plain

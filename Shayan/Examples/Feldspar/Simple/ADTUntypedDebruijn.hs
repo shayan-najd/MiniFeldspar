@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.ADTUntypedDebruijn where
  
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.ADTUntypedDebruijn

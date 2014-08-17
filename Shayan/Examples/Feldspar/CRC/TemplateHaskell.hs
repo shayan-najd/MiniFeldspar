@@ -1,6 +1,5 @@
 
 
-import Prelude ()
 import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.TemplateHaskell
@@ -13,10 +12,7 @@ import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 import qualified Expression.Feldspar.GADTValue       as FGV
 import qualified Type.Feldspar.GADT                  as TFG
 import Compiler (scompileWith)
-
-import Normalization
-import Normalization.Feldspar.MiniWellScoped ()
-
+ 
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Conversion.Expression.Feldspar ()
@@ -26,12 +22,11 @@ crc32 = [|| $$foldl $$updCrc 0 ||]
  
 updCrc :: Data (Integer -> Integer -> Integer)
 updCrc = [|| \ cc -> \ ch -> 
-             $$xor 
-             ($$xor 
+             $$bitXor 
+             ($$bitXor 
               (ind $$tbl 
-               ($$((.&.))
-                ($$xor ($$xor cc 0xFFFFFFFF) ch) 0xff))
-              ($$((.>>.)) ($$xor cc 0xFFFFFFFF)  8)) 
+               ($$bitAnd ($$bitXor ($$bitXor cc 0xFFFFFFFF) ch) 0xff))
+              ($$shfRgt ($$bitXor cc 0xFFFFFFFF) 8)) 
              0xFFFFFFFF ||]
           
 tbl :: Data (Ary Integer)
@@ -63,6 +58,6 @@ main = MP.getArgs MP.>>=
                           (scompileWith [("v0" , TFA.Ary TFA.Int)]  
                            TFG.Int 
                            ("v0" <+> esString) 1 
-                           (nrmIf (as MP./= "NoNrm") crc32FMWS)) 
+                           crc32FMWS) 
                       f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
                   in  MP.writeFile (as MP.++ "CRCTemplateHaskell.c") f')

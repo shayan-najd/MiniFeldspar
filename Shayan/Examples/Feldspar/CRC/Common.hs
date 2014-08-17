@@ -1,8 +1,6 @@
 module Examples.Feldspar.CRC.Common where
 
-import Prelude ()
 import MyPrelude
-import Data.Char (ord)
 
 test :: Integer -> Bool
 test = (== 3632233996)

@@ -1,6 +1,5 @@
 module Examples.Feldspar.Prelude.Environment where
 
-import Prelude ()
 import MyPrelude hiding (Int) 
 
 import qualified Expression.Feldspar.ADTValue  as FAV

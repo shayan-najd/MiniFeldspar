@@ -1,6 +1,7 @@
 -- Inspired by Dybjer and Flinisky's 
 module Demo.GlueNBE where
 
+import Prelude
 import Data.Maybe
 
 data Syn = S | K | App Syn Syn | Zero | Succ | Rec

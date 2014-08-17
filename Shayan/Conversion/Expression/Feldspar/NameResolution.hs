@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.NameResolution () where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Expression.Feldspar.ADTUntypedNamed    as FAUN

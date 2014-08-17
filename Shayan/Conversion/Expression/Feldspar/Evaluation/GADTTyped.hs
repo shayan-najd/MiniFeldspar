@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Evaluation.GADTTyped () where
 
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTTyped
@@ -12,9 +11,7 @@ import Nat.ADT
 
 import Conversion 
 import Conversion.Variable ()
-
-import Prelude (undefined)
-
+ 
 instance Cnv (Exp n t , Env n FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of        
     ConI i       -> FAV.conI <$@> i
@@ -31,7 +28,7 @@ instance Cnv (Exp n t , Env n FAV.Exp) FAV.Exp where
     Ary el ef    -> FAV.ary  <$@> el <*@> ef
     Len _  e     -> FAV.len  <$@> e                         
     Ind ea ei    -> FAV.ind  <$@> ea <*@> ei                            
-    Let _  el eb -> return   <$@> App undefined (Abs eb) el
+    Let _  el eb -> return   <$@> App impossible (Abs eb) el
     Cmx er ei    -> FAV.cmx  <$@> er <*@> ei)                            
     
 instance Cnv (Exp (Suc n) t , Env n FAV.Exp) (FAV.Exp -> FAV.Exp) where

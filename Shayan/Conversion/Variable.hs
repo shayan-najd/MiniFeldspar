@@ -1,6 +1,5 @@
 module Conversion.Variable () where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Variable.Plain     as VP

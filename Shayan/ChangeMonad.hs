@@ -1,6 +1,5 @@
-module ChangeMonad where
+module ChangeMonad (Chg(..),chg,tilNotChg) where
 
-import Prelude ()
 import MyPrelude
  
 data Chg a = Chg Bool a
@@ -18,7 +17,7 @@ instance Applicative Chg where
 instance Monad Chg where
   return           = Chg False 
   (Chg b x) >>= f = let Chg b' x' = f x 
-                     in Chg (b || b') x'    
+                    in  Chg (b || b') x'    
                         
 chg :: a -> Chg a
 chg = Chg True

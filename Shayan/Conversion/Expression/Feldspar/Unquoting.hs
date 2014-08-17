@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Unquoting () where
 
-import Prelude ()
 import MyPrelude (pure,fail,toRational,toInteger,fromInteger,fromRational
                  ,show,(++),(==),Maybe(..))
 
@@ -9,7 +8,7 @@ import qualified Language.Haskell.TH.Syntax          as TH
 
 import Conversion
 
-import Examples.Feldspar.Prelude.TemplateHaskell hiding ((==))
+import Examples.Feldspar.Prelude.TemplateHaskell
 
 instance Cnv (TH.Exp , ()) (FAUN.Exp TH.Name) where
   cnv (ee , r) = let ?r = r in case ee of 

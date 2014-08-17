@@ -1,6 +1,5 @@
 module Conversion(Cnv(..),(<$@>),(<*@>),cnvImp) where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Language.Haskell.TH.Syntax as TH
@@ -19,7 +18,6 @@ instance Cnv (Float , r) Float where
 
 instance Cnv (Complex Float , r) (Complex Float) where
   cnv = pure . fst  
-
 
 instance Cnv (TH.Name , r) TH.Name where
   cnv = pure . fst    

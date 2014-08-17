@@ -1,13 +1,12 @@
 module Examples.Feldspar.IP.Common where
 
-import Prelude ()
 import MyPrelude
 
 import System.IO.Unsafe
 
 tstPPM :: [Integer]
 tstPPM = unsafePerformIO 
-         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image.ppm"
+         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image16.ppm"
              let "P3" : _ : "255" : c = lines f
              return (fmap (read :: String -> Integer) c))
 

@@ -1,6 +1,5 @@
 {-# LANGUAGE RebindableSyntax #-}
 
-import Prelude ()
 import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.MiniWellScoped 
@@ -14,11 +13,11 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler (scompileWith)
  
-import Normalization
-import Normalization.Feldspar.MiniWellScoped ()
+-- import Normalization
+-- import Normalization.Feldspar.MiniWellScoped ()
 
 toBW :: Vec Integer -> Vec Integer
-toBW = map (\x -> if x < 135 then 1 else 0) 
+toBW = map (\x -> if lt x 135 then 1 else 0) 
 
 redCoefficient :: Data Integer
 redCoefficient   = 30
@@ -31,28 +30,30 @@ blueCoefficient  = 11
 
 rgbToGray :: Data Integer -> Data Integer -> 
              Data Integer -> Data Integer 
-rgbToGray r g b = ((r * redCoefficient  ) +                        
-                   (g * greenCoefficient) +
-                   (b * blueCoefficient )) / 100
+rgbToGray = \ r -> \ g -> \ b ->
+            div 
+            (add 
+             (add (mul r redCoefficient)                         
+                      (mul g greenCoefficient))
+             (mul b blueCoefficient)) 100
                  
 toGray :: Vec Integer -> Vec Integer
-toGray v = vec ((length v) / 3)
-           (\ i -> let j = i * 3
-                   in rgbToGray 
-                      (v !! j) 
-                      (v !! (j + 1)) 
-                      (v !! (j + 2)))
+toGray = \ v -> vec (div (lenV v) 3)
+         (\ i -> let j = mul i 3
+                 in  rgbToGray 
+                         (indV v j) 
+                         (indV v (add j 1)) 
+                         (indV v (add j 2)))
   
 fromColoredtoBW :: Vec Integer -> Vec Integer
-fromColoredtoBW v = toBW (toGray v)
+fromColoredtoBW = \ v -> toBW (toGray v)
  
 inp :: Vec Integer
-inp = fromList 
-      (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstPPM) 0
+inp = fromList (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstPPM) 0
 
 out :: [MP.Integer]
-out  = let FGV.Exp e =  MP.frmRgt (cnv ((vec2ary MP.. 
-                                         fromColoredtoBW) inp, etFGV)) 
+out  = let FGV.Exp e = MP.frmRgt (cnv ((vec2ary MP.. 
+                                        fromColoredtoBW) inp, etFGV)) 
        in  MP.elems e
 
 prop :: MP.Bool
@@ -63,11 +64,11 @@ fromColoredtoBWAry = vec2ary MP.. fromColoredtoBW MP.. ary2vec
 
 main :: MP.IO ()
 main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt 
-                          (scompileWith [] 
-                           (TFG.Ary TFG.Int) 
-                           esString 0 
-                           (nrmIf (as MP./= "NoNrm") fromColoredtoBWAry))
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
-                  in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f')    
- 
+       (\ [as] -> let 
+            f = MP.frmRgt 
+                (scompileWith [] 
+                 (TFG.Ary TFG.Int) 
+                 esString 0 
+                 ({-nrmIf (as MP./= "NoNrm")-} fromColoredtoBWAry))
+            f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f') 

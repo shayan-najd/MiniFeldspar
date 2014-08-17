@@ -1,6 +1,4 @@
 module Existential where 
-
-import Prelude ()
  
 data Exs0 :: (* -> *) -> * where
   Exs0 :: t -> tf t -> Exs0 tf

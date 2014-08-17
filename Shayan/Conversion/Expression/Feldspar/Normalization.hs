@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Normalization () where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Expression.Feldspar.GADTHigherOrder as FGHO

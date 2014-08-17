@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.ScopeWithnessing () where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Expression.Feldspar.ADTUntypedDebruijn  as FAUD

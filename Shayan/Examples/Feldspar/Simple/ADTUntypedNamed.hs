@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.ADTUntypedNamed where
  
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.ADTUntypedNamed 

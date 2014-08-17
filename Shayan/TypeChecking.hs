@@ -1,7 +1,5 @@
 module TypeChecking where
 
-import Prelude ()
-
 import Type.Herbrand
 import InferenceMonad
 import Nat.ADT

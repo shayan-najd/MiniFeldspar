@@ -1,6 +1,5 @@
 module Compiler where
 
-import Prelude ()
 import MyPrelude hiding (fst , snd)
 
 import Expression.Feldspar.C

@@ -1,10 +1,10 @@
 module Type.Herbrand where
 
-import Prelude ()
 import MyPrelude
 
 import Variable.Typed
 import Environment.Scoped 
+import Nat.TH
 
 import qualified Nat.ADT as NA
 
@@ -40,14 +40,14 @@ appTs i t = fmap (appT i t)
 appTtas :: [(NA.Nat , Typ r)] -> Typ r -> Typ r
 appTtas ttas t = foldl (\ ta (i , t') -> appT i t' ta) t ttas 
 
-type EnvFld r = NA.N0 ': NA.N2 ': NA.N0 ': NA.N2 ': 
-                NA.N1 ': NA.N0 ': NA.N0 ': r
+type EnvFld r = $(natT 0 "NA.") ': $(natT 2 "NA.") ': $(natT 0 "NA.") ': 
+                $(natT 2 "NA.") ': $(natT 1 "NA.") ': $(natT 0 "NA.") ': 
+                $(natT 0 "NA.") ': r
   
-pattern Int       = App Zro Emp
-pattern Arr ta tb = App (Suc Zro) (Ext ta (Ext tb Emp))
-pattern Bol       = App (Suc (Suc Zro)) Emp
-pattern Tpl tf ts = App (Suc (Suc (Suc Zro))) (Ext tf (Ext ts Emp))       
-pattern Ary ta    = App (Suc (Suc (Suc (Suc Zro)))) (Ext ta  Emp)  
-pattern Flt       = App (Suc (Suc (Suc (Suc (Suc Zro))))) Emp
-pattern Cmx       = App (Suc (Suc (Suc (Suc (Suc (Suc Zro)))))) Emp
-
+pattern Int       = App $(natP 0 "") Emp
+pattern Arr ta tb = App $(natP 1 "") (Ext ta (Ext tb Emp))
+pattern Bol       = App $(natP 2 "") Emp
+pattern Tpl tf ts = App $(natP 3 "") (Ext tf (Ext ts Emp))       
+pattern Ary ta    = App $(natP 4 "") (Ext ta  Emp)  
+pattern Flt       = App $(natP 5 "") Emp
+pattern Cmx       = App $(natP 6 "") Emp

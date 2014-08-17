@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.TypeWithnessing () where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Expression.Feldspar.GADTTyped      as FGTD

@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.GADTTyped where
  
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTTyped 

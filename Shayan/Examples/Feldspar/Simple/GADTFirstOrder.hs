@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.GADTFirstOrder where
 
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTFirstOrder

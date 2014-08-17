@@ -1,6 +1,5 @@
 module VanillaPrelude where
 
-import Prelude ()
 import MyPrelude as MP
 
 cnd :: Bool -> s -> s -> s

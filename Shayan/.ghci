@@ -15,11 +15,13 @@
 :set -XDeriveTraversable
 :set -XDeriveDataTypeable
 :set -XDeriveGeneric
-:set -XTypeHoles
 :set -XNoUndecidableInstances
 :set -XMonoLocalBinds
 :set -XScopedTypeVariables
 :set -XMultiParamTypeClasses
 :set -XImplicitParams
 :set -XTemplateHaskell
-:set -XRank2Types
+:set -XRankNTypes
+:set -XPatternSynonyms
+:set -XViewPatterns
+:set -XNoImplicitPrelude

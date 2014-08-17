@@ -1,4 +1,4 @@
-module ErrorMonad where
+module ErrorMonad(ErrM(..),frmRgt) where
 
 import Prelude (Monad(..),String,Eq,Show,Functor,error)
 import Control.Applicative (Applicative(..))

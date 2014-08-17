@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.TypeInference () where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Expression.Feldspar.GADTUntypedDebruijn as FGUD

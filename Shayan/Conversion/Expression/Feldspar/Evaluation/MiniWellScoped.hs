@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Evaluation.MiniWellScoped () where
 
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.MiniWellScoped

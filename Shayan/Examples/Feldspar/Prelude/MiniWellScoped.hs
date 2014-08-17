@@ -5,20 +5,19 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,Bool,pattern True, pattern False
        ,Tpl,tpl,fst,snd           
        ,Complex,cmx,real,imag
-       ,Vec,vec,length,(!!)           
+       ,Vec,vec,lenV,indV           
        ,Ary,ary,len,ind               
-       ,ifThenElse,whl,forLoop,forLoopVec
-       ,not,(&&),(||)                  
-       ,Equality((==)),(/=)
-       ,Ordering((<)),(>),(>=),(<=),min           
-       ,Numeric((+),(-),(*),(/),negate),ilog2
-       ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
+       ,ifThenElse,whl,forLoop,forLoopVec --memorize
+       ,not,and,or                  
+       ,Equality(eql),notEql
+       ,Ordering(lt),gt,lte,gte,min           
+       ,Numeric(add,sub,mul,div,neg),ilog2 --sqrt
+       ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis,ary2vec,vec2ary                                  
-       ,(...),permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
-       ,(....),permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
+       ,frmTo,permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
+       ,frmToA,permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
        ) where
 
-import Prelude ()
 import qualified Prelude   as P
 import qualified MyPrelude as MP
 
@@ -27,7 +26,7 @@ import qualified Type.Feldspar.ADT             as TFA
 import qualified Type.Feldspar.GADT            as TFG
 
 import Singleton
-import Environment.Typed hiding (map,len)
+import Environment.Typed (Env(Emp,Ext))
 import Examples.Feldspar.Prelude.Environment
 
 type Type t = HasSin TFG.Typ t
@@ -124,11 +123,11 @@ data Vec t = Vec (Data Integer) (Data Integer -> Data t)
 vec :: Data Integer -> (Data Integer -> Data t) -> Vec t
 vec = Vec
 
-length :: Vec t -> Data Integer
-length (Vec l _) = l
+lenV :: Vec t -> Data Integer
+lenV (Vec l _) = l
 
-(!!) :: Vec t -> Data Integer -> Data t
-(!!) (Vec _ f) = f 
+indV :: Vec t -> Data Integer -> Data t
+indV (Vec _ f) = f 
 
 ---------------------------------------------------------------------------------
 -- Ary
@@ -155,12 +154,11 @@ whl = Whl
 
 forLoop :: Type s => Data Integer -> Data s -> 
            (Data Integer -> Data s -> Data s ) -> Data s
-forLoop l init step = Snd (Whl (\ t -> (Fst t) < l)
+forLoop l init step = Snd (Whl (\ t -> lt (Fst t) l)
                                (\ t -> Tpl 
-                                       ((Fst t) + (ConI 1)) 
+                                       (add  (Fst t) (ConI 1)) 
                                        (step (Fst t) (Snd t)))
-                               (Tpl (ConI 0) init))
-                      
+                               (Tpl (ConI 0) init))                      
 
 forLoopVec :: Type s => Data Integer -> Vec s -> 
            (Data Integer -> Vec s -> Vec s) -> Vec s
@@ -175,90 +173,90 @@ forLoopVec l init step =  let init'     = vec2ary init
 not :: Data Bool -> Data Bool
 not x = ifThenElse x False True
 
-(&&) :: Data Bool -> Data Bool -> Data Bool
-x && y = ifThenElse x y False
+and :: Data Bool -> Data Bool -> Data Bool
+and x y = ifThenElse x y False
 
-(||) :: Data Bool -> Data Bool -> Data Bool
-x || y = ifThenElse x True y
+or :: Data Bool -> Data Bool -> Data Bool
+or x y = ifThenElse x True y
 
 ---------------------------------------------------------------------------------
 -- Equality
 ---------------------------------------------------------------------------------
   
 class Equality t where
-  (==) :: Data t -> Data t -> Data Bool
+  eql :: Data t -> Data t -> Data Bool
   
 instance Equality Bool where
-  el == er = AppV eqlBolVar (Ext el (Ext er Emp)) 
+  eql el er = AppV eqlBolVar (Ext el (Ext er Emp)) 
 
 instance Equality Integer where
-  el == er = AppV eqlIntVar (Ext el (Ext er Emp)) 
+  eql el er = AppV eqlIntVar (Ext el (Ext er Emp)) 
 
 instance Equality Float where
-  el == er = AppV eqlFltVar (Ext el (Ext er Emp)) 
+  eql el er = AppV eqlFltVar (Ext el (Ext er Emp)) 
          
-(/=) :: Equality t => Data t -> Data t -> Data Bool 
-x /= y = not (x == y) 
+notEql :: Equality t => Data t -> Data t -> Data Bool 
+notEql x y = not (eql x y) 
 
 ---------------------------------------------------------------------------------
 -- Ordering
 ---------------------------------------------------------------------------------
 
 class Ordering t where
-  (<) :: Data t -> Data t -> Data Bool
+  lt :: Data t -> Data t -> Data Bool
    
 instance Ordering Bool where
-  el < er = AppV ltdBolVar (Ext el (Ext er Emp))  
+  lt el er = AppV ltdBolVar (Ext el (Ext er Emp))  
 
 instance Ordering Integer where
-  el < er = AppV ltdIntVar (Ext el (Ext er Emp))  
+  lt el er = AppV ltdIntVar (Ext el (Ext er Emp))  
   
 instance Ordering Float where
-  el < er = AppV ltdFltVar (Ext el (Ext er Emp))  
+  lt el er = AppV ltdFltVar (Ext el (Ext er Emp))  
     
-(>) :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
-x > y = not ((x < y) || (x == y)) 
+gt :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
+gt x y = not (or (lt x y) (eql x y)) 
 
-(>=) :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
-x >= y = not (x < y)
+lte :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
+lte x y = or (lt x y) (eql x y)
 
-(<=) :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
-x <= y = (x < y) || (x == y)
+gte :: (Equality t , Ordering t) => Data t -> Data t -> Data Bool
+gte x y = not (lt x y)
 
 min :: Ordering t => Data t -> Data t -> Data t
-min x y = ifThenElse (x < y) x y
+min x y = ifThenElse (lt x y) x y
 
 ---------------------------------------------------------------------------------
 -- Numeric
 ---------------------------------------------------------------------------------
 
 class Numeric t where
-  (+)    :: Data t -> Data t -> Data t
-  (-)    :: Data t -> Data t -> Data t
-  (*)    :: Data t -> Data t -> Data t
-  (/)    :: Data t -> Data t -> Data t
-  negate :: Data t -> Data t
+  add :: Data t -> Data t -> Data t
+  sub :: Data t -> Data t -> Data t
+  mul :: Data t -> Data t -> Data t
+  div :: Data t -> Data t -> Data t
+  neg :: Data t -> Data t
  
 instance Numeric Integer where
-  el + er = AppV addIntVar (Ext el (Ext er Emp))  
-  el - er = AppV subIntVar (Ext el (Ext er Emp))  
-  el * er = AppV mulIntVar (Ext el (Ext er Emp))  
-  el / er = AppV divIntVar (Ext el (Ext er Emp))  
-  negate  = (litI 0 -)
+  add el er = AppV addIntVar (Ext el (Ext er Emp))  
+  sub el er = AppV subIntVar (Ext el (Ext er Emp))  
+  mul el er = AppV mulIntVar (Ext el (Ext er Emp))  
+  div el er = AppV divIntVar (Ext el (Ext er Emp))  
+  neg       = sub (litI 0)
    
 instance Numeric Float where 
-  el + er = AppV addFltVar (Ext el (Ext er Emp))  
-  el - er = AppV subFltVar (Ext el (Ext er Emp))  
-  el * er = AppV mulFltVar (Ext el (Ext er Emp))  
-  el / er = AppV divFltVar (Ext el (Ext er Emp))  
-  negate  = (litF 0 -)
+  add el er = AppV addFltVar (Ext el (Ext er Emp))  
+  sub el er = AppV subFltVar (Ext el (Ext er Emp))  
+  mul el er = AppV mulFltVar (Ext el (Ext er Emp))  
+  div el er = AppV divFltVar (Ext el (Ext er Emp))  
+  neg       = sub (litF 0)
 
 instance Numeric (Complex) where 
-  el + er = AppV addCmxVar (Ext el (Ext er Emp))  
-  el - er = AppV subCmxVar (Ext el (Ext er Emp))  
-  el * er = AppV mulCmxVar (Ext el (Ext er Emp))  
-  el / er = AppV divCmxVar (Ext el (Ext er Emp))  
-  negate  = (cmx (litF 0.0) (litF 0.0) -)
+  add el er = AppV addCmxVar (Ext el (Ext er Emp))  
+  sub el er = AppV subCmxVar (Ext el (Ext er Emp))  
+  mul el er = AppV mulCmxVar (Ext el (Ext er Emp))  
+  div el er = AppV divCmxVar (Ext el (Ext er Emp))  
+  neg       = sub (cmx (litF 0.0) (litF 0.0))
   
 ilog2 :: Data Integer -> Data Integer
 ilog2 xx = AppV ilog2Var (Ext xx Emp)
@@ -278,34 +276,34 @@ ilog2 xx = AppV ilog2Var (Ext xx Emp)
 -- Bitwise Operators
 ---------------------------------------------------------------------------------
 
-(.&.)      :: Data Integer -> Data Integer -> Data Integer 
-el .&. er     = AppV andIntVar (Ext el (Ext er Emp))  
+bitXor        :: Data Integer -> Data Integer -> Data Integer
+bitXor el er  = AppV xorIntVar (Ext el (Ext er Emp))  
 
-(.|.)      :: Data Integer -> Data Integer -> Data Integer
-el .|. er     = AppV orIntVar (Ext el (Ext er Emp))  
+bitAnd      :: Data Integer -> Data Integer -> Data Integer 
+bitAnd el er  = AppV andIntVar (Ext el (Ext er Emp))  
 
-xor        :: Data Integer -> Data Integer -> Data Integer
-xor el er     = AppV xorIntVar (Ext el (Ext er Emp))  
+bitOr      :: Data Integer -> Data Integer -> Data Integer
+bitOr  el er  = AppV orIntVar (Ext el (Ext er Emp))  
 
-(.>>.)     :: Data Integer -> Data Integer -> Data Integer
-el .>>. er    = AppV shrIntVar (Ext el (Ext er Emp))  
+shfRgt     :: Data Integer -> Data Integer -> Data Integer
+shfRgt el er  = AppV shrIntVar (Ext el (Ext er Emp))  
 
-(.<<.)     :: Data Integer -> Data Integer -> Data Integer
-el .<<. er    = AppV shlIntVar (Ext el (Ext er Emp))  
+shfLft     :: Data Integer -> Data Integer -> Data Integer
+shfLft el er  = AppV shlIntVar (Ext el (Ext er Emp))  
  
 complement :: Data Integer -> Data Integer
 complement e  = AppV cmpIntVar (Ext e Emp)
 
 testBit    :: Data Integer -> Data Integer -> Data Bool 
-testBit el er =  ifThenElse ((el .&. (ConI 1 .<<. er)) == ConI 0) 
+testBit el er =  ifThenElse (eql (bitAnd el (shfLft (ConI 1) er)) (ConI 0)) 
                  False  
                  True
  
 oneBits :: Data Integer -> Data Integer
-oneBits n = complement (complement (ConI 0) .<<. n)
+oneBits n = complement (shfLft (complement (ConI 0)) n)
 
 lsbs :: Data Integer -> Data Integer -> Data Integer
-lsbs k i = i .&. oneBits k
+lsbs k i = bitAnd i (oneBits k)
 
 ---------------------------------------------------------------------------------
 -- Conversion Operators
@@ -318,7 +316,7 @@ cis :: Data Float -> Data (Complex)
 cis e = AppV cisVar (Ext e Emp)
  
 vec2ary :: Vec t -> Data (Ary t)
-vec2ary v = Ary (length v) (v !!) 
+vec2ary v = Ary (lenV v) (indV v) 
 
 ary2vec :: Type t => Data (Ary t) -> Vec t
 ary2vec v = vec (Len v) (\i -> Ind v i)
@@ -327,72 +325,71 @@ ary2vec v = vec (Len v) (\i -> Ind v i)
 -- Vector Operators
 ---------------------------------------------------------------------------------
 
-(...) :: Data Integer -> Data Integer -> Vec Integer
-(...) m n = let l = ifThenElse (n < m) (ConI 0) (n - m + (ConI 1))
-            in  vec l (\ i -> i + m)
+frmTo :: Data Integer -> Data Integer -> Vec Integer
+frmTo m n = vec 
+            (ifThenElse (lt n m) 
+             (ConI 0) 
+             (add (sub n m) (ConI 1))) 
+            (\ i -> add i m)
   
 permute :: (Data Integer -> Data Integer -> Data Integer)
            -> Vec t -> Vec t
-permute f v = let l = length v 
-              in  vec l (\ i -> v !! (f l i))
+permute f v = vec (lenV v) (\ i -> indV v (f (lenV v) i))
  
 reverse :: Vec t -> Vec t
-reverse = permute (\ l i -> l - (ConI 1) - i)
+reverse = permute (\ l i -> sub (sub l (ConI 1)) i)
 
 foldl :: Type a => 
          (Data a -> Data b -> Data a) -> Data a -> Vec b -> Data a
-foldl f acc v  = let l = length v
-                 in  forLoop l acc (\ i a ->  f a (v !! i))
+foldl f acc v  = forLoop (lenV v) acc (\ i a ->  f a (indV v i))
    
 
 foldlVec :: Type a => 
          (Vec a -> Data b -> Vec a) -> Vec a -> 
          Vec b -> Vec a
-foldlVec f acc v  = let l = length v
-                        acc' = vec2ary acc
+foldlVec f acc v  = let acc' = vec2ary acc
                         f' vv d = vec2ary (f (ary2vec vv) d)
-                    in  ary2vec (forLoop l acc' (\ i a ->  f' a (v !! i)))
+                    in  ary2vec (forLoop (lenV v) acc' (\ i a ->  f' a (indV v i)))
 
 map :: (Data a -> Data b) -> Vec a -> Vec b
-map f v = let l = length v
-          in vec l (\i -> f (v !! i))     
+map f v = vec (lenV v) (\i -> f (indV v i))     
 
 zipWith :: (Data a -> Data b -> Data c) -> Vec a -> Vec b -> Vec c
-zipWith f v1 v2 = vec (min (length v1) (length v2))
-                      (\ i -> f (v1 !! i) (v2 !! i))
+zipWith f v1 v2 = vec (min (lenV v1) (lenV v2))
+                      (\ i -> f (indV v1 i) (indV v2 i))
 
 sum :: Vec Integer -> Data Integer
-sum = foldl (+) (ConI 0)
+sum = foldl add (ConI 0)
 
 scalarProd :: Vec Integer -> Vec Integer -> Data Integer
-scalarProd v1 v2 = sum (zipWith (*) v1 v2)
+scalarProd v1 v2 = sum (zipWith mul v1 v2)
 
 ---------------------------------------------------------------------------------
 -- Ary Operators
 ---------------------------------------------------------------------------------
 
-(....) :: Data Integer -> Data Integer -> Data (Ary Integer)
-(....) m n = let l = ifThenElse (n < m) (ConI 0) (n - m + (ConI 1))
-             in  Ary l (\ i -> i + m)
+frmToA :: Data Integer -> Data Integer -> Data (Ary Integer)
+frmToA m n = Ary 
+             (ifThenElse (lt n m) 
+              (ConI 0) 
+              (add (sub n m) (ConI 1)))
+             (\ i -> add i m)
   
 permuteA :: Type t => 
             (Data Integer -> Data Integer -> Data Integer)
            -> Data (Ary t) -> Data (Ary t)
-permuteA f v = let l = len v 
-               in  Ary l (\ i -> ind v (f l i))
+permuteA f v = Ary (len v) (\ i -> ind v (f (len v) i))
  
 reverseA :: Type t => Data (Ary t) -> Data (Ary t)
-reverseA = permuteA (\ l i -> l - (ConI 1) - i)
+reverseA = permuteA (\ l i -> sub (sub l (ConI 1)) i)
 
 foldlA :: (Type a , Type b) => 
          (Data a -> Data b -> Data a) -> Data a -> Data (Ary b) -> Data a
-foldlA f acc v  = let l = len v
-                  in  forLoop l acc (\ i a ->  f a (ind v i))
+foldlA f acc v  = forLoop (len v) acc (\ i a -> f a (ind v i))
    
 mapA :: Type a => 
         (Data a -> Data b) -> Data (Ary a) -> Data (Ary b)
-mapA f v = let l = len v
-           in Ary l (\ i -> f (ind v i))     
+mapA f v = Ary (len v) (\ i -> f (ind v i))     
 
 zipWithA :: (Type a , Type b) => 
             (Data a -> Data b -> Data c) -> Data (Ary a) -> Data (Ary b) -> 
@@ -401,10 +398,10 @@ zipWithA f v1 v2 = Ary (min (len v1) (len v2))
                       (\ i -> f (ind v1 i) (ind v2 i))
 
 sumA :: Data (Ary Integer) -> Data Integer
-sumA = foldlA (+) (ConI 0)
+sumA = foldlA add (ConI 0)
 
 scalarProdA :: Data (Ary Integer) -> Data (Ary Integer) -> Data Integer
-scalarProdA v1 v2 = sumA (zipWithA (*) v1 v2)
+scalarProdA v1 v2 = sumA (zipWithA mul v1 v2)
 
 ---------------------------------------------------------------------------------
 -- Helper Operators
@@ -415,7 +412,7 @@ fromList lst k =  vec
                   (litI (MP.fromIntegral (MP.length lst))) 
                   (\ i ->  MP.foldr 
                            (\ j acc -> ifThenElse 
-                                       (i == 
+                                       (eql i 
                                         (litI (MP.fromIntegral j)))
                                        (lst MP.!! j)
                                        acc)
@@ -427,7 +424,7 @@ fromListA lst k = ary
                   (litI (MP.fromIntegral (MP.length lst))) 
                   (\ i ->  MP.foldr 
                            (\ j acc -> ifThenElse 
-                                       (i == 
+                                       (eql i 
                                         (litI (MP.fromIntegral j)))
                                        (lst MP.!! j)
                                        acc)

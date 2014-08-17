@@ -1,6 +1,7 @@
-module Nat.GADT where
+module Nat.GADT
+  (Nat(..),prd) where
+  
  
-import Prelude ()
 import MyPrelude
 
 import Singleton
@@ -20,7 +21,9 @@ int (Suc x) = 1 + int x
 instance Show (Nat n) where
   show v = show (int v)
 
-
+prd :: Nat (NA.Suc n) -> Nat n           
+prd (Suc n) = n
+ 
 type instance Trm (Nat NA.Zro)     = Maybe ()  
 type instance Trm (Nat (NA.Suc n)) = Maybe (Trm (Nat n))
   
@@ -40,14 +43,3 @@ instance GetPrfHasSin Nat where
   getPrfHasSin Zro     = PrfHasSin 
   getPrfHasSin (Suc n) = case getPrfHasSin n of 
     PrfHasSin -> PrfHasSin
-
-pattern N0 = Zro
-pattern N1 = Suc N0
-pattern N2 = Suc N1
-pattern N3 = Suc N2 
-pattern N4 = Suc N3 
-pattern N5 = Suc N4 
-pattern N6 = Suc N5 
-pattern N7 = Suc N6 
-pattern N8 = Suc N7 
-pattern N9 = Suc N8 

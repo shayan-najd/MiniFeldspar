@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.GADTHigherOrder where
 
-import Prelude ()
 import MyPrelude 
 
 import Expression.Feldspar.GADTHigherOrder

@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.Conversion where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Language.Haskell.TH.Syntax              as TH 

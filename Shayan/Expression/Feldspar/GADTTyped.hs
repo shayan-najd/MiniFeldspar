@@ -1,6 +1,5 @@
 module Expression.Feldspar.GADTTyped where
  
-import Prelude ()
 import MyPrelude
 
 import Variable.Scoped

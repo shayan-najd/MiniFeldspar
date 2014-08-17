@@ -7,12 +7,12 @@ do
 	do
 	    ./clean
 	    rm ${a}${n}
-	    /usr/bin/time -f "%e" -a -o time${a}${n}Compile ghc -o ${a}${n} Examples/Feldspar/${a}/${n}.hs  -XRankNTypes -XPolyKinds -XGADTs -XStandaloneDeriving -XDeriveTraversable -XDeriveFoldable -XDeriveFunctor -XTemplateHaskell -XImplicitParams -XMultiParamTypeClasses -XTypeOperators -XDataKinds -XFlexibleInstances -XPatternSynonyms -XTypeFamilies -XScopedTypeVariables -XConstraintKinds
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Compile ghc -o ${a}${n} Examples/Feldspar/${a}/${n}.hs -Wall -fno-warn-orphans -XNoMonomorphismRestriction -XPolyKinds -XDataKinds -XConstraintKinds -XTypeOperators -XTypeFamilies -XGADTs -XFlexibleInstances -XFlexibleContexts -XStandaloneDeriving -XDeriveFoldable -XDeriveFunctor -XDeriveTraversable -XDeriveDataTypeable -XDeriveGeneric -XNoUndecidableInstances -XMonoLocalBinds -XScopedTypeVariables -XMultiParamTypeClasses -XImplicitParams -XTemplateHaskell -XRankNTypes -XPatternSynonyms -XViewPatterns -XNoImplicitPrelude
 	done
     done
 done
 ./clean
-for f in Nrm NoNrm
+for f in NoNrm # Nrm NoNrm
 do
     for a in IP CRC FFT
     do
@@ -27,7 +27,7 @@ do
     done
 done
 ./clean
-for f in Nrm NoNrm
+for f in NoNrm # Nrm NoNrm
 do
     for a in IP CRC FFT
     do
@@ -41,7 +41,7 @@ do
 	done
     done
 done
-for f in Nrm NoNrm
+for f in NoNrm # Nrm NoNrm
 do
     for a in IP CRC FFT
     do
@@ -58,13 +58,13 @@ do
 	done
     done
 done
-for a in IP CRC FFT
+for f in NoNrm # Nrm NoNrm
 do
-    for n in MiniWellScoped TemplateHaskell
-    do	    
-	rm ${a}${n}
-	for f in Nrm NoNrm
-	do
+    for a in IP CRC FFT
+    do
+	for n in MiniWellScoped TemplateHaskell
+	do	    
+	    rm ${a}${n}	    
 	    rm ${f}${a}${n}.c
 	    rm ${f}${a}${n}
 	done

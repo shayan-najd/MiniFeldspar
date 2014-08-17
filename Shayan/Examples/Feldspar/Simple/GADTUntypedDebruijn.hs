@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.GADTUntypedDebruijn where
  
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTUntypedDebruijn
@@ -11,7 +10,6 @@ import Conversion
 import Conversion.Expression.Feldspar.Evaluation.GADTUntypedDebruijn ()
 import Environment.Scoped
  
-
 dbl :: Exp (NA.Suc NA.Zro)
 dbl = Abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))
 

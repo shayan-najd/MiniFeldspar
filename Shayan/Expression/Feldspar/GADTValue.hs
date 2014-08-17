@@ -1,6 +1,5 @@
 module Expression.Feldspar.GADTValue where
 
-import Prelude ()
 import MyPrelude hiding (Int) 
 import qualified VanillaPrelude as VP
 

@@ -1,6 +1,5 @@
 module Expression.Feldspar.GADTHigherOrder where
  
-import Prelude ()
 import MyPrelude
 
 import Variable.Typed
@@ -106,3 +105,32 @@ absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
       Rgt Rfl               -> xx
       _                     -> ee
     | otherwise             -> ee
+
+-- when input string is not "__dummy__"
+hasTmp :: String -> Exp r t -> Bool
+hasTmp s ee = case ee of    
+  ConI _                    -> False
+  ConB _                    -> False
+  ConF _                    -> False
+  Var  _                    -> False
+  Abs eb                    -> hasTmpF s eb
+  App ef ea                 -> hasTmp s ef || hasTmp s ea
+  Cnd ec et ef              -> hasTmp s ec || hasTmp s et || hasTmp s ef 
+  Whl ec eb ei              -> hasTmpF s ec || hasTmpF s eb || hasTmp s ei
+  Tpl ef es                 -> hasTmp s ef || hasTmp s es
+  Fst e                     -> hasTmp s e
+  Snd e                     -> hasTmp s e
+  Ary el ef                 -> hasTmp s el || hasTmpF s ef
+  Len e                     -> hasTmp s e
+  Ind ea ei                 -> hasTmp s ea || hasTmp s ei
+  Let el eb                 -> hasTmp s el || hasTmpF s eb
+  Cmx er ei                 -> hasTmp s er || hasTmp s ei
+  Tmp x 
+    | s == x                -> True
+    | otherwise             -> False
+
+hasTmpF :: String -> (Exp r ta -> Exp r tb) -> Bool
+hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))
+
+isFresh :: (Exp r ta -> Exp r tb) -> Bool
+isFresh f = not (hasTmp "__fresh__" (f (Tmp "__fresh__")))

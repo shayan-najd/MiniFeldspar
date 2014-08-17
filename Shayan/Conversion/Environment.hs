@@ -1,6 +1,5 @@
 module Conversion.Environment () where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Environment.Map    as EM
@@ -20,16 +19,16 @@ import Singleton
 ---------------------------------------------------------------------------------
 instance Cnv (a , r) b => 
          Cnv (EM.Env x a , r) (EM.Env x b) where
-  cnv (e , r) = let ?r = r in 
+  cnv (ee , rr) = let ?r = rr in 
     mapM (\(x , y) -> do y' <- cnvImp y
-                         return (x , y')) e  
+                         return (x , y')) ee  
 
 ---------------------------------------------------------------------------------
 -- Conversion from EP.Env
 ---------------------------------------------------------------------------------
 instance Cnv (a , r) b => 
          Cnv (EP.Env a , r) (EP.Env b)  where
-  cnv (e , r) = let ?r = r in mapM cnvImp e
+  cnv (ee , rr) = let ?r = rr in mapM cnvImp ee
 
 instance Cnv (a , r) (ExsSin b) => 
          Cnv (EP.Env a , r) (ExsSin (ET.Env b)) where
@@ -43,21 +42,19 @@ instance Cnv (a , r) (ExsSin b) =>
 -- Conversion from ES.Env
 ---------------------------------------------------------------------------------
 instance Cnv (ES.Env n t , r ) (EP.Env t) where
-  cnv (ee , r) = let ?r = r in case ee of
+  cnv (ee , rr) = let ?r = rr in case ee of
     ES.Emp      -> pure []
     ES.Ext x xs -> (x :) <$@> xs
      
 instance (Cnv (a , r) b , n ~ n') => 
          Cnv (ES.Env n a , r) (ES.Env n' b) where  
-  cnv (e , r) = let ?r = r in mapM cnvImp e
+  cnv (ee , rr) = let ?r = rr in mapM cnvImp ee
 
 ---------------------------------------------------------------------------------
 -- Conversion from ES.Env
 ---------------------------------------------------------------------------------
 instance n ~ Len r => 
          Cnv (ET.Env TFG.Typ r , rr) (ES.Env n TFA.Typ) where
-  cnv (ee , r) = let ?r = r in case ee of
+  cnv (ee , rr) = let ?r = rr in case ee of
     ET.Emp      -> pure ES.Emp
     ET.Ext x xs -> ES.Ext <$@> x <*@> xs
-     
-    

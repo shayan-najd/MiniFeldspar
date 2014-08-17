@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.TemplateHaskell where
 
-import Prelude ()
 import MyPrelude 
 
 import Language.Haskell.TH.Syntax

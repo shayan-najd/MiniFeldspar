@@ -1,6 +1,5 @@
 module Singleton where
   
-import Prelude ()
 import MyPrelude  
 
 import qualified Nat.ADT as NA

@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Lifting () where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Expression.Feldspar.GADTFirstOrder  as FGFO

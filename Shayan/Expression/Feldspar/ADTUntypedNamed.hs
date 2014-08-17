@@ -1,6 +1,5 @@
 module Expression.Feldspar.ADTUntypedNamed where
  
-import Prelude ()
 import MyPrelude 
 
 data Exp x = ConI Integer 

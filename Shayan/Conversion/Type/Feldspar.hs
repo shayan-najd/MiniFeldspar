@@ -1,6 +1,5 @@
 module Conversion.Type.Feldspar () where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Type.Feldspar.ADT  as TFA

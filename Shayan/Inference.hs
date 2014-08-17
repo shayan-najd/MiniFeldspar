@@ -1,6 +1,5 @@
 module Inference where
 
-import Prelude ()
 import MyPrelude
 
 import qualified TypeChecking as Chk

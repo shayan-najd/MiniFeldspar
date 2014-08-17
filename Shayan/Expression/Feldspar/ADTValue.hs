@@ -1,6 +1,5 @@
 module Expression.Feldspar.ADTValue where
 
-import Prelude (error)
 import MyPrelude 
 
 data Exp = ConI Integer
@@ -40,31 +39,31 @@ class CoLft t where
   
 instance CoLft Integer where  
   colft (ConI i) = i
-  colft _        = error "Type Error!"
+  colft _        = badTypVal
   
 instance CoLft Bool where  
   colft (ConB b) = b
-  colft _        = error "Type Error!"
+  colft _        = badTypVal
   
 instance CoLft Float where  
   colft (ConF f) = f
-  colft _        = error "Type Error!"
+  colft _        = badTypVal
 
 instance (Lft a , CoLft b) => CoLft (a -> b) where
   colft (Abs f) = colft . f . lft 
-  colft _       = error "Type Error!"
+  colft _       = badTypVal
 
 instance (CoLft a , CoLft b) => CoLft (a , b) where
   colft (Tpl (x , y) ) = (colft x , colft y)
-  colft _              = error "Type Error!"
+  colft _              = badTypVal
   
 instance CoLft a => CoLft (Array Integer a) where  
   colft (Ary x) = fmap colft x
-  colft _       = error "Type Error!"
+  colft _       = badTypVal
   
 instance CoLft (Complex Float) where  
   colft (Cmx c) = c
-  colft _       = error "Type Error!"
+  colft _       = badTypVal
 
 var :: a -> ErrM a
 var = return
@@ -90,26 +89,26 @@ addV = Abs (\ (ConI vl) -> Abs (\ (ConI vr) -> ConI (vl + vr)))
 
 add :: Exp -> Exp -> Exp
 add (ConI i) (ConI j) = ConI (i + j)
-add _         _       = error "Type Error!"
+add _         _       = badTypVal
 
 cnd :: Exp -> Exp -> Exp -> ErrM Exp
 cnd (ConB vc) v1 v2 = return (if vc then v1 else v2)
-cnd _         _  _  = fail "Type Error!"                
+cnd _         _  _  = badTypValM
 
 whl :: (Exp -> Exp) -> (Exp -> Exp) -> Exp -> ErrM Exp
 whl fc fb v = return (head (dropWhile 
                             (\ x -> case fc x of
                                 ConB b -> b
-                                _      -> error "Type Error!") 
+                                _      -> badTypVal) 
                             (iterate fb v)))
               
 fst :: Exp -> ErrM Exp
 fst (Tpl (vf , _ )) = return vf
-fst _               = fail "Type Error!"
+fst _               = badTypValM
 
 snd :: Exp -> ErrM Exp
 snd (Tpl (_  , vs)) = return vs
-snd _               = fail "Type Error!"
+snd _               = badTypValM
 
 tpl :: Exp -> Exp -> ErrM Exp
 tpl vf vs = return (Tpl (vf , vs))
@@ -118,16 +117,16 @@ ary :: Exp -> (Exp -> Exp) -> ErrM Exp
 ary (ConI l) vf = return (Ary (listArray (0 , (l - 1)) 
                                [vf (ConI i)
                                | i <- [0 .. (l - 1)]]))
-ary _        _  = fail "Type Error!"             
+ary _        _  = badTypValM             
 
 len :: Exp -> ErrM Exp
 len (Ary a) = (return . ConI . (1 +) . uncurry (flip (-)) . bounds) a
-len _       = fail " Type Error!"
+len _       = badTypValM
 
 ind :: Exp -> Exp -> ErrM Exp
 ind (Ary a) (ConI i) = return (a ! i)
-ind _       _        = fail " Type Error!"
+ind _       _        = badTypValM
 
 cmx :: Exp -> Exp -> ErrM Exp 
 cmx (ConF fr) (ConF fi) = return (Cmx (fr :+ fi))
-cmx _         _         = fail " Type Error!"
+cmx _         _         = badTypValM

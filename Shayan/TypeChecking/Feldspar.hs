@@ -1,6 +1,5 @@
-module TypeChecking.Feldspar where
+module TypeChecking.Feldspar () where
  
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTTyped
@@ -12,8 +11,8 @@ import TypeChecking
 import InferenceMonad
 
 instance Chk (Exp n) where
-  type Cns (Exp n)      = TH.EnvFld '[]
-  type Env (Exp n)      = ES.Env n                          
+  type Cns (Exp n) = TH.EnvFld '[]
+  type Env (Exp n) = ES.Env n                          
   chk ee r = case ee of  
     ConI _         -> return TH.Int
     ConB _         -> return TH.Bol
@@ -72,5 +71,4 @@ instance Chk (Exp n) where
                          ti  <- chk ei r
                          addC (tr TH.:~: TH.Flt) 
                          addC (ti TH.:~: TH.Flt)
-                         return TH.Cmx                         
-                         
+                         return TH.Cmx

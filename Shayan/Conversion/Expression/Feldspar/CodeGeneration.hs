@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.CodeGeneration where
 
-import Prelude ()
 import MyPrelude hiding ((<>))
 
 import Text.PrettyPrint

@@ -7,35 +7,35 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,Complex,cmx,real,imag
        ,Ary,ary,len,ind        
        ,{-ifThenElse,-}whl,forLoop,memorize
-       ,not,(&&),(||)                  
-       ,Equality((==)),(/=)
-       ,Ordering((<)),(>),(>=),(<=),min           
-       ,Numeric((+),(-),(*),(/),negate),ilog2,sqrt
-       ,xor,(.&.),(.|.),(.>>.),(.<<.),complement,testBit,lsbs,oneBits
+       ,not,and,or                  
+       ,Equality(eql),notEql
+       ,Ordering(lt),gt,lte,gte,min           
+       ,Numeric(add,sub,mul,div,neg),ilog2,sqrt
+       ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis
-       ,(...),permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
+       ,frmTo,permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
        ) where
 
-import Prelude ()
 import MyPrelude (Integer,Array,Float,Bool(..))
 import qualified MyPrelude as MP
 
-import Language.Haskell.TH.Syntax
- 
+import Language.Haskell.TH.Syntax (Lift(lift),Q,Exp(LitE),TExp
+                                  ,Lit(IntegerL,RationalL))
+
 import Examples.Feldspar.Prelude.Environment
 import qualified VanillaPrelude as VP 
 
 type Data t = Q (TExp t)
 
-type Ary t = Array Integer t
+type Ary  t = Array Integer t
 
-class FO a                              where {}
+class    FO a                           where {}
 instance FO Bool                        where {}
 instance FO Integer                     where {}
 instance FO Float                       where {}
-instance FO Complex                     where {}
 instance (FO a , FO b) => FO (Tpl a b)  where {}
 instance FO a => FO (Ary a)             where {}
+instance FO Complex                     where {}
 
 ---------------------------------------------------------------------------------
 -- Integer
@@ -72,10 +72,10 @@ instance FrmInt Float where
 
 type Tpl a b = (a , b)
 
-fst :: (a , b) -> a
+fst :: (FO a , FO b) => (a , b) -> a
 fst = VP.fst
 
-snd :: (a , b) -> b
+snd :: (FO a , FO b) => (a , b) -> b
 snd = VP.snd
 
 ---------------------------------------------------------------------------------
@@ -97,13 +97,13 @@ imag = [|| imagPartHsk ||]
 -- Ary
 ---------------------------------------------------------------------------------
 
-ary :: Integer -> (Integer -> a) -> Ary a
+ary :: FO a => Integer -> (Integer -> a) -> Ary a
 ary = VP.ary
 
-len :: Ary a -> Integer
+len :: FO a => Ary a -> Integer
 len = VP.len
 
-ind :: Ary a -> Integer -> a
+ind :: FO a => Ary a -> Integer -> a
 ind = VP.ind
 
 ---------------------------------------------------------------------------------
@@ -115,8 +115,8 @@ whl = VP.whl
 
 forLoop :: FO s => Data (Integer -> s -> (Integer -> s -> s) -> s)
 forLoop = [|| \ l -> \ init -> \ step -> 
-              snd (whl (\ t -> $$((<)) (fst t) l)
-                       (\ t -> ( $$((+)) (fst t) 1  
+              snd (whl (\ t -> $$lt (fst t) l)
+                       (\ t -> ( $$add (fst t) 1  
                                , step (fst t) (snd t)))
                    (0 , init)) 
           ||]
@@ -131,91 +131,90 @@ memorize = [|| memHsk ||]
 not :: Data (Bool -> Bool)
 not = [||  \ x -> if x then False else True ||] 
 
-(&&) :: Data (Bool -> Bool -> Bool)
-(&&) = [|| \ x -> \ y -> if x then y else False ||]
+and :: Data (Bool -> Bool -> Bool)
+and = [|| \ x -> \ y -> if x then y else False ||]
 
-(||) :: Data (Bool -> Bool -> Bool)
-(||) = [|| \ x -> \ y -> if x then True else y ||]
+or :: Data (Bool -> Bool -> Bool)
+or = [|| \ x -> \ y -> if x then True else y ||]
 
 ---------------------------------------------------------------------------------
 -- Equality
 ---------------------------------------------------------------------------------
   
 class Equality t where
-  (==) :: Data (t -> t -> Bool)
+  eql :: Data (t -> t -> Bool)
   
 instance Equality Bool where
-  (==) = [|| eqlBolHsk ||] 
+  eql = [|| eqlBolHsk ||] 
 
 instance Equality Integer where
-  (==) = [|| eqlIntHsk ||]
+  eql = [|| eqlIntHsk ||]
 
 instance Equality Float where
-  (==) = [|| eqlFltHsk ||]
+  eql = [|| eqlFltHsk ||]
          
-(/=) :: Equality t => Data (t -> t -> Bool)
-(/=)= [|| \ x -> \ y -> $$not (($$((==))) x y) ||]
-
+notEql :: Equality t => Data (t -> t -> Bool)
+notEql= [|| \ x -> \ y -> $$not ($$eql x y) ||]
 
 ---------------------------------------------------------------------------------
 -- Ordering
 ---------------------------------------------------------------------------------
 
 class Ordering t where
-  (<) :: Data (t -> t -> Bool)
+  lt :: Data (t -> t -> Bool)
    
 instance Ordering Bool where
-  (<) = [|| \ x -> \ y -> ltdBolHsk x y ||] 
+  lt = [|| \ x -> \ y -> ltdBolHsk x y ||] 
 
 instance Ordering Integer where
-  (<) = [|| \ x -> \ y -> ltdIntHsk x y ||]   
+  lt = [|| \ x -> \ y -> ltdIntHsk x y ||]   
   
 instance Ordering Float where
-  (<) = [|| \ x -> \ y -> ltdFltHsk x y ||] 
+  lt = [|| \ x -> \ y -> ltdFltHsk x y ||] 
     
-(>) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
-(>) = [|| \ x -> \ y -> $$not ($$((||)) ($$((<)) x y) ($$((==)) x y)) ||]
+gt :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+gt = [|| \ x -> \ y -> $$not ($$or ($$lt x y) ($$eql x y)) ||]
 
-(>=) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
-(>=) = [|| \ x -> \ y -> $$not ($$((<)) x y) ||]
+lte :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+lte = [|| \ x -> \ y -> $$or ($$lt x y) ($$eql x y) ||]
 
-(<=) :: (Equality t , Ordering t) => Data (t -> t -> Bool)
-(<=) = [|| \ x -> \ y -> $$((||)) ($$((<)) x y) ($$((==)) x y) ||]
+gte :: (Equality t , Ordering t) => Data (t -> t -> Bool)
+gte = [|| \ x -> \ y -> $$not ($$lt x y) ||]
 
 min :: Ordering t => Data(t -> t -> t) 
-min = [|| \ x -> \ y -> if ($$((<)) x y) then x else y ||]
+min = [|| \ x -> \ y -> if ($$lt x y) then x else y ||]
 
 ---------------------------------------------------------------------------------
 -- Numeric
 ---------------------------------------------------------------------------------
 
 class Numeric t where
-  (+) :: Data (t -> t -> t) 
-  (-) :: Data (t -> t -> t)  
-  (*) :: Data (t -> t -> t)  
-  (/) :: Data (t -> t -> t) 
-  negate :: Data (t -> t)
+  add :: Data (t -> t -> t) 
+  sub :: Data (t -> t -> t)  
+  mul :: Data (t -> t -> t)  
+  div :: Data (t -> t -> t) 
+  neg :: Data (t -> t)
  
 instance Numeric Integer where
-  (+) = [|| addIntHsk ||]
-  (-) = [|| subIntHsk ||]
-  (*) = [|| mulIntHsk ||]          
-  (/) = [|| divIntHsk ||]
-  negate = [|| \ i -> $$((-)) 0 i ||]  
+  add = [|| addIntHsk ||]
+  sub = [|| subIntHsk ||]
+  mul = [|| mulIntHsk ||]          
+  div = [|| divIntHsk ||]
+  neg = [|| \ i -> $$sub 0 i ||]  
     
 instance Numeric Float where 
-  (+) = [|| addFltHsk ||]
-  (-) = [|| subFltHsk ||]
-  (*) = [|| mulFltHsk ||]          
-  (/) = [|| divFltHsk ||]
-  negate = [|| \ f -> $$((-)) 0.0 f ||]
+  add = [|| addFltHsk ||]
+  sub = [|| subFltHsk ||]
+  mul = [|| mulFltHsk ||]          
+  div = [|| divFltHsk ||]
+  neg = [|| \ f -> $$sub 0.0 f ||]
 
 instance Numeric (Complex) where 
-  (+) = [|| addCmxHsk ||]
-  (-) = [|| subCmxHsk ||]
-  (*) = [|| mulCmxHsk ||]          
-  (/) = [|| divCmxHsk ||] 
-  negate = [|| \ c -> $$((-)) (cmx 0.0 0.0) c ||]
+  add = [|| addCmxHsk ||]
+  sub = [|| subCmxHsk ||]
+  mul = [|| mulCmxHsk ||]          
+  div = [|| divCmxHsk ||] 
+  neg = [|| \ c -> $$sub (cmx 0.0 0.0) c ||]
   
 ilog2 :: Data (Integer -> Integer)
 ilog2 = [|| ilog2Hsk ||] 
@@ -237,34 +236,34 @@ sqrt = [|| sqrtFltHsk ||]
 -- Bitwise Operators
 ---------------------------------------------------------------------------------
 
-(.&.)      :: Data (Integer -> Integer -> Integer) 
-(.&.)         = [|| andIntHsk ||] 
+bitAnd      :: Data (Integer -> Integer -> Integer) 
+bitAnd         = [|| andIntHsk ||] 
 
-(.|.)      :: Data (Integer -> Integer -> Integer) 
-(.|.)         = [|| orIntHsk ||] 
+bitOr      :: Data (Integer -> Integer -> Integer) 
+bitOr         = [|| orIntHsk ||] 
 
-xor        :: Data (Integer -> Integer -> Integer) 
-xor           = [|| xorIntHsk ||] 
+bitXor        :: Data (Integer -> Integer -> Integer) 
+bitXor        = [|| xorIntHsk ||] 
 
-(.>>.)     :: Data (Integer -> Integer -> Integer) 
-(.>>.)        = [|| shrIntHsk ||]  
+shfRgt     :: Data (Integer -> Integer -> Integer) 
+shfRgt        = [|| shrIntHsk ||]  
 
-(.<<.)     :: Data (Integer -> Integer -> Integer)
-(.<<.)        = [|| shlIntHsk ||] 
+shfLft     :: Data (Integer -> Integer -> Integer)
+shfLft        = [|| shlIntHsk ||] 
  
 complement :: Data (Integer -> Integer)
 complement    = [|| cmpIntHsk ||] 
 
 testBit    :: Data (Integer -> Integer -> Bool)
-testBit       = [|| \ i -> \ j -> if $$((==)) ($$((.&.)) i ($$((.<<.)) 1 j)) 0 
+testBit       = [|| \ i -> \ j -> if $$eql ($$bitAnd i ($$shfLft 1 j)) 0 
                                   then False  
                                   else True ||] 
  
 oneBits :: Data (Integer -> Integer)
-oneBits       =  [|| \ n -> $$complement (($$((.<<.)))($$complement 0) n) ||]
+oneBits       =  [|| \ n -> $$complement ($$shfLft ($$complement 0) n) ||]
 
 lsbs :: Data (Integer -> Integer -> Integer)
-lsbs          = [|| \ k -> \ i -> ($$((.&.))) i  ($$oneBits k) ||]
+lsbs          = [|| \ k -> \ i -> $$bitAnd i ($$oneBits k) ||]
 
 ---------------------------------------------------------------------------------
 -- Conversion Operators
@@ -280,46 +279,47 @@ cis = [|| cisHsk ||]
 -- Array Operators
 ---------------------------------------------------------------------------------
 
-(...) :: (FrmInt t , Numeric t) => Data (Integer -> Integer -> Ary t)
-(...) = [|| \ m -> \ n -> ary 
-                          (if ($$((<)) n m) 
+frmTo :: (FrmInt t , Numeric t , FO t) => Data (Integer -> Integer -> Ary t)
+frmTo = [|| \ m -> \ n -> ary 
+                          (if ($$lt n m) 
                            then 0 
-                           else ($$((+)) ($$((-)) n m) 1))
-                          (\ i -> $$((+)) ($$frmInt i) ($$frmInt m)) ||]  
+                           else ($$add ($$sub n m) 1))
+                          (\ i -> $$add ($$frmInt i) ($$frmInt m)) ||]  
    
-permute :: Data ((Integer -> Integer -> Integer) -> Ary t -> Ary t)
+permute :: FO t => Data ((Integer -> Integer -> Integer) -> Ary t -> Ary t)
 permute = [|| \ f -> \ v -> ary (len v) 
                                    (\ i -> ind v 
                                            (f (len v) i)) ||]
  
-reverse :: Data (Ary t -> Ary t)
-reverse = [|| $$permute (\ l i -> $$((-)) ($$((-)) l 1) i) ||]
+reverse :: FO t => Data (Ary t -> Ary t)
+reverse = [|| $$permute (\ l i -> $$sub ($$sub l 1) i) ||]
 
-foldl :: FO a => Data ((a -> b -> a) -> a -> Ary b -> a)
+foldl :: (FO a , FO b) => Data ((a -> b -> a) -> a -> Ary b -> a)
 foldl = [|| \ f -> \ acc -> \ v -> 
-            $$forLoop (len v) acc (\ i -> \ a ->  f a (ind v i)) ||]
+            $$forLoop (len v) acc (\ i -> \ a -> f a (ind v i)) ||]
  
-map :: Data ((a -> b) -> Ary a -> Ary b)
+map :: (FO a , FO b) => Data ((a -> b) -> Ary a -> Ary b)
 map = [|| \ f -> \ v -> ary (len v) (\ i -> f (ind v i)) ||]     
 
-zipWith :: Data ((a -> b -> c) -> Ary a -> Ary b -> Ary c)
+zipWith :: (FO a , FO b , FO c) => 
+           Data ((a -> b -> c) -> Ary a -> Ary b -> Ary c)
 zipWith = [|| \ f -> \ v1 -> \ v2 -> 
                 ary ($$min (len v1) (len v2))
                     (\ i -> f (ind v1 i) (ind v2 i)) ||]
 
 sum :: (FO t , Numeric t , FrmInt t) => Data (Ary t -> t)
-sum = [|| $$foldl $$((+)) ($$frmInt 0) ||]
+sum = [|| $$foldl $$add ($$frmInt 0) ||]
 
 scalarProd :: Data (Ary Integer -> Ary Integer -> Integer)
-scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$((*)) v1 v2) ||]
+scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$mul v1 v2) ||]
  
-fromList :: [Data a] -> Data a -> Data (Ary a)
+fromList :: FO a => [Data a] -> Data a -> Data (Ary a)
 fromList lst k =  let l = MP.fromInteger (MP.toInteger (MP.length lst))
                   in  [|| ary l
                           (\ i -> $$(MP.foldr 
                                      (\ j acc -> 
                                        let l' = (MP.fromInteger (MP.toInteger j))
-                                       in  [|| if   $$((==)) i l'
+                                       in  [|| if   $$eql i l'
                                                then $$(lst MP.!! j)
                                                else $$acc ||]) k 
                                       (MP.enumFromTo 0 (MP.length lst MP.- 1))

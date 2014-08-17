@@ -1,6 +1,5 @@
 module Expression.Feldspar.C where
 
-import Prelude ()
 import MyPrelude 
 
 import qualified Type.Feldspar.ADT as TFA

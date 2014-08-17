@@ -1,7 +1,6 @@
 -- Inspired by Dybjer and Flinisky's 
 module Demo.TypeDirectedNBE where
 
-import Prelude ()
 import MyPrelude
 
 import Environment.Map

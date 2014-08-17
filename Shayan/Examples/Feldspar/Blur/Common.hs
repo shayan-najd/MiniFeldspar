@@ -1,6 +1,5 @@
 module Examples.Feldspar.Blur.Common where
 
-import Prelude ()
 import MyPrelude
 
 loaderC :: String

@@ -1,6 +1,5 @@
 module Environment.Scoped where
 
-import Prelude ()
 import MyPrelude
   
 import Variable.Scoped 
@@ -37,5 +36,5 @@ get (Suc n) (Ext _  r) = get n r
 get _       _          = impossible
 
 map :: (a -> b) -> Env n a -> Env n b
-map _ Emp = Emp
+map _ Emp        = Emp
 map f (Ext x xs) = Ext (f x) (map f xs)

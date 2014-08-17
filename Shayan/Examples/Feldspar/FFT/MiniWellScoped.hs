@@ -1,6 +1,5 @@
 {-# LANGUAGE RebindableSyntax #-}
  
-import Prelude ()
 import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.MiniWellScoped
@@ -13,37 +12,41 @@ import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler(scompile)
-
-import Normalization
-import Normalization.Feldspar.MiniWellScoped ()
  
 fft :: Vec Complex -> Vec Complex
-fft v = let steps = ilog2 (length v) - 1 
-        in  bitRev steps (fftCore steps v)
-         
+fft = \ v -> (\ steps -> bitRev steps (fftCore steps v))
+      (sub (ilog2 (lenV v)) 1)
+
 fftCore :: Data Integer -> Vec Complex -> Vec Complex
-fftCore n vv = forLoopVec (n + 1) vv 
-               (\ j v -> vec (length vv) (ixf v (n - j)))
+fftCore = \ n -> \ vv -> forLoopVec (add n 1) vv 
+          (\ j -> \ v -> vec (lenV vv) 
+                  (ixf v (sub n j)))
 
 ixf :: Vec Complex
     -> Data Integer -> Data Integer -> Data Complex
-ixf v k i = let k2   = 1 .<<. k
-                a    = v !!  i
-                b    = v !! (xor i k2)
-                twid = cis (litF (MP.negate MP.pi) 
-                            * i2f (lsbs k i) / i2f k2)
-            in  if testBit i k then twid * (b - a) else a + b
-          
+ixf = let p = litF (MP.negate MP.pi) in 
+    \ v -> \ k -> \ i ->
+      (\ k2 -> (\ twid -> \ a -> \ b -> 
+                if testBit i k 
+                then mul twid (sub b a) 
+                else add a b)
+       (cis (div (mul p (i2f (lsbs k i))) (i2f k2)))
+       (indV v i)
+       (indV v (bitXor i k2)))
+    (shfLft 1 k)
+           
 bitRev :: Data Integer -> Vec Complex -> Vec Complex
-bitRev n x = forLoopVec n x (\ i -> permute (\ _ -> rotBit (i + 1)))
+bitRev = \ n -> \ x -> 
+         forLoopVec n x (\ i -> permute (\ _j -> rotBit (add i 1)))
  
 rotBit :: Data Integer -> Data Integer -> Data Integer
-rotBit k i = lefts .|. rights
-  where
-    ir     = i .>>. 1
-    rights = lsbs k ir
-    lefts  = (((ir .>>. k) .<<. 1) .|. (i .&. 1)) .<<. k
-  
+rotBit = \ k -> \ i -> 
+         bitOr 
+         (shfLft (bitOr 
+                  (shfLft (shfRgt (shfRgt i 1) k) 1) 
+                  (bitAnd i 1)) k) 
+         (lsbs k (shfRgt i 1))
+   
 inp :: Vec Complex
 inp = fromList (MP.fmap (\ f -> cmx (litF f) 0.0) tstInp) 
       (cmx 0.0 0.0)
@@ -65,6 +68,6 @@ main = MP.getArgs MP.>>=
                           (scompile 
                            (TFG.Ary TFG.Cmx) 
                            esString 
-                           (nrmIf (as MP./= "NoNrm") fftAry))
+                           ({- nrmIf (as MP./= "NoNrm") -} fftAry))
                       f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
                   in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f')    

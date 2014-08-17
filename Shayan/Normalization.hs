@@ -2,7 +2,6 @@ module Normalization
        (NrmOne(..),(<$>),(<*>),pure,(<$@>),(<*@>),Chg(..),chg,nrm,nrmIf) 
        where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Variable.Plain  as VP

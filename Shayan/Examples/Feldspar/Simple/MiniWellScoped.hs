@@ -1,6 +1,5 @@
 module Examples.Feldspar.Simple.MiniWellScoped where
 
-import Prelude ()
 import MyPrelude 
 
 import Expression.Feldspar.MiniWellScoped

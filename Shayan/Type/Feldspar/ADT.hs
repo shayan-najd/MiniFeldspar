@@ -1,6 +1,5 @@
 module Type.Feldspar.ADT where
 
-import Prelude ()
 import MyPrelude
 
 data Typ =

@@ -1,6 +1,5 @@
 module Conversion.Expression.Feldspar.Evaluation.GADTFirstOrder () where
 
-import Prelude ()
 import MyPrelude
 
 import Expression.Feldspar.GADTFirstOrder

@@ -11,12 +11,13 @@ module MyPrelude
         read,
         (.),flip,curry,uncurry,id,const,
         (++),zip,head,dropWhile,iterate,length,zipWith,filter,(!!),delete,init,
+        ord,
         Maybe(..),fromJust,maybe,
         Enum(..),
         Ord(..),
         Eq(..),
         Show(..),
-        otherwise, impossible , impossibleM,
+        otherwise, impossible , impossibleM,badUse,badTypVal,badTypValM,
         lookup,
         State,getState,put,modify,runState,execState,evalState,StateT
              ,lift,runStateT,
@@ -30,6 +31,7 @@ module MyPrelude
         module Control.Monad,
         module Data.Array)
        where
+import Prelude
 import Existential
 import Data.Maybe
 import ErrorMonad
@@ -45,6 +47,7 @@ import Data.List
 import Data.Complex
 import Data.Word
 import Data.Bits
+import Data.Char(ord)
 import System.Environment
 
 impossible :: a
@@ -52,6 +55,15 @@ impossible = error "Impossible!"
 
 impossibleM :: Monad m => m a
 impossibleM = fail "Impossible!"
+
+badUse :: String -> a
+badUse = error . ("Bad use of " ++)
+
+badTypVal :: a
+badTypVal = error "Value of wrong type!"
+
+badTypValM :: Monad m => m a
+badTypValM = fail "Value of wrong type!"
 
 getState :: MonadState s m => m s
 getState = get

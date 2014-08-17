@@ -1,6 +1,5 @@
 module Examples.Feldspar.FFT.Common where
 
-import Prelude ()
 import MyPrelude
 
 test :: [Float] -> Bool

@@ -1,6 +1,5 @@
 module Solver where
 
-import Prelude ()
 import MyPrelude
 
 import Singleton

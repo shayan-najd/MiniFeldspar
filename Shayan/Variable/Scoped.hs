@@ -1,6 +1,8 @@
-module Variable.Scoped where
+module Variable.Scoped
+  (Var(..),prd,inc
+  ,pattern N0,pattern N1,pattern N2,pattern N3,pattern N4,pattern N5
+  ,pattern N6,pattern N7,pattern N8,pattern N9) where
 
-import Prelude ()
 import MyPrelude
 
 import qualified Nat.ADT as NA
