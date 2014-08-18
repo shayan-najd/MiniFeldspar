@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Evaluation.GADTFirstOrder () where
+module Expression.Feldspar.Conversions.Evaluation.GADTFirstOrder () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import qualified Type.Feldspar.GADT as TFG
 import Environment.Typed
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 import Singleton
 

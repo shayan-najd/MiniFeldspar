@@ -6,7 +6,7 @@ import Examples.Feldspar.Prelude.Environment
 import Examples.Feldspar.CRC.Common
 
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+import Expression.Feldspar.Conversions.Evaluation.MiniWellScoped ()
 
 import qualified Expression.Feldspar.GADTValue       as FGV
 import qualified Type.Feldspar.GADT                  as TFG
@@ -14,7 +14,7 @@ import Compiler (scompileWith)
 
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
-import Conversion.Expression.Feldspar ()
+import Expression.Feldspar.Conversion ()
 
 crc32 :: Data (Ary Integer -> Integer)
 crc32 = [|| $$foldl $$updCrc 0 ||]

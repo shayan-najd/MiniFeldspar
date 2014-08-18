@@ -1,4 +1,4 @@
-module Conversion.Nat () where
+module Nat.Conversion () where
 
 import MyPrelude
 

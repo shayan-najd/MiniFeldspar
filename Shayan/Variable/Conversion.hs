@@ -1,4 +1,4 @@
-module Conversion.Variable () where
+module Variable.Conversion () where
 
 import MyPrelude
 
@@ -14,8 +14,8 @@ import qualified Environment.Typed  as ET
 import qualified Nat.GADT           as NG
 
 import Conversion
-import Conversion.Environment ()
-import Conversion.Nat         ()
+import Environment.Conversion ()
+import Nat.Conversion         ()
 
 import Singleton
 

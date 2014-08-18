@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Lifting () where
+module Expression.Feldspar.Conversions.Lifting () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import Variable.Typed    as VT
 import Environment.Typed as ET
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 instance (t ~ t' , r ~ r') =>
          Cnv (FGFO.Exp r t , Env TFG.Typ r) (FGHO.Exp r' t') where

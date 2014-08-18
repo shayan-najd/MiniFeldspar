@@ -1,4 +1,4 @@
-module Conversion.Environment () where
+module Environment.Conversion () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import qualified Type.Feldspar.ADT  as TFA
 import qualified Type.Feldspar.GADT as TFG
 
 import Conversion
-import Conversion.Type.Feldspar ()
+import Type.Feldspar.Conversion ()
 import Singleton
 
 ---------------------------------------------------------------------------------

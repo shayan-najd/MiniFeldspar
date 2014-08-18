@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Unquoting () where
+module Expression.Feldspar.Conversions.Unquoting () where
 
 import MyPrelude (pure,fail,toRational,toInteger,fromInteger,fromRational
                  ,show,(++),(==),Maybe(..))

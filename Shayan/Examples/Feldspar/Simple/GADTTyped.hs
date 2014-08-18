@@ -9,7 +9,7 @@ import qualified Expression.Feldspar.ADTValue as V
 import qualified Nat.ADT as NA
 import Environment.Scoped
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.GADTTyped ()
+import Expression.Feldspar.Conversions.Evaluation.GADTTyped ()
 import TypeChecking.Feldspar ()
 import Inference
 

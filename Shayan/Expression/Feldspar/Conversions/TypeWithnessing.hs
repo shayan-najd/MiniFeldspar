@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.TypeWithnessing () where
+module Expression.Feldspar.Conversions.TypeWithnessing () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import qualified Type.Feldspar.ADT                  as TFA
 import Environment.Typed
 
 import Conversion
-import Conversion.Variable      ()
+import Variable.Conversion      ()
 
 import Singleton
 

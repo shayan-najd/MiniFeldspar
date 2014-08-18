@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.NameResolution () where
+module Expression.Feldspar.Conversions.NameResolution () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import qualified Environment.Plain                      as EP
 import Variable.Plain
 
 import Conversion
-import Conversion.Variable    ()
+import Variable.Conversion    ()
 
 instance Eq x =>
          Cnv (FAUN.Exp x , EP.Env x) FAUD.Exp where

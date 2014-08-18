@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Normalization () where
+module Expression.Feldspar.Conversions.Normalization () where
 
 import MyPrelude
 

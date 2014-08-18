@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Evaluation.ADTValue () where
+module Expression.Feldspar.Conversions.Evaluation.ADTValue () where
 
 import MyPrelude
 
@@ -7,7 +7,7 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 import Singleton
 
 instance HasSin TFG.Typ t =>  Cnv (FAV.Exp , ()) (FGV.Exp t) where

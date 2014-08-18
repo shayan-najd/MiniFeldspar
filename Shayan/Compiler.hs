@@ -14,9 +14,9 @@ import qualified Environment.Typed                  as ET
 import qualified Variable.Scoped                    as VS
 
 import Conversion
-import Conversion.Type.Feldspar ()
-import Conversion.Variable ()
-import Conversion.Expression.Feldspar.CodeGeneration (pretty)
+import Type.Feldspar.Conversion ()
+import Variable.Conversion ()
+import Expression.Feldspar.Conversions.CodeGeneration (pretty)
 
 import Singleton
 

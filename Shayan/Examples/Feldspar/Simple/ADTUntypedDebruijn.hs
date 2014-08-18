@@ -6,7 +6,7 @@ import Expression.Feldspar.ADTUntypedDebruijn
 import Variable.Plain
 import qualified Expression.Feldspar.ADTValue as V
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.ADTUntypedDebruijn ()
+import Expression.Feldspar.Conversions.Evaluation.ADTUntypedDebruijn ()
 
 dbl :: Exp
 dbl = Abs (App (App (Var (Suc Zro)) (Var Zro)) (Var Zro))

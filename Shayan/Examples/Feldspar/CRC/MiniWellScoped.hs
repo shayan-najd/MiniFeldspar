@@ -7,7 +7,7 @@ import Examples.Feldspar.Prelude.Environment
 import Examples.Feldspar.CRC.Common
 
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+import Expression.Feldspar.Conversions.Evaluation.MiniWellScoped ()
 
 import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG

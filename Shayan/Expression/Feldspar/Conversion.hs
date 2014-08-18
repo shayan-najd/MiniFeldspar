@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar () where
+module Expression.Feldspar.Conversion () where
 
 import MyPrelude
 
@@ -19,17 +19,17 @@ import qualified Environment.Scoped as ES
 import qualified Environment.Typed  as ET
 
 import Conversion
-import Conversion.Variable                             ()
-import Conversion.Environment                          ()
-import Conversion.Type.Feldspar                        ()
-import Conversion.Expression.TemplateHaskell           ()
-import Conversion.Expression.Feldspar.Unquoting        ()
-import Conversion.Expression.Feldspar.NameResolution   ()
-import Conversion.Expression.Feldspar.ScopeWithnessing ()
-import Conversion.Expression.Feldspar.TypeInference    ()
-import Conversion.Expression.Feldspar.TypeWithnessing  ()
-import Conversion.Expression.Feldspar.Lifting          ()
-import Conversion.Expression.Feldspar.Normalization    ()
+import Variable.Conversion                              ()
+import Environment.Conversion                           ()
+import Type.Feldspar.Conversion                         ()
+import Expression.TemplateHaskell.Conversion            ()
+import Expression.Feldspar.Conversions.Unquoting        ()
+import Expression.Feldspar.Conversions.NameResolution   ()
+import Expression.Feldspar.Conversions.ScopeWithnessing ()
+import Expression.Feldspar.Conversions.TypeInference    ()
+import Expression.Feldspar.Conversions.TypeWithnessing  ()
+import Expression.Feldspar.Conversions.Lifting          ()
+import Expression.Feldspar.Conversions.Normalization    ()
 
 import Normalization
 import Normalization.Feldspar.GADTHigherOrder ()

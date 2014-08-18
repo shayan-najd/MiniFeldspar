@@ -5,7 +5,7 @@ import MyPrelude
 import Expression.Feldspar.ADTUntypedNamed
 import qualified Expression.Feldspar.ADTValue as V
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.ADTUntypedNamed ()
+import Expression.Feldspar.Conversions.Evaluation.ADTUntypedNamed ()
 import qualified Language.Haskell.TH.Syntax as TH
 
 type Var = TH.Name

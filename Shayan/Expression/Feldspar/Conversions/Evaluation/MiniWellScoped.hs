@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Evaluation.MiniWellScoped () where
+module Expression.Feldspar.Conversions.Evaluation.MiniWellScoped () where
 
 import MyPrelude
 
@@ -12,7 +12,7 @@ import Variable.Typed
 import Environment.Typed
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 import Singleton
 

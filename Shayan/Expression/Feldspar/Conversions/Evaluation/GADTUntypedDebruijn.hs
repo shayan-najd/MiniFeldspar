@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Evaluation.GADTUntypedDebruijn () where
+module Expression.Feldspar.Conversions.Evaluation.GADTUntypedDebruijn () where
 
 import MyPrelude
 
@@ -10,7 +10,7 @@ import Environment.Scoped
 import Nat.ADT
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 instance Cnv (Exp n , Env n FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of

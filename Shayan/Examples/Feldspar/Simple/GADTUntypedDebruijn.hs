@@ -7,7 +7,7 @@ import Variable.Scoped
 import qualified Nat.ADT                      as NA
 import qualified Expression.Feldspar.ADTValue as V
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.GADTUntypedDebruijn ()
+import Expression.Feldspar.Conversions.Evaluation.GADTUntypedDebruijn ()
 import Environment.Scoped
 
 dbl :: Exp (NA.Suc NA.Zro)

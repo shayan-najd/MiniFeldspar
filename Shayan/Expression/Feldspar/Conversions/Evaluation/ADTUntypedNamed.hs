@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.Evaluation.ADTUntypedNamed () where
+module Expression.Feldspar.Conversions.Evaluation.ADTUntypedNamed () where
 
 import MyPrelude
 
@@ -8,7 +8,7 @@ import qualified Expression.Feldspar.ADTValue as FAV
 import Environment.Map
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 instance Eq v => Cnv (Exp v , Env v FAV.Exp) FAV.Exp where
   cnv (ee , r) = let ?r = r in join (case ee of

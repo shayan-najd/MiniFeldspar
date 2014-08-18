@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.TypeInference () where
+module Expression.Feldspar.Conversions.TypeInference () where
 
 import MyPrelude
 
@@ -11,7 +11,7 @@ import qualified Type.Feldspar.ADT                       as TFA
 import Environment.Scoped
 
 import Conversion
-import Conversion.Variable   ()
+import Variable.Conversion   ()
 
 import Inference             (typInf)
 import TypeChecking.Feldspar ()

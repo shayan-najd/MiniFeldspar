@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.CodeGeneration where
+module Expression.Feldspar.Conversions.CodeGeneration where
 
 import MyPrelude hiding ((<>))
 

@@ -7,7 +7,7 @@ import Environment.Typed
 import qualified Expression.Feldspar.GADTValue as FGV
 import Variable.Typed
 import Conversion
-import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
+import Expression.Feldspar.Conversions.Evaluation.MiniWellScoped ()
 import qualified Type.Feldspar.ADT as A
 import Type.Feldspar.ADT  as TFA
 

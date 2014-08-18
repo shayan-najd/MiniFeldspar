@@ -5,7 +5,7 @@ import MyPrelude
 import Expression.Feldspar.GADTHigherOrder
 import Variable.Typed
 import Conversion as E
-import Conversion.Expression.Feldspar.Evaluation.GADTHigherOrder ()
+import Expression.Feldspar.Conversions.Evaluation.GADTHigherOrder ()
 import qualified Expression.Feldspar.GADTValue as FGV
 import Singleton
 import Type.Feldspar.GADT

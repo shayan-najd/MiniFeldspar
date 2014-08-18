@@ -1,4 +1,4 @@
-module Conversion.Type.Feldspar () where
+module Type.Feldspar.Conversion () where
 
 import MyPrelude
 

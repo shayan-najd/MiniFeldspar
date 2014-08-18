@@ -18,7 +18,7 @@ import qualified Environment.Scoped as ES
 import qualified Environment.Typed  as ET
 
 import Conversion
-import Conversion.Environment ()
+import Environment.Conversion ()
 
 import Variable.Typed
 import Singleton

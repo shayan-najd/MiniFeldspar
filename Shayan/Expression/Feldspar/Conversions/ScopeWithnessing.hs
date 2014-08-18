@@ -1,4 +1,4 @@
-module Conversion.Expression.Feldspar.ScopeWithnessing () where
+module Expression.Feldspar.Conversions.ScopeWithnessing () where
 
 import MyPrelude
 
@@ -8,7 +8,7 @@ import qualified Expression.Feldspar.GADTUntypedDebruijn as FGUD
 import Nat.GADT
 
 import Conversion
-import Conversion.Variable ()
+import Variable.Conversion ()
 
 instance Cnv (FAUD.Exp , r) (Exs1 FGUD.Exp Nat) where
   cnv (ee , r)  = let ?r = r in

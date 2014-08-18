@@ -31,16 +31,14 @@ import qualified Environment.Scoped                      as ES
 import qualified Environment.Typed                       as ET
 
 import Normalization
--- import Normalization.Feldspar.GADTTyped ()
 import Normalization.Feldspar.GADTHigherOrder  ()
 
 import Conversion
-import Conversion.Variable                     ()
-import Conversion.Environment                  ()
--- import Conversion.Existential                  ()
-import Conversion.Type.Feldspar                ()
-import Conversion.Expression.TemplateHaskell   ()
-import Conversion.Expression.Feldspar          ()
+import Variable.Conversion                     ()
+import Environment.Conversion                  ()
+import Type.Feldspar.Conversion                ()
+import Expression.TemplateHaskell.Conversion   ()
+import Expression.Feldspar.Conversion          ()
 
 import qualified Nat.ADT as NA
 

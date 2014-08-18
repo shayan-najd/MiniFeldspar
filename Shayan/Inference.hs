@@ -7,7 +7,7 @@ import Nat.ADT
 import Type.Herbrand
 import Solver
 import Conversion
-import Conversion.Nat ()
+import Nat.Conversion ()
 
 mxm :: [Nat] -> Nat
 mxm [] = Zro

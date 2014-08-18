@@ -1,4 +1,4 @@
-module Conversion.Expression.TemplateHaskell () where
+module Expression.TemplateHaskell.Conversion () where
 
 import MyPrelude
 

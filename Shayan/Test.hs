@@ -11,7 +11,7 @@ import qualified Examples.Feldspar.Simple.GADTHigherOrder     as FGHO
 import qualified Examples.Feldspar.Simple.MiniWellScoped      as FMWS
 import qualified Examples.Feldspar.Simple.Conversion          as FCNV
 
-import Conversion.Expression.Feldspar.Evaluation.ADTValue ()
+import Expression.Feldspar.Conversions.Evaluation.ADTValue ()
 
 main :: IO ()
 main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
