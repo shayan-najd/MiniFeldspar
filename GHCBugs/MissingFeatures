@@ -1,0 +1,5 @@
+a. the ability to instantiate classes for the non-last type paramters of a polymorphic data type. 
+  E.g. consider the following: instance Functor /\ x. Either x y where {fmap f (Left x) = Left (f x); fmap f e = e}
+
+b. the ability to control what names are imported in TH quotations
+c. the ability to splice infix operators (including the `name` syntax)
