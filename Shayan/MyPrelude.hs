@@ -1,6 +1,6 @@
-module MyPrelude 
+module MyPrelude
        (Int,MyPrelude.Integer,Num(..),div,toInteger,pi,(/),floor,log,sqrt,
-        Word32,Rational, 
+        Word32,Rational,
         Float,toRational,fromRational,fromIntegral,
         Bool(..),(&&),(||),not,
         Complex(..),realPart,imagPart,cis,magnitude,
@@ -24,7 +24,7 @@ module MyPrelude
         module ErrorMonad,
         module Existential,
         module Data.Monoid,
-        module Data.Foldable, 
+        module Data.Foldable,
         module Data.Traversable,
         module Data.Functor,
         module Control.Applicative,
@@ -42,7 +42,7 @@ import Control.Applicative
 import Data.Functor
 import Control.Monad hiding (forM,forM_,sequence,sequence_,msum,mapM,mapM_)
 import Data.Monoid
-import Control.Monad.State 
+import Control.Monad.State
 import Data.List
 import Data.Complex
 import Data.Word

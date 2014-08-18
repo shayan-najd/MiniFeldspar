@@ -1,4 +1,4 @@
-module Variable.Plain 
+module Variable.Plain
   (Var,Nat(..),prd,inc) where
 
 import Nat.ADT

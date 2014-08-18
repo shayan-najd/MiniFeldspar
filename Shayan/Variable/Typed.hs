@@ -16,12 +16,12 @@ int (Suc x) = 1 + int x
 
 instance Show (Var r t) where
   show v = show (int v)
- 
+
 prd :: Var (t' ': r) t -> Var r t
 prd (Suc x) = x
 prd _       = impossible
-  
-inc :: (forall t'. Var r t' -> Var r' t') -> 
+
+inc :: (forall t'. Var r t' -> Var r' t') ->
        Var (ta ': r) t -> Var (ta ': r') t
 inc _ Zro     = Zro
 inc f (Suc x) = Suc (f x)

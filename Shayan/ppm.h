@@ -25,7 +25,7 @@ Int size(Image img)
 }
 
 Image readImage (const char* filename)
-{  
+{
   FILE* fp = fopen(filename, "rb");
   Image img;
   fscanf(fp , "P%d\n%d %d\n255\n" , &img.type , &img.sizeX , &img.sizeY);
@@ -39,7 +39,7 @@ Image readImage (const char* filename)
 void writeImage (const char* filename, Image img)
 {
   FILE* fp = fopen(filename,"wb");
-  fprintf(fp , "P%d\n%d %d\n255\n" , img.type , img.sizeX , img.sizeY);  
+  fprintf(fp , "P%d\n%d %d\n255\n" , img.type , img.sizeX , img.sizeY);
   for(Int i = 0; i < size(img); i++)
     fprintf(fp , "%d\n" , img.data[i]);
   fclose(fp);

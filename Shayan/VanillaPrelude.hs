@@ -3,10 +3,10 @@ module VanillaPrelude where
 import MyPrelude as MP
 
 cnd :: Bool -> s -> s -> s
-cnd c t f = if c then t else f 
+cnd c t f = if c then t else f
 
-whl :: (s -> Bool) -> (s -> s) -> s -> s 
-whl fc fb = head . dropWhile fc . iterate fb 
+whl :: (s -> Bool) -> (s -> s) -> s -> s
+whl fc fb = head . dropWhile fc . iterate fb
 
 tpl :: a -> b -> (a , b)
 tpl = ((,))
@@ -23,7 +23,7 @@ ary l f = listArray (0 , l - 1) (fmap f [0 .. l - 1])
 len :: (Array Integer a) -> Integer
 len = (1 +) . uncurry (flip (-)) . bounds
 
-ind :: (Array Integer a) -> Integer -> a 
+ind :: (Array Integer a) -> Integer -> a
 ind = (!)
 
 cmx :: Float -> Float -> Complex Float

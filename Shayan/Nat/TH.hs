@@ -7,8 +7,8 @@ nat :: Int -> String -> Q Exp
 nat 0 p = do Just nm <- lookupValueName (p ++ "Zro")
              return (ConE nm)
 nat n p = do Just nm <- lookupValueName (p ++ "Suc")
-             AppE (ConE nm) <$> (nat (n - 1) p) 
-   
+             AppE (ConE nm) <$> (nat (n - 1) p)
+
 natP :: Int -> String -> Q Pat
 natP 0 p = do Just nm <- lookupValueName (p ++ "Zro")
               return (ConP nm [])

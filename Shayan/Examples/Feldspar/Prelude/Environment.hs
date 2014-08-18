@@ -1,6 +1,6 @@
 module Examples.Feldspar.Prelude.Environment where
 
-import MyPrelude hiding (Int) 
+import MyPrelude hiding (Int)
 
 import qualified Expression.Feldspar.ADTValue  as FAV
 import qualified Expression.Feldspar.GADTValue as FGV
@@ -20,7 +20,7 @@ import qualified Environment.Typed  as ET
 import Conversion
 import Conversion.Environment ()
 
-import Variable.Typed 
+import Variable.Typed
 import Singleton
 
 infixr 9 :->
@@ -69,7 +69,7 @@ type Prelude = TFA.Cmx :-> TFA.Flt ':
                TFA.Flt :-> TFA.Flt               ':
                TFA.Ary TFA.Flt :-> TFA.Ary TFA.Flt ':
                '[]
-               
+
 ---------------------------------------------------------------------------------
 -- ETTFG
 ---------------------------------------------------------------------------------
@@ -112,36 +112,36 @@ etTFG = TFG.Cmx --> TFG.Flt <:>
 -- ESTH
 ---------------------------------------------------------------------------------
 
-esTH :: ES.Env (Len Prelude) TH.Name 
-esTH = 'realPartHsk 
-   <+> 'imagPartHsk 
-   <+> 'eqlBolHsk 
-   <+> 'eqlIntHsk 
-   <+> 'eqlFltHsk 
-   <+> 'ltdBolHsk 
-   <+> 'ltdIntHsk 
-   <+> 'ltdFltHsk 
-   <+> 'addIntHsk 
-   <+> 'subIntHsk 
-   <+> 'mulIntHsk 
-   <+> 'divIntHsk 
-   <+> 'addFltHsk 
-   <+> 'subFltHsk 
-   <+> 'mulFltHsk 
-   <+> 'divFltHsk 
-   <+> 'addCmxHsk 
-   <+> 'subCmxHsk 
-   <+> 'mulCmxHsk 
-   <+> 'divCmxHsk 
-   <+> 'andIntHsk 
-   <+> 'orIntHsk 
-   <+> 'xorIntHsk 
-   <+> 'shrIntHsk 
-   <+> 'shlIntHsk 
-   <+> 'cmpIntHsk 
-   <+> 'i2fHsk 
-   <+> 'cisHsk 
-   <+> 'ilog2Hsk 
+esTH :: ES.Env (Len Prelude) TH.Name
+esTH = 'realPartHsk
+   <+> 'imagPartHsk
+   <+> 'eqlBolHsk
+   <+> 'eqlIntHsk
+   <+> 'eqlFltHsk
+   <+> 'ltdBolHsk
+   <+> 'ltdIntHsk
+   <+> 'ltdFltHsk
+   <+> 'addIntHsk
+   <+> 'subIntHsk
+   <+> 'mulIntHsk
+   <+> 'divIntHsk
+   <+> 'addFltHsk
+   <+> 'subFltHsk
+   <+> 'mulFltHsk
+   <+> 'divFltHsk
+   <+> 'addCmxHsk
+   <+> 'subCmxHsk
+   <+> 'mulCmxHsk
+   <+> 'divCmxHsk
+   <+> 'andIntHsk
+   <+> 'orIntHsk
+   <+> 'xorIntHsk
+   <+> 'shrIntHsk
+   <+> 'shlIntHsk
+   <+> 'cmpIntHsk
+   <+> 'i2fHsk
+   <+> 'cisHsk
+   <+> 'ilog2Hsk
    <+> 'sqrtFltHsk
    <+> 'memHsk
    <+> ES.Emp
@@ -152,60 +152,60 @@ esTH = 'realPartHsk
 
 esString :: ES.Env (Len Prelude) String
 esString = fmap (\ (TH.Name x _) -> (init . init . init . TH.occString) x) esTH
-  
+
 ---------------------------------------------------------------------------------
 -- ESFAV
 ---------------------------------------------------------------------------------
 
-esFAV :: ES.Env (Len Prelude) FAV.Exp 
-esFAV = realPartFAV 
-   <+> imagPartFAV 
-   <+> eqlBolFAV 
-   <+> eqlIntFAV 
-   <+> eqlFltFAV 
-   <+> ltdBolFAV 
-   <+> ltdIntFAV 
-   <+> ltdFltFAV 
-   <+> addIntFAV 
-   <+> subIntFAV 
-   <+> mulIntFAV 
-   <+> divIntFAV 
-   <+> addFltFAV 
-   <+> subFltFAV 
-   <+> mulFltFAV 
-   <+> divFltFAV 
-   <+> addCmxFAV 
-   <+> subCmxFAV 
-   <+> mulCmxFAV 
-   <+> divCmxFAV 
-   <+> andIntFAV 
-   <+> orIntFAV 
-   <+> xorIntFAV 
-   <+> shrIntFAV 
-   <+> shlIntFAV 
-   <+> cmpIntFAV 
-   <+> i2fFAV 
-   <+> cisFAV 
-   <+> ilog2FAV 
-   <+> sqrtFltFAV 
-   <+> memFAV 
+esFAV :: ES.Env (Len Prelude) FAV.Exp
+esFAV = realPartFAV
+   <+> imagPartFAV
+   <+> eqlBolFAV
+   <+> eqlIntFAV
+   <+> eqlFltFAV
+   <+> ltdBolFAV
+   <+> ltdIntFAV
+   <+> ltdFltFAV
+   <+> addIntFAV
+   <+> subIntFAV
+   <+> mulIntFAV
+   <+> divIntFAV
+   <+> addFltFAV
+   <+> subFltFAV
+   <+> mulFltFAV
+   <+> divFltFAV
+   <+> addCmxFAV
+   <+> subCmxFAV
+   <+> mulCmxFAV
+   <+> divCmxFAV
+   <+> andIntFAV
+   <+> orIntFAV
+   <+> xorIntFAV
+   <+> shrIntFAV
+   <+> shlIntFAV
+   <+> cmpIntFAV
+   <+> i2fFAV
+   <+> cisFAV
+   <+> ilog2FAV
+   <+> sqrtFltFAV
+   <+> memFAV
    <+> ES.Emp
 
 ---------------------------------------------------------------------------------
 -- etFGV
 ---------------------------------------------------------------------------------
-  
-etFGV :: ET.Env FGV.Exp Prelude 
+
+etFGV :: ET.Env FGV.Exp Prelude
 etFGV = (FGV.Exp realPartHsk
      <:> FGV.Exp imagPartHsk
-     <:> FGV.Exp eqlBolHsk 
+     <:> FGV.Exp eqlBolHsk
      <:> FGV.Exp eqlIntHsk
      <:> FGV.Exp eqlFltHsk
-     <:> FGV.Exp ltdBolHsk 
+     <:> FGV.Exp ltdBolHsk
      <:> FGV.Exp ltdIntHsk
      <:> FGV.Exp ltdFltHsk
      <:> FGV.Exp addIntHsk
-     <:> FGV.Exp subIntHsk 
+     <:> FGV.Exp subIntHsk
      <:> FGV.Exp mulIntHsk
      <:> FGV.Exp divIntHsk
      <:> FGV.Exp addFltHsk
@@ -213,14 +213,14 @@ etFGV = (FGV.Exp realPartHsk
      <:> FGV.Exp mulFltHsk
      <:> FGV.Exp divFltHsk
      <:> FGV.Exp addCmxHsk
-     <:> FGV.Exp subCmxHsk 
-     <:> FGV.Exp mulCmxHsk 
+     <:> FGV.Exp subCmxHsk
+     <:> FGV.Exp mulCmxHsk
      <:> FGV.Exp divCmxHsk
      <:> FGV.Exp andIntHsk
-     <:> FGV.Exp orIntHsk 
-     <:> FGV.Exp xorIntHsk 
-     <:> FGV.Exp shrIntHsk 
-     <:> FGV.Exp shlIntHsk 
+     <:> FGV.Exp orIntHsk
+     <:> FGV.Exp xorIntHsk
+     <:> FGV.Exp shrIntHsk
+     <:> FGV.Exp shlIntHsk
      <:> FGV.Exp cmpIntHsk
      <:> FGV.Exp i2fHsk
      <:> FGV.Exp cisHsk
@@ -265,7 +265,7 @@ ltdIntVar = $(nat 6 "")
 
 ltdFltVar :: Var Prelude (TFA.Flt :-> (TFA.Flt :-> TFA.Bol))
 ltdFltVar = $(nat 7 "")
-  
+
 addIntVar :: Var Prelude (TFA.Int :-> (TFA.Int :-> TFA.Int))
 addIntVar = $(nat 8 "")
 
@@ -277,7 +277,7 @@ mulIntVar = $(nat 10 "")
 
 divIntVar :: Var Prelude (TFA.Int :-> (TFA.Int :-> TFA.Int))
 divIntVar = $(nat 11 "")
- 
+
 addFltVar :: Var Prelude (TFA.Flt :-> (TFA.Flt :-> TFA.Flt))
 addFltVar = $(nat 12 "")
 
@@ -344,7 +344,7 @@ type Int = Word32
 type Flt = Float
 type Cmx = Complex Float
 
-realPartHsk :: Cmx -> Flt 
+realPartHsk :: Cmx -> Flt
 realPartHsk = realPart
 
 imagPartHsk :: Cmx -> Flt
@@ -367,7 +367,7 @@ ltdIntHsk = (<)
 
 ltdFltHsk :: Flt -> (Flt -> Bol)
 ltdFltHsk = (<)
-  
+
 addIntHsk :: Int -> (Int -> Int)
 addIntHsk = (+)
 
@@ -379,7 +379,7 @@ mulIntHsk = (*)
 
 divIntHsk :: Int -> (Int -> Int)
 divIntHsk =  div
- 
+
 addFltHsk :: Flt -> (Flt -> Flt)
 addFltHsk = (+)
 
@@ -405,7 +405,7 @@ divCmxHsk :: Cmx -> (Cmx -> Cmx)
 divCmxHsk = (/)
 
 andIntHsk :: Int -> (Int -> Int)
-andIntHsk = (.&.) 
+andIntHsk = (.&.)
 
 orIntHsk :: Int -> (Int -> Int)
 orIntHsk = (.|.)
@@ -423,13 +423,13 @@ cmpIntHsk :: Int -> Int
 cmpIntHsk = complement
 
 i2fHsk :: Int -> Flt
-i2fHsk = (\ i -> fromIntegral i) 
+i2fHsk = (\ i -> fromIntegral i)
 
 cisHsk :: Flt -> Cmx
 cisHsk = cis
 
-ilog2Hsk :: Int -> Int 
-ilog2Hsk x = floor (log (fromIntegral x) / log (2 :: Float)) 
+ilog2Hsk :: Int -> Int
+ilog2Hsk x = floor (log (fromIntegral x) / log (2 :: Float))
 
 sqrtFltHsk :: Flt -> Flt
 sqrtFltHsk = sqrt
@@ -440,96 +440,96 @@ memHsk = id
 ---------------------------------------------------------------------------------
 -- FAV
 ---------------------------------------------------------------------------------
-  
-realPartFAV :: FAV.Exp 
+
+realPartFAV :: FAV.Exp
 realPartFAV = FAV.lft realPartHsk
 
-imagPartFAV :: FAV.Exp 
+imagPartFAV :: FAV.Exp
 imagPartFAV = FAV.lft imagPartHsk
 
-eqlBolFAV :: FAV.Exp 
-eqlBolFAV = FAV.lft eqlBolHsk 
+eqlBolFAV :: FAV.Exp
+eqlBolFAV = FAV.lft eqlBolHsk
 
-eqlIntFAV :: FAV.Exp 
+eqlIntFAV :: FAV.Exp
 eqlIntFAV = FAV.lft eqlIntHsk
 
-eqlFltFAV :: FAV.Exp 
+eqlFltFAV :: FAV.Exp
 eqlFltFAV = FAV.lft eqlFltHsk
 
-ltdBolFAV :: FAV.Exp 
-ltdBolFAV = FAV.lft ltdBolHsk 
+ltdBolFAV :: FAV.Exp
+ltdBolFAV = FAV.lft ltdBolHsk
 
-ltdIntFAV :: FAV.Exp 
+ltdIntFAV :: FAV.Exp
 ltdIntFAV = FAV.lft ltdIntHsk
 
-ltdFltFAV :: FAV.Exp 
+ltdFltFAV :: FAV.Exp
 ltdFltFAV = FAV.lft ltdFltHsk
-  
-addIntFAV :: FAV.Exp 
+
+addIntFAV :: FAV.Exp
 addIntFAV = FAV.lft addIntHsk
 
-subIntFAV :: FAV.Exp 
-subIntFAV = FAV.lft subIntHsk 
+subIntFAV :: FAV.Exp
+subIntFAV = FAV.lft subIntHsk
 
-mulIntFAV :: FAV.Exp 
+mulIntFAV :: FAV.Exp
 mulIntFAV = FAV.lft mulIntHsk
 
-divIntFAV :: FAV.Exp 
+divIntFAV :: FAV.Exp
 divIntFAV = FAV.lft divIntHsk
- 
-addFltFAV :: FAV.Exp 
+
+addFltFAV :: FAV.Exp
 addFltFAV = FAV.lft addFltHsk
 
-subFltFAV :: FAV.Exp 
+subFltFAV :: FAV.Exp
 subFltFAV = FAV.lft subFltHsk
 
-mulFltFAV :: FAV.Exp 
+mulFltFAV :: FAV.Exp
 mulFltFAV = FAV.lft mulFltHsk
 
-divFltFAV :: FAV.Exp 
+divFltFAV :: FAV.Exp
 divFltFAV = FAV.lft divFltHsk
 
-addCmxFAV :: FAV.Exp 
+addCmxFAV :: FAV.Exp
 addCmxFAV = FAV.lft addCmxHsk
 
-subCmxFAV :: FAV.Exp 
-subCmxFAV = FAV.lft subCmxHsk 
+subCmxFAV :: FAV.Exp
+subCmxFAV = FAV.lft subCmxHsk
 
-mulCmxFAV :: FAV.Exp 
-mulCmxFAV = FAV.lft mulCmxHsk 
+mulCmxFAV :: FAV.Exp
+mulCmxFAV = FAV.lft mulCmxHsk
 
-divCmxFAV :: FAV.Exp 
+divCmxFAV :: FAV.Exp
 divCmxFAV = FAV.lft divCmxHsk
 
-andIntFAV :: FAV.Exp 
+andIntFAV :: FAV.Exp
 andIntFAV = FAV.lft andIntHsk
 
-orIntFAV :: FAV.Exp 
-orIntFAV = FAV.lft orIntHsk 
+orIntFAV :: FAV.Exp
+orIntFAV = FAV.lft orIntHsk
 
-xorIntFAV :: FAV.Exp 
-xorIntFAV = FAV.lft xorIntHsk 
+xorIntFAV :: FAV.Exp
+xorIntFAV = FAV.lft xorIntHsk
 
-shrIntFAV :: FAV.Exp 
-shrIntFAV = FAV.lft shrIntHsk 
+shrIntFAV :: FAV.Exp
+shrIntFAV = FAV.lft shrIntHsk
 
-shlIntFAV :: FAV.Exp 
-shlIntFAV = FAV.lft shlIntHsk 
+shlIntFAV :: FAV.Exp
+shlIntFAV = FAV.lft shlIntHsk
 
-cmpIntFAV :: FAV.Exp 
+cmpIntFAV :: FAV.Exp
 cmpIntFAV = FAV.lft cmpIntHsk
 
-i2fFAV :: FAV.Exp 
+i2fFAV :: FAV.Exp
 i2fFAV = FAV.lft i2fHsk
 
-cisFAV :: FAV.Exp 
+cisFAV :: FAV.Exp
 cisFAV = FAV.lft  cisHsk
 
-ilog2FAV :: FAV.Exp 
+ilog2FAV :: FAV.Exp
 ilog2FAV = FAV.lft ilog2Hsk
 
-sqrtFltFAV :: FAV.Exp 
+sqrtFltFAV :: FAV.Exp
 sqrtFltFAV = FAV.lft sqrtFltHsk
 
-memFAV :: FAV.Exp 
+memFAV :: FAV.Exp
 memFAV = FAV.lft memHsk

@@ -7,8 +7,8 @@ import qualified Nat.ADT as NA
 
 data Var :: NA.Nat -> * where
   Zro :: Var (NA.Suc n)
-  Suc :: Var n -> Var (NA.Suc n)  
-                               
+  Suc :: Var n -> Var (NA.Suc n)
+
 deriving instance Eq   (Var n)
 deriving instance Ord  (Var n)
 

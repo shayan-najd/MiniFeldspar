@@ -11,16 +11,16 @@ import qualified Examples.Feldspar.Simple.GADTHigherOrder     as FGHO
 import qualified Examples.Feldspar.Simple.MiniWellScoped      as FMWS
 import qualified Examples.Feldspar.Simple.Conversion          as FCNV
 
-import Conversion.Expression.Feldspar.Evaluation.ADTValue () 
+import Conversion.Expression.Feldspar.Evaluation.ADTValue ()
 
 main :: IO ()
 main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
                  FGTD.test  && FGFO.test  && FGHO.test &&
-                 FMWS.test  && FCNV.test 
+                 FMWS.test  && FCNV.test
               then "Pass!"
               else "Fail!")
 
--- Todo:       
+-- Todo:
 -- * Check for exotic terms
 -- * Weakening of HOAS
 --    + getting rid of Tmp
@@ -31,7 +31,7 @@ main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
 -- * Conversion of FGHO (x :-> y) ~> (FMWS x -> FMWS y)
 -- * Free Fusion for Church / Ahman's Containers
 -- * Supporting F
--- * Scope Proofing Quotations (e.g. Sam's misunderstanding) [EncodingTypes.txt] 
+-- * Scope Proofing Quotations (e.g. Sam's misunderstanding) [EncodingTypes.txt]
 -- * Support for Syntactic Suggar in Quotations (e.g. use TH-Desugar)
 -- * Add sqrt and memorize (for Float) to Preludes that do not have it
 -- * Write the code required for memorize

@@ -1,15 +1,15 @@
-module Examples.Feldspar.Prelude.TemplateHaskell 
+module Examples.Feldspar.Prelude.TemplateHaskell
        (Data
        ,MP.Integer,litI
-       ,MP.Float,litF                     
+       ,MP.Float,litF
        ,MP.Bool(True,False)
-       ,Tpl,{-((,)),-}fst,snd           
+       ,Tpl,{-((,)),-}fst,snd
        ,Complex,cmx,real,imag
-       ,Ary,ary,len,ind        
+       ,Ary,ary,len,ind
        ,{-ifThenElse,-}whl,forLoop,memorize
-       ,not,and,or                  
+       ,not,and,or
        ,Equality(eql),notEql
-       ,Ordering(lt),gt,lte,gte,min           
+       ,Ordering(lt),gt,lte,gte,min
        ,Numeric(add,sub,mul,div,neg),ilog2,sqrt
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis
@@ -23,7 +23,7 @@ import Language.Haskell.TH.Syntax (Lift(lift),Q,Exp(LitE),TExp
                                   ,Lit(IntegerL,RationalL))
 
 import Examples.Feldspar.Prelude.Environment
-import qualified VanillaPrelude as VP 
+import qualified VanillaPrelude as VP
 
 type Data t = Q (TExp t)
 
@@ -40,10 +40,10 @@ instance FO Complex                     where {}
 ---------------------------------------------------------------------------------
 -- Integer
 ---------------------------------------------------------------------------------
- 
+
 instance Lift Integer where
     lift i = MP.return (LitE (IntegerL (MP.toInteger i)))
- 
+
 litI :: Integer -> Data Integer
 litI i = [|| i ||]
 
@@ -56,7 +56,7 @@ instance FrmInt Integer where
 ---------------------------------------------------------------------------------
 -- Float
 ---------------------------------------------------------------------------------
- 
+
 instance Lift Float where
   lift f = MP.return (LitE (RationalL (MP.toRational f)))
 
@@ -83,7 +83,7 @@ snd = VP.snd
 ---------------------------------------------------------------------------------
 
 type Complex = MP.Complex Float
- 
+
 cmx :: Float -> Float -> Complex
 cmx = VP.cmx
 
@@ -114,22 +114,22 @@ whl :: FO s => (s -> Bool) -> (s -> s) -> s -> s
 whl = VP.whl
 
 forLoop :: FO s => Data (Integer -> s -> (Integer -> s -> s) -> s)
-forLoop = [|| \ l -> \ init -> \ step -> 
+forLoop = [|| \ l -> \ init -> \ step ->
               snd (whl (\ t -> $$lt (fst t) l)
-                       (\ t -> ( $$add (fst t) 1  
+                       (\ t -> ( $$add (fst t) 1
                                , step (fst t) (snd t)))
-                   (0 , init)) 
+                   (0 , init))
           ||]
 
 memorize :: Data (Ary Float -> Ary Float)
 memorize = [|| memHsk ||]
-          
+
 ---------------------------------------------------------------------------------
 -- Boolean Operators
 ---------------------------------------------------------------------------------
 
 not :: Data (Bool -> Bool)
-not = [||  \ x -> if x then False else True ||] 
+not = [||  \ x -> if x then False else True ||]
 
 and :: Data (Bool -> Bool -> Bool)
 and = [|| \ x -> \ y -> if x then y else False ||]
@@ -140,19 +140,19 @@ or = [|| \ x -> \ y -> if x then True else y ||]
 ---------------------------------------------------------------------------------
 -- Equality
 ---------------------------------------------------------------------------------
-  
+
 class Equality t where
   eql :: Data (t -> t -> Bool)
-  
+
 instance Equality Bool where
-  eql = [|| eqlBolHsk ||] 
+  eql = [|| eqlBolHsk ||]
 
 instance Equality Integer where
   eql = [|| eqlIntHsk ||]
 
 instance Equality Float where
   eql = [|| eqlFltHsk ||]
-         
+
 notEql :: Equality t => Data (t -> t -> Bool)
 notEql= [|| \ x -> \ y -> $$not ($$eql x y) ||]
 
@@ -162,16 +162,16 @@ notEql= [|| \ x -> \ y -> $$not ($$eql x y) ||]
 
 class Ordering t where
   lt :: Data (t -> t -> Bool)
-   
+
 instance Ordering Bool where
-  lt = [|| \ x -> \ y -> ltdBolHsk x y ||] 
+  lt = [|| \ x -> \ y -> ltdBolHsk x y ||]
 
 instance Ordering Integer where
-  lt = [|| \ x -> \ y -> ltdIntHsk x y ||]   
-  
+  lt = [|| \ x -> \ y -> ltdIntHsk x y ||]
+
 instance Ordering Float where
-  lt = [|| \ x -> \ y -> ltdFltHsk x y ||] 
-    
+  lt = [|| \ x -> \ y -> ltdFltHsk x y ||]
+
 gt :: (Equality t , Ordering t) => Data (t -> t -> Bool)
 gt = [|| \ x -> \ y -> $$not ($$or ($$lt x y) ($$eql x y)) ||]
 
@@ -181,7 +181,7 @@ lte = [|| \ x -> \ y -> $$or ($$lt x y) ($$eql x y) ||]
 gte :: (Equality t , Ordering t) => Data (t -> t -> Bool)
 gte = [|| \ x -> \ y -> $$not ($$lt x y) ||]
 
-min :: Ordering t => Data(t -> t -> t) 
+min :: Ordering t => Data(t -> t -> t)
 min = [|| \ x -> \ y -> if ($$lt x y) then x else y ||]
 
 ---------------------------------------------------------------------------------
@@ -189,40 +189,40 @@ min = [|| \ x -> \ y -> if ($$lt x y) then x else y ||]
 ---------------------------------------------------------------------------------
 
 class Numeric t where
-  add :: Data (t -> t -> t) 
-  sub :: Data (t -> t -> t)  
-  mul :: Data (t -> t -> t)  
-  div :: Data (t -> t -> t) 
+  add :: Data (t -> t -> t)
+  sub :: Data (t -> t -> t)
+  mul :: Data (t -> t -> t)
+  div :: Data (t -> t -> t)
   neg :: Data (t -> t)
- 
+
 instance Numeric Integer where
   add = [|| addIntHsk ||]
   sub = [|| subIntHsk ||]
-  mul = [|| mulIntHsk ||]          
+  mul = [|| mulIntHsk ||]
   div = [|| divIntHsk ||]
-  neg = [|| \ i -> $$sub 0 i ||]  
-    
-instance Numeric Float where 
+  neg = [|| \ i -> $$sub 0 i ||]
+
+instance Numeric Float where
   add = [|| addFltHsk ||]
   sub = [|| subFltHsk ||]
-  mul = [|| mulFltHsk ||]          
+  mul = [|| mulFltHsk ||]
   div = [|| divFltHsk ||]
   neg = [|| \ f -> $$sub 0.0 f ||]
 
-instance Numeric (Complex) where 
+instance Numeric (Complex) where
   add = [|| addCmxHsk ||]
   sub = [|| subCmxHsk ||]
-  mul = [|| mulCmxHsk ||]          
-  div = [|| divCmxHsk ||] 
+  mul = [|| mulCmxHsk ||]
+  div = [|| divCmxHsk ||]
   neg = [|| \ c -> $$sub (cmx 0.0 0.0) c ||]
-  
+
 ilog2 :: Data (Integer -> Integer)
-ilog2 = [|| ilog2Hsk ||] 
+ilog2 = [|| ilog2Hsk ||]
   {-
   [|| \ xx -> ($$((-))) 31  ($$nlz xx) ||]
  where
    nlz :: Data (Integer -> Integer)
-   nlz = [|| \ x -> $$bitCount ($$complement 
+   nlz = [|| \ x -> $$bitCount ($$complement
                                 $$(MP.foldl go [|| x ||] [1,2,4,8,16])) ||]
      where
        go :: Data Integer -> Integer -> Data Integer
@@ -236,29 +236,29 @@ sqrt = [|| sqrtFltHsk ||]
 -- Bitwise Operators
 ---------------------------------------------------------------------------------
 
-bitAnd      :: Data (Integer -> Integer -> Integer) 
-bitAnd         = [|| andIntHsk ||] 
+bitAnd      :: Data (Integer -> Integer -> Integer)
+bitAnd         = [|| andIntHsk ||]
 
-bitOr      :: Data (Integer -> Integer -> Integer) 
-bitOr         = [|| orIntHsk ||] 
+bitOr      :: Data (Integer -> Integer -> Integer)
+bitOr         = [|| orIntHsk ||]
 
-bitXor        :: Data (Integer -> Integer -> Integer) 
-bitXor        = [|| xorIntHsk ||] 
+bitXor        :: Data (Integer -> Integer -> Integer)
+bitXor        = [|| xorIntHsk ||]
 
-shfRgt     :: Data (Integer -> Integer -> Integer) 
-shfRgt        = [|| shrIntHsk ||]  
+shfRgt     :: Data (Integer -> Integer -> Integer)
+shfRgt        = [|| shrIntHsk ||]
 
 shfLft     :: Data (Integer -> Integer -> Integer)
-shfLft        = [|| shlIntHsk ||] 
- 
+shfLft        = [|| shlIntHsk ||]
+
 complement :: Data (Integer -> Integer)
-complement    = [|| cmpIntHsk ||] 
+complement    = [|| cmpIntHsk ||]
 
 testBit    :: Data (Integer -> Integer -> Bool)
-testBit       = [|| \ i -> \ j -> if $$eql ($$bitAnd i ($$shfLft 1 j)) 0 
-                                  then False  
-                                  else True ||] 
- 
+testBit       = [|| \ i -> \ j -> if $$eql ($$bitAnd i ($$shfLft 1 j)) 0
+                                  then False
+                                  else True ||]
+
 oneBits :: Data (Integer -> Integer)
 oneBits       =  [|| \ n -> $$complement ($$shfLft ($$complement 0) n) ||]
 
@@ -268,42 +268,42 @@ lsbs          = [|| \ k -> \ i -> $$bitAnd i ($$oneBits k) ||]
 ---------------------------------------------------------------------------------
 -- Conversion Operators
 ---------------------------------------------------------------------------------
- 
+
 i2f :: Data (Integer -> Float)
-i2f = [|| i2fHsk ||] 
+i2f = [|| i2fHsk ||]
 
 cis :: Data (Float -> Complex)
-cis = [|| cisHsk ||] 
+cis = [|| cisHsk ||]
 
 ---------------------------------------------------------------------------------
 -- Array Operators
 ---------------------------------------------------------------------------------
 
 frmTo :: (FrmInt t , Numeric t , FO t) => Data (Integer -> Integer -> Ary t)
-frmTo = [|| \ m -> \ n -> ary 
-                          (if ($$lt n m) 
-                           then 0 
+frmTo = [|| \ m -> \ n -> ary
+                          (if ($$lt n m)
+                           then 0
                            else ($$add ($$sub n m) 1))
-                          (\ i -> $$add ($$frmInt i) ($$frmInt m)) ||]  
-   
+                          (\ i -> $$add ($$frmInt i) ($$frmInt m)) ||]
+
 permute :: FO t => Data ((Integer -> Integer -> Integer) -> Ary t -> Ary t)
-permute = [|| \ f -> \ v -> ary (len v) 
-                                   (\ i -> ind v 
+permute = [|| \ f -> \ v -> ary (len v)
+                                   (\ i -> ind v
                                            (f (len v) i)) ||]
- 
+
 reverse :: FO t => Data (Ary t -> Ary t)
 reverse = [|| $$permute (\ l i -> $$sub ($$sub l 1) i) ||]
 
 foldl :: (FO a , FO b) => Data ((a -> b -> a) -> a -> Ary b -> a)
-foldl = [|| \ f -> \ acc -> \ v -> 
+foldl = [|| \ f -> \ acc -> \ v ->
             $$forLoop (len v) acc (\ i -> \ a -> f a (ind v i)) ||]
- 
-map :: (FO a , FO b) => Data ((a -> b) -> Ary a -> Ary b)
-map = [|| \ f -> \ v -> ary (len v) (\ i -> f (ind v i)) ||]     
 
-zipWith :: (FO a , FO b , FO c) => 
+map :: (FO a , FO b) => Data ((a -> b) -> Ary a -> Ary b)
+map = [|| \ f -> \ v -> ary (len v) (\ i -> f (ind v i)) ||]
+
+zipWith :: (FO a , FO b , FO c) =>
            Data ((a -> b -> c) -> Ary a -> Ary b -> Ary c)
-zipWith = [|| \ f -> \ v1 -> \ v2 -> 
+zipWith = [|| \ f -> \ v1 -> \ v2 ->
                 ary ($$min (len v1) (len v2))
                     (\ i -> f (ind v1 i) (ind v2 i)) ||]
 
@@ -312,17 +312,17 @@ sum = [|| $$foldl $$add ($$frmInt 0) ||]
 
 scalarProd :: Data (Ary Integer -> Ary Integer -> Integer)
 scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$mul v1 v2) ||]
- 
+
 fromList :: FO a => [Data a] -> Data a -> Data (Ary a)
 fromList lst k =  let l = MP.fromInteger (MP.toInteger (MP.length lst))
                   in  [|| ary l
-                          (\ i -> $$(MP.foldr 
-                                     (\ j acc -> 
+                          (\ i -> $$(MP.foldr
+                                     (\ j acc ->
                                        let l' = (MP.fromInteger (MP.toInteger j))
                                        in  [|| if   $$eql i l'
                                                then $$(lst MP.!! j)
-                                               else $$acc ||]) k 
+                                               else $$acc ||]) k
                                       (MP.enumFromTo 0 (MP.length lst MP.- 1))
                                      )
-                          ) 
-                      ||]                      
+                          )
+                      ||]

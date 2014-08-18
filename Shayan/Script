@@ -21,7 +21,7 @@ do
 	    for i in {1..10}
 	    do
 		rm ${f}${a}${n}.c
-		/usr/bin/time -f "%e" -a -o time${f}${a}${n}Gen ./${a}${n} ${f} 
+		/usr/bin/time -f "%e" -a -o time${f}${a}${n}Gen ./${a}${n} ${f}
 	    done
 	done
     done
@@ -36,7 +36,7 @@ do
 	    for i in {1..10}
 	    do
 		rm ${f}${a}${n}
-		/usr/bin/time -f "%e" -a -o time${f}${a}${n}GCC gcc -o ${f}${a}${n} ${f}${a}${n}.c -lm -std=c99 
+		/usr/bin/time -f "%e" -a -o time${f}${a}${n}GCC gcc -o ${f}${a}${n} ${f}${a}${n}.c -lm -std=c99
 	    done
 	done
     done
@@ -52,7 +52,7 @@ do
 		if [ ${a}${n} != FFTMiniWellScoped ]; then
 		    rm ImageFFT.pgm
 		    rm Image.pbm
-		    /usr/bin/time -f "%e" -a -o time${f}${a}${n}Run ./${f}${a}${n} 
+		    /usr/bin/time -f "%e" -a -o time${f}${a}${n}Run ./${f}${a}${n}
                 fi
 	    done
 	done
@@ -63,8 +63,8 @@ do
     for a in IP CRC FFT
     do
 	for n in MiniWellScoped TemplateHaskell
-	do	    
-	    rm ${a}${n}	    
+	do
+	    rm ${a}${n}
 	    rm ${f}${a}${n}.c
 	    rm ${f}${a}${n}
 	done
@@ -75,7 +75,7 @@ rm Image.pbm
 ./clean
 F=Experiment_$(date +%Y-%m-%d-%H-%M-%S)
 mkdir $F
-for file in time*; do 
+for file in time*; do
     mv $file ./$F/$file
 done
 ./Process ./$F/

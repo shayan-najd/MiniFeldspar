@@ -11,76 +11,76 @@ import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 import qualified Expression.Feldspar.GADTValue       as FGV
 import qualified Type.Feldspar.GADT                  as TFG
 import Compiler (scompileWith)
- 
+
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Conversion.Expression.Feldspar ()
 
 fft :: Data (Ary Complex -> Ary Complex)
-fft = [|| \ v -> (\ steps -> $$bitRev steps ($$fftCore steps v)) 
+fft = [|| \ v -> (\ steps -> $$bitRev steps ($$fftCore steps v))
                  ($$sub ($$ilog2 (len v))  1) ||]
-         
+
 fftCore :: Data (Integer -> Ary Complex -> Ary Complex)
-fftCore = [|| \ n -> \ vv -> $$forLoop ($$add n 1) vv 
-                     (\ j -> \ v -> ary (len vv) 
+fftCore = [|| \ n -> \ vv -> $$forLoop ($$add n 1) vv
+                     (\ j -> \ v -> ary (len vv)
                       ($$ixf v ($$sub n j))) ||]
 
 ixf :: Data (Ary Complex -> Integer -> Integer -> Complex)
 ixf = let p :: MP.Float = MP.negate MP.pi in
       [|| \ v -> \ k -> \ i ->
-            (\ k2 -> (\ twid -> \ a -> \ b -> 
-                      if $$testBit i k 
-                      then $$mul twid ($$sub b a) 
-                      else $$add a b) 
-             ($$cis ($$div ($$mul p ($$i2f ($$lsbs k i))) 
-                               ($$i2f k2))) 
-             (ind v i)  
+            (\ k2 -> (\ twid -> \ a -> \ b ->
+                      if $$testBit i k
+                      then $$mul twid ($$sub b a)
+                      else $$add a b)
+             ($$cis ($$div ($$mul p ($$i2f ($$lsbs k i)))
+                               ($$i2f k2)))
+             (ind v i)
              (ind v ($$bitXor i k2)))
             ($$shfLft 1 k)
       ||]
-           
+
 bitRev :: Data (Integer -> Ary Complex -> Ary Complex)
-bitRev = [|| \ n -> \ x -> 
+bitRev = [|| \ n -> \ x ->
              $$forLoop n x (\ i -> $$permute (\ _j -> $$rotBit ($$add i 1)))
          ||]
 
 rotBit :: Data (Integer -> Integer -> Integer)
 rotBit = [|| \ k -> \ i ->
-          $$bitOr 
-          ($$shfLft ($$bitOr 
-                     ($$shfLft ($$shfRgt ($$shfRgt i 1) k) 1) 
-                     ($$bitAnd i 1)) k) 
-          ($$lsbs k ($$shfRgt i 1)) 
+          $$bitOr
+          ($$shfLft ($$bitOr
+                     ($$shfLft ($$shfRgt ($$shfRgt i 1) k) 1)
+                     ($$bitAnd i 1)) k)
+          ($$lsbs k ($$shfRgt i 1))
           ||]
- 
+
 inp :: Data (Ary Complex)
-inp = fromList (MP.fmap (\ f -> [|| cmx f 0.0 ||]) tstInp) 
+inp = fromList (MP.fmap (\ f -> [|| cmx f 0.0 ||]) tstInp)
       [|| cmx 0.0 0.0 ||]
- 
+
 out :: [MP.Float]
 out  = let outFMWS :: FMWS.Exp Prelude (TFA.Ary TFA.Cmx) =
              MP.frmRgt (cnv ([|| $$fft $$inp ||] , etTFG , esTH))
-           (FGV.Exp e) :: FGV.Exp (TFA.Ary TFA.Cmx) = 
-             MP.frmRgt (cnv (outFMWS , etFGV)) 
-       in MP.fmap MP.magnitude (MP.elems e) 
+           (FGV.Exp e) :: FGV.Exp (TFA.Ary TFA.Cmx) =
+             MP.frmRgt (cnv (outFMWS , etFGV))
+       in MP.fmap MP.magnitude (MP.elems e)
 
 prop :: MP.Bool
 prop = test out
 
 dummyAry :: Ary Complex
 dummyAry = dummyAry
- 
+
 fftFMWS :: FMWS.Exp (TFA.Ary TFA.Cmx ': Prelude) (TFA.Ary TFA.Cmx)
-fftFMWS = MP.frmRgt (cnv ([|| $$fft dummyAry ||] 
-                         , TFG.Ary TFG.Cmx <:> etTFG 
+fftFMWS = MP.frmRgt (cnv ([|| $$fft dummyAry ||]
+                         , TFG.Ary TFG.Cmx <:> etTFG
                          , 'dummyAry <+> esTH))
 
 main :: MP.IO ()
-main = MP.getArgs MP.>>=  
-       (\ [as] -> let f = MP.frmRgt 
-                          (scompileWith [("v0" , TFA.Ary TFA.Cmx)]  
-                           (TFG.Ary TFG.Cmx) 
-                           ("v0" <+> esString) 1 
-                           ({- nrmIf (as MP./= "NoNrm") -} fftFMWS)) 
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
+main = MP.getArgs MP.>>=
+       (\ [as] -> let f = MP.frmRgt
+                          (scompileWith [("v0" , TFA.Ary TFA.Cmx)]
+                           (TFG.Ary TFG.Cmx)
+                           ("v0" <+> esString) 1
+                           ({- nrmIf (as MP./= "NoNrm") -} fftFMWS))
+                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
                   in MP.writeFile (as MP.++ "FFTTemplateHaskell.c") f')

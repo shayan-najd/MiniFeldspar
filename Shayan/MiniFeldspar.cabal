@@ -37,7 +37,7 @@ library
      TemplateHaskell,
      Rank2Types
      PatternSynonyms
-  exposed-modules:     
+  exposed-modules:
      InferenceMonad,
      Optimization,
      ChangeMonad,
@@ -116,10 +116,10 @@ library
      Normalization.Feldspar.GADTTyped,
      Optimization.Feldspar.MiniWellScoped
 
-  build-depends:       
+  build-depends:
      base             >=4.7 && <4.8,
      mtl              >=2.2 && <2.3,
      template-haskell >=2.9 && <2.10,
      array            >=0.5,
-     pretty           >=1.1 && <1.2 
+     pretty           >=1.1 && <1.2
   default-language:    Haskell2010

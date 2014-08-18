@@ -3,15 +3,15 @@ Expressions
 -----------
 There are different representations of the expressions in
 MiniFeldspar. Each representaion corresponds to a specific stage in
-the system pipline. 
+the system pipline.
 These representations can be found in the folder "Expression".
 
 Types
 -----
-There are three represnetations of types in MiniFeldspar: 
+There are three represnetations of types in MiniFeldspar:
 (a) a simple ADT represenation
 (b) a singleton representation via GADTS
-(c) a generic represnation via Herbrand Constraints, 
+(c) a generic represnation via Herbrand Constraints,
     used for the constraint solving
 These representations can be found in the folder "Type".
 
@@ -38,14 +38,14 @@ Nats
 There are three representation of natural numbers:
 (a) a simple ADT representation
 (b) a singleton representation via GADTS
-(c) a representation via TemplateHaskell, to generate 
+(c) a representation via TemplateHaskell, to generate
     large natural numbers based on positive integer literals
 These representations can be found in the folder "Nat".
 
 Conversions
 -----------
 Conversion between each different representations of the expressions,
-the types, the environment, the variables and natural numbers. 
+the types, the environment, the variables and natural numbers.
 These conversions can be found in the folder "Conversion" and they are
 all instances of the type class "Cnv" which is defined in
 "Conversion.hs".

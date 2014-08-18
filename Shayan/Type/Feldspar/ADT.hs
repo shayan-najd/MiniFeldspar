@@ -5,11 +5,11 @@ import MyPrelude
 data Typ =
     Int
   | Bol
-  | Flt  
+  | Flt
   | Arr Typ Typ
-  | Tpl Typ Typ  
-  | Ary Typ  
-  | Cmx  
+  | Tpl Typ Typ
+  | Ary Typ
+  | Cmx
 
-deriving instance Eq   Typ 
+deriving instance Eq   Typ
 deriving instance Show Typ

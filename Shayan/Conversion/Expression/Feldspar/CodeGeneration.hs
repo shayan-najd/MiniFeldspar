@@ -12,35 +12,35 @@ class Pretty a where
  pretty :: a -> Doc
 
 instance Pretty Exp where
- pretty (Var x)     = text x   
+ pretty (Var x)     = text x
  pretty (Flt f)     = text (show f++"f")
  pretty (Num i)     = text (show i++"u")
  pretty (App op es) = text op <+> parens (commaCat (fmap pretty es))
- 
+
 instance Pretty Stmt where
- pretty (Whl e ss) = text "while" <+> parens (pretty e) 
+ pretty (Whl e ss) = text "while" <+> parens (pretty e)
   $+$ (lbrace
    $+$ nest 2 (vcat (fmap pretty ss))
    $+$ rbrace)
- pretty (If e1 ss1 ss2) = text "if" <+> parens (pretty e1) 
+ pretty (If e1 ss1 ss2) = text "if" <+> parens (pretty e1)
   $+$ (lbrace
    $+$ nest 2 (vcat (fmap pretty ss1))
    $+$ rbrace)
-  $+$ text "else" 
+  $+$ text "else"
   $+$ (lbrace
    $+$ nest 2 (vcat (fmap pretty ss2))
-   $+$ rbrace) 
+   $+$ rbrace)
  pretty (Assign v e)      = text v <+> text "=" <+> pretty e <> semi
  pretty (Declare (v , t)) = pretty t <+> text v <> semi
- 
+
 instance Pretty Func where
- pretty (Func name vs ss) = 
-  text "void" <+> text name 
+ pretty (Func name vs ss) =
+  text "void" <+> text name
   <+> parens (commaCat (fmap pretty vs) )
   $+$ (lbrace
    $+$ nest 2 (vcat (fmap pretty ss))
    $+$ rbrace)
-  
+
 instance Pretty Var where
  pretty (v,t) = pretty t <+> text v
 

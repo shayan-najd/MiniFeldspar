@@ -25,7 +25,7 @@ representation:
 > -- our implementation
 > -- ErrM is our implementation of the Error Monad
 > instance Quasi ErrM where ...
- 
+
 (d) We then convert to an untyped version of Feldspar's FOAS (First
 Order Abstract Syntax), represented by ADT (called FAUN, Feldspar ADT
 Untyped Named), which is polymorphic on the type of variable
@@ -53,12 +53,12 @@ type (called FAC, Feldspar ADT Church):
   Skolem variable (represtend by Natural numbers):
 
   > -- our implementation
-  > cnvFAUDtoFAC :: FAUD.Exp -> FAC.Exp Nat  
+  > cnvFAUDtoFAC :: FAUD.Exp -> FAC.Exp Nat
 
   (2) typechecking the above to collect Herbrand constraints (called
   HerCon, Herbrand Constraint):
 
-  > -- our implementation 
+  > -- our implementation
   > chk :: FAC.Exp Nat -> [HerCon]
 
   (3) solving the Herband constraints, resulting in a mapping of fresh
@@ -66,17 +66,17 @@ type (called FAC, Feldspar ADT Church):
   without Skolem variables). If a Skolem variable does not correspond
   to a simple type, we return an error (i.e. we consider the input
   ill-typed).
-  
-  > -- our implementation 
+
+  > -- our implementation
   > slv :: [HerCon] -> ErrM [Typ]
-  
+
   (4) replacing the Skolem variables with their corresponding simple
   types using the mapping. If a metavariable does not exist in the
   mapping, we return an error.
 
   > -- our implementation
-  > rpl :: [Typ] -> FAC.Exp Nat -> ErrM (FAC.Exp Typ) 
- 
+  > rpl :: [Typ] -> FAC.Exp Nat -> ErrM (FAC.Exp Typ)
+
 (g) Conversion to a FOAS with GADT representation (called FGFO,
 Feldspar GADT FOAS), wrapped in an existential type (called ExsFGFO,
 Existential FGFO):
@@ -100,7 +100,7 @@ GADT (called FGHO, Feldspar GADT HOAS):
 
 By putting it all together, and explicitly providing the environment
 for the free variables, we can get rid of the "SinTyp" constraint,
-since the type index is known at the compile time via the phantom type 
+since the type index is known at the compile time via the phantom type
 of the typed quotation:
 
 > -- our implementation

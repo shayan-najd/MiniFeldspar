@@ -38,17 +38,17 @@ geometric :: Data (Float -> Float -> Float)
 geometric =  [|| \ x -> \ y -> $$sqrt ($$((*)) x y) ||]
 
 append :: Data (Ary t -> Ary t -> Ary t)
-append =  [|| \ a -> \ b -> 
-              ary 
-              ($$((+)) (len a) (len b)) 
-              (\ i -> if $$((<)) i (len a) 
-                      then ind a i 
+append =  [|| \ a -> \ b ->
+              ary
+              ($$((+)) (len a) (len b))
+              (\ i -> if $$((<)) i (len a)
+                      then ind a i
                       else ind b ($$((-)) i (len a))) ||]
 
 blur :: Data (Ary Float -> Ary Float)
-blur =  [|| \ a -> $$zipWith 
-                   $$geometric 
-                   ($$append $$unit a) 
+blur =  [|| \ a -> $$zipWith
+                   $$geometric
+                   ($$append $$unit a)
                    ($$append a $$unit) ||]
 
 size :: Data Int
@@ -94,10 +94,10 @@ test2mC :: MP.String
 test2mC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test2mFMWS))
 
 test3C :: MP.String
-test3C = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3FMWS)) 
+test3C = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3FMWS))
 
 test3mC :: MP.String
-test3mC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3mFMWS))  
+test3mC = (MP.frmRgt (scompileWith [] TFG.Flt esString 0 test3mFMWS))
 
 main :: MP.IO ()
 main = do MP.writeFile "testopt.c"   (testC   MP.++ loaderC)

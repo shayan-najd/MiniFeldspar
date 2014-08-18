@@ -1,6 +1,6 @@
 module Environment.Map (Env,pattern Emp,pattern Ext,len,get) where
- 
-import MyPrelude 
+
+import MyPrelude
 
 import qualified Nat.ADT  as NA
 

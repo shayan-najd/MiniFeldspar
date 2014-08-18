@@ -10,5 +10,5 @@ To be exact, we have four classes of language constructs:
 
    (1) the ones that are spliced (i.e. has $$ prefix)
 
-   (2) the ones that have vanilla type and their definition (in form of MiniFeldspar AST) is explicitly passed to the compiler 
+   (2) the ones that have vanilla type and their definition (in form of MiniFeldspar AST) is explicitly passed to the compiler
        (e.g. cCompile [|| forLoop' ||] [("TemplateHaskell.forLoop'",forLoop)])

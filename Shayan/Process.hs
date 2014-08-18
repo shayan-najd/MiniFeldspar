@@ -9,11 +9,11 @@ main :: IO()
 main = do [d] <- getArgs
           fs <- fmap (filter ((== "time") . take 4))
                 $ getDirectoryContents d
-          avgs <- mapM (\ f -> do 
+          avgs <- mapM (\ f -> do
                           fc <- readFile (d </> f)
                           let ls = lines fc
-                          return (drop 4 f 
-                                 , sum (map (read :: String -> Float) ls) 
+                          return (drop 4 f
+                                 , sum (map (read :: String -> Float) ls)
                                            / fromIntegral (length ls))
                        ) fs
-          writeFile (d </> "result") (show avgs)        
+          writeFile (d </> "result") (show avgs)

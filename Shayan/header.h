@@ -17,7 +17,7 @@ Cmx cmx(Flt r , Flt i)
 {
   return (r + i * I);
 }
-  
+
 Flt realPart(Cmx c)
 {
   return (crealf(c));
@@ -31,17 +31,17 @@ Flt imagPart(Cmx c)
 Bol eqlBol(Bol l , Bol r)
 {
   return (l == r);
-} 
+}
 
 Bol eqlInt(Int l , Int r)
 {
   return (l == r);
-} 
+}
 
 Bol eqlFlt(Flt l , Flt r)
 {
   return (l == r);
-} 
+}
 
 Bol ltdBol(Bol l , Bol r)
 {
@@ -51,7 +51,7 @@ Bol ltdBol(Bol l , Bol r)
 Bol ltdInt(Int l , Int r)
 {
   return (l < r);
-} 
+}
 
 Bol ltdFlt(Flt l , Flt r)
 {
@@ -61,17 +61,17 @@ Bol ltdFlt(Flt l , Flt r)
 Int addInt(Int l , Int r)
 {
   return (l + r);
-} 
+}
 
 Int subInt(Int l , Int r)
 {
   return (l - r);
-} 
+}
 
 Int mulInt(Int l , Int r)
 {
   return (l * r);
-} 
+}
 
 Int divInt (Int l , Int r)
 {
@@ -81,17 +81,17 @@ Int divInt (Int l , Int r)
 Flt addFlt(Flt l , Flt r)
 {
   return (l + r);
-} 
+}
 
 Flt subFlt(Flt l , Flt r)
 {
   return (l - r);
-} 
+}
 
 Flt mulFlt(Flt l , Flt r)
 {
   return (l * r);
-} 
+}
 
 Flt divFlt (Flt l , Flt r)
 {
@@ -101,17 +101,17 @@ Flt divFlt (Flt l , Flt r)
 Cmx addCmx(Cmx l , Cmx r)
 {
   return (l + r);
-} 
+}
 
 Cmx subCmx(Cmx l , Cmx r)
 {
   return (l - r);
-} 
+}
 
 Cmx mulCmx(Cmx l , Cmx r)
 {
   return (l * r);
-} 
+}
 
 Cmx divCmx (Cmx l , Cmx r)
 {
@@ -168,13 +168,13 @@ Flt sqrtFlt (Flt f)
   return sqrtf(f);
 }
 
-typedef struct 
+typedef struct
 {
   Int fst;
   Int snd;
 } TplIntInt;
 
-TplIntInt newTplIntInt(Int f , Int s) 
+TplIntInt newTplIntInt(Int f , Int s)
 {
   return ((TplIntInt) {.fst = f , .snd = s});
 }
@@ -189,13 +189,13 @@ Int sndTplIntInt(TplIntInt t)
   return t.snd;
 }
 
-typedef struct 
+typedef struct
 {
   Int fst;
   Flt snd;
 } TplIntFlt;
 
-TplIntFlt newTplIntFlt(Int f , Flt s) 
+TplIntFlt newTplIntFlt(Int f , Flt s)
 {
   return ((TplIntFlt) {.fst = f , .snd = s});
 }
@@ -264,13 +264,13 @@ AryCmx newAryCmx(Int s)
   return ((AryCmx) {.size = s , .elems = malloc(s * sizeof(Cmx))});
 }
 
-typedef struct 
+typedef struct
 {
   Int fst;
   AryCmx snd;
 } TplIntAryCmx;
 
-TplIntAryCmx newTplIntAryCmx(Int f , AryCmx s) 
+TplIntAryCmx newTplIntAryCmx(Int f , AryCmx s)
 {
   return ((TplIntAryCmx) {.fst = f , .snd = s});
 }

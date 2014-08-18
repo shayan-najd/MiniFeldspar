@@ -1,14 +1,14 @@
 module Conversion.Expression.TemplateHaskell () where
 
-import MyPrelude 
+import MyPrelude
 
 import qualified Language.Haskell.TH.Syntax as TH
-  
+
 instance TH.Quasi ErrM where
-  qNewName          = return . TH.mkName 
-  qReport b         = fail . if b 
+  qNewName          = return . TH.mkName
+  qReport b         = fail . if b
                              then ("Error: " ++)
-                             else ("Warning: " ++)     
+                             else ("Warning: " ++)
   qRecover          = fail "Not Allowed!"
   qReify            = fail "Not Allowed!"
   qLookupName       = fail "Not Allowed!"
@@ -23,4 +23,3 @@ instance TH.Quasi ErrM where
   qRunIO            = fail "Not Allowed!"
   qPutQ             = fail "Not Allowed!"
   qGetQ             = fail "Not Allowed!"
- 
