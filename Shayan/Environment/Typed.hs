@@ -1,44 +1,44 @@
-module Environment.Typed where
+module Environment.Typed(Env(Emp,Ext),fmap,foldMap,traverse,len,get) where
 
-import MyPrelude hiding (mapM)
-
-import Singleton
+import MyPrelude hiding (mapM,fmap,traverse,foldMap)
 
 import Variable.Typed
 
+import Singleton
 import qualified Nat.GADT as NG
 
 data Env :: (k -> *) -> [k] -> * where
   Emp :: Env tf '[]
   Ext :: tf t -> Env tf e -> Env tf (t ': e)
 
+fmap :: (forall t. tfa t -> tfb t) -> Env tfa r -> Env tfb r
+fmap _ Emp        = Emp
+fmap f (Ext x xs) = Ext (f x) (fmap f xs)   
+
+foldMap :: Monoid m  => 
+           (forall t. tfa t -> m) -> Env tfa r -> m
+foldMap  _ Emp        = mempty
+foldMap  f (Ext x xs) = mappend (f x) (foldMap f xs)
+
+traverse :: Applicative m => 
+            (forall t. tfa t -> m (tfb t)) -> Env tfa r -> m (Env tfb r)
+traverse _ Emp        = pure Emp
+traverse f (Ext x xs) = Ext <$> f x <*> traverse f xs
+
 len :: Env ef r -> NG.Nat (Len r)
 len Emp        = NG.Zro
 len (Ext _ xs) = NG.Suc (len xs)
- 
-add :: (?env :: Env tf r') => Var r t -> Var (Add r' r) t
-add v = case ?env of
-  Emp      -> v
-  Ext _ xs -> let ?env = xs in Suc (add v) 
                   
 get :: Var r t -> Env tf r -> tf t
 get Zro     (Ext x  _ ) = x
 get (Suc n) (Ext _  xs) = get n xs
 get _       Emp         = impossible
- 
-cnvGEnvtoGVar ::  Env tf r -> Env (Var r) r
-cnvGEnvtoGVar Emp        = Emp
-cnvGEnvtoGVar (Ext _ xs) = Ext Zro (map Suc (cnvGEnvtoGVar xs))
- 
-map :: (forall t. tfa t -> tfb t) -> Env tfa r -> Env tfb r
-map _ Emp        = Emp
-map f (Ext x xs) = Ext (f x) (map f xs)   
 
-mapM :: Applicative m => 
-        (forall t. tfa t -> m (tfb t)) -> Env tfa r -> m (Env tfb r)
-mapM _ Emp        = pure Emp
-mapM f (Ext x xs) = Ext <$> f x <*> mapM f xs
-
+-- add :: (?env :: Env tf r') => Var r t -> Var (Add r' r) t
+-- add v = case ?env of
+--   Emp      -> v
+--   Ext _ xs -> let ?env = xs in Suc (add v) 
+ 
 type instance Trm '[]        = ()
 type instance Trm (tf ': ts) = (Trm tf , Trm ts)
                    
@@ -56,4 +56,4 @@ instance EqlSin tf => EqlSin (Env tf) where
   eqlSin (Ext t e) (Ext t' e') = do Rfl <- eqlSin e e'
                                     Rfl <- eqlSin t t'
                                     return Rfl
-  eqlSin  _           _        = fail "Scope Error!"     
+  eqlSin  _           _        = fail "Scope Error!"

@@ -13,9 +13,6 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler (scompileWith)
  
--- import Normalization
--- import Normalization.Feldspar.MiniWellScoped ()
-
 toBW :: Vec Integer -> Vec Integer
 toBW = map (\x -> if lt x 135 then 1 else 0) 
 
@@ -69,6 +66,6 @@ main = MP.getArgs MP.>>=
                 (scompileWith [] 
                  (TFG.Ary TFG.Int) 
                  esString 0 
-                 ({-nrmIf (as MP./= "NoNrm")-} fromColoredtoBWAry))
+                 fromColoredtoBWAry)
             f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
        in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f') 

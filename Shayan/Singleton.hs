@@ -48,5 +48,3 @@ type family Len (l :: [k]) :: NA.Nat where
 type family Add (ll :: [k]) (lr :: [k]) :: [k]  where
   Add '[]       lr = lr
   Add (x ': xs) lr = x ': Add xs lr
-                  
-                  

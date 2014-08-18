@@ -7,7 +7,7 @@ import qualified Type.Feldspar.GADT     as TFG
 
 import Variable.Typed
 
-import Environment.Typed     
+import Environment.Typed as ET     
 import Data.IORef
 import System.IO.Unsafe
 
@@ -69,7 +69,7 @@ mapVar :: (forall t'. Var r  t' -> Var r' t') ->
 mapVar _ _ (ConI i)       = ConI i
 mapVar _ _ (ConB i)       = ConB i
 mapVar _ _ (ConF i)       = ConF i
-mapVar f g (AppV v es)    = AppV (f v) (map (mapVar f g) es)
+mapVar f g (AppV v es)    = AppV (f v) (ET.fmap (mapVar f g) es)
 mapVar f g (Cnd ec et ef) = Cnd (mapVar f g ec) (mapVar f g et) (mapVar f g ef)
 mapVar f g (Whl ec eb ei) = Whl (mapVar f g . ec . mapVar g f) 
                                 (mapVar f g . eb . mapVar g f) (mapVar f g ei)

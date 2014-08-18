@@ -1,4 +1,4 @@
-module Environment.Scoped where
+module Environment.Scoped(Env(Emp,Ext),len,get) where
 
 import MyPrelude
   
@@ -34,7 +34,3 @@ get :: Var n -> Env n t -> t
 get Zro     (Ext x  _) = x
 get (Suc n) (Ext _  r) = get n r
 get _       _          = impossible
-
-map :: (a -> b) -> Env n a -> Env n b
-map _ Emp        = Emp
-map f (Ext x xs) = Ext (f x) (map f xs)

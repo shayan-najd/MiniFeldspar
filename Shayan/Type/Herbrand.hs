@@ -40,8 +40,12 @@ appTs i t = fmap (appT i t)
 appTtas :: [(NA.Nat , Typ r)] -> Typ r -> Typ r
 appTtas ttas t = foldl (\ ta (i , t') -> appT i t' ta) t ttas 
 
-type EnvFld r = $(natT 0 "NA.") ': $(natT 2 "NA.") ': $(natT 0 "NA.") ': 
-                $(natT 2 "NA.") ': $(natT 1 "NA.") ': $(natT 0 "NA.") ': 
+type EnvFld r = $(natT 0 "NA.") ': 
+                $(natT 2 "NA.") ': 
+                $(natT 0 "NA.") ': 
+                $(natT 2 "NA.") ': 
+                $(natT 1 "NA.") ': 
+                $(natT 0 "NA.") ': 
                 $(natT 0 "NA.") ': r
   
 pattern Int       = App $(natP 0 "") Emp

@@ -10,22 +10,16 @@ import qualified Examples.Feldspar.Simple.GADTFirstOrder      as FGFO
 import qualified Examples.Feldspar.Simple.GADTHigherOrder     as FGHO
 import qualified Examples.Feldspar.Simple.MiniWellScoped      as FMWS
 import qualified Examples.Feldspar.Simple.Conversion          as FCNV
---import qualified Examples.Feldspar.Prelude.GADTHigherOrder as FPGHO
---import qualified Examples.Feldspar.Prelude.GADTFirstOrder  as FPGFO
---import qualified Examples.Feldspar.Prelude.MiniWellScoped  as FPMWS ()
 
 import Conversion.Expression.Feldspar.Evaluation.ADTValue () 
--- import Normalization.Feldspar.GADTTyped ()
 
 main :: IO ()
 main = print (if FAUN.test  && FAUD.test  && FGUD.test &&
                  FGTD.test  && FGFO.test  && FGHO.test &&
-                 FMWS.test  && FCNV.test  -- &&
---                 FPGFO.test &&  FPGHO.test &&
-                 --  FPMWS.test && 
-                 --    FPTHS1A.test && FPTHS1B.test && FPTHS2A.test && FPTHS2B.test 
+                 FMWS.test  && FCNV.test 
               then "Pass!"
               else "Fail!")
+
 -- Todo:       
 -- * Check for exotic terms
 -- * Weakening of HOAS

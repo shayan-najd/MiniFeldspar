@@ -151,7 +151,7 @@ esTH = 'realPartHsk
 ---------------------------------------------------------------------------------
 
 esString :: ES.Env (Len Prelude) String
-esString = ES.map (\ (TH.Name x _) -> (init . init . init . TH.occString) x) esTH
+esString = fmap (\ (TH.Name x _) -> (init . init . init . TH.occString) x) esTH
   
 ---------------------------------------------------------------------------------
 -- ESFAV

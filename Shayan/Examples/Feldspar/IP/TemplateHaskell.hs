@@ -11,10 +11,7 @@ import Conversion.Expression.Feldspar.Evaluation.MiniWellScoped ()
 import qualified Expression.Feldspar.GADTValue       as FGV
 import qualified Type.Feldspar.GADT                  as TFG
 import Compiler (scompileWith)
-
--- import Normalization
--- import Normalization.Feldspar.MiniWellScoped ()
-
+ 
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Conversion.Expression.Feldspar ()
@@ -79,6 +76,6 @@ main = MP.getArgs MP.>>=
                           (scompileWith [("v0" , TFA.Ary TFA.Int)]  
                            (TFG.Ary TFG.Int) 
                            ("v0" <+> esString) 1 
-                           ({- nrmIf (as MP./= "NoNrm") -} fromColoredtoBWFMWS)) 
+                           fromColoredtoBWFMWS) 
                       f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC    
                   in  MP.writeFile (as MP.++ "IPTemplateHaskell.c") f')     
