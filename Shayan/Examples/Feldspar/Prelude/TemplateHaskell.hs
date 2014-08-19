@@ -10,7 +10,7 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,not,and,or
        ,Equality(eql),notEql
        ,Ordering(lt),gt,lte,gte,min
-       ,Numeric(add,sub,mul,div,neg),ilog2,sqrt
+       ,Numeric(add,sub,mul,div,neg),ilog2,pi,sqrt
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis
        ,frmTo,permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
@@ -228,6 +228,10 @@ ilog2 = [|| ilog2Hsk ||]
        go :: Data Integer -> Integer -> Data Integer
        go b s = [|| $$((.|.)) $$b  ($$((.>>.)) $$b s) ||]
    -}
+
+pi :: Data Float
+pi =  let p = (MP.negate MP.pi) :: MP.Float
+      in  [|| p ||]
 
 sqrt :: Data (Float -> Float)
 sqrt = [|| sqrtFltHsk ||]

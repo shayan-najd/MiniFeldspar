@@ -35,9 +35,10 @@ rgbToGray = \ r -> \ g -> \ b ->
              (mul b blueCoefficient)) 100
 
 toGray :: Vec Integer -> Vec Integer
-toGray = \ v -> vec (div (lenV v) 3)
-         (\ i -> let j = mul i 3
-                 in  rgbToGray
+toGray = \ v ->
+         vec (div (lenV v) 3)
+                 (\ i -> let j = mul i 3 in
+                         rgbToGray
                          (indV v j)
                          (indV v (add j 1))
                          (indV v (add j 2)))

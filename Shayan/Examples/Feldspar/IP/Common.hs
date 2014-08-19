@@ -12,13 +12,13 @@ tstPPM = unsafePerformIO
 
 tstPGM :: [Integer]
 tstPGM = unsafePerformIO
-         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image.pgm"
+         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image16.pgm"
              let "P2" : _ : "255" : c = lines f
              return (fmap (read :: String -> Integer) c))
 
 tstPBM :: [Integer]
 tstPBM = unsafePerformIO
-         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image.pbm"
+         (do f <- readFile "Examples/Feldspar/IP/Image/Result/Phil/Image16.pbm"
              let "P1" : _ : "255" : c = lines f
              return (fmap (read :: String -> Integer) c))
 

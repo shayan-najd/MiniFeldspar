@@ -14,26 +14,26 @@ import qualified Type.Feldspar.GADT            as TFG
 import Compiler(scompile)
 
 fft :: Vec Complex -> Vec Complex
-fft = \ v -> (\ steps -> bitRev steps (fftCore steps v))
-      (sub (ilog2 (lenV v)) 1)
+fft = \ v ->
+      let steps = sub (ilog2 (lenV v)) 1 in
+      bitRev steps (fftCore steps v)
 
 fftCore :: Data Integer -> Vec Complex -> Vec Complex
-fftCore = \ n -> \ vv -> forLoopVec (add n 1) vv
-          (\ j -> \ v -> vec (lenV vv)
-                  (ixf v (sub n j)))
+fftCore = \ n -> \ vv ->
+          forLoopVec (add n 1) vv
+                (\ j -> \ v ->
+                        vec (lenV vv) (\ i -> ixf v (sub n j) i))
 
 ixf :: Vec Complex
     -> Data Integer -> Data Integer -> Data Complex
-ixf = let p = litF (MP.negate MP.pi) in
-    \ v -> \ k -> \ i ->
-      (\ k2 -> (\ twid -> \ a -> \ b ->
-                if testBit i k
-                then mul twid (sub b a)
-                else add a b)
-       (cis (div (mul p (i2f (lsbs k i))) (i2f k2)))
-       (indV v i)
-       (indV v (bitXor i k2)))
-    (shfLft 1 k)
+ixf = \ v -> \ k -> \ i ->
+      let k2   = shfLft 1 k in
+      let twid = cis (div (mul pi (i2f (lsbs k i))) (i2f k2)) in
+      let a    = indV v i in
+      let b    = indV v (bitXor i k2) in
+        if testBit i k
+        then mul twid (sub b a)
+        else add a b
 
 bitRev :: Data Integer -> Vec Complex -> Vec Complex
 bitRev = \ n -> \ x ->
@@ -68,6 +68,6 @@ main = MP.getArgs MP.>>=
                           (scompile
                            (TFG.Ary TFG.Cmx)
                            esString
-                           ({- nrmIf (as MP./= "NoNrm") -} fftAry))
+                           fftAry)
                       f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
                   in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f')

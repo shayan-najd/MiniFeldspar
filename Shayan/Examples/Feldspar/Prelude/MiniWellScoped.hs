@@ -11,7 +11,7 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,not,and,or
        ,Equality(eql),notEql
        ,Ordering(lt),gt,lte,gte,min
-       ,Numeric(add,sub,mul,div,neg),ilog2 --sqrt
+       ,Numeric(add,sub,mul,div,neg),ilog2,pi --sqrt
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis,ary2vec,vec2ary
        ,frmTo,permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
@@ -272,6 +272,10 @@ ilog2 xx = AppV ilog2Var (Ext xx Emp)
          go :: Data Integer -> MP.Integer -> Data Integer
          go b s = b .|. (b .>>. (litI s))
   -}
+
+pi :: Data Float
+pi = litF (MP.negate MP.pi)
+
 ---------------------------------------------------------------------------------
 -- Bitwise Operators
 ---------------------------------------------------------------------------------

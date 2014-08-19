@@ -35,15 +35,18 @@ rgbToGray = [|| \ r -> \ g -> \ b ->
                ($$add
                 ($$add ($$mul r $$redCoefficient )
                          ($$mul g $$greenCoefficient))
-                ($$mul b $$blueCoefficient )) 100 ||]
+                ($$mul b $$blueCoefficient )) 100
+            ||]
 
 toGray :: Data (Ary Integer -> Ary Integer)
-toGray = [|| \ v -> ary ($$div (len v) 3)
-                    (\ i -> let j = $$mul i 3
-                            in $$rgbToGray
-                                   (ind v j)
-                                   (ind v ($$add j 1))
-                                   (ind v ($$add j 2))) ||]
+toGray = [|| \ v ->
+              ary ($$div (len v) 3)
+                      (\ i -> let j = $$mul i 3 in
+                              $$rgbToGray
+                              (ind v j)
+                              (ind v ($$add j 1))
+                              (ind v ($$add j 2)))
+         ||]
 
 fromColoredtoBW :: Data (Ary Integer -> Ary Integer)
 fromColoredtoBW = [|| \ v -> $$toBW ($$toGray v) ||]
