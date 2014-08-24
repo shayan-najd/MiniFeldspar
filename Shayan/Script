@@ -1,5 +1,5 @@
 #!/bin/bash
-for a in IP CRC FFT
+for a in IP CRC FFT FFTSharing
 do
     for n in MiniWellScoped TemplateHaskell
     do
@@ -14,7 +14,7 @@ done
 ./clean
 for f in NoNrm # Nrm NoNrm
 do
-    for a in IP CRC FFT
+    for a in IP CRC FFT FFTSharing
     do
 	for n in MiniWellScoped TemplateHaskell
 	do
@@ -29,7 +29,7 @@ done
 ./clean
 for f in NoNrm # Nrm NoNrm
 do
-    for a in IP CRC FFT
+    for a in IP CRC FFT FFTSharing
     do
 	for n in MiniWellScoped TemplateHaskell
 	do
@@ -43,17 +43,17 @@ do
 done
 for f in NoNrm # Nrm NoNrm
 do
-    for a in IP CRC FFT
+    for a in IP CRC FFT FFTSharing
     do
 	for n in MiniWellScoped TemplateHaskell
 	do
 	    for i in {1..10}
 	    do
-		if [ ${a}${n} != FFTMiniWellScoped ]; then
-		    rm ImageFFT.pgm
-		    rm Image.pbm
-		    /usr/bin/time -f "%e" -a -o time${f}${a}${n}Run ./${f}${a}${n}
-                fi
+		#if [ ${a}${n} != FFTMiniWellScoped ]; then
+		rm ImageFFT.pgm
+		rm Image.pbm
+		/usr/bin/time -f "%e" -a -o time${f}${a}${n}Run ./${f}${a}${n}
+                #fi
 	    done
 	done
     done

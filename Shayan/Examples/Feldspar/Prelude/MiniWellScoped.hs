@@ -7,7 +7,7 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,Complex,cmx,real,imag
        ,Vec,vec,lenV,indV
        ,Ary,ary,len,ind
-       ,ifThenElse,whl,forLoop,forLoopVec --memorize
+       ,ifThenElse,whl,forLoop,forLoopVec,share --memorize
        ,not,and,or
        ,Equality(eql),notEql
        ,Ordering(lt),gt,lte,gte,min
@@ -151,6 +151,9 @@ ifThenElse = Cnd
 
 whl :: (Data t -> Data Bool) -> (Data t -> Data t) -> Data t -> Data t
 whl = Whl
+
+share :: Type tl => Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
+share = Let
 
 forLoop :: Type s => Data Integer -> Data s ->
            (Data Integer -> Data s -> Data s ) -> Data s
