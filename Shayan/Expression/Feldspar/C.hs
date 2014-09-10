@@ -1,4 +1,5 @@
-module Expression.Feldspar.C where
+module Expression.Feldspar.C
+    (Var,Func(..),Stmt(..),Exp(..))where
 
 import MyPrelude
 

@@ -33,8 +33,8 @@
 %% (0) Abstract
 %% (1) Keywords
 %% (2) Introduction
-%%     (i) very general introduction to the problem and the solution without 
-%%          (a) terms not understandable by a third year CS student 
+%%     (i) very general introduction to the problem and the solution without
+%%          (a) terms not understandable by a third year CS student
 %%          (b) references
 %%     (ii) general technical introduction to the problem we are trying to solve
 %%     (iii) why the problem is important (why the problem matters)
@@ -43,11 +43,11 @@
 %%     (vi) paper layout
 %% (3) Background
 %%     (i) background on embedding including
-%%         (a) introducing MiniFeldspar's first-order language, vectors and the unique benefits of it (free fusion and guarantees) 
+%%         (a) introducing MiniFeldspar's first-order language, vectors and the unique benefits of it (free fusion and guarantees)
 %%         (b) introducing the essence of the Practical Theory's embedding technique of SQL including what subformula property is and why it matters
 %% (4) Our proposal
 %%     (i) vector processing examples in MiniFeldspar's first-order language
-%%     (ii) vector processing examples in TH language 
+%%     (ii) vector processing examples in TH language
 %%     (iii) describing benefits of our approach in details (e.g. syntax, absence of vectors, and reusing the host language normalizer)
 %%     (iv) stressing that normalizer does more optimization than evaluation in the spirit of MiniFeldspar's shallow embedding
 %% (5) First Attempt (naive solution)
@@ -60,13 +60,61 @@
 %% (8) Related Work
 %% (9) Future Work
 %% (10) Conclusion
-%% (11) Acknowledgements 
+%% (11) Acknowledgements
+
+%%  Notes of First Meeting With Phil at ICFP
+%% -----------------------------------------
+%% Examples:
+%% * sums and for loops
+%% * Syntax
+%%   - Conditional and less than
+%%      + Haskell Only
+%%      + Mixing host and embedded code
+%%   - Deep and Shallow Embedding
+%%      + simulates functions and tuples but not sums and for loops
+%%      + types get more complicated
+%% * Normalisation
+%%   - ?
+%% * Sharing
+%%   - Observable sharing
+%%   - CSE
+%%   - Explicit sharing
+%%
+%%
+%% ---------------
+%% Possible Approaches:
+%% 1. Implementations of ICFP'13 SQL, Lava, and Feldspar
+%% 2. Compare Feldspar (deep + shallow + CSE + Opt.) with QDSL
+%%    - Introduction: Compare Feldspar implemented with QDSL to Feldspar implemented with deep and
+%%                    shallow embedding achieve the same effect with significantly less effort.
+%%                    QDSL approach is straightforward and reuses a normaliser and typechecker.
+%%                    In comparison, deep and shallow embedding requires
+%%                      + repeating standard boilerplate for map between deep and shallow represnations
+%%                      + more complicated type structures
+%%                      + more complicated error messages
+%%                      + implementing a CSE phase
+%%                      + implementing more opt. (cost of special purpose optimisation to cancel out inverse conversions)
+%%                      + cost of CSE on exponentially larger programs at program generation time (not at runtime)
+%%                          / check with observable sharing stuff, e.g.
+%%                                 dup v = (v , v)
+%%                                 dup v = let v' = lable unique v in (v' , v')
+%%
+%%                    Deep and shallow embedding approach reuses the type system, some syntax of the host language for EDSL.
+%%                    QDSL approach reuses the type system, and all the host language syntax.
+%%                    Deep and shallow embedding uses the host language evaluator to normalise all occurences of function and product types.
+%%                    QDSL approach uses a reusable normaliser to normalise all occurences of function, product types.
+%%                    Two-layers
+%%
+%% ---------------------------------------------------------------------------
+%% QDSLs: Why it is nicer to be quoted nor
+
+
 
 \begin{document}
 
-%% \conferenceinfo{WXYZ '05}{date, City.} 
-%% \copyrightyear{2005} 
-%% \copyrightdata{[to be supplied]} 
+%% \conferenceinfo{WXYZ '05}{date, City.}
+%% \copyrightyear{2005}
+%% \copyrightdata{[to be supplied]}
 
 %% \titlebanner{banner above paper title}        % These are ignored unless
 %% \preprintfooter{short description of paper}   % 'preprint' option specified.
@@ -118,7 +166,36 @@ domain-specific languages into a given host language.
 
 
 \section{Introduction}
+----------------------------
+"Good artists copy, great artists steal." --- Picasso
 
+Domain specific embedded languages are great: they steal the type
+system of the host language.  This paper presents quoted domain
+specific languages, which are greater still: they steal the type
+system and syntax of the host language, and exploit a normaliser for
+the quoted expressions that can be reused between many implementations
+of embedded languages.
+-----------------------------
+-- Higher-order is the secret sauce of functional programming.
+Many embedded domain specific languages, such as Feldspar, Hydra, and
+Nicola, benefit from allowing programmers to exploit higher-order
+features while generating efficient first-order code.
+The reason this works is Gentzen's \emph{subformula property}, which gaurantees that higher-order constructs
+
+
+-----------------------------
+Sometimes a detour is the shortest way to one's destination.
+Often, a concept can be most concisely expressed using higher-order
+functions, eventhought, the final result is first-order.
+Many embedded domain specific languages, such as Feldspar, Hydra, and
+Nicola, benefit from allowing programmers to exploit higher-order
+features while generating efficient first-order code.
+They achieve this by utilizing the evaluator of the host language;
+We achieve it by using a normaliser instead. Our normaliser is gauranteed to work because of the theorems depending on subformula property.
+ 
+We present a new approach to implementing embedded domain specific languages based on quotations called QDSLs (Quoted DSLs).
+
+ 
 \section{Background}
 
 \subsection{Feldspar}

@@ -1,6 +1,6 @@
 module Expression.Feldspar.MiniWellScoped where
 
-import MyPrelude
+import MyPrelude hiding (foldl)
 
 import qualified Type.Feldspar.ADT      as TFA
 import qualified Type.Feldspar.GADT     as TFG
@@ -83,31 +83,13 @@ mapVar f g (Let el eb)    = Let (mapVar f g el) (mapVar f g . eb . mapVar g f)
 mapVar f g (Cmx er ei)    = Cmx (mapVar f g er) (mapVar f g ei)
 mapVar _ _ (Tmp x)        = Tmp x
 
-mapC :: r ~ TFG.Arg tt =>
-        TFG.Typ tt -> (forall t. HasSin TFG.Typ t => tfa t -> tfb t) ->
-        Env tfa r -> Env tfb r
-mapC _              _ Emp        = Emp
-mapC (TFG.Arr t ts) f (Ext x xs) = case getPrfHasSin t of
-  PrfHasSin -> Ext (f x) (mapC ts f xs)
-mapC _              _ _          = impossible
-
-mapMC :: (Monad m , r ~ TFG.Arg tt) =>
-        TFG.Typ tt -> (forall t. HasSin TFG.Typ t => tfa t -> m (tfb t)) ->
-        Env tfa r -> m (Env tfb r)
-mapMC _              _ Emp        = return (Emp)
-mapMC (TFG.Arr t ts) f (Ext x xs) = case getPrfHasSin t of
-  PrfHasSin -> do x'  <- f x
-                  xs' <- mapMC ts f xs
-                  return (Ext x' xs')
-mapMC _              _ _          = impossibleM
-
 absTmp :: forall r t t'. (HasSin TFG.Typ t', HasSin TFG.Typ t) =>
           Exp r t' -> String -> Exp r t -> Exp r t
 absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
   ConI i                    -> ConI i
   ConB i                    -> ConB i
   ConF i                    -> ConF i
-  AppV v es                 -> AppV v (mapC (sinTyp v) (absTmp xx s) es)
+  AppV v es                 -> AppV v (TFG.mapC (sinTyp v) (absTmp xx s) es)
   Cnd ec et ef              -> Cnd (absTmp xx s ec)   (absTmp xx s et)
                                     (absTmp xx s ef)
   Whl ec eb ei              -> Whl (absTmp xx s . ec) (absTmp xx s . eb)
@@ -127,3 +109,30 @@ absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
       Rgt Rfl               -> xx
       _                     -> ee
     | otherwise             -> ee
+
+-- when input string is not "__dummy__"
+hasTmp :: String -> Exp r t -> Bool
+hasTmp s ee = case ee of
+  ConI _                    -> False
+  ConB _                    -> False
+  ConF _                    -> False
+  AppV _ es                 -> foldl (\ b e -> b || hasTmp s e) False es
+  Cnd ec et ef              -> hasTmp s ec || hasTmp s et || hasTmp s ef
+  Whl ec eb ei              -> hasTmpF s ec || hasTmpF s eb || hasTmp s ei
+  Tpl ef es                 -> hasTmp s ef || hasTmp s es
+  Fst e                     -> hasTmp s e
+  Snd e                     -> hasTmp s e
+  Ary el ef                 -> hasTmp s el || hasTmpF s ef
+  Len e                     -> hasTmp s e
+  Ind ea ei                 -> hasTmp s ea || hasTmp s ei
+  Let el eb                 -> hasTmp s el || hasTmpF s eb
+  Cmx er ei                 -> hasTmp s er || hasTmp s ei
+  Tmp x
+    | s == x                -> True
+    | otherwise             -> False
+
+hasTmpF :: String -> (Exp r ta -> Exp r tb) -> Bool
+hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))
+
+isFresh :: (Exp r ta -> Exp r tb) -> Bool
+isFresh f = not (hasTmp "__fresh__" (f (Tmp "__fresh__")))

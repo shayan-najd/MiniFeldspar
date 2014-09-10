@@ -1,6 +1,9 @@
-module Expression.Feldspar.ADTValue where
+module Expression.Feldspar.ADTValue
+    (Exp(..),Lft(..),CoLft(..)
+    ,conI,conB,conF,var,abs,app,addV,add,cnd,whl,fst,snd,tpl,ary,len,ind,cmx)
+        where
 
-import MyPrelude
+import MyPrelude hiding (abs,fst,snd)
 
 data Exp = ConI Integer
          | ConB Bool

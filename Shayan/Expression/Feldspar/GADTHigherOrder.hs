@@ -1,4 +1,5 @@
-module Expression.Feldspar.GADTHigherOrder where
+module Expression.Feldspar.GADTHigherOrder
+    (Exp(..),sucAll,prdAll,mapVar,isFresh,absTmp) where
 
 import MyPrelude
 

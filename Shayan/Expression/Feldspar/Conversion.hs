@@ -32,7 +32,7 @@ import Expression.Feldspar.Conversions.Lifting          ()
 import Expression.Feldspar.Conversions.Normalization    ()
 
 import Normalization
-import Normalization.Feldspar.GADTHigherOrder ()
+import Normalization.Feldspar.GADTHigherOrder (eta)
 
 import Singleton
 
@@ -346,7 +346,7 @@ instance (r ~ r' , t ~ t' , n ~ Len r , HasSin TFG.Typ t') =>
          Cnv (FGHO.Exp r t , ET.Env TFG.Typ r , ES.Env n TH.Name)
              (FMWS.Exp r' t')
          where
-  cnv (e , _ , _) = cnv (nrm e , ())
+  cnv (e , _ , _) = cnv (nrm (eta e) , ())
 
 instance (r ~ r' , t ~ t' , n ~ Len r , HasSin TFG.Typ t') =>
          Cnv (FGHO.Exp r  t , ET.Env TFG.Typ r , ES.Env n TH.Name)

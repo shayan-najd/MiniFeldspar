@@ -1,4 +1,5 @@
-module Expression.Feldspar.GADTFirstOrder where
+module Expression.Feldspar.GADTFirstOrder
+    (Exp(..),sucAll,prdAll,mapVar) where
 
 import MyPrelude
 

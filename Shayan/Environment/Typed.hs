@@ -1,6 +1,6 @@
-module Environment.Typed(Env(Emp,Ext),fmap,foldMap,traverse,len,get) where
+module Environment.Typed(Env(Emp,Ext),fmap,foldMap,foldl,traverse,len,get) where
 
-import MyPrelude hiding (mapM,fmap,traverse,foldMap)
+import MyPrelude hiding (mapM,fmap,traverse,foldMap,foldl)
 
 import Variable.Typed
 
@@ -19,6 +19,10 @@ foldMap :: Monoid m  =>
            (forall t. tfa t -> m) -> Env tfa r -> m
 foldMap  _ Emp        = mempty
 foldMap  f (Ext x xs) = mappend (f x) (foldMap f xs)
+
+foldl :: (forall t. b -> tfa t -> b) -> b -> Env tfa r -> b
+foldl _ z Emp        = z
+foldl f z (Ext x xs) = foldl f (f z x) xs
 
 traverse :: Applicative m =>
             (forall t. tfa t -> m (tfb t)) -> Env tfa r -> m (Env tfb r)

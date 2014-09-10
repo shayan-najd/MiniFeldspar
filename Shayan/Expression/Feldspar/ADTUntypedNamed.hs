@@ -1,4 +1,5 @@
-module Expression.Feldspar.ADTUntypedNamed where
+module Expression.Feldspar.ADTUntypedNamed
+    (Exp(..)) where
 
 import MyPrelude
 

@@ -23,11 +23,11 @@ isVal ee = case ee of
     Tpl  ef es   -> isVal ef && isVal es
     Fst  _       -> False
     Snd  _       -> False
-    Ary  el _    -> isVal el
+    Ary  _  _    -> False
     Len  _       -> False
     Ind  _  _    -> False
     Let  _  _    -> False
-    Cmx  er ei   -> isVal er && isVal ei
+    Cmx  _  _    -> False
     Tmp  _       -> True
 
 val :: Exp n t -> (Bool,Exp n t)

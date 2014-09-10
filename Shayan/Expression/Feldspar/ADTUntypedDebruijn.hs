@@ -1,4 +1,5 @@
-module Expression.Feldspar.ADTUntypedDebruijn where
+module Expression.Feldspar.ADTUntypedDebruijn
+    (Exp(..),fre) where
 
 import MyPrelude
 
