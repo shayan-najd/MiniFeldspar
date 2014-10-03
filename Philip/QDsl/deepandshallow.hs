@@ -18,6 +18,7 @@ data FunC a where
   Prim2     :: String -> (a -> b -> c) -> FunC a -> FunC b -> FunC c
   Value     :: a -> FunC a
   Variable  :: String -> FunC a
+  Undef     :: FunC a
   Arr       :: FunC Int -> (FunC Int -> FunC a) -> FunC (Array Int a)
   ArrLen    :: FunC (Array Int a) -> FunC Int
   ArrIx     :: FunC (Array Int a) -> FunC Int -> FunC a
@@ -42,6 +43,7 @@ instance Show (FunC a) where
   show (Prim1 s f a)    =  par (s <+> show a)
   show (Prim2 s f a b)  =  par (s <+> show a <+> show b)
   show (Variable x)     =  x
+  show Undef            =  "Undef"
   show (Arr n f)        =  par ("Arr" <+> show n <+> showf f)
   show (ArrLen a)       =  par ("ArrLen" <+> show a)
   show (ArrIx a i)      =  par ("ArrIx" <+> show a <+> show i)
@@ -57,6 +59,7 @@ eval (Snd p)          =  snd (eval p)
 eval (Prim1 _ f a)    =  f (eval a)
 eval (Prim2 _ f a b)  =  f (eval a) (eval b)
 eval (Value a)        =  a
+eval Undef            =  undefined
 eval (Arr n ixf)      =  listArray (0,n') [ eval (ixf (LitI i)) | i <- [0..n'] ]
                          where n' = eval n - 1
 eval (ArrLen a)       =  u - l + 1
@@ -94,8 +97,14 @@ instance Num (FunC Int) where
   abs a          =  Prim1 "abs" abs a
   signum a       =  Prim1 "signum" signum a
 
+(%#)         :: FunC Int -> FunC Int -> FunC Int
+a %# b       =  Prim2 "mod" mod a b
+
 (<#)         :: FunC Int -> FunC Int -> FunC Bool
 a <# b       =  Prim2 "(<)" (<) a b
+
+(==#)        :: FunC Int -> FunC Int -> FunC Bool
+a ==# b      =  Prim2 "(==)" (==) a b
 
 minC         :: FunC Int -> FunC Int -> FunC Int
 minC a b     =  If (a <# b) a b
@@ -113,6 +122,27 @@ instance (Syntactic a, Syntactic b) => Syntactic (a,b) where
 
 forLoop        :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s) -> s
 forLoop n s b  =  snd (while (\(i,s) -> i<#n) (\(i,s) -> (i+1, b i s)) (0,s))
+
+data Option a = Option { isSome :: FunC Bool, fromSome :: a }
+
+instance Syntactic a => Syntactic (Option a) where
+  type Internal (Option a)  =  (Bool, Internal a)
+  -- changed from paper, by adding call to fromFunC and toFunC.
+  fromFunC m                =  Option (Fst m) (fromFunC (Snd m))
+  toFunC (Option b a)       =  Pair b (toFunC a)
+
+undef    :: Syntactic a => a
+undef    =  fromFunC Undef
+
+some     :: a -> Option a
+some a   =  Option true a
+
+none     :: Syntactic a => Option a
+none     =  Option false undef
+
+option   :: (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
+option noneCase someCase opt =
+  ifC (isSome opt) (someCase (fromSome opt)) noneCase
 
 data Vector a where
   Indexed :: FunC Int -> (FunC Int -> a) -> Vector a
@@ -139,20 +169,97 @@ zipWithVec f (Indexed m g) (Indexed n h)
 sumVec :: (Syntactic a, Num a) => Vector a -> a
 sumVec (Indexed n f) = forLoop n 0 (\i s -> s + f i)
 
+filterVec :: Syntactic a => (a -> FunC Bool) -> Vector a -> Vector (Option a)
+filterVec p  =  fmap (\x -> ifC (p x) (some x) none)
+
 idVec :: FunC Int -> Vector (FunC Int)
 idVec n  =  Indexed n id
 
 scalarProd :: (Syntactic a, Num a) => Vector a -> Vector a -> a
 scalarProd a b = sumVec (zipWithVec (*) a b)
 
-ex :: FunC Int
-ex =  scalarProd (idVec 10) (fmap (* 2) (idVec 10))
+sqr :: Num a => a -> a
+sqr x  =  x * x
 
-answer :: Int
-answer = eval ex
+power :: Int -> FunC Int -> FunC Int
+power 0 x  =  1
+power n x | n `mod` 2 == 0  =  sqr (power (n `div` 2) x)
+          | otherwise       =  x * power (n - 1) x
 
-check :: Bool
-check =  answer == sum (zipWith (*) [0..9] (map (*2) [0..9]))
+ex0 :: FunC Int
+ex0 =  scalarProd (idVec 10) (fmap (* 2) (idVec 10))
 
+check0 :: Bool
+check0 =  eval ex0 == sum (zipWith (*) [0..9] (map (*2) [0..9]))
 
+{-
 
+The value of ex0 is:
+
+  (Snd (While (\x-> ((<) (Fst x)
+                         (If ((<) (LitI 10) (LitI 10))
+                             (LitI 10)
+                             (LitI 10))))
+              (\x-> (Pair ((+) (Fst x) (LitI 1))
+                          ((+) (Snd x) ((*) (Fst x) ((*) (Fst x) (LitI 2))))))
+              (Pair (LitI 0) (LitI 0))))
+
+-}
+
+ex1 :: FunC Int
+ex1 =  power 7 42
+
+check1 :: Bool
+check1 =  eval ex1 == 42^7
+
+{- 
+
+The value of ex1 is:
+
+  ((*) (LitI 42)
+       ((*) ((*) (LitI 42)
+                 ((*) ((*) (LitI 42) (LitI 1))
+                      ((*) (LitI 42) (LitI 1))))
+            ((*) (LitI 42)
+                 ((*) ((*) (LitI 42) (LitI 1))
+                      ((*) (LitI 42) (LitI 1))))))
+
+-}
+
+ex2 :: FunC Int
+ex2 =  sumVec (fmap (\x -> option 0 id x) (filterVec (\y -> (y %# 2) ==# 0) (idVec 10)))
+
+check2 :: Bool
+check2 =  eval ex2 == sum [ x | x <- [0..9], x `mod` 2 == 0 ]
+
+{-
+
+The value of ex2 is:
+
+  (Snd (While
+    (\x-> ((<) (Fst x) (LitI 10)))
+    (\x-> (Pair
+            ((+) (Fst x) (LitI 1))
+            ((+) (Snd x)
+              (If (Fst (If ((==) (mod (Fst x) (LitI 2)) (LitI 0))
+                           (Pair (LitB True) (Fst x))
+                           (Pair (LitB False) Undef)))
+                  (Snd (If ((==) (mod (Fst x) (LitI 2)) (LitI 0))
+                           (Pair (LitB True) (Fst x))
+                           (Pair (LitB False) Undef)))
+                  (LitI 0)))))
+    (Pair (LitI 0) (LitI 0))))
+
+After simplification, this becomes:
+
+  (Snd (While
+    (\x-> ((<) (Fst x) (LitI 10)))
+    (\x-> (Pair
+            ((+) (Fst x) (LitI 1))
+            ((+) (Snd x)
+              (If ((==) (mod (Fst x) (LitI 2)) (LitI 0))
+                  (Fst x)
+                  (LitI 0)))
+    (Pair (LitI 0) (LitI 0))))
+
+-}
