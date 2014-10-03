@@ -112,6 +112,9 @@ minC a b     =  If (a <# b) a b
 ifC          :: Syntactic a => FunC Bool -> a -> a -> a
 ifC c t e    =  fromFunC (If c (toFunC t) (toFunC e))
 
+(?)          :: Syntactic a => FunC Bool -> (a, a) -> a
+c ? (t,e)    =  ifC c t e
+
 while	     :: Syntactic s => (s -> FunC Bool) -> (s -> s) -> s -> s
 while c b i  =  fromFunC (While (funC c) (funC b) (toFunC i))
 
@@ -130,6 +133,11 @@ instance Syntactic a => Syntactic (Option a) where
   -- changed from paper, by adding call to fromFunC and toFunC.
   fromFunC m                =  Option (Fst m) (fromFunC (Snd m))
   toFunC (Option b a)       =  Pair b (toFunC a)
+
+instance Monad Option where
+  return a  =  Option { isSome = true, fromSome = a }
+  m >>= k  =   n { isSome = isSome m ? (isSome n, true) }
+    where  n = k (fromSome m)
 
 undef    :: Syntactic a => a
 undef    =  fromFunC Undef
