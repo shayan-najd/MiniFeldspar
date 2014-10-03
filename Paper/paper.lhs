@@ -1,6 +1,12 @@
-\documentclass[preprint]{sigplanconf}
+\documentclass{llncs}
+%\documentclass[preprint]{sigplanconf}
 
-%include lhs2TeX.fmt
+%include polycode.fmt
+%format == = "\longeq "
+%format || = "||"
+%format <|| = "\openq "
+%format ||> = "\closeq "
+
 % US Letter page size
 %\pdfpagewidth=8.5in
 %\pdfpageheight=11in
@@ -19,14 +25,20 @@
 \usepackage{xspace}
 \usepackage{hyperref}
 \usepackage{url}
+\usepackage{color}
+\usepackage{listings}
+\lstset{language=C,identifierstyle=\ttfamily,keywordstyle=\bfseries\ttfamily}
 %% \usepackage[table]{xcolor}
 %% \usepackage{colortbl}
-
 
 %%% macros
 
 \newcommand{\todo}[1]{{\noindent\small\color{red} \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
 %\newcommand{\todo}[1]{}
+
+\newcommand{\longeq}{=\!=}
+\newcommand{\openq}{[||||\,}
+\newcommand{\closeq}{\,||||]}
 
 %% Draft outline
 
@@ -109,7 +121,6 @@
 %% QDSLs: Why it is nicer to be quoted nor
 
 
-
 \begin{document}
 
 %% \conferenceinfo{WXYZ '05}{date, City.}
@@ -121,18 +132,31 @@
 
 \title{QDSLs: Why its nicer to be quoted normally}
 
-\authorinfo{Shayan Najd}
-           {The University of Edinburgh}
-           {sh.najd@@ed.ac.uk}
-\authorinfo{Sam Lindley}
-           {The University of Edinburgh}
-           {sam.lindley@@ed.ac.uk}
-\authorinfo{Josef Svenningsson}
-           {Chalmers University of Technology}
-           {josefs@@chalmers.se}
-\authorinfo{Philip Wadler}
-           {The University of Edinburgh}
-           {philip.wadler@@ed.ac.uk}
+\author{Shayan Najd\inst{1}
+  \and Sam Lindley\inst{1}
+  \and Josef Svenningsson\inst{2}
+  \and Philip Wadler\inst{1}}
+
+\institute{The University of Edinburgh
+\email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
+\and
+Chalmers University of Technology
+\email{josefs@@chalmers.se}}
+
+
+
+% \authorinfo{Shayan Najd}
+%            {The University of Edinburgh}
+%            {sh.najd@@ed.ac.uk}
+% \authorinfo{Sam Lindley}
+%            {The University of Edinburgh}
+%            {sam.lindley@@ed.ac.uk}
+% \authorinfo{Josef Svenningsson}
+%            {Chalmers University of Technology}
+%            {josefs@@chalmers.se}
+% \authorinfo{Philip Wadler}
+%            {The University of Edinburgh}
+%            {philip.wadler@@ed.ac.uk}
 
 \maketitle
 
@@ -166,6 +190,289 @@ domain-specific languages into a given host language.
 
 
 \section{Introduction}
+
+Do you prefer to build a domain-specific language using shallow
+embedding, deep embedding, or a combination of the two?
+This paper offers a new way---quoted domain-specific languages.
+For brevity, we write EDSL for embedded domain specific language
+(usually with a combination of deep and shallow embedding), and
+QDSL for quoted domain specific language.
+
+% advantages of QDSLs / compare to deep and shallow embeddings
+
+% essence of QDSLs
+
+% QDSLs are not really new / key related work
+
+% contributions of this paper
+
+
+\section{Overview}
+
+Let's begin by considering the ``hello world'' of program generation,
+the power function. Since division by zero is undefined, we arbitrarily
+choose that raising zero to a negative power yields zero.
+\begin{code}
+power :: Int -> Float -> Float
+power n x  =
+  if n < 0 then
+    if x == 0 then 0 else 1 / power (-n) x
+  else if n == 0 then
+    1
+  else if even n then 
+    sqr (power (n `div` 2) x)
+  else
+    x * power (n-1) x
+
+sqr :: Float -> Float
+sqr x  =  x * x
+\end{code}
+Our goal is to generate code in the programming language~C.
+For example,
+\begin{lstlisting}
+  float main (float u) {
+    float v = u * 1;
+    float w = u * (v * v);
+    if (a == 0)
+      return 0;
+    else
+      return 1 / (w * w);
+  } 
+\end{lstlisting}
+should result from instantiating |power| to |(-6)|.
+
+For EDSL, we assume a type |EDSL a| to represent a term
+of type |a|, and function
+\begin{code}
+edslC :: (EDSL a -> EDSL b) -> C
+\end{code}
+to generate a \texttt{main} function corresponding to its
+argument.  Here is a solution to our problem using EDSL.
+\begin{code}
+power :: Int -> EDSL Float -> EDSL Float
+power n x  =
+  if n < 0 then
+    x .==. 0 ? (0,  1 / power (-n) x)
+  else if n == 0 then
+    1
+  else if even n then 
+    sqr (power (n `div` 2) x)
+  else
+    x * power (n-1) x
+
+sqr :: EDSL Float -> EDSL Float
+sqr y  =  y * y
+\end{code}
+Invoking |edslC (power (-6))| generates the C code above.
+
+Type |Float -> Float| in the original becomes
+\[
+|EDSL Float -> EDSL Float|
+\]
+in the EDSL solution, meaning that |power n| accepts a representation
+of the argument and returns a representation of that argument raised
+to the $n$'th power.
+
+In EDSL, the body of the code remains almost---but not
+quite!---identical to the original.  Clever encoding tricks, which we
+will explain later, permit declarations, function calls, arithmetic
+operations, and numbers to appear the same whether they are to be
+executed at generation-time or run-time.  However, for reasons that we
+will explain later, comparison and conditionals appear differently
+depending on whether they are to be executed at generation-time or
+run-time, using |x < eps| and |if a then b else c| for the former but
+|x .<. eps| and |a ?  (b, c)| for the latter.
+
+Assuming |x| contains a value of type |EDSL Float| denoting an object
+variable |u| of type float, evaluating |power (-6) x| returns yields following.
+\begin{code}
+if u == 0 then 0 else
+  1/(u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))
+\end{code}
+Applying common-subexpression elimination, or using a technique such
+as observable sharing, permits recovering the sharing structure.
+\[
+\begin{array}{l||l}
+|v| & |(u * 1)|  \\
+|w| & |u * (v * v)| \\
+|return| &  |if u == 0 then 0 else 1/(w*w)|
+\end{array}
+\]
+It is easy to generate the final C code from this structure.
+
+By contrast, for QDSL, we assume a type |QDSL a| to represent a
+quoted term of type |a|, and function
+\begin{code}
+qdslC :: QDSL (a -> b) -> C
+\end{code}
+to generate a \texttt{main} function corresponding to its
+argument.  Here is a solution to our problem using QDSL.
+\begin{code}
+power :: Int -> Exp (Float -> Float)
+power n = 
+  if n < 0 then
+    <|| \x -> if x == 0 then 0 else 1 / $(power (-n)) x ||>
+  else if n == 0 then
+    <|| \x -> 1 ||>
+  else if even n then 
+    <|| \x -> $(sqr) ($(power (n `div` 2)) x) ||>
+  else
+    <|| \x -> x * $(power (n-1)) x ||>
+
+sqr :: Exp (Float -> Float)
+sqr  =  <|| \y -> y * y ||>
+\end{code}
+Invoking |edslC (power (-6))| generates the C code above.
+
+Type |Float -> Float| in the original becomes
+\[
+|QDSL (Float -> Float)|
+\]
+in the QDSL solution, meaning that |power n| returns a quotation
+of a function that accepts an argument and returns that
+argument raised to the $n$'th power.
+
+In QDSL, the body of the code changes more substantially. The quasi-quoting
+mechanism of Template Haskell is used to indicate which code executes
+at which time.  Unquoted code executes at generation-time while quoted
+code executes at run-time. Quoting is indicated by \( <|| \cdots ||> \)
+and unquoting by \( \$(\cdots) \). Here, by the mechanism of
+quoting, without any need for tricks, the syntax for code excecuted at
+both generation-time and run-time is identical for all constructs,
+including comparison and conditionals.
+
+Now evaluating |power (-6)| yields the following.
+\begin{code}
+<|| \x ->
+     if x == 0 then 0 else
+       1 / (\y -> y * y) (x * (\y -> y * y) (x * 1)) ||>
+\end{code}
+Normalising the term, with variables renamed
+for readability, yields the following.
+\begin{code}
+<|| \u ->
+      let v = u * 1 in
+        let w = u * (v * v) in
+          if u == 0 then 0 else 1 / w * w ||>
+\end{code}
+It is easy to generate the final C code from
+the normalised term.
+
+Here are some points of comparison between the two approaches.
+\begin{itemize}
+
+\item EDSL requires some term forms, such as comparison and
+conditionals, to differ between the host and embedded languages.
+In contrast, QDSL enables the host and embedded languages to
+appear identical.
+
+\item EDSL permits the host and embedded languages to intermingle
+seamlessly. In contrast, QDSL requires syntax to separate quoted and
+unquoted terms, which (depending on your point of view) may be
+considered as an unnessary distraction or as drawing a useful
+distinction between generation-time and run-time.  If one takes the
+former view, the type-based approach to quotation found in C\# and
+Scala might be preferred.
+
+\item EDSL typically develops custom shallow and deep embeddings for
+each application, although these may follow a fairly standard pattern
+(as we review in Section~\ref{sec:shallow-deep}).  In contrast, QDSL
+may share the same representation for quoted terms across a range of
+applications; the quoted language is the host language, and does not
+vary with the specific domain.
+
+\item EDSL loses sharing, which must later be recovered be either
+common subexpression elimination or applying a technique such as
+observable sharing.  Common subexpression elimination can be
+expensive, as we will see in the FFT example in Section~\ref{sec:fft}.
+Observable sharing is less costly, but requires stepping outside a
+pure functional model. In contrast, QDSL preserves sharing throughout.
+
+\item EDSL yields the term in normalised form in this case, though
+there are other situations where a normaliser is required (see
+Section~\ref{sec:option}).  In contrast, QDSL yields an unwieldy term
+that requires normalisation.  However, just as a single representation
+of QDSL terms suffices across many applications, so does a single
+normaliser---it can be built once and reused many times.
+
+\item Once the deep embedding or the normalised quoted term is
+produced, generating the domain-specific code is similar for
+both approaches.
+ 
+\end{itemize}
+
+\section{A second example}
+
+Say that we wish to refactor our previous code, applying the
+|Maybe| type to handle the case of division by zero.
+
+In EDSL, we use the |Option| type defined previously.
+\begin{code}
+(./.) :: EDSL Float -> Option (EDSL Float)
+x ./. y  =  if y == 0 then none else some (x / y)
+
+powerO :: Int -> EDSL Float -> Option (EDSL Float)
+powerO n x  =
+  if n < 0 then
+    do y <- powerO (-n) x
+       1 ./. y
+  else if n == 0 then
+    return 1
+  else if even n then 
+    do y <- powerO (n `div` 2) x
+       return (sqr y)
+  else
+    do y <- powerO (n-1) x
+       return (x*y)
+
+power :: Int -> EDSL Float -> EDSL Float
+power n x  =
+  option 0 id (powerO n x)
+
+sqr :: EDSL Float -> EDSL Float
+sqr y  =  y * y
+\end{code}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Shallow and deep embedding}
+
+
+\section{Combining shallow and deep embedding}
+
+
+\section{The subformula property}
+
+
+\section{The design of QuickDSL}
+
+
+\section{Empirical results}
+
+
+
+
+\end{document}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ----------------------------
 "Good artists copy, great artists steal." --- Picasso
 
