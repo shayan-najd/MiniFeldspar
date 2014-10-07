@@ -8,6 +8,7 @@ import Data.Array
 
 data FunC a where
   LitI      :: Int -> FunC Int
+  LitF      :: Float -> FunC Float
   LitB      :: Bool -> FunC Bool
   If        :: FunC Bool -> FunC a -> FunC a -> FunC a
   While     :: (FunC s -> FunC Bool) -> (FunC s -> FunC s) -> FunC s -> FunC s
@@ -34,6 +35,7 @@ showf f  =  par ("\\x->" <+> show (f (Variable "x")))
 
 instance Show (FunC a) where
   show (LitI i)	        =  par ("LitI" <+> show i)
+  show (LitF x)         =  par ("LitF" <+> show x)
   show (LitB b)	        =  par ("LitB" <+> show b)
   show (While c b i)    =  par ("While" <+> showf c <+> showf b <+> show i)
   show (If c t e)       =  par ("If" <+> show c <+> show t <+> show e)
@@ -50,6 +52,7 @@ instance Show (FunC a) where
 
 eval                  :: FunC a -> a
 eval (LitI i)         =  i
+eval (LitF x)         =  x
 eval (LitB b)         =  b
 eval (While c b i)    =  ewhile (evalf c) (evalf b) (eval i)
 eval (If c t e)       =  if eval c then eval t else eval e
@@ -97,13 +100,25 @@ instance Num (FunC Int) where
   abs a          =  Prim1 "abs" abs a
   signum a       =  Prim1 "signum" signum a
 
+instance Num (FunC Float) where
+  a + b          =  Prim2 "(+)" (+) a b 
+  a - b          =  Prim2 "(-)" (-) a b 
+  a * b          =  Prim2 "(*)" (*) a b
+  fromInteger a  =  LitF (fromInteger a)
+  abs a          =  Prim1 "abs" abs a
+  signum a       =  Prim1 "signum" signum a
+
+instance Fractional (FunC Float) where
+  a / b           =  Prim2 "(/)" (/) a b
+  fromRational a  =  LitF (fromRational a)
+
 (%#)         :: FunC Int -> FunC Int -> FunC Int
 a %# b       =  Prim2 "mod" mod a b
 
 (<#)         :: FunC Int -> FunC Int -> FunC Bool
 a <# b       =  Prim2 "(<)" (<) a b
 
-(==#)        :: FunC Int -> FunC Int -> FunC Bool
+(==#)        :: Eq a => FunC a -> FunC a -> FunC Bool
 a ==# b      =  Prim2 "(==)" (==) a b
 
 minC         :: FunC Int -> FunC Int -> FunC Int
@@ -189,10 +204,24 @@ scalarProd a b = sumVec (zipWithVec (*) a b)
 sqr :: Num a => a -> a
 sqr x  =  x * x
 
-power :: Int -> FunC Int -> FunC Int
+power :: Int -> FunC Float -> FunC Float
 power 0 x  =  1
-power n x | n `mod` 2 == 0  =  sqr (power (n `div` 2) x)
-          | otherwise       =  x * power (n - 1) x
+power n x  | n < 0           =  x ==# 0 ? (0, 1 / power (-n) x)
+           | n `mod` 2 == 0  =  sqr (power (n `div` 2) x)
+           | otherwise       =  x * power (n - 1) x
+
+
+(/#) :: FunC Float -> FunC Float -> Option (FunC Float)
+x /# y  =  (y ==# 0) ? (none, some (x/y))
+
+powerO :: Int -> FunC Float -> Option (FunC Float)
+powerO 0 x  =  return 1
+powerO n x | n < 0            =  do y <- powerO (-n) x
+                                    1 /# y
+           | n `mod` 2 == 0   =  do y <- powerO (n `div` 2) x
+                                    return (sqr y)
+           | otherwise        =  do y <- powerO (n - 1) x
+                                    return (x * y)
 
 ex0 :: FunC Int
 ex0 =  scalarProd (idVec 10) (fmap (* 2) (idVec 10))
@@ -214,11 +243,17 @@ The value of ex0 is:
 
 -}
 
-ex1 :: FunC Int
-ex1 =  power 7 42
+ex1 :: FunC Float
+ex1 =  power (-6) 2
 
 check1 :: Bool
-check1 =  eval ex1 == 42^7
+check1 =  eval ex1 == 1/2^6
+
+ex1O :: FunC Float
+ex1O =  option 0 id (powerO (-6) 2)
+
+check1O :: Bool
+check1O =  eval ex1O == 1/2^6
 
 {- 
 
