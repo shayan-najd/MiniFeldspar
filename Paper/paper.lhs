@@ -418,17 +418,13 @@ value.
 power' :: Int -> Float -> Maybe Float
 power' n x  =
   if n < 0 then
-    if x == 0 then Nothing else
-      do y <- power' (-n) x
-         return (1 / y)
+    if x == 0 then Nothing else do y <- power' (-n) x; return (1 / y)
   else if n == 0 then
     return 1
   else if even n then 
-    do y <- power' (n `div` 2) x
-       return (sqr y)
+    do y <- power' (n `div` 2) x; return (sqr y)
   else
-    do y <- power' (n-1) x
-       return (x * y)
+    do y <- power' (n-1) x; return (x * y)
 
 power'' :: Int -> Float -> Float
 power'' n x  =  maybe 0 (\x -> x) (power' n x)
@@ -453,17 +449,13 @@ Here is the refactored code.
 power' :: Int -> EDSL Float -> Option (EDSL Float)
 power' n x  =
   if n < 0 then
-    (x .==. 0) ? (none, 
-    do y <- power' (-n) x
-       return (1 / y))
+    (x .==. 0) ? (none, do y <- power' (-n) x; return (1 / y))
   else if n == 0 then
     return 1
   else if even n then 
-    do y <- power' (n `div` 2) x
-       return (sqr y)
+    do y <- power' (n `div` 2) x; return (sqr y)
   else
-    do y <- power' (n-1) x
-       return (x*y)
+    do y <- power' (n-1) x; return (x*y)
 
 power'' :: Int -> EDSL Float -> EDSL Float
 power'' n x  = option (\y -> y) id (power' n x)
@@ -489,13 +481,13 @@ the generated code is in far from normal form. Rewrite rules including
 the following need to be repeatedly applied.
 \[
 \begin{array}{l}
-|fst (a, b)| \mapsto a \\
-|snd (a, b)| \mapsto b \\
-|fst (if c then t else e) \mapst if c then fst t else fst e \\
-|snd (if c then t else e) \mapst if c then snd t else snd e \\
-|if (if c then t else e) then t' else e'| \mapsto {} \\
-\quad \|if c then (if t then t' else e') else (if e then t' else e') \\
-|if c then (if c then t' else e') else e| \mapsto |if c then t' else e|
+|fst (a, b)| \leadsto a \\
+|snd (a, b)| \leadsto b \\
+|fst (if c then t else e)| \leadsto |if c then fst t else fst e| \\
+|snd (if c then t else e)| \leadsto |if c then snd t else snd e| \\
+|if (if c then t else e) then t' else e'| \leadsto {} \\
+\quad |if c then (if t then t' else e') else (if e then t' else e')| \\
+|if c then (if c then t' else e') else e| \leadsto |if c then t' else e|
 \end{array}
 \]
 
