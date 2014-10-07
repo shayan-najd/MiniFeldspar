@@ -231,12 +231,13 @@ Our goal is to generate code in the programming language~C.
 For example,
 \begin{lstlisting}
   float main (float u) {
-    float v = u * 1;
-    float w = u * (v * v);
-    if (a == 0)
+    if (u == 0) {
       return 0;
-    else
+    } else {
+      float v = u * 1;
+      float w = u * (v * v);
       return 1 / (w * w);
+    }
   } 
 \end{lstlisting}
 should result from instantiating |power| to |(-6)|.
@@ -283,19 +284,21 @@ depending on whether they are to be executed at generation-time or
 run-time, using |x < eps| and |if a then b else c| for the former but
 |x .<. eps| and |a ?  (b, c)| for the latter.
 
+\todo{The following displays a deep structure as if it is a term.
+That may actually be confusing.}
 Assuming |x| contains a value of type |EDSL Float| denoting an object
 variable |u| of type float, evaluating |power (-6) x| returns yields following.
 \begin{code}
 if u == 0 then 0 else
-  1/(u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))
+  1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))
 \end{code}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
 \[
-\begin{array}{l||l}
+\begin{array}{r@@{~}||@@{~}l}
 |v| & |(u * 1)|  \\
 |w| & |u * (v * v)| \\
-|return| &  |if u == 0 then 0 else 1/(w*w)|
+|main| &  |if u == 0 then 0 else 1/(w*w)|
 \end{array}
 \]
 It is easy to generate the final C code from this structure.
@@ -322,7 +325,7 @@ power n =
 sqr :: Exp (Float -> Float)
 sqr  =  <|| \y -> y * y ||>
 \end{code}
-Invoking |edslC (power (-6))| generates the C code above.
+Invoking |qdslC (power (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes
 \[
@@ -351,9 +354,10 @@ Normalising the term, with variables renamed
 for readability, yields the following.
 \begin{code}
 <|| \u ->
-      let v = u * 1 in
-        let w = u * (v * v) in
-          if u == 0 then 0 else 1 / w * w ||>
+      if u == 0 then 0 else
+        let v = u * 1 in
+          let w = u * (v * v) in
+            1 / w * w  ||>
 \end{code}
 It is easy to generate the final C code from
 the normalised term.
@@ -403,52 +407,97 @@ both approaches.
 
 \section{A second example}
 
-Say that we wish to refactor our previous code, applying the
-|Maybe| type to handle the case of division by zero.
-
-In EDSL, we use the |Option| type defined previously.
+The previous code arbitrarily returns 0 if 0 is raised to a negative
+exponent.  Say that we wish to refactor the code using the |Maybe|
+type.  Following the principle of separation of concerns, we decompose
+|power| into two functions |power'| and |power''|, where the first
+uses the |Maybe| type to indicate whether an exceptional case occured,
+and the second instantiates exceptional cases to a suitable default
+value.
 \begin{code}
-(./.) :: EDSL Float -> Option (EDSL Float)
-x ./. y  =  if y == 0 then none else some (x / y)
-
-powerO :: Int -> EDSL Float -> Option (EDSL Float)
-powerO n x  =
+power' :: Int -> Float -> Maybe Float
+power' n x  =
   if n < 0 then
-    do y <- powerO (-n) x
-       1 ./. y
+    if x == 0 then Nothing else
+      do y <- power' (-n) x
+         return (1 / y)
   else if n == 0 then
     return 1
   else if even n then 
-    do y <- powerO (n `div` 2) x
+    do y <- power' (n `div` 2) x
        return (sqr y)
   else
-    do y <- powerO (n-1) x
+    do y <- power' (n-1) x
+       return (x * y)
+
+power'' :: Int -> Float -> Float
+power'' n x  =  maybe 0 (\x -> x) (power' n x)
+
+sqr :: Float -> Float
+sqr x  =  x * x
+\end{code}
+The above uses the function
+\begin{code}
+maybe :: b -> (a -> b) -> Maybe a -> b
+\end{code}
+from the Haskell library |Data.Maybe|.
+The same C code as before should result from instantiating |power''| to |(-6)|.
+
+In this case, the refactored function is arguably clumsier than the original,
+but it should be apparent that it is desirable to support
+this style of refactoring in general.
+
+In EDSL, type |Maybe| is represented by type |Option|.
+Here is the refactored code.
+\begin{code}
+power' :: Int -> EDSL Float -> Option (EDSL Float)
+power' n x  =
+  if n < 0 then
+    (x .==. 0) ? (none, 
+    do y <- power' (-n) x
+       return (1 / y))
+  else if n == 0 then
+    return 1
+  else if even n then 
+    do y <- power' (n `div` 2) x
+       return (sqr y)
+  else
+    do y <- power' (n-1) x
        return (x*y)
 
-power :: Int -> EDSL Float -> EDSL Float
-power n x  =
-  option 0 id (powerO n x)
+power'' :: Int -> EDSL Float -> EDSL Float
+power'' n x  = option (\y -> y) id (power' n x)
 
 sqr :: EDSL Float -> EDSL Float
 sqr y  =  y * y
 \end{code}
+The above uses the function
+\begin{code}
+option :: (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
+\end{code}
+from the EDSL library. Details of the type |Option| and the type class |Syntactic|
+are explained in Section~\ref{sec:option}. A clever aspect of the representation
+is that the type |Option| is declared as a monad,
+so that the usual |do| notation may be used.
+Invoking |edslC (power'' (-6))| generate the same C code as
+the previous example.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Before the |power| function generated code in essentially
+normal form, save for the need to use common subexpression elimination
+or observable sharing to recover shared structure. In this case, 
+the generated code is in far from normal form. Rewrite rules including
+the following need to be repeatedly applied.
+\[
+\begin{array}{l}
+|fst (a, b)| \mapsto a \\
+|snd (a, b)| \mapsto b \\
+|fst (if c then t else e) \mapst if c then fst t else fst e \\
+|snd (if c then t else e) \mapst if c then snd t else snd e \\
+|if (if c then t else e) then t' else e'| \mapsto {} \\
+\quad \|if c then (if t then t' else e') else (if e then t' else e') \\
+|if c then (if c then t' else e') else e| \mapsto |if c then t' else e|
+\end{array}
+\]
 
 
 
