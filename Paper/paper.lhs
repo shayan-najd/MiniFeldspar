@@ -490,6 +490,8 @@ the following need to be repeatedly applied.
 \end{array}
 \]
 
+\todo{Continue from here}
+
 
 
 \section{Shallow and deep embedding}
