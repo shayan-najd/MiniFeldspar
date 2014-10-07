@@ -1,10 +1,17 @@
 {-# LANGUAGE GADTs, TypeFamilies, FlexibleInstances #-}
 
+-- This was an attempt to simplify nested conditionals by passing in the outer condition
+-- Giving up, this is too hard (because of constraints imposed by GADTs).
+-- File currently broken.
+-- Philip Wadler, 7 Oct 2014
+
 module DeepAndShallow where
 import Data.Array
 
 -- Combining Deep and Shallow Embedding
 -- Philip Wadler, 30 Apr 2014
+
+type Id = String
 
 data FunC a where
   LitI      :: Int -> FunC Int
@@ -15,14 +22,54 @@ data FunC a where
   Pair      :: FunC a -> FunC b -> FunC (a , b)
   Fst       :: FunC (a , b) -> FunC a
   Snd       :: FunC (a , b) -> FunC b
-  Prim1     :: String -> (a -> b) -> FunC a -> FunC b
-  Prim2     :: String -> (a -> b -> c) -> FunC a -> FunC b -> FunC c
+  Prim1     :: Id -> (a -> b) -> FunC a -> FunC b
+  Prim2     :: Id -> (a -> b -> c) -> FunC a -> FunC b -> FunC c
   Value     :: a -> FunC a
-  Variable  :: String -> FunC a
+  Variable  :: Id -> FunC a
   Undef     :: FunC a
   Arr       :: FunC Int -> (FunC Int -> FunC a) -> FunC (Array Int a)
   ArrLen    :: FunC (Array Int a) -> FunC Int
   ArrIx     :: FunC (Array Int a) -> FunC Int -> FunC a
+
+data FunC' where
+  LitI'      :: Int -> FunC'
+  LitF'      :: Float -> FunC'
+  LitB'      :: Bool -> FunC'
+  If'        :: FunC' -> FunC' -> FunC' -> FunC'
+  While'     :: Id -> FunC' -> FunC' -> FunC' -> FunC'
+  Pair'      :: FunC' -> FunC' -> FunC'
+  Fst'       :: FunC' -> FunC'
+  Snd'       :: FunC' -> FunC'
+  Prim1'     :: Id -> FunC' -> FunC'
+  Prim2'     :: Id -> FunC' -> FunC' -> FunC'
+  Variable'  :: String -> FunC'
+  Undef'     :: FunC'
+  Arr'       :: FunC' -> Id -> FunC' -> FunC'
+  ArrLen'    :: FunC' -> FunC'
+  ArrIx'     :: FunC' -> FunC' -> FunC'
+  deriving Eq
+
+erase :: FunC a -> FunC'
+erase (LitI i)         =  LitI' i
+erase (LitF x)         =  LitF' x
+erase (LitB b)         =  LitB' b
+erase (If c t e)       =  If' (erase c) (erase t) (erase e)
+erase (While c b i)    =  While' x (erase (c x)) (erase (b x)) (erase i)
+                       where x = Variable "x"
+erase (Pair a b)       =  Pair' (erase a) (erase b)
+erase (Fst p)          =  Fst' (erase p)
+erase (Snd p)          =  Snd' (erase p)
+erase (Prim1 s f a)    =  Prim1' s (erase a)
+erase (Prim2 s f a b)  =  Prim2' s (erase a) (erase b)
+erase (Value a)        =  GiveUp
+erase Undef            =  Undef'
+erase (Arr n ixf)      =  GiveUp
+erase (ArrLen a)       =  GiveUp
+erase (ArrIx a i)      =  GiveUp
+
+instance Eq (FunC a) where
+  a == b  =  erase a == erase b
+
 
 par     :: String -> String
 par s   =  "(" ++ s ++ ")"
@@ -204,42 +251,55 @@ idVec n  =  Indexed n id
 
 -- Smart constructors for simplification
 
-makeIf :: FunC Bool -> FunC a -> FunC a -> FunC a
-makeIf (LitB True)  t e  =  t
-makeIf (LitB False) t e  =  e
-makeIf (If c t0 e0) t e  =  If c (makeIf t0 t e) (makeIf e0 t e)
-makeIf c t e             =  If c t e
+makeIf :: [(FunC Bool,Bool)] -> FunC Bool -> FunC a -> FunC a -> FunC a
+makeIf cs (LitB b)  t e     =  if b then t else e
+makeIf cs (If c t0 e0) t e  =  makeIf cs c
+                                         (makeIf ((c,True) :cs) t0 t e)
+                                         (makeIf ((c,False):cs) e0 t e)
+makeIf cs c t e             =  case lookup c cs of
+                                 Nothing  -> If c t e
+                                 Just b   -> if b then t else e
 
-makeFst :: FunC (a,b) -> FunC a
-makeFst (If c t e)  =  If c (makeFst t) (makeFst e)
-makeFst (Pair a b)  =  a
-makeFst p           =  Fst p
+makeFst :: [(FunC Bool,Bool)] -> FunC (a,b) -> FunC a
+makeFst cs (If c t e)  =  makeIf cs c (makeFst cs t) (makeFst cs e)
+makeFst cs (Pair a b)  =  a
+makeFst cs p           =  Fst p
 
-makeSnd :: FunC (a,b) -> FunC b
-makeSnd (If c t e)  =  If c (makeSnd t) (makeSnd e)
-makeSnd (Pair a b)  =  b
-makeSnd p           =  Snd p
+makeSnd :: [(FunC Bool,Bool)] -> FunC (a,b) -> FunC b
+makeSnd cs (If c t e)  =  makeIf cs c (makeSnd cs t) (makeSnd cs e)
+makeSnd cs (Pair a b)  =  b
+makeSnd cs p           =  Snd p
+
+simp :: [(FunC Bool,Bool)] -> FunC a -> FunC a
+simp cs (LitI i)         =  LitI i
+simp cs (LitF x)         =  LitF x
+simp cs (LitB b)         =  LitB b
+simp cs (While c b i)    =  While (simpf cs c) (simpf cs b) (simp cs i)
+simp cs (If c t e)       =  makeIf cs (simpb cs (simp cs c))
+                                      (simp ((c,True) :cs) t)
+                                      (simp ((c,False):cs) e)
+simp cs (Pair a b)       =  Pair (simp cs a) (simp cs b)
+simp cs (Fst p)          =  makeFst cs (simp cs p)
+simp cs (Snd p)          =  makeSnd cs (simp cs p)
+simp cs (Prim1 s f a)    =  Prim1 s f (simp cs a)
+simp cs (Prim2 s f a b)  =  Prim2 s f (simp cs a) (simp cs b)
+simp cs (Value a)        =  Value a
+simp cs (Variable x)     =  Variable x
+simp cs Undef            =  Undef
+simp cs (Arr n ixf)      =  Arr (simp cs n) (simpf cs ixf)
+simp cs (ArrLen a)       =  ArrLen (simp cs a)
+simp cs (ArrIx a i)      =  ArrIx (simp cs a) (simp cs i)
+
+simpb :: [(FunC Bool,Bool)] -> FunC Bool -> FunC Bool
+simpb cs c  =  case lookup c cs of
+                 Nothing -> c
+                 Just b  -> LitB b
+
+simpf :: [(FunC Bool,Bool)] -> (FunC a -> FunC b) -> FunC a -> FunC b
+simpf cs f x  =  simp cs (f x)
 
 simplify :: FunC a -> FunC a
-simplify (LitI i)         =  LitI i
-simplify (LitF x)         =  LitF x
-simplify (LitB b)         =  LitB b
-simplify (While c b i)    =  While (simplifyf c) (simplifyf b) (simplify i)
-simplify (If c t e)       =  makeIf (simplify c) (simplify t) (simplify e)
-simplify (Pair a b)       =  Pair (simplify a) (simplify b)
-simplify (Fst p)          =  makeFst (simplify p)
-simplify (Snd p)          =  makeSnd (simplify p)
-simplify (Prim1 s f a)    =  Prim1 s f (simplify a)
-simplify (Prim2 s f a b)  =  Prim2 s f (simplify a) (simplify b)
-simplify (Value a)        =  Value a
-simplify (Variable x)     =  Variable x
-simplify Undef            =  Undef
-simplify (Arr n ixf)      =  Arr (simplify n) (simplifyf ixf)
-simplify (ArrLen a)       =  ArrLen (simplify a)
-simplify (ArrIx a i)      =  ArrIx (simplify a) (simplify i)
-
-simplifyf :: (FunC a -> FunC b) -> FunC a -> FunC b
-simplifyf f x  =  simplify (f x)
+simplify =  simp []
 
 
 -- Examples
@@ -262,20 +322,13 @@ x /# y  =  (y ==# 0) ? (none, some (x/y))
 
 powerO :: Int -> FunC Float -> Option (FunC Float)
 powerO 0 x  =  return 1
-powerO n x | n < 0            =  do y <- powerO (-n) x
-                                    1 /# y
+powerO n x | n < 0            =  x ==# 0 ? 
+                                    (none, 
+                                      do y <- powerO (-n) x
+                                         return (1 / y))
            | n `mod` 2 == 0   =  do y <- powerO (n `div` 2) x
                                     return (sqr y)
            | otherwise        =  do y <- powerO (n - 1) x
-                                    return (x * y)
-
-powerU :: Int -> FunC Float -> Option (FunC Float)
-powerU 0 x  =  return 1
-powerU n x | n < 0            =  (x ==# 0) ? (none, do y <- powerU (-n) x
-                                                       return (1 / y))
-           | n `mod` 2 == 0   =  do y <- powerU (n `div` 2) x
-                                    return (sqr y)
-           | otherwise        =  do y <- powerU (n - 1) x
                                     return (x * y)
 
 ex0 :: FunC Int
@@ -307,16 +360,13 @@ check1 =  eval ex1 == 1/2^6
 {- 
 
 The value of ex1 is:
- 
-  If ((==) (LitF 2.0) (LitF 0.0))
-     (LitF 0.0)
-     ((/) (LitF 1.0)
-          ((*) ((*) (LitF 2.0)
-                    ((*) ((*) (LitF 2.0) (LitF 1.0))
-                         ((*) (LitF 2.0) (LitF 1.0))))
-               ((*) (LitF 2.0)
-                    ((*) ((*) (LitF 2.0) (LitF 1.0))
-                         ((*) (LitF 2.0) (LitF 1.0))))))
+
+  ((*) ((*) (LitF 2.0)
+            ((*) ((*) (LitF 2.0) (LitF 1.0))
+                 ((*) (LitF 2.0) (LitF 1.0))))
+       ((*) (LitF 2.0)
+            ((*) ((*) (LitF 2.0) (LitF 1.0))
+                 ((*) (LitF 2.0) (LitF 1.0)))))
 
 -}
 
@@ -391,24 +441,5 @@ ex1ozs =  simplify ex1oz
 check1ozs :: Bool
 check1ozs =  eval ex1ozs == 0  -- ok!
 
-ex1u :: FunC Float
-ex1u =  option 0 id (powerU (-6) 2)
-
-check1u :: Bool
-check1u =  eval ex1u == 1/2^6
-
-ex1uz :: FunC Float
-ex1uz =  option 0 id (powerU (-1) 0)
-
-check1uz :: Bool
-check1uz =  eval ex1uz == 0  -- undefined!
-
-ex1uzs :: FunC Float
-ex1uzs =  simplify ex1uz
-
-check1uzs :: Bool
-check1uzs =  eval ex1uzs == 0  -- ok!
-
 main :: Bool
 main = check0 && check1 && check2s && check1z && check1o && check1ozs
-                                              && check1u && check1uzs
