@@ -30,9 +30,6 @@ par s   =  "(" ++ s ++ ")"
 (<+>)    :: String -> String -> String
 s <+> t  =  s ++ " " ++ t
 
-showf :: (FunC a -> FunC b) -> String
-showf f  =  par ("\\x->" <+> show (f (Variable "x")))
-
 instance Show (FunC a) where
   show (LitI i)	        =  par ("LitI" <+> show i)
   show (LitF x)         =  par ("LitF" <+> show x)
@@ -49,6 +46,9 @@ instance Show (FunC a) where
   show (Arr n f)        =  par ("Arr" <+> show n <+> showf f)
   show (ArrLen a)       =  par ("ArrLen" <+> show a)
   show (ArrIx a i)      =  par ("ArrIx" <+> show a <+> show i)
+
+showf :: (FunC a -> FunC b) -> String
+showf f  =  par ("\\x->" <+> show (f (Variable "x")))
 
 (<#>) :: (a -> b) -> a -> b
 f <#> x  =  seq x (f x)
@@ -145,6 +145,7 @@ forLoop        :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s) -> s
 forLoop n s b  =  snd (while (\(i,s) -> i<#n) (\(i,s) -> (i+1, b i s)) (0,s))
 
 data Option a = Option { isSome :: FunC Bool, fromSome :: a }
+  deriving Show
 
 instance Syntactic a => Syntactic (Option a) where
   type Internal (Option a)  =  (Bool, Internal a)
@@ -154,7 +155,7 @@ instance Syntactic a => Syntactic (Option a) where
 
 instance Monad Option where
   return a  =  Option { isSome = true, fromSome = a }
-  m >>= k  =   n { isSome = isSome m ? (isSome n, true) }
+  m >>= k  =   n { isSome = isSome m ? (isSome n, false) }
     where  n = k (fromSome m)
 
 undef    :: Syntactic a => a
@@ -200,6 +201,47 @@ filterVec p  =  fmap (\x -> ifC (p x) (some x) none)
 
 idVec :: FunC Int -> Vector (FunC Int)
 idVec n  =  Indexed n id
+
+-- Smart constructors for simplification
+
+makeIf :: FunC Bool -> FunC a -> FunC a -> FunC a
+makeIf (LitB True)  t e  =  t
+makeIf (LitB False) t e  =  e
+makeIf (If c t0 e0) t e  =  If c (makeIf t0 t e) (makeIf e0 t e)
+makeIf c t e             =  If c t e
+
+makeFst :: FunC (a,b) -> FunC a
+makeFst (If c t e)  =  If c (makeFst t) (makeFst e)
+makeFst (Pair a b)  =  a
+makeFst p           =  Fst p
+
+makeSnd :: FunC (a,b) -> FunC b
+makeSnd (If c t e)  =  If c (makeSnd t) (makeSnd e)
+makeSnd (Pair a b)  =  b
+makeSnd p           =  Snd p
+
+simplify :: FunC a -> FunC a
+simplify (LitI i)         =  LitI i
+simplify (LitF x)         =  LitF x
+simplify (LitB b)         =  LitB b
+simplify (While c b i)    =  While (simplifyf c) (simplifyf b) (simplify i)
+simplify (If c t e)       =  makeIf (simplify c) (simplify t) (simplify e)
+simplify (Pair a b)       =  Pair (simplify a) (simplify b)
+simplify (Fst p)          =  makeFst (simplify p)
+simplify (Snd p)          =  makeSnd (simplify p)
+simplify (Prim1 s f a)    =  Prim1 s f (simplify a)
+simplify (Prim2 s f a b)  =  Prim2 s f (simplify a) (simplify b)
+simplify (Value a)        =  Value a
+simplify Undef            =  Undef
+simplify (Arr n ixf)      =  Arr (simplify n) (simplifyf ixf)
+simplify (ArrLen a)       =  ArrLen (simplify a)
+simplify (ArrIx a i)      =  ArrIx (simplify a) (simplify i)
+
+simplifyf :: (FunC a -> FunC b) -> FunC a -> FunC b
+simplifyf f x  =  simplify (f x)
+
+
+-- Examples
 
 scalarProd :: (Syntactic a, Num a) => Vector a -> Vector a -> a
 scalarProd a b = sumVec (zipWithVec (*) a b)
@@ -252,11 +294,23 @@ ex1 =  power (-6) 2
 check1 :: Bool
 check1 =  eval ex1 == 1/2^6
 
-ex1O :: FunC Float
-ex1O =  option 0 id (powerO (-6) 2)
+ex1z :: FunC Float
+ex1z =  power (-1) 0
 
-check1O :: Bool
-check1O =  eval ex1O == 1/2^6
+check1z :: Bool
+check1z =  eval ex1z == 0
+
+ex1o :: FunC Float
+ex1o =  option 0 id (powerO (-6) 2)
+
+check1o :: Bool
+check1o =  eval ex1o == 1/2^6
+
+ex1oz :: FunC Float
+ex1oz =  option 0 id (powerO (-1) 0)
+
+check1oz :: Bool
+check1oz =  eval ex1oz == 0
 
 {- 
 
