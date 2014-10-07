@@ -50,17 +50,20 @@ instance Show (FunC a) where
   show (ArrLen a)       =  par ("ArrLen" <+> show a)
   show (ArrIx a i)      =  par ("ArrIx" <+> show a <+> show i)
 
+(<#>) :: (a -> b) -> a -> b
+f <#> x  =  seq x (f x)
+
 eval                  :: FunC a -> a
 eval (LitI i)         =  i
 eval (LitF x)         =  x
 eval (LitB b)         =  b
-eval (While c b i)    =  ewhile (evalf c) (evalf b) (eval i)
+eval (While c b i)    =  ewhile <#> evalf c <#> evalf b <#> eval i
 eval (If c t e)       =  if eval c then eval t else eval e
-eval (Pair a b)       =  (eval a , eval b)
-eval (Fst p)          =  fst (eval p)
-eval (Snd p)          =  snd (eval p)
-eval (Prim1 _ f a)    =  f (eval a)
-eval (Prim2 _ f a b)  =  f (eval a) (eval b)
+eval (Pair a b)       =  (,) <#> eval a <#> eval b
+eval (Fst p)          =  fst <#> eval p
+eval (Snd p)          =  snd <#> eval p
+eval (Prim1 _ f a)    =  f <#> eval a
+eval (Prim2 _ f a b)  =  f <#> eval a <#> eval b
 eval (Value a)        =  a
 eval Undef            =  undefined
 eval (Arr n ixf)      =  listArray (0,n') [ eval (ixf (LitI i)) | i <- [0..n'] ]
