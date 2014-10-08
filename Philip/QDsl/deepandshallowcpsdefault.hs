@@ -6,23 +6,38 @@ import Data.Array
 -- Combining Deep and Shallow Embedding
 -- Philip Wadler, 30 Apr 2014
 
+class Dflt a where
+  dflt :: a
+
+instance Dflt Bool where
+  dflt = False
+
+instance Dflt Int where
+  dflt = 0
+
+instance Dflt Float where
+  dflt = 0
+
+instance (Dflt a, Dflt b) => Dflt (a,b) where
+  dflt = (dflt, dflt)
+
 data FunC a where
   LitI      :: Int -> FunC Int
   LitF      :: Float -> FunC Float
   LitB      :: Bool -> FunC Bool
-  If        :: Dflt a => FunC Bool -> FunC a -> FunC a -> FunC a
-  While     :: Dflt s => (FunC s -> FunC Bool) -> (FunC s -> FunC s) -> FunC s -> FunC s
-  Pair      :: (Dflt a, Dflt b) => FunC a -> FunC b -> FunC (a , b)
-  Fst       :: (Dflt a, Dflt b) => FunC (a , b) -> FunC a
-  Snd       :: (Dflt a, Dflt b) => FunC (a , b) -> FunC b
-  Prim1     :: (Dflt a, Dflt b) => String -> (a -> b) -> FunC a -> FunC b
-  Prim2     :: (Dflt a, Dflt b, Dflt c) => String -> (a -> b -> c) -> FunC a -> FunC b -> FunC c
-  Value     :: Dflt a => a -> FunC a
-  Variable  :: Dflt a => String -> FunC a
+  If        :: FunC Bool -> FunC a -> FunC a -> FunC a
+  While     :: (FunC s -> FunC Bool) -> (FunC s -> FunC s) -> FunC s -> FunC s
+  Pair      :: FunC a -> FunC b -> FunC (a , b)
+  Fst       :: FunC (a , b) -> FunC a
+  Snd       :: FunC (a , b) -> FunC b
+  Prim1     :: String -> (a -> b) -> FunC a -> FunC b
+  Prim2     :: String -> (a -> b -> c) -> FunC a -> FunC b -> FunC c
+  Value     :: a -> FunC a
+  Variable  :: String -> FunC a
   Undef     :: Dflt a => FunC a
-  Arr       :: Dflt a => FunC Int -> (FunC Int -> FunC a) -> FunC (Array Int a)
-  ArrLen    :: Dflt a => FunC (Array Int a) -> FunC Int
-  ArrIx     :: Dflt a => FunC (Array Int a) -> FunC Int -> FunC a
+  Arr       :: FunC Int -> (FunC Int -> FunC a) -> FunC (Array Int a)
+  ArrLen    :: FunC (Array Int a) -> FunC Int
+  ArrIx     :: FunC (Array Int a) -> FunC Int -> FunC a
 
 par     :: String -> String
 par s   =  "(" ++ s ++ ")"
@@ -30,7 +45,7 @@ par s   =  "(" ++ s ++ ")"
 (<+>)    :: String -> String -> String
 s <+> t  =  s ++ " " ++ t
 
-instance Dflt a => Show (FunC a) where
+instance Show (FunC a) where
   show (LitI i)	        =  par ("LitI" <+> show i)
   show (LitF x)         =  par ("LitF" <+> show x)
   show (LitB b)	        =  par ("LitB" <+> show b)
@@ -47,31 +62,13 @@ instance Dflt a => Show (FunC a) where
   show (ArrLen a)       =  par ("ArrLen" <+> show a)
   show (ArrIx a i)      =  par ("ArrIx" <+> show a <+> show i)
 
-showf :: (Dflt a, Dflt b) => (FunC a -> FunC b) -> String
+showf :: (FunC a -> FunC b) -> String
 showf f  =  par ("\\x->" <+> show (f (Variable "x")))
 
 (<#>) :: (a -> b) -> a -> b
 f <#> x  =  seq x (f x)
 
-class Dflt a where
-  dflt :: a
-
-instance Dflt Bool where
-  dflt = False
-
-instance Dflt Int where
-  dflt = 0
-
-instance Dflt Float where
-  dflt = 0
-
-instance (Dflt a, Dflt b) => Dflt (a,b) where
-  dflt = (dflt, dflt)
-
-instance (Dflt a, Dflt b) => Dflt (Array a b) where
-  dflt = undefined -- listArray (dflt,dflt) [(dflt,dflt)]
-
-eval                  :: Dflt a => FunC a -> a
+eval                  :: FunC a -> a
 eval (LitI i)         =  i
 eval (LitF x)         =  x
 eval (LitB b)         =  b
@@ -90,7 +87,7 @@ eval (ArrLen a)       =  u - l + 1
                          where (l,u) = bounds (eval a)
 eval (ArrIx a i)      =  eval a ! eval i
 
-evalf                 :: (Dflt a, Dflt b) => (FunC a -> FunC b) -> a -> b
+evalf                 :: (FunC a -> FunC b) -> a -> b
 evalf f x             =  eval (f (Value x))
 
 ewhile                :: (s -> Bool) -> (s -> s) -> s -> s
@@ -139,19 +136,19 @@ a %# b       =  Prim2 "mod" mod a b
 (<#)         :: FunC Int -> FunC Int -> FunC Bool
 a <# b       =  Prim2 "(<)" (<) a b
 
-(==#)        :: (Eq a, Dflt a) => FunC a -> FunC a -> FunC Bool
+(==#)        :: Eq a => FunC a -> FunC a -> FunC Bool
 a ==# b      =  Prim2 "(==)" (==) a b
 
 minC         :: FunC Int -> FunC Int -> FunC Int
 minC a b     =  If (a <# b) a b
 
-ifC          :: (Syntactic a, Dflt a) => FunC Bool -> a -> a -> a
+ifC          :: Syntactic a => FunC Bool -> a -> a -> a
 ifC c t e    =  fromFunC (If c (toFunC t) (toFunC e))
 
-(?)          :: (Syntactic a, Dflt a) => FunC Bool -> (a, a) -> a
+(?)          :: Syntactic a => FunC Bool -> (a, a) -> a
 c ? (t,e)    =  ifC c t e
 
-while	     :: (Syntactic s, Dflt s) => (s -> FunC Bool) -> (s -> s) -> s -> s
+while	     :: Syntactic s => (s -> FunC Bool) -> (s -> s) -> s -> s
 while c b i  =  fromFunC (While (funC c) (funC b) (toFunC i))
 
 instance (Syntactic a, Syntactic b) => Syntactic (a,b) where
@@ -165,15 +162,15 @@ forLoop n s b  =  snd (while (\(i,s) -> i<#n) (\(i,s) -> (i+1, b i s)) (0,s))
 data Opt a = Opt { isSome :: FunC Bool, fromSome :: a }
   deriving Show
 
-data Option a = O { unO :: forall b . Syntactic b => ((a -> Opt b) -> Opt b) }
+data Option a = O { unO :: forall b . (Syntactic b, Dflt b) => ((a -> Opt b) -> Opt b) }
 
-instance Syntactic a => Syntactic (Opt a) where
+instance (Syntactic a, Dflt a) => Syntactic (Opt a) where
   type Internal (Opt a)  =  (Bool, Internal a)
   -- changed from paper, by adding call to fromFunC and toFunC.
   fromFunC o        =  Opt (Fst o) (fromFunC (Snd o))
   toFunC (Opt i f)  =  Pair i (toFunC f)
 
-instance Syntactic a => Syntactic (Option a) where
+instance (Syntactic a, Dflt a) => Syntactic (Option a) where
   type Internal (Option a) = (Bool, Internal a)
   fromFunC = lift . fromFunC
   toFunC   = toFunC . lower
@@ -187,10 +184,10 @@ lift :: Opt a -> Option a
 lift o = O (\k -> Opt (ifC (isSome o) (isSome (k (fromSome o))) false)
                       (ifC (isSome o) (fromSome (k (fromSome o))) undef))
 
-lower :: Syntactic a => Option a -> Opt a
+lower :: (Syntactic a, Dflt a) => Option a -> Opt a
 lower (O f) = f (\a -> Opt true a)
 
-undef    :: Syntactic a => a
+undef    :: (Syntactic a, Dflt a) => a
 undef    =  fromFunC Undef
 
 some     :: a -> Option a
