@@ -172,7 +172,7 @@ conjecture by applying the technique to the Feldspar system of
 Axelsson and others (2010), which embeds signal processing programs
 into Haskell that translate into C. We validate our technique by
 re-implementing Feldspar using Template Haskell quasi-quotation, and
-confirm that Feldspar and our technique yield identical target code on
+confirm that Feldspar and our technique generate identical target code on
 a range of applications including image processing, FFT, and CRC.
 
 Feldspar, as well as similar languages such as Nicola and Hydra,
@@ -281,16 +281,13 @@ operations, and numbers to appear the same whether they are to be
 executed at generation-time or run-time.  However, for reasons that we
 will explain later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
-run-time, using |x < eps| and |if a then b else c| for the former but
-|x .<. eps| and |a ?  (b, c)| for the latter.
+run-time, using |x == 0| and |if a then b else c| for the former but
+|x .==. 0| and |a ?  (b, c)| for the latter.
 
-\todo{The following displays a deep structure as if it is a term.
-That may actually be confusing.}
 Assuming |x| contains a value of type |EDSL Float| denoting an object
-variable |u| of type float, evaluating |power (-6) x| returns yields following.
+variable |u| of type float, evaluating |power (-6) x| yields following.
 \begin{code}
-if u == 0 then 0 else
-  1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))
+(u .==. 0) ? (0, 1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1))))
 \end{code}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
@@ -298,7 +295,7 @@ as observable sharing, permits recovering the sharing structure.
 \begin{array}{r@@{~}||@@{~}l}
 |v| & |(u * 1)|  \\
 |w| & |u * (v * v)| \\
-|main| &  |if u == 0 then 0 else 1/(w*w)|
+|main| &  |(u .==. 0) ? (0, 1/(w*w))|
 \end{array}
 \]
 It is easy to generate the final C code from this structure.
@@ -335,14 +332,14 @@ in the QDSL solution, meaning that |power n| returns a quotation
 of a function that accepts an argument and returns that
 argument raised to the $n$'th power.
 
-In QDSL, the body of the code changes more substantially. The quasi-quoting
-mechanism of Template Haskell is used to indicate which code executes
-at which time.  Unquoted code executes at generation-time while quoted
-code executes at run-time. Quoting is indicated by \( <|| \cdots ||> \)
-and unquoting by \( \$(\cdots) \). Here, by the mechanism of
-quoting, without any need for tricks, the syntax for code excecuted at
-both generation-time and run-time is identical for all constructs,
-including comparison and conditionals.
+In QDSL, the body of the code changes more substantially. The typed
+quasi-quoting mechanism of Template Haskell is used to indicate which
+code executes at which time.  Unquoted code executes at
+generation-time while quoted code executes at run-time. Quoting is
+indicated by \( <|| \cdots ||> \) and unquoting by \( \$(\cdots) \).
+Here, by the mechanism of quoting, without any need for tricks,
+the syntax for code excecuted at both generation-time and run-time is
+identical for all constructs, including comparison and conditionals.
 
 Now evaluating |power (-6)| yields the following.
 \begin{code}
@@ -407,13 +404,13 @@ both approaches.
 
 \section{A second example}
 
-The previous code arbitrarily returns 0 if 0 is raised to a negative
-exponent.  Say that we wish to refactor the code using the |Maybe|
-type.  Following the principle of separation of concerns, we decompose
-|power| into two functions |power'| and |power''|, where the first
-uses the |Maybe| type to indicate whether an exceptional case occured,
-and the second instantiates exceptional cases to a suitable default
-value.
+In the previous code, we arbitrarily chose that raising zero to a
+negative power yields zero. Say that we wish to exploit the |Maybe| type
+to refactor the code to separate recognising the exceptional case
+(negative exponent of zero) from choosing a value for this case (zero).
+We decompose |power| into two functions |power'| and |power''|, where the first
+returns |Nothing| in the exceptional case, and the second maps |Nothing|
+to a suitable default value.
 \begin{code}
 power' :: Int -> Float -> Maybe Float
 power' n x  =
@@ -439,9 +436,8 @@ maybe :: b -> (a -> b) -> Maybe a -> b
 from the Haskell library |Data.Maybe|.
 The same C code as before should result from instantiating |power''| to |(-6)|.
 
-In this case, the refactored function is arguably clumsier than the original,
-but it should be apparent that it is desirable to support
-this style of refactoring in general.
+(In this case, the refactored function is arguably clumsier than the original,
+but clearly it is desirable to support this form of refactoring in general.)
 
 In EDSL, type |Maybe| is represented by type |Option|.
 Here is the refactored code.
@@ -463,21 +459,24 @@ power'' n x  = option (\y -> y) id (power' n x)
 sqr :: EDSL Float -> EDSL Float
 sqr y  =  y * y
 \end{code}
-The above uses the function
+The above uses the functions
 \begin{code}
+none   :: Option a
+return :: a -> Option a
+(>>=)  :: Option a -> (a -> Option b) -> Option b
 option :: (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
 \end{code}
 from the EDSL library. Details of the type |Option| and the type class |Syntactic|
 are explained in Section~\ref{sec:option}. A clever aspect of the representation
 is that the type |Option| is declared as a monad,
 so that the usual |do| notation may be used.
-Invoking |edslC (power'' (-6))| generate the same C code as
+Invoking |edslC (power'' (-6))| generates the same C code as
 the previous example.
 
 Before the |power| function generated code in essentially
 normal form, save for the need to use common subexpression elimination
 or observable sharing to recover shared structure. In this case, 
-the generated code is in far from normal form. Rewrite rules including
+the generated code is far from normal form. Rewrite rules including
 the following need to be repeatedly applied.
 \[
 \begin{array}{l}
