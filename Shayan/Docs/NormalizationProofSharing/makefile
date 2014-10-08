@@ -1,11 +1,11 @@
 proof.pdf: proof.tex proof.bib
-	-lualatex proof
-	-lualatex proof
-	-lualatex proof
+	-pdflatex proof
+	-pdflatex proof
+	-pdflatex proof
 	-bibtex proof
-	-lualatex proof
-	-lualatex proof
-	-lualatex proof
+	-pdflatex proof
+	-pdflatex proof
+	-pdflatex proof
 clean:
 	-rm *.aux
 	-rm *.bbl
