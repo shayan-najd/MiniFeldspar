@@ -45,25 +45,32 @@ data FunC a where
   ArrLen    :: FunC (Array Int a) -> FunC Int
   ArrIx     :: FunC (Array Int a) -> FunC Int -> FunC a
 
-par     :: String -> String
-par s   =  "(" ++ s ++ ")"
+par        :: String -> String
+par s      =  "(" ++ s ++ ")"
 
-(<+>)    :: String -> String -> String
-s <+> t  =  s ++ " " ++ t
+(<+>)      :: String -> String -> String
+s <+> t    =  s ++ " " ++ t
+
+ispar      :: String -> Bool
+ispar s    =  head s == '(' && last s == ')'
+
+droppar    :: String -> String
+droppar s  =  init (tail s)
 
 instance Show (FunC a) where
-  show (LitI i)	        =  par ("LitI" <+> show i)
-  show (LitF x)         =  par ("LitF" <+> show x)
-  show (LitB b)	        =  par ("LitB" <+> show b)
-  show (While c b i)    =  par ("While" <+> showf c <+> showf b <+> show i)
-  show (If c t e)       =  par ("If" <+> show c <+> show t <+> show e)
-  show (Pair a b)       =  par ("Pair" <+> show a <+> show b)
-  show (Fst p)          =  par ("Fst" <+> show p)
-  show (Snd p)          =  par ("Snd" <+> show p)
+  show (LitI i)	        =  par (show i)
+  show (LitF x)         =  par (show x)
+  show (LitB b)	        =  par (show b)
+  show (While c b i)    =  par ("while" <+> showf c <+> showf b <+> show i)
+  show (If c t e)       =  par (show c <+> "?" <+> par (show t ++ ", " ++ show e))
+  show (Pair a b)       =  par (show a ++ ", " ++ show b)
+  show (Fst p)          =  par ("fst" <+> show p)
+  show (Snd p)          =  par ("snd" <+> show p)
   show (Prim1 s f a)    =  par (s <+> show a)
-  show (Prim2 s f a b)  =  par (s <+> show a <+> show b)
+  show (Prim2 s f a b)  | ispar s     =  par (show a <+> droppar s <+> show b)
+                        | otherwise   =  par (s <+> show a <+> show b)
   show (Variable x)     =  x
-  show Undef            =  "Undef"
+  show Undef            =  "undef"
   show (Arr n f)        =  par ("Arr" <+> show n <+> showf f)
   show (ArrLen a)       =  par ("ArrLen" <+> show a)
   show (ArrIx a i)      =  par ("ArrIx" <+> show a <+> show i)
@@ -136,17 +143,17 @@ instance Fractional (FunC Float) where
   a / b           =  Prim2 "(/)" (/) a b
   fromRational a  =  LitF (fromRational a)
 
-(%#)         :: FunC Int -> FunC Int -> FunC Int
-a %# b       =  Prim2 "mod" mod a b
+(.<.)        :: FunC Int -> FunC Int -> FunC Bool
+a .<. b      =  Prim2 "(<)" (<) a b
 
-(<#)         :: FunC Int -> FunC Int -> FunC Bool
-a <# b       =  Prim2 "(<)" (<) a b
+(.==.)       :: Eq a => FunC a -> FunC a -> FunC Bool
+a .==. b     =  Prim2 "(==)" (==) a b
 
-(==#)        :: Eq a => FunC a -> FunC a -> FunC Bool
-a ==# b      =  Prim2 "(==)" (==) a b
+modd         :: FunC Int -> FunC Int -> FunC Int
+a `modd` b   =  Prim2 "mod" mod a b
 
 minC         :: FunC Int -> FunC Int -> FunC Int
-minC a b     =  If (a <# b) a b
+minC a b     =  (a .<. b) ? (a, b)
 
 ifC          :: Syntactic a => FunC Bool -> a -> a -> a
 ifC c t e    =  fromFunC (If c (toFunC t) (toFunC e))
@@ -163,7 +170,7 @@ instance (Syntactic a, Syntactic b) => Syntactic (a,b) where
   fromFunC p           =  (fromFunC (Fst p), fromFunC (Snd p))
 
 forLoop        :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s) -> s
-forLoop n s b  =  snd (while (\(i,s) -> i<#n) (\(i,s) -> (i+1, b i s)) (0,s))
+forLoop n s b  =  snd (while (\(i,s) -> i.<.n) (\(i,s) -> (i+1, b i s)) (0,s))
 
 data Opt a = Opt { isSome :: FunC Bool, fromSome :: a }
   deriving Show
@@ -285,16 +292,41 @@ sqr :: Num a => a -> a
 sqr x  =  x * x
 
 power :: Int -> FunC Float -> FunC Float
+power n x =
+  if n < 0 then
+    x .==. 0 ? (0, 1 / power (-n) x)
+  else if n == 0 then
+    1
+  else if even n then
+    sqr (power (n `div` 2) x)
+  else
+    x * power (n-1) x
+
+
+power' :: Int -> FunC Float -> Option (FunC Float)
+power' n x =
+  if n < 0 then
+    (x .==. 0) ? (none, do y <- power' (-n) x; return (1/y))
+  else if n == 0 then
+    return 1
+  else if even n then
+    do y <- power' (n `div` 2) x; return (sqr y)
+  else
+    do y <- power' (n-1) x; return (x*y)
+
+power'' :: Int -> FunC Float -> FunC Float
+power'' n x  =  option 0 (\y -> y) (power' n x)
+
+
+{-
 power 0 x  =  1
-power n x  | n < 0           =  x ==# 0 ? (0, 1 / power (-n) x)
+power n x  | n < 0           =  x .==. 0 ? (0, 1 / power (-n) x)
            | n `mod` 2 == 0  =  sqr (power (n `div` 2) x)
            | otherwise       =  x * power (n - 1) x
 
-
 (/#) :: FunC Float -> FunC Float -> Option (FunC Float)
-x /# y  =  (y ==# 0) ? (none, some (x/y))
+x /# y  =  (y .==. 0) ? (none, some (x/y))
 
-powerO :: Int -> FunC Float -> Option (FunC Float)
 powerO 0 x  =  return 1
 powerO n x | n < 0            =  do y <- powerO (-n) x
                                     1 /# y
@@ -302,6 +334,7 @@ powerO n x | n < 0            =  do y <- powerO (-n) x
                                     return (sqr y)
            | otherwise        =  do y <- powerO (n - 1) x
                                     return (x * y)
+-}
 
 ex0 :: FunC Int
 ex0 =  scalarProd (idVec 10) (fmap (* 2) (idVec 10))
@@ -336,13 +369,13 @@ check1z :: Bool
 check1z =  eval ex1z == 0
 
 ex1o :: FunC Float
-ex1o =  option 0 id (powerO (-6) 2)
+ex1o =  power'' (-6) 2
 
 check1o :: Bool
 check1o =  eval ex1o == 1/2^6
 
 ex1oz :: FunC Float
-ex1oz =  option 0 id (powerO (-1) 0)
+ex1oz =  power'' (-1) 0
 
 check1oz :: Bool
 check1oz =  eval ex1oz == 0
@@ -362,10 +395,13 @@ The value of ex1 is:
 -}
 
 ex2 :: FunC Int
-ex2 =  sumVec (fmap (\x -> option 0 id x) (filterVec (\y -> (y %# 2) ==# 0) (idVec 10)))
+ex2 =  sumVec (fmap (\x -> option 0 id x) (filterVec (\x -> x `modd` 2 .==. 0) (idVec 10)))
 
 check2 :: Bool
 check2 =  eval ex2 == sum [ x | x <- [0..9], x `mod` 2 == 0 ]
+
+main =
+  check0 && check1 && check1z && check1o && check1oz && check2
 
 {-
 
