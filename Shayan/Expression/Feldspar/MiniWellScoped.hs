@@ -1,4 +1,5 @@
-module Expression.Feldspar.MiniWellScoped where
+module Expression.Feldspar.MiniWellScoped
+    (Exp(..),sucAll,prdAll,mapVar,isFresh,absTmp,eql) where
 
 import MyPrelude hiding (foldl)
 
@@ -56,6 +57,57 @@ instance Show (Exp r ta -> Exp r tb) where
 instance Show (Env (Exp r) r') where
   show Emp        = "[]"
   show (Ext x xs) = "(" ++ show x ++ ") , " ++ show xs
+
+eqlE :: Env (Exp r) r' -> Env (Exp r) r' -> Bool
+eqlE Emp        Emp        = True
+eqlE (Ext x xs) (Ext y ys) = eql x y && eqlE xs ys
+eqlE _          _          = False
+
+eql :: forall r t .  Exp r t -> Exp r t -> Bool
+eql (ConI i)    (ConI i')     = i == i'
+eql (ConB b)    (ConB b')     = b == b'
+eql (ConF f)    (ConF f')     = f == f'
+eql (AppV (v :: Var r tv) es)    (AppV (v' :: Var r tv') es') =
+  case eqlSin (sin :: TFG.Typ tv) (sin :: TFG.Typ tv') of
+    Rgt Rfl -> v == v' && eqlE es es'
+    _       -> False
+eql (Cnd ec et ef) (Cnd ec' et' ef') = eql ec ec' && eql et et' && eql ef ef'
+eql (Whl ec eb ei) (Whl ec' eb' ei') = eqlF ec ec' && eqlF eb eb' && eql ei ei'
+eql (Tpl ef es)    (Tpl ef' es')     = eql ef ef' && eql es es'
+eql (Fst (e :: Exp r (TFA.Tpl t ts))) (Fst (e' :: Exp r (TFA.Tpl t ts'))) =
+  case eqlSin (sin :: TFG.Typ ts) (sin :: TFG.Typ ts') of
+    Rgt Rfl -> eql e e'
+    _       -> False
+eql (Snd (e :: Exp r (TFA.Tpl tf t))) (Snd (e' :: Exp r (TFA.Tpl tf' t))) =
+  case eqlSin (sin :: TFG.Typ tf) (sin :: TFG.Typ tf') of
+    Rgt Rfl -> eql e e'
+    _       -> False
+eql (Ary ei ef) (Ary ei' ef') = eql ei ei' && eqlF ef ef'
+eql (Len (e :: Exp r (TFA.Ary ta))) (Len (e' :: Exp r (TFA.Ary ta'))) =
+  case eqlSin (sin :: TFG.Typ ta) (sin :: TFG.Typ ta') of
+    Rgt Rfl -> eql e e'
+    _       -> False
+eql (Ind (e :: Exp r (TFA.Ary t)) ei) (Ind (e' :: Exp r (TFA.Ary t)) ei') =
+    eql e e' && eql ei ei'
+eql (Let (el :: Exp r ta) eb) (Let (el' :: Exp r ta') eb') =
+  case eqlSin (sin :: TFG.Typ ta) (sin :: TFG.Typ ta') of
+    Rgt Rfl -> eql el el' && eqlF eb eb'
+    _       -> False
+eql (Cmx ei er) (Cmx ei' er') = eql ei ei' && eql er er'
+eql (Tmp x    ) (Tmp x')      = x == x'
+eql _           _             = False
+
+refEql :: IORef Int
+{-# NOINLINE refEql #-}
+refEql = unsafePerformIO (newIORef 0)
+
+eqlF :: forall r ta tb.  (Exp r ta -> Exp r tb) -> (Exp r ta -> Exp r tb) -> Bool
+eqlF f f' = let i = unsafePerformIO
+                    (do j <- readIORef refEql
+                        modifyIORef refEql (+1)
+                        return j)
+                v = "_x" ++ show i
+            in eql (f (Tmp v)) (f' (Tmp v))
 
 sucAll :: Exp r t' -> Exp (t ': r) t'
 sucAll = mapVar Suc prd
