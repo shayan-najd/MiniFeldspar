@@ -146,8 +146,8 @@ instance Fractional (FunC Float) where
 (.<.)        :: FunC Int -> FunC Int -> FunC Bool
 a .<. b      =  Prim2 "(<)" (<) a b
 
-(.==.)       :: Eq a => FunC a -> FunC a -> FunC Bool
-a .==. b     =  Prim2 "(==)" (==) a b
+(.==.)       :: (Syntactic a, Eq (Internal a)) => a -> a -> FunC Bool
+a .==. b     =  Prim2 "(==)" (==) (toFunC a) (toFunC b)
 
 modd         :: FunC Int -> FunC Int -> FunC Int
 a `modd` b   =  Prim2 "mod" mod a b

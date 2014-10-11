@@ -1,4 +1,4 @@
-\documentclass{llncs}
+\documentclass[citeauthoryear]{llncs}
 %\documentclass[preprint]{sigplanconf}
 
 %include polycode.fmt
@@ -7,11 +7,11 @@
 %format <|| = "\openq "
 %format ||> = "\closeq "
 %format `div` = "\rmdiv"
+%format <*> = "\mathbin{{<}\!{*}\!{>}}"
 
 % US Letter page size
 %\pdfpagewidth=8.5in
 %\pdfpageheight=11in
-
 
 % The following \documentclass options may be useful:
 %
@@ -41,6 +41,9 @@
 \newcommand{\openq}{[||||\,}
 \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
+
+\newcommand{\citet}[1]{\cite{#1}}
+\newcommand{\citep}[1]{(\cite{#1})}
 
 %% Draft outline
 
@@ -252,7 +255,8 @@ of type |a|, and function
 edslC :: (EDSL a -> EDSL b) -> C
 \end{code}
 to generate a \texttt{main} function corresponding to its
-argument.  Here is a solution to our problem using EDSL.
+argument, where |C| is a type that represents |C| code.
+Here is a solution to our problem using EDSL.
 \begin{code}
 power :: Int -> EDSL Float -> EDSL Float
 power n x  =
@@ -285,8 +289,8 @@ operations, and numbers to appear the same whether they are to be
 executed at generation-time or run-time.  However, for reasons that we
 will explain later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
-run-time, using |x == 0| and |if a then b else c| for the former but
-|x .==. 0| and |a ?  (b, c)| for the latter.
+run-time, using |M == N| and |if L then M else N| for the former but
+|M .==. N| and |L ?  (M, N)| for the latter.
 
 Assuming |x| contains a value of type |EDSL Float| denoting an object
 variable |u| of type float, evaluating |power (-6) x| yields following.
@@ -407,6 +411,7 @@ both approaches.
 \end{itemize}
 
 \subsection{Second example}
+\label{sec:option}
 
 In the previous code, we arbitrarily chose that raising zero to a
 negative power yields zero. Say that we wish to exploit the |Maybe| type
@@ -496,19 +501,23 @@ essentially in normal form, save for the need to use common subexpression
 elimination or observable sharing to recover shared structure.  However, this is
 not the case here. Rewrite rules including the following need to be repeatedly
 applied.
+
+\todo{Fix typesetting of |M[L:=P]|.}
 \begin{eqnarray*}
 |fst (M, N)| &\leadsto& M \\
 |snd (M, N)| &\leadsto& N \\
 |fst (L ? (M, N))| &\leadsto& |L ? (fst M, fst N)| \\
 |snd (L ? (M, N))| &\leadsto& |L ? (snd M, snd N)| \\
+|True ? (M,N)| &\leadsto& |M| \\
+|False ? (M,N)| &\leadsto& |N| \\
 |(L ? (M, N)) ? (P,Q)| &\leadsto& |L ? (M ? (P,Q)) ? (N ? (P,Q))| \\
-|(L ? (L ? (M,N)) ? Q| &\leadsto& |L ? M ? Q| \\
-|(L ? P ? (L ? (M,N))| &\leadsto& |L ? P ? N|
+|L ? (M, N)| &\leadsto& |L ? (M[L:=True], N[L:=False])|
 \end{eqnarray*}
-Here |L|,|M|,|N|,|P|,|Q| range over arbitrary |EDSL| terms.
-After applying these rules, common subexpression elimination yields
-the same structure as in the previous subsection, from which the
-same C code is generated.
+Here |L|,|M|,|N|,|P|,|Q| range over |EDSL| terms, and
+|M[L:=P]| stands for |M| with each occurence of |L| replaced by |P|.
+After applying these rules, common subexpression
+elimination yields the same structure as in the previous subsection,
+from which the same C code is generated.
 
 Hence, an advantages of the EDSL approach---that it generates
 terms essentially in normal form---turns out to be restricted
@@ -540,23 +549,205 @@ Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are typed as before,
 and provided for use in quoted terms by the QDSL library.
 
-Evaluating |QDSL (powerQ'' (-6))| yields the following.
+Evaluating |QDSL (powerQ'' (-6))| yields a term of similar complexity
+to the term yielded by the EDSL. Normalisation by the rules discussed
+in Section~\ref{sec:normalise} reduces the term to the same form
+as before, which in turn generates the same C as before.  
+
+Here are some further points of comparison between the two approaches.
+\begin{itemize}
+
+\item Both EDSL and QDSL can exploit notational conveniences in the
+host language. The example here exploits Haskell |do| notation; the
+embedding SQL in F\# by \citet{CheneyLW13} expoited F\# sequence
+notation. For the EDSL, exploiting |do| notation just requires
+instantiating |return| and |(>>=)| correctly. For the QDSL, it is
+also necessary for the normaliser to recognise and expand
+|do| notation and to substitute appropriate instances of 
+|return| and |(>>=)|.
+
+\item As this example shows, sometimes both EDSLs and QDSLs
+may require normalisation. Each EDSL usually has a distinct
+deep representation and so requires a distinct normaliser.
+In contrast, all QDSLs can share the representation of the
+quoted host language, and so can share a normaliser.
+
+\end{itemize}
+
+
+\section{Combining deep and shallow embedding}
+
+We now review the usual approach to embedding a DSL into
+a host language by combining deep and shallow embedding.
+As a running example, we will use MiniFeldspar, an embedded DSL for
+generating signal processing software in C.
+Much of this section reprises \citet{SvenningssonA12}.
+
+\subsection{The deep embedding}
+
+Recall that a value of type |EDSL a| represents a term of type |a|,
+and is called a deep embedding.  In what follows, we shorten |EDSL a|
+to |E a|.
 \begin{code}
-case (if x == 0 then Nothing else 
-       case (power 6 x) of
-         Nothing -> Nothing
-         Just y -> Just (1 / y)) of
+data E a where
+  LitB		:: Bool -> E Bool
+  LitI		:: Int -> E Int
+  LitF		:: Float -> E Float
+  If		:: E Bool -> E a -> E a -> E a
+  While		:: (E a -> E Bool) -> (E a -> E a) -> E a -> E a
+  Pair		:: E a -> E b -> E (a,b)
+  Fst		:: E (a,b) -> E a
+  Snd           :: E (a,b) -> E b
+  Prim1		:: String -> (a -> b) -> E a -> E b
+  Prim2         :: String -> (a -> b -> c) -> E a -> E b -> E c
+  Variable      :: String -> E a
+  Value         :: a -> E a
+\end{code}
+The type above represents a low level, pure functional language
+with a straightforward translation to C. It uses higher-order
+abstract syntax (HOAS) to represent constructs with variable binding
+\citet{hoas}.
 
-  Nothing -> 0
-  Just y -> (\x -> x) y
+Our EDSL has boolean, integer, and floating point literals,
+conditionals, while loops, pairs, primitives,
+and special-purpose constructs for variables and values.
+(Later we will add constructs for arrays and for a default value.)
+Rather than using side-effects, the while loop takes
+three arguments, a function from current state |a| to a boolean,
+and a function from current state |a| to new state |a|,
+and initial state |a|, and returns final state |a|.
+Constructs |Prim1| and |Prim2| represent primitive
+operations, the string is the name of the operation
+(used in printing or to generate C) and the function
+argument computes the primitive (used in evaluation).
+Construct |Variable| is used in printing and in generating C,
+construct |Value| is used in the evaluator.
 
+The exact semantics is given by |eval|. It is a strict language,
+so we define an infix strict application operator |(<*>)|.
+\begin{code}
+(<*>)                 :: (a -> b) -> a -> b
+f x                   =  seq x (f x)
+
+eval                  :: E a -> a
+eval (LitI i)         =  i
+eval (LitF x)         =  x
+eval (LitB b)         =  b
+eval (If c t e)       =  if eval c then eval t else eval e
+eval (While c b i)    =  evalWhile (evalFun c) (evalFun b) <*> eval i
+eval (Pair a b)       =  (,) <*> eval a <*> eval b
+eval (Fst p)          =  fst <*> eval p
+eval (Snd p)          =  snd <*> eval p
+eval (Prim1 _ f a)    =  f <*> eval a
+eval (Prim2 _ f a b)  =  f <*> eval a <*> eval b
+eval (Value a)        =  a
+
+evalFun               :: (E a -> E b) -> a -> b
+evalFun f x           =  (eval . f . Value) <*> x
+
+evalWhile             :: (a -> Bool) -> (a -> a) -> a -> a
+evalWhile c b i       =  if c i then evalWhile c b (b i) else i
+\end{code}
+Function |eval| plays no role in generating C, but may be useful for testing.
+
+
+\subsection{Class |Syntactic|}
+
+We introduce a type class |Syntactic| that allows us to convert
+between types in the host language, Haskell, and corresponding
+representations in the target languagee, the deep embedding |E|.
+\begin{code}
+class Syntactic a where
+  type Internal a
+  toE    :: a -> E (Internal a)
+  fromE  :: E (Internal a) -> a
+\end{code}
+The type families feature of GHC is used to specify for each
+type |a| in the host language a corresponding representation |Internal a|
+in the target language \cite{type-families}. Functions |toE| and
+|fromE| translate between the host representation |a| and the
+target representation |E (Internal a)|.
+
+The first instance of |Syntactic| is |E| itself, and is straightforward.
+\begin{code}
+instance Syntactic (E a) where
+  type Internal (E a) = a
+  toE    =  id
+  fromE  =  id
+\end{code}
+This instance is used for base types. Our representation of a run-time
+|Bool| will have type |E Bool| in both the host and target
+languages, and similarly for |Int| and |Float|.
+
+We do not code the target language using its constructors
+directly. Instead, for each constructor we define a corresponding
+``smart constructor'' using class |Syntactic|.
+\begin{code}
+true, false  :: E Bool
+true         =  LitB True
+false        =  LitB False
+
+(?)          :: Syntactic a => E Bool -> (a,a) -> a
+c ? (t,e)    =  fromE (If c (toE t) (toE e))
+
+while        :: Syntactic a => (a -> E Bool) -> (a -> a) -> a -> a
+while c b i  =  fromE (While (c . fromE) (toE . b . fromE) (toE i))
 \end{code}
 
+Numbers are made convenient to manipulate via overloading.
+\begin{code}
+instance Num (FunC Int) where
+  a + b          =  Prim2 "(+)" (+) a b 
+  a - b          =  Prim2 "(-)" (-) a b 
+  a * b          =  Prim2 "(*)" (*) a b
+  fromInteger a  =  LitI (fromInteger a)
+\end{code}
+With this declaration, |1+2 :: E Int| evaluates to
+|Prim2 "(+)" (+) (LitI 1) (LitI 2)|, permitting code
+executed at generation-time and run-time to appear identical.
+A similar declaration works for |Float|.
+
+Comparison also benefits from a smart constructor.
+\begin{code}
+(.==.)       :: (Syntactic a, Eq (Internal a)) => a -> a -> E Bool
+a .==. b     =  Prim2 "(==)" (==) (toE a) (toE b)
+\end{code}
+Overloading cannot apply here, because Haskell requires
+|(==)| return a result of type |Bool|, while |(.==.)| returns
+a result of type |E Bool|.  A similar declaration works for |(.<.)|.
+
+
+\subsection{Embedding pairs}
+
+We set up a correspondence between pairs in the
+host language and pairs in the target language.
+\begin{code}
+instance (Syntactic a, Syntactic b) where
+  type  Internal (a,b)  =  (Internal a, Internal b)
+  toE (a,b)             =  Pair (toE a, toE b)
+  fromE p               =  (fromE (Fst p), fromE (Snd p))
+\end{code}
+This permits us to manipulate pairs in the host language
+as normal, with |(a,b)|, |fst a|, and |snd a|, using class
+|Syntactic| to convert to the target language as necessary.
 
 
 
 
-\section{Combining shallow and deep embedding}
+
+
+
+
+
+%   Arr           :: E Int -> (E Int -> E a) -> E (Array Int a)
+%   ArrLen        :: E (Array Int a) -> E Int
+%   ArrIx         :: E (Array Int a) -> E Int -> E a
+
+
+% eval (Arr n f)        =  array (0,n') [ (i, eval (f (LitI i))) | i <- [0..n'] ]
+%                          where n' = eval n - 1
+% eval (ArrLen a)       =  u - l + 1  where (l,u) = bounds (eval a)
+% eval (ArrIx a i)      =  eval a ! eval i
 
 
 \section{The subformula property}
@@ -568,6 +759,10 @@ case (if x == 0 then Nothing else
 \section{Empirical results}
 
 
+This is a test.
+
+\bibliographystyle{plainnat}
+\bibliography{paper}
 
 
 \end{document}
