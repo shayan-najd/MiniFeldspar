@@ -8,6 +8,9 @@
 %format ||> = "\closeq "
 %format `div` = "\rmdiv"
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
+%format .==. = "\mathbin{{.}{" == "}{.}}"
+%format .<.  = "\mathbin{{.}{" < "}{.}}"
+%format x0
 
 % US Letter page size
 %\pdfpagewidth=8.5in
@@ -215,6 +218,7 @@ QDSL for quoted domain specific language.
 \section{Overview}
 
 \subsection{First example}
+\label{sec:first-example}
 
 Let's begin by considering the ``hello world'' of program generation,
 the power function. Since division by zero is undefined, we arbitrarily
@@ -399,7 +403,7 @@ pure functional model. In contrast, QDSL preserves sharing throughout.
 
 \item EDSL yields the term in normalised form in this case, though
 there are other situations where a normaliser is required (see
-Section~\ref{sec:option}).  In contrast, QDSL yields an unwieldy term
+Section~\ref{sec:second-example}).  In contrast, QDSL yields an unwieldy term
 that requires normalisation.  However, just as a single representation
 of QDSL terms suffices across many applications, so does a single
 normaliser---it can be built once and reused many times.
@@ -411,7 +415,7 @@ both approaches.
 \end{itemize}
 
 \subsection{Second example}
-\label{sec:option}
+\label{sec:second-example}
 
 In the previous code, we arbitrarily chose that raising zero to a
 negative power yields zero. Say that we wish to exploit the |Maybe| type
@@ -727,15 +731,34 @@ instance (Syntactic a, Syntactic b) where
   toE (a,b)             =  Pair (toE a, toE b)
   fromE p               =  (fromE (Fst p), fromE (Snd p))
 \end{code}
-This permits us to manipulate pairs in the host language
-as normal, with |(a,b)|, |fst a|, and |snd a|, using class
-|Syntactic| to convert to the target language as necessary.
+This permits us to manipulate pairs in the host language as normal,
+with |(a,b)|, |fst a|, and |snd a|, using class |Syntactic| to convert
+to the target language as necessary.  Argument |p| is duplicated in
+the definition of |fromE|, which may require common
+subexpression elimination or observable sharing, as discussed in
+Section~\ref{sec:first-example}.
+
+We have now developed sufficient machinery to define a |for| loop
+in terms of a |while| loop.
+\begin{code}
+for :: Syntactic a => E Int -> a -> (E Int -> a -> a) -> a
+for n x0 b  =  snd (while (\(i,x) -> i .<. n) (\(i,x) -> (i+1, b i x)) (0,x0))
+\end{code}
+The state of the |while| loop is a pair consisting of a counter and
+the state of the |for| loop. The body |b| of the |for| loop is a function
+that expects both the counter and the state of the |for| loop.
+The counter is discarded when the loop is complete, and the final state
+of the |for| loop returned.
+
+Thanks to our machinery, the above definition uses only ordinary Haskell
+pairs. The condition and body of the |while| loop pattern match on the
+state using ordinary pair syntax, and the initial state is constructed
+as a standard Haskell pair.
 
 
+\subsection{Embedding option}
 
-
-
-
+We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
 
 
 

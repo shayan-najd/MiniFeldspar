@@ -169,8 +169,8 @@ instance (Syntactic a, Syntactic b) => Syntactic (a,b) where
   toFunC (a,b)         =  Pair (toFunC a) (toFunC b)
   fromFunC p           =  (fromFunC (Fst p), fromFunC (Snd p))
 
-forLoop        :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s) -> s
-forLoop n s b  =  snd (while (\(i,s) -> i.<.n) (\(i,s) -> (i+1, b i s)) (0,s))
+for        :: Syntactic s => FunC Int -> s -> (FunC Int -> s -> s) -> s
+for n s b  =  snd (while (\(i,s) -> i.<.n) (\(i,s) -> (i+1, b i s)) (0,s))
 
 data Opt a = Opt { isSome :: FunC Bool, fromSome :: a }
   deriving Show
@@ -236,7 +236,7 @@ zipWithVec f (Indexed m g) (Indexed n h)
   =  Indexed (minC m n) (\i -> f (g i) (h i))
 
 sumVec :: (Syntactic a, Num a) => Vector a -> a
-sumVec (Indexed n f) = forLoop n 0 (\i s -> s + f i)
+sumVec (Indexed n f) = for n 0 (\i s -> s + f i)
 
 filterVec :: (Syntactic a, Dflt a) => (a -> FunC Bool) -> Vector a -> Vector (Option a)
 filterVec p  =  fmap (\x -> ifC (p x) (some x) none)
