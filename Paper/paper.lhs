@@ -11,6 +11,11 @@
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
 %format x0
+%format Opt_R
+%format some_R
+%format none_R
+%format opt_R
+%format forall = "\forall"
 
 % US Letter page size
 %\pdfpagewidth=8.5in
@@ -756,9 +761,148 @@ state using ordinary pair syntax, and the initial state is constructed
 as a standard Haskell pair.
 
 
+\subsection{Embedding undefined}
+
+For the next section, which defines an analogue of the |Maybe| type, it
+will prove convenient to work with types which have a distinguished
+value at each type, which we call |undef|. (Better names are `default'
+or `undefined', but both already have other meanings in Haskell.)
+
+It is straightforward to define a type class |Undef|, where type |a|
+belongs to |Undef| if it belongs to |Syntactic| and it has an
+undefined value.
+\begin{code}
+class Syntactic a => Undef a where
+  undef :: a
+
+instance Undef (E Bool) where
+  undef = false
+
+instance Undef (E Int) where
+  undef = 0
+
+instance Undef (E Float) where
+  undef = 0
+
+instance (Undef a, Undef b) => Undef (a,b) where
+  undef = (undef, undef)
+\end{code}
+
+For example,
+\begin{code}
+(/#) :: E Float -> E Float -> F Float
+x /# y  =  (y .==. 0) ? (undef, x/y)
+\end{code}
+behaves as division, save that when the divisor is zero
+it returns the undefined value of type |Float|, which
+is also zero.
+
+\citet{SvenningssonA12} claim that it is not possible
+to support |undef| without modifying the type |E|, but they
+appear to have underestimated the power of their own technique.
+
+
 \subsection{Embedding option}
 
 We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
+
+The deep-and-shallow technique cleverly represents pairs in the target
+with pairs in the host. Alas, we cannot use the same trick for |Maybe|,
+because |fromE| would have to decide at generation-time whether to return
+|Just| or |Nothing|, but which is correct is not known until run-time.
+
+One could extend type |E| to also represent values of |Maybe| type,
+but \citet{SvenningssonA12} prefer to leave |E| minimal. Following
+their development, corresponding to |Maybe a| we introduce a type
+|Opt_R a|, which consists of a boolean and a value of type |a|.
+Corresponding to |Just x|, the boolean is true and the value is |x|,
+corresponding to |Nothing|, the boolean is false and the value is
+|undef|.  We take |some_R|, |none_R|, and |opt_R| as the analogues of
+|Just|, |Nothing|, and |maybe|.  The |Syntactic| instance is
+straightforward, mapping options to and from the pairs already defined
+for |E|.
+\begin{code}
+data Opt_R a = Opt_R { def :: E Bool, val :: a }
+
+instance Syntactic a => Syntactic (Opt_R a) where
+  type Internal (Opt_R a)  =  (Bool, Internal a)
+  toE (Opt_R b x)          =  Pair b (toE x)
+  fromE p                  =  Opt_R (Fst p) (fromE (Snd p))
+
+some_R         :: a -> Opt_R a
+some_R x       =  Opt_R true x
+
+none_R         :: Undef a => Opt_R a
+none_R         =  Opt_R false undef
+
+opt_R          :: Syntactic b => b -> (a -> b) -> Opt_R a -> b
+opt_R d f o    =  def o ? (f (val o), d)
+\end{code}
+
+The next obvious step is to define a suitable monad over the type |Opt_R|.
+The natural definitions to use are:
+\begin{code}
+return    :: a -> Opt_R a
+return x  =  some_R x
+
+(>>=)     :: (Undef b) => Opt_R a -> (a -> Opt_R b) -> Opt_R b
+o >>= g   =  Opt_R  (def o ? (def (g (val o)), false))
+                    (def o ? (val (g (val o)), undef))
+\end{code}
+but this requires the type constraint |Undef b| which is not part of
+the type of |(>>=)|. This is a common issue defining monads, called
+the constrained-monad problem 
+\citet{hughes:restricted-monad,SculthorpeBGG13}.
+To solve it, we follow a trick due to \cite{PerssonAS11}.
+
+We introduce a second continuation-passing style (cps) type |Opt|,
+defined in terms of the representation type |Opt_R|.  It is
+straightforward to define |Monad| and |Syntax| instances for the cps
+type, operations to lift the representation type to cps and to lower
+cps to the representation type, and to lift |some|, |none|, and
+|option| from the representation type to the cps type.
+The |lift| operation is closely related to the |(>>=)| operation
+we could not define above; it is properly typed,
+thanks to the type constraint on |b| in the definition of |Opt a|.
+
+\todo{fix typesetting of dot after $\forall$}
+\begin{code}
+newtype Opt a = O { unO :: forall b . Undef b => ((a -> Opt_R b) -> Opt_R b) }
+
+instance Monad Opt where
+  return x    = O (\g -> g x)
+  m >>= k     = O (\g -> unO m (\x -> unO (k x) g))
+
+instance Undef a => Syntactic (Opt a) where
+  type Internal (Opt a) = (Bool, Internal a)
+  fromE = lift . fromE
+  toE   = toE . lower
+
+lift          :: Opt_R a -> Opt a
+lift o        =  O (\g -> Opt_R  (def o ? (def (g (val o)), false))
+                                 (def o ? (val (g (val o)), undef)))
+
+lower         :: Undef a => Opt a -> Opt_R a
+lower m       =  unO m some_R
+
+some          :: a -> Opt a
+some a        =  lift (some_R a)
+
+none          :: Undef a => Opt a
+none          =  lift none_R
+
+option        :: (Undef a, Undef b) => b -> (a -> b) -> Opt a -> b
+option d f o  =  option_R d f (lower o) 
+\end{code}
+
+These definitions are adequate to support the EDSL code presented
+in Section~\ref{sec:second-example}.
+
+\todo{After discussing the subformula property, a different solution
+to this problem becomes available.}
+
+
+\subsection{Embedding Vector}
 
 
 
