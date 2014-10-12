@@ -208,51 +208,49 @@ domain-specific languages into a given host language.
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
 
-In contrast to the standard way to engineer domain-specific
-languages based on combination of deep and shall embedding,
-we propose a new technique which we call \emph{quoted
-domain specific languages}. In what follows, we write
-EDSL for the former, and QDSL for the latter.
+Should you use EDSL or QDSL?
 
-% We propose QDSL, a new way to define domain-specific languages,
-% and contrast it with EDSL based on the traditional combination of
-% deep and shallow embedding used in systems such as Feldspar
-% \citep{feldspar} and Nicola \citep{nicola}.
+Say you wish to use a domain-specific language embedded in a host
+language to generate code in a target language.  One widely-used
+technique combines deep and shallow embedding, which we refer to as
+EDSL.  Here we introduce a second technique based on quotation and
+normalisation of quoted terms, which we refer to as QDSL.
 
-% It has become common to write embedded domain-specific
-% languages (EDSLs) using a combination of deep and shallow
-% embedding
-
-% Do you prefer to build a domain-specific language using shallow
-% embedding, deep embedding, or a combination of the two?
-% This paper offers a new way---quoted domain-specific languages.
-% For brevity, we write EDSL for embedded domain specific language
-% (usually with a combination of deep and shallow embedding), and
-% QDSL for quoted domain specific language.
-
-EDSL is great in part because it steals the type system
-of its host language. Arguably, QDSL is greater because it steals
-the type system, the concrete syntax, and the abstract syntax of
-its host language.
+EDSL is great in part because it steals the type system of its host
+language. Arguably, QDSL is greater because it steals the type system,
+the concrete syntax, and the abstract syntax of its host language.
 
 EDSL sometimes, but not always, avoids the need for normalisation.
-QDSL depends crucially on normalisation. In EDSL, each DSL has
-a different deep embedding, so when normalisation is required,
-a new normaliser needs to be written for each DSL. In QDSL,
-all DSLs for a host language share the same deep embedding---namely,
-the abstact syntax of the host language---so a single normaliser can
-shared across the DSLs.
+QDSL depends crucially on normalisation. Each EDSL has a
+different deep embedding, so when normalisation is required, a new
+normaliser needs to be written for each EDSL. In contrast, all QDSLs for a
+host language share the same deep embedding---namely, the abstact
+syntax of the host language---so they can share a single normaliser.
 
+Both EDSL and QDSL steal types from the host language. Sometimes, it
+proves convenient to steal a type from the host even when we expect it
+never to appear in target. The most common example is when we exploit
+higher-order types in the host even when the target supports only
+first-order types.  But other examples are plentiful; here we provide
+an example of using the |Maybe| type of the host even though we don't
+expect to provide that type in the target. We show how these
+situations are neatly handled by an application of Gentzen's
+subformula property, exploiting a result from logic in 1935 to advance
+computing fourscore years later.
 
+\todo{Put Gentzen quote here, as a break?}
 
-% advantages of QDSLs / compare to deep and shallow embeddings
+\todo{Explain Feldspar}
 
-% essence of QDSLs
+\todo{Explain other EDSLs}
 
-% QDSLs are not really new / key related work
+\todo{Explain `Practical Theory'}
 
-% contributions of this paper
+\todo{Explain QDSLs in LINQ and Scala}
 
+\todo{Explain Gentzen's paper and subformula property}
+
+\todo{Summary of contributions of paper/outline}
 
 \section{Overview}
 

@@ -1,0 +1,25 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+We summarise a standard way to engineer domain-specific languages by
+combining deep and shallow embedding, and describe a new technique
+which we call \emph{quoted domain specific languages}, comparing and
+contrasting the two.  We abbreviate the former as EDSL,
+and the latter as QDSL.
+
+We propose QDSL, a new way to define domain-specific languages,
+and contrast it with EDSL based on the traditional combination of
+deep and shallow embedding used in systems such as Feldspar
+\citep{feldspar} and Nicola \citep{nicola}.
+
+It has become common to write embedded domain-specific
+languages (EDSLs) using a combination of deep and shallow
+embedding
+
+Do you prefer to build a domain-specific language using shallow
+embedding, deep embedding, or a combination of the two?
+This paper offers a new way---quoted domain-specific languages.
+For brevity, we write EDSL for embedded domain specific language
+(usually with a combination of deep and shallow embedding), and
+QDSL for quoted domain specific language.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
