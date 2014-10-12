@@ -1,8 +1,8 @@
 {-# LANGUAGE GADTs, TypeFamilies, FlexibleInstances, FlexibleContexts, Rank2Types #-}
 
-module DeepAndShallow where
-import Control.Applicative hiding (some)
+module DeepAndShallowE where
 import Data.Array
+-- import Control.Applicative hiding (some)
 
 -- Combining Deep and Shallow Embedding
 -- Josef Svenningsson and Philip Wadler, 12 Oct 2014
@@ -57,8 +57,8 @@ instance Show (E a) where
 showf :: (E a -> E b) -> String
 showf f  =  par ("\\x->" <+> show (f (Variable "x")))
 
-(<!>) :: (a -> b) -> a -> b
-f <!> x  =  seq x (f x)
+(<*>) :: (a -> b) -> a -> b
+f <*> x  =  seq x (f x)
 
 eval                  :: E a -> a
 eval (LitI i)         =  i
@@ -66,11 +66,11 @@ eval (LitF x)         =  x
 eval (LitB b)         =  b
 eval (If c t e)       =  if eval c then eval t else eval e
 eval (While c b i)    =  evalWhile (evalFun c) (evalFun b) (eval i)
-eval (Pair a b)       =  (,) <!> eval a <!> eval b
-eval (Fst p)          =  fst <!> eval p
-eval (Snd p)          =  snd <!> eval p
-eval (Prim1 _ f a)    =  f <!> eval a
-eval (Prim2 _ f a b)  =  f <!> eval a <!> eval b
+eval (Pair a b)       =  (,) <*> eval a <*> eval b
+eval (Fst p)          =  fst <*> eval p
+eval (Snd p)          =  snd <*> eval p
+eval (Prim1 _ f a)    =  f <*> eval a
+eval (Prim2 _ f a b)  =  f <*> eval a <*> eval b
 eval (Value a)        =  a
 eval (Arr n ixf)      =  listArray (0,n') [ eval (ixf (LitI i)) | i <- [0..n'] ]
                          where n' = eval n - 1
@@ -79,7 +79,7 @@ eval (ArrLen a)       =  u - l + 1
 eval (ArrIx a i)      =  eval a ! eval i
 
 evalFun               :: (E a -> E b) -> a -> b
-evalFun f x           =  (eval . f . Value) <!> x
+evalFun f x           =  (eval . f . Value) <*> x
 
 evalWhile             :: (s -> Bool) -> (s -> s) -> s -> s
 evalWhile c b i       =  if c i then evalWhile c b (b i) else i
@@ -199,12 +199,14 @@ instance Undef a => Syntactic (Opt a) where
   fromE = lift . fromE
   toE   = toE . lower
 
+{-
 instance Functor Opt where
   fmap f m  =  do x <- m; return (f x)
 
 instance Applicative Opt where
   pure = return
   m <*> n  =  do f <- m; x <- n; return (f x)
+-}
 
 instance Monad Opt where
   return x    = O (\g -> g x)

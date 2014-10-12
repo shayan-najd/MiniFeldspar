@@ -584,7 +584,7 @@ quoted host language, and so can share a normaliser.
 \end{itemize}
 
 
-\section{Combining deep and shallow embedding}
+\section{MiniFeldspar as an EDSL}
 
 We now review the usual approach to embedding a DSL into
 a host language by combining deep and shallow embedding.
@@ -620,7 +620,7 @@ abstract syntax (HOAS) to represent constructs with variable binding
 Our EDSL has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives,
 and special-purpose constructs for variables and values.
-(Later we will add constructs for arrays and for a default value.)
+(Later we will add constructs for arrays.)
 Rather than using side-effects, the while loop takes
 three arguments, a function from current state |a| to a boolean,
 and a function from current state |a| to new state |a|,
@@ -663,19 +663,16 @@ Function |eval| plays no role in generating C, but may be useful for testing.
 \subsection{Class |Syntactic|}
 
 We introduce a type class |Syntactic| that allows us to convert
-between types in the host language, Haskell, and corresponding
-representations in the target languagee, the deep embedding |E|.
+shallow embeddings to and from deep embeddings.
 \begin{code}
 class Syntactic a where
   type Internal a
   toE    :: a -> E (Internal a)
   fromE  :: E (Internal a) -> a
 \end{code}
-The type families feature of GHC is used to specify for each
-type |a| in the host language a corresponding representation |Internal a|
-in the target language \cite{type-families}. Functions |toE| and
-|fromE| translate between the host representation |a| and the
-target representation |E (Internal a)|.
+Type |Internal| is a GHC type family \citep{type-families}.  Functions
+|toE| and |fromE| translate between the shallow embedding |a| and the
+deep embedding |E (Internal a)|.
 
 The first instance of |Syntactic| is |E| itself, and is straightforward.
 \begin{code}
@@ -684,9 +681,9 @@ instance Syntactic (E a) where
   toE    =  id
   fromE  =  id
 \end{code}
-This instance is used for base types. Our representation of a run-time
-|Bool| will have type |E Bool| in both the host and target
-languages, and similarly for |Int| and |Float|.
+Our representation of a run-time |Bool| will have type |E Bool| in
+both the deep and shallow embeddings, and similarly for |Int| and
+|Float|.
 
 We do not code the target language using its constructors
 directly. Instead, for each constructor we define a corresponding
@@ -716,32 +713,33 @@ With this declaration, |1+2 :: E Int| evaluates to
 executed at generation-time and run-time to appear identical.
 A similar declaration works for |Float|.
 
-Comparison also benefits from a smart constructor.
+Comparison also benefits from smart constructors.
 \begin{code}
 (.==.)       :: (Syntactic a, Eq (Internal a)) => a -> a -> E Bool
 a .==. b     =  Prim2 "(==)" (==) (toE a) (toE b)
+
+(.<.)        :: (Syntactic a, Ord (Internal a)) => a -> a -> E Bool
+a .<. b      =  Prim2 "(<)" (<) (toE a) (toE b)
 \end{code}
 Overloading cannot apply here, because Haskell requires
 |(==)| return a result of type |Bool|, while |(.==.)| returns
-a result of type |E Bool|.  A similar declaration works for |(.<.)|.
+a result of type |E Bool|, and similarly for |(.<.)|.
 
 
 \subsection{Embedding pairs}
 
-We set up a correspondence between pairs in the
-host language and pairs in the target language.
+We set up a correspondence between host language pairs
+in the shallow embedding and target language pairs in the deep embedding.
 \begin{code}
 instance (Syntactic a, Syntactic b) where
   type  Internal (a,b)  =  (Internal a, Internal b)
   toE (a,b)             =  Pair (toE a, toE b)
   fromE p               =  (fromE (Fst p), fromE (Snd p))
 \end{code}
-This permits us to manipulate pairs in the host language as normal,
-with |(a,b)|, |fst a|, and |snd a|, using class |Syntactic| to convert
-to the target language as necessary.  Argument |p| is duplicated in
-the definition of |fromE|, which may require common
-subexpression elimination or observable sharing, as discussed in
-Section~\ref{sec:first-example}.
+This permits us to manipulate pairs as normal, with |(a,b)|, |fst a|,
+and |snd a|.  (Argument |p| is duplicated in the definition of
+|fromE|, which may require common subexpression elimination or
+observable sharing, as discussed in Section~\ref{sec:first-example}.)
 
 We have now developed sufficient machinery to define a |for| loop
 in terms of a |while| loop.
@@ -765,8 +763,10 @@ as a standard Haskell pair.
 
 For the next section, which defines an analogue of the |Maybe| type, it
 will prove convenient to work with types which have a distinguished
-value at each type, which we call |undef|. (Better names are `default'
-or `undefined', but both already have other meanings in Haskell.)
+value at each type, which we call |undef|.
+
+% (A better name might be `default' or `undefined', if each did not
+% already have another meaning in Haskell.)
 
 It is straightforward to define a type class |Undef|, where type |a|
 belongs to |Undef| if it belongs to |Syntactic| and it has an
@@ -797,30 +797,34 @@ behaves as division, save that when the divisor is zero
 it returns the undefined value of type |Float|, which
 is also zero.
 
-\citet{SvenningssonA12} claim that it is not possible
-to support |undef| without modifying the type |E|, but they
-appear to have underestimated the power of their own technique.
+\citet{SvenningssonA12} claim that it is not possible to support
+|undef| without changing the deep embedding, but here defined |undef|
+entirely as a shallow embedding.  (It appears they underestimated the
+power of their own technique!)
 
 
 \subsection{Embedding option}
 
 We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
 
-The deep-and-shallow technique cleverly represents pairs in the target
-with pairs in the host. Alas, we cannot use the same trick for |Maybe|,
-because |fromE| would have to decide at generation-time whether to return
-|Just| or |Nothing|, but which is correct is not known until run-time.
+The deep-and-shallow technique cleverly represents deep embeddding
+|E (a,b)| by shallow embedding |(E a, E b)|.  Hence, it is tempting to
+represent |E (Maybe a)| by |Maybe (E a)|, but this cannot work,
+because |fromE| would have to decide at generation-time whether to
+return |Just| or |Nothing|, but which to use is not known until
+run-time.
 
-One could extend type |E| to also represent values of |Maybe| type,
-but \citet{SvenningssonA12} prefer to leave |E| minimal. Following
-their development, corresponding to |Maybe a| we introduce a type
-|Opt_R a|, which consists of a boolean and a value of type |a|.
-Corresponding to |Just x|, the boolean is true and the value is |x|,
-corresponding to |Nothing|, the boolean is false and the value is
-|undef|.  We take |some_R|, |none_R|, and |opt_R| as the analogues of
-|Just|, |Nothing|, and |maybe|.  The |Syntactic| instance is
-straightforward, mapping options to and from the pairs already defined
-for |E|.
+Indeed, rather than extending the deep embedding to support the type
+|E (Maybe a)|, \citet{SvenningssonA12} prefer a different choice, that
+represents optional values while leaving |E| unchanged.  Following
+their development, we represent values of type |Maybe a| by the type
+|Opt_R a|, which pairs a boolean with a value of type |a|.  For a
+value corresponding to |Just x|, the boolean is true and the value is
+|x|, while for one corresponding to |Nothing|, the boolean is false
+and the value is |undef|.  We define |some_R|, |none_R|, and |opt_R|
+as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syntactic|
+instance is straightforward, mapping options to and from the pairs
+already defined for |E|.
 \begin{code}
 data Opt_R a = Opt_R { def :: E Bool, val :: a }
 
@@ -840,7 +844,7 @@ opt_R d f o    =  def o ? (f (val o), d)
 \end{code}
 
 The next obvious step is to define a suitable monad over the type |Opt_R|.
-The natural definitions to use are:
+The natural definitions to use are as follows.
 \begin{code}
 return    :: a -> Opt_R a
 return x  =  some_R x
@@ -849,9 +853,10 @@ return x  =  some_R x
 o >>= g   =  Opt_R  (def o ? (def (g (val o)), false))
                     (def o ? (val (g (val o)), undef))
 \end{code}
-but this requires the type constraint |Undef b| which is not part of
-the type of |(>>=)|. This is a common issue defining monads, called
-the constrained-monad problem 
+However, this adds type constraint |Undef b| 
+to the type of |(>>=)|, which is not permitted.
+This need to add constraints often arises, and has
+been dubbed the constrained-monad problem 
 \citet{hughes:restricted-monad,SculthorpeBGG13}.
 To solve it, we follow a trick due to \cite{PerssonAS11}.
 
@@ -904,17 +909,121 @@ to this problem becomes available.}
 
 \subsection{Embedding Vector}
 
+Array programming is central to the intended application domain
+of MiniFeldspar. In this section, we extend our EDSL to handle
+arrays.
+
+First, extend our deep embedding |E| to support arrays. We add three constructs.
+The first accepts a length and a body that computes the array element
+for each index. The second extracts the length from an array, and the
+third fetches the element at a given index.
+\begin{code}
+  Arr           :: E Int -> (E Int -> E a) -> E (Array Int a)
+  ArrLen        :: E (Array Int a) -> E Int
+  ArrIx         :: E (Array Int a) -> E Int -> E a
+\end{code}
+The exact sematics is given by |eval|.
+\begin{code}
+eval (Arr n g)        =  array (0,n') [ (i, eval (g (LitI i))) | i <- [0..n'] ]
+                         where n' = eval n - 1
+eval (ArrLen a)       =  u - l + 1  where (l,u) = bounds (eval a)
+eval (ArrIx a i)      =  eval a ! eval i
+\end{code}
+Corresponding to the deep embedding |Array| is a shallow embedding |Vector|.
+\begin{code}
+data Vector a = Vec (E Int) (E Int -> a)
+
+instance Syntactic a => Syntactic (Vector a) where
+  type Internal (Vector a)  =  Array Int (Internal a)
+  toE (Vec n g)             =  Arr n (toE . g)
+  fromE a                   =  Vec (ArrLen a) (\i -> fromE (ArrIx a i))
+
+instance Functor Vector where
+  fmap f (Vec n g)          =  Vec n (f . g)
+\end{code}
+The shallow embedding |Vec| resembles the constructor |Arr|, but whereas
+the body of |Arr| must return values of type |E a|, the body of a vector
+may return values of any type |a| that satisfies |Syntactic a|.
+It is straightforward to make |Vector| an instance of |Functor|.
+
+Here are some primitive operations on vectors
+\begin{code}
+zipWithVec                        :: (Syntactic a, Syntactic b) => 
+                                     (a -> b -> c) -> Vector a -> Vector b -> Vector c
+zipWithVec f (Vec m g) (Vec n h)  =  Vec (min m n) (\i -> f (g i) (h i))
+
+sumVec                            :: (Syntactic a, Num a) => Vector a -> a
+sumVec (Vec n g)                  =  for n 0 (\x -> x + g i)
+\end{code}
+Computing |zipWithVec f u v| combines vectors |u| and |v| pointwise with |f|,
+and computing |sumVec v| sums the elements of vector |v|.
+
+This style of definition extends well to any functions where each vector
+element is computed independently, including |drop|, |take|, |reverse|,
+vector concatentation, and the like, but may work less well when there are
+dependencies between elements, as in computing a running sum.
+
+\todo{Check that running sum is a good example of something that is 
+hard in MiniFeldspar}
+
+\subsection{Fusion}
+
+Using our primitives, it is easy to compute the scalar product of two vectors.
+\begin{code}
+scalarProd :: (Syntactic a, Num a) => Vector a -> Vector a -> a
+scalarProd u v  =  sumVec (zipWith (*) u v)
+\end{code}
+An important consequence of the style of definition we have adopted is
+that it provides lightweight fusion. The above definition would not produce
+good C code if it first computed |zipWith (*) u v|, put the result into an
+intermediate vector |w|, and then computed |sumVec w|. Fortunately, it does
+not. Assume |u| is |Vec m g| and |v| is |Vec n h|. Then we can simplify
+|scalarProd u v| as follows.
+\[
+\begin{array}{cl}
+         &  |scalarProd u v|  \\
+\leadsto &  |sumVec (zipWith (*) u v)|  \\
+\leadsto &  |sumVec (zipWith (*) (Vec m g) (Vec n h)|  \\
+\leadsto &  |sumVec (Vec (min m n) (\i -> g i * h i)|  \\
+\leadsto &  |for (min m n) (\i x -> x + g i * h i)|
+\end{array}
+\]
+Indeed, we can see that by construction that whenever we combine two
+primitives the intermediate vector is always eliminated, a stronger
+guarantee than provided by conventional optimising compilers.
+
+There are some situations where fusion is not beneficial, notably
+when an intermediate vector is accessed many times fusion will cause
+the elements to be recomputed.  An alternative is to materialise the
+vector in memory with the following function.
+\begin{code}
+memorise :: Synactic a => Vector a -> Vector a
+memorise (Vec n g)  =  Vec n (\i -> ArrIx (Arr n (toE . g)) i)
+\end{code}
+The above definition depends on common subexpression elimination
+or observable sharing to ensure |Arr n (toE .g)| is computed
+once, rather than once for each element of the resulting vector.
+
+For example, if 
+\begin{code}
+blur :: Synactic a => Vector a -> Vector a
+\end{code}
+averages adjacent elements of a vector, then one may choose to
+compute either
+\begin{code}
+blur (blur v)
+\end{code}
+or
+\begin{code}
+blur (memorise (blur v))
+\end{code}
+with different trade-offs between recomputation and memory usage.
+Strong guarantees for fusion in combination with |memorize| gives
+the programmer a simple interface which provides powerful optimisation
+combined with fine control over memory usage.
 
 
-%   Arr           :: E Int -> (E Int -> E a) -> E (Array Int a)
-%   ArrLen        :: E (Array Int a) -> E Int
-%   ArrIx         :: E (Array Int a) -> E Int -> E a
-
-
-% eval (Arr n f)        =  array (0,n') [ (i, eval (f (LitI i))) | i <- [0..n'] ]
-%                          where n' = eval n - 1
-% eval (ArrLen a)       =  u - l + 1  where (l,u) = bounds (eval a)
-% eval (ArrIx a i)      =  eval a ! eval i
+\section{MiniFeldspar as a QDSL}
 
 
 \section{The subformula property}
