@@ -204,12 +204,46 @@ domain-specific languages into a given host language.
 
 \section{Introduction}
 
-Do you prefer to build a domain-specific language using shallow
-embedding, deep embedding, or a combination of the two?
-This paper offers a new way---quoted domain-specific languages.
-For brevity, we write EDSL for embedded domain specific language
-(usually with a combination of deep and shallow embedding), and
-QDSL for quoted domain specific language.
+\begin{quotation}
+Good artists copy, great artists steal. --- Picasso
+\end{quotation}
+
+In contrast to the standard way to engineer domain-specific
+languages based on combination of deep and shall embedding,
+we propose a new technique which we call \emph{quoted
+domain specific languages}. In what follows, we write
+EDSL for the former, and QDSL for the latter.
+
+% We propose QDSL, a new way to define domain-specific languages,
+% and contrast it with EDSL based on the traditional combination of
+% deep and shallow embedding used in systems such as Feldspar
+% \citep{feldspar} and Nicola \citep{nicola}.
+
+% It has become common to write embedded domain-specific
+% languages (EDSLs) using a combination of deep and shallow
+% embedding
+
+% Do you prefer to build a domain-specific language using shallow
+% embedding, deep embedding, or a combination of the two?
+% This paper offers a new way---quoted domain-specific languages.
+% For brevity, we write EDSL for embedded domain specific language
+% (usually with a combination of deep and shallow embedding), and
+% QDSL for quoted domain specific language.
+
+EDSL is great in part because it steals the type system
+of its host language. Arguably, QDSL is greater because it steals
+the type system, the concrete syntax, and the abstract syntax of
+its host language.
+
+EDSL sometimes, but not always, avoids the need for normalisation.
+QDSL depends crucially on normalisation. In EDSL, each DSL has
+a different deep embedding, so when normalisation is required,
+a new normaliser needs to be written for each DSL. In QDSL,
+all DSLs for a host language share the same deep embedding---namely,
+the abstact syntax of the host language---so a single normaliser can
+shared across the DSLs.
+
+
 
 % advantages of QDSLs / compare to deep and shallow embeddings
 
