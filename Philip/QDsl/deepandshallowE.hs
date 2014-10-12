@@ -302,6 +302,8 @@ simplifyf f x  =  simplify (f x)
 scalarProd :: (Syntactic a, Num a) => Vector a -> Vector a -> a
 scalarProd a b = sumVec (zipWithVec (*) a b)
 
+
+
 sqr :: Num a => a -> a
 sqr x  =  x * x
 
