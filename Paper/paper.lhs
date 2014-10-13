@@ -10,7 +10,12 @@
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
-%format x0
+%format x_0
+%format Opt_R
+%format some_R
+%format none_R
+%format opt_R
+%format forall = "\forall"
 
 % US Letter page size
 %\pdfpagewidth=8.5in
@@ -199,21 +204,53 @@ domain-specific languages into a given host language.
 
 \section{Introduction}
 
-Do you prefer to build a domain-specific language using shallow
-embedding, deep embedding, or a combination of the two?
-This paper offers a new way---quoted domain-specific languages.
-For brevity, we write EDSL for embedded domain specific language
-(usually with a combination of deep and shallow embedding), and
-QDSL for quoted domain specific language.
+\begin{quotation}
+Good artists copy, great artists steal. --- Picasso
+\end{quotation}
 
-% advantages of QDSLs / compare to deep and shallow embeddings
+Should you use EDSL or QDSL?
 
-% essence of QDSLs
+Say you wish to use a domain-specific language embedded in a host
+language to generate code in a target language.  One widely-used
+technique combines deep and shallow embedding, which we refer to as
+EDSL.  Here we introduce a second technique based on quotation and
+normalisation of quoted terms, which we refer to as QDSL.
 
-% QDSLs are not really new / key related work
+EDSL is great in part because it steals the type system of its host
+language. Arguably, QDSL is greater because it steals the type system,
+the concrete syntax, and the abstract syntax of its host language.
 
-% contributions of this paper
+EDSL sometimes, but not always, avoids the need for normalisation.
+QDSL depends crucially on normalisation. Each EDSL has a
+different deep embedding, so when normalisation is required, a new
+normaliser needs to be written for each EDSL. In contrast, all QDSLs for a
+host language share the same deep embedding---namely, the abstact
+syntax of the host language---so they can share a single normaliser.
 
+Both EDSL and QDSL steal types from the host language. Sometimes, it
+proves convenient to steal a type from the host even when we expect it
+never to appear in target. The most common example is when we exploit
+higher-order types in the host even when the target supports only
+first-order types.  But other examples are plentiful; here we provide
+an example of using the |Maybe| type of the host even though we don't
+expect to provide that type in the target. We show how these
+situations are neatly handled by an application of Gentzen's
+subformula property, exploiting a result from logic in 1935 to advance
+computing fourscore years later.
+
+\todo{Put Gentzen quote here, as a break?}
+
+\todo{Explain Feldspar}
+
+\todo{Explain other EDSLs}
+
+\todo{Explain `Practical Theory'}
+
+\todo{Explain QDSLs in LINQ and Scala}
+
+\todo{Explain Gentzen's paper and subformula property}
+
+\todo{Summary of contributions of paper/outline}
 
 \section{Overview}
 
@@ -225,7 +262,7 @@ the power function. Since division by zero is undefined, we arbitrarily
 choose that raising zero to a negative power yields zero.
 \begin{code}
 power :: Int -> Float -> Float
-power n x  =
+power n x =
   if n < 0 then
     if x == 0 then 0 else 1 / power (-n) x
   else if n == 0 then
@@ -235,8 +272,8 @@ power n x  =
   else
     x * power (n-1) x
 
-sqr :: Float -> Float
-sqr x  =  x * x
+sqr    ::  Float -> Float
+sqr x  =   x * x
 \end{code}
 Our goal is to generate code in the programming language~C.
 For example,
@@ -263,7 +300,7 @@ argument, where |C| is a type that represents |C| code.
 Here is a solution to our problem using EDSL.
 \begin{code}
 power :: Int -> EDSL Float -> EDSL Float
-power n x  =
+power n x =
   if n < 0 then
     x .==. 0 ? (0,  1 / power (-n) x)
   else if n == 0 then
@@ -273,8 +310,8 @@ power n x  =
   else
     x * power (n-1) x
 
-sqr :: EDSL Float -> EDSL Float
-sqr y  =  y * y
+sqr    ::  EDSL Float -> EDSL Float
+sqr y  =   y * y
 \end{code}
 Invoking |edslC (power (-6))| generates the C code above.
 
@@ -331,8 +368,8 @@ power n =
   else
     <|| \x -> x * $(power (n-1)) x ||>
 
-sqr :: Exp (Float -> Float)
-sqr  =  <|| \y -> y * y ||>
+sqr  ::  Exp (Float -> Float)
+sqr  =   <|| \y -> y * y ||>
 \end{code}
 Invoking |qdslC (power (-6))| generates the C code above.
 
@@ -355,18 +392,16 @@ identical for all constructs, including comparison and conditionals.
 
 Now evaluating |power (-6)| yields the following.
 \begin{code}
-<|| \x ->
-     if x == 0 then 0 else
-       1 / (\y -> y * y) (x * (\y -> y * y) (x * 1)) ||>
+<|| \x ->  if x == 0 then 0 else
+             1 / (\y -> y * y) (x * (\y -> y * y) (x * 1)) ||>
 \end{code}
 Normalising the term, with variables renamed
 for readability, yields the following.
 \begin{code}
-<|| \u ->
-      if u == 0 then 0 else
-        let v = u * 1 in
-          let w = u * (v * v) in
-            1 / w * w  ||>
+<|| \u ->  if u == 0 then 0 else
+             let v = u * 1 in
+             let w = u * (v * v) in
+             1 / w * w  ||>
 \end{code}
 It is easy to generate the final C code from
 the normalised term.
@@ -425,8 +460,8 @@ We decompose |power| into two functions |power'| and |power''|, where the first
 returns |Nothing| in the exceptional case, and the second maps |Nothing|
 to a suitable default value.
 \begin{code}
-power' :: Int -> Float -> Maybe Float
-power' n x  =
+power' ::  Int -> Float -> Maybe Float
+power' n x =
   if n < 0 then
     if x == 0 then Nothing else do y <- power' (-n) x; return (1 / y)
   else if n == 0 then
@@ -436,15 +471,15 @@ power' n x  =
   else
     do y <- power' (n-1) x; return (x * y)
 
-power'' :: Int -> Float -> Float
-power'' n x  =  maybe 0 (\x -> x) (power' n x)
+power''      ::  Int -> Float -> Float
+power'' n x  =   maybe 0 (\x -> x) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses
 \begin{code}
 data Maybe a = Nothing | Just a
-return :: a -> Maybe a
-(>>=) :: Maybe a -> (a -> Maybe b) -> Maybe b
-maybe :: b -> (a -> b) -> Maybe a -> b
+return  ::  a -> Maybe a
+(>>=)   ::  Maybe a -> (a -> Maybe b) -> Maybe b
+maybe   ::  b -> (a -> b) -> Maybe a -> b
 \end{code}
 from the Haskell prelude. Type |Maybe| is declared as a monad, enabling the |do| notation,
 which translates into |(>>=)|. 
@@ -467,15 +502,15 @@ power' n x  =
   else
     do y <- power' (n-1) x; return (x*y)
 
-power'' :: Int -> EDSL Float -> EDSL Float
-power'' n x  = option 0 (\y -> y) (power' n x)
+power''      ::  Int -> EDSL Float -> EDSL Float
+power'' n x  =   option 0 (\y -> y) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses the functions
 \begin{code}
-none   :: Option a
-return :: a -> Option a
-(>>=)  :: Option a -> (a -> Option b) -> Option b
-option :: (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
+none   	::  Option a
+return 	::  a -> Option a
+(>>=)  	::  Option a -> (a -> Option b) -> Option b
+option 	::  (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
 \end{code}
 from the EDSL library. Details of the type |Option| and the type class |Syntactic|
 are explained in Section~\ref{sec:option}.
@@ -536,18 +571,19 @@ run-time equivalent, which we also call |Maybe|.
 Here is the refactored code.
 \begin{code}
 power' :: Int -> QDSL (Float -> Maybe Float)
-power' n x  =
+power' n =
   if n < 0 then
-    <|| if x == 0 then Nothing else do y <- $(power' (-n) x); return (1 / y) ||>
+    <|| \x ->  if x == 0 then Nothing else
+                 do y <- $(power' (-n) x); return (1 / y) ||>
   else if n == 0 then
-    <|| return 1 ||>
+    <|| \x -> return 1 ||>
   else if even n then 
-    <|| do y <- $(power' (n `div` 2) x); return $(sqr y) ||>
+    <|| \x -> do y <- $(power' (n `div` 2) x); return $(sqr y) ||>
   else
-    <|| do y <- $(power' (n-1) x); return (x * y) ||>
+    <|| \x -> do y <- $(power' (n-1) x); return (x * y) ||>
 
-power'' :: Int -> QDSL (Float -> Float)
-power'' n x  =  <|| maybe 0 (\x -> x) $(power' n x) ||>
+power''      ::  Int -> QDSL (Float -> Float)
+power'' n x  =   <|| maybe 0 (\x -> x) $(power' n x) ||>
 \end{code}
 Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are typed as before,
@@ -579,7 +615,7 @@ quoted host language, and so can share a normaliser.
 \end{itemize}
 
 
-\section{Combining deep and shallow embedding}
+\section{MiniFeldspar as an EDSL}
 
 We now review the usual approach to embedding a DSL into
 a host language by combining deep and shallow embedding.
@@ -594,18 +630,18 @@ and is called a deep embedding.  In what follows, we shorten |EDSL a|
 to |E a|.
 \begin{code}
 data E a where
-  LitB		:: Bool -> E Bool
-  LitI		:: Int -> E Int
-  LitF		:: Float -> E Float
-  If		:: E Bool -> E a -> E a -> E a
-  While		:: (E a -> E Bool) -> (E a -> E a) -> E a -> E a
-  Pair		:: E a -> E b -> E (a,b)
-  Fst		:: E (a,b) -> E a
-  Snd           :: E (a,b) -> E b
-  Prim1		:: String -> (a -> b) -> E a -> E b
-  Prim2         :: String -> (a -> b -> c) -> E a -> E b -> E c
-  Variable      :: String -> E a
-  Value         :: a -> E a
+  LitB		::  Bool -> E Bool
+  LitI		::  Int -> E Int
+  LitF		::  Float -> E Float
+  If		::  E Bool -> E a -> E a -> E a
+  While		::  (E a -> E Bool) -> (E a -> E a) -> E a -> E a
+  Pair		::  E a -> E b -> E (a,b)
+  Fst		::  E (a,b) -> E a
+  Snd           ::  E (a,b) -> E b
+  Prim1		::  String -> (a -> b) -> E a -> E b
+  Prim2         ::  String -> (a -> b -> c) -> E a -> E b -> E c
+  Variable      ::  String -> E a
+  Value         ::  a -> E a
 \end{code}
 The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
@@ -615,7 +651,7 @@ abstract syntax (HOAS) to represent constructs with variable binding
 Our EDSL has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives,
 and special-purpose constructs for variables and values.
-(Later we will add constructs for arrays and for a default value.)
+(Later we will add constructs for arrays.)
 Rather than using side-effects, the while loop takes
 three arguments, a function from current state |a| to a boolean,
 and a function from current state |a| to new state |a|,
@@ -630,27 +666,27 @@ construct |Value| is used in the evaluator.
 The exact semantics is given by |eval|. It is a strict language,
 so we define an infix strict application operator |(<*>)|.
 \begin{code}
-(<*>)                 :: (a -> b) -> a -> b
-f x                   =  seq x (f x)
+(<*>)                 ::  (a -> b) -> a -> b
+f x                   =   seq x (f x)
 
-eval                  :: E a -> a
-eval (LitI i)         =  i
-eval (LitF x)         =  x
-eval (LitB b)         =  b
-eval (If c t e)       =  if eval c then eval t else eval e
-eval (While c b i)    =  evalWhile (evalFun c) (evalFun b) <*> eval i
-eval (Pair a b)       =  (,) <*> eval a <*> eval b
-eval (Fst p)          =  fst <*> eval p
-eval (Snd p)          =  snd <*> eval p
-eval (Prim1 _ f a)    =  f <*> eval a
-eval (Prim2 _ f a b)  =  f <*> eval a <*> eval b
-eval (Value a)        =  a
+eval                  ::  E a -> a
+eval (LitI i)         =   i
+eval (LitF x)         =   x
+eval (LitB b)         =   b
+eval (If c t e)       =   if eval c then eval t else eval e
+eval (While c b i)    =   evalWhile (evalFun c) (evalFun b) <*> eval i
+eval (Pair a b)       =   (,) <*> eval a <*> eval b
+eval (Fst p)          =   fst <*> eval p
+eval (Snd p)          =   snd <*> eval p
+eval (Prim1 _ f a)    =   f <*> eval a
+eval (Prim2 _ f a b)  =   f <*> eval a <*> eval b
+eval (Value a)        =   a
 
-evalFun               :: (E a -> E b) -> a -> b
-evalFun f x           =  (eval . f . Value) <*> x
+evalFun               ::  (E a -> E b) -> a -> b
+evalFun f x           =   (eval . f . Value) <*> x
 
-evalWhile             :: (a -> Bool) -> (a -> a) -> a -> a
-evalWhile c b i       =  if c i then evalWhile c b (b i) else i
+evalWhile             ::  (a -> Bool) -> (a -> a) -> a -> a
+evalWhile c b i       =   if c i then evalWhile c b (b i) else i
 \end{code}
 Function |eval| plays no role in generating C, but may be useful for testing.
 
@@ -658,44 +694,41 @@ Function |eval| plays no role in generating C, but may be useful for testing.
 \subsection{Class |Syntactic|}
 
 We introduce a type class |Syntactic| that allows us to convert
-between types in the host language, Haskell, and corresponding
-representations in the target languagee, the deep embedding |E|.
+shallow embeddings to and from deep embeddings.
 \begin{code}
 class Syntactic a where
   type Internal a
-  toE    :: a -> E (Internal a)
-  fromE  :: E (Internal a) -> a
+  toE    	   ::  a -> E (Internal a)
+  fromE  	   ::  E (Internal a) -> a
 \end{code}
-The type families feature of GHC is used to specify for each
-type |a| in the host language a corresponding representation |Internal a|
-in the target language \cite{type-families}. Functions |toE| and
-|fromE| translate between the host representation |a| and the
-target representation |E (Internal a)|.
+Type |Internal| is a GHC type family \citep{type-families}.  Functions
+|toE| and |fromE| translate between the shallow embedding |a| and the
+deep embedding |E (Internal a)|.
 
 The first instance of |Syntactic| is |E| itself, and is straightforward.
 \begin{code}
 instance Syntactic (E a) where
-  type Internal (E a) = a
-  toE    =  id
-  fromE  =  id
+  type Internal (E a)  =  a
+  toE    	       =  id         
+  fromE  	       =  id
 \end{code}
-This instance is used for base types. Our representation of a run-time
-|Bool| will have type |E Bool| in both the host and target
-languages, and similarly for |Int| and |Float|.
+Our representation of a run-time |Bool| will have type |E Bool| in
+both the deep and shallow embeddings, and similarly for |Int| and
+|Float|.
 
 We do not code the target language using its constructors
 directly. Instead, for each constructor we define a corresponding
 ``smart constructor'' using class |Syntactic|.
 \begin{code}
-true, false  :: E Bool
-true         =  LitB True
-false        =  LitB False
+true, false  ::  E Bool
+true         =   LitB True
+false        =   LitB False
 
-(?)          :: Syntactic a => E Bool -> (a,a) -> a
-c ? (t,e)    =  fromE (If c (toE t) (toE e))
+(?)          ::  Syntactic a => E Bool -> (a,a) -> a
+c ? (t,e)    =   fromE (If c (toE t) (toE e))
 
-while        :: Syntactic a => (a -> E Bool) -> (a -> a) -> a -> a
-while c b i  =  fromE (While (c . fromE) (toE . b . fromE) (toE i))
+while        ::  Syntactic a => (a -> E Bool) -> (a -> a) -> a -> a
+while c b i  =   fromE (While (c . fromE) (toE . b . fromE) (toE i))
 \end{code}
 
 Numbers are made convenient to manipulate via overloading.
@@ -711,38 +744,39 @@ With this declaration, |1+2 :: E Int| evaluates to
 executed at generation-time and run-time to appear identical.
 A similar declaration works for |Float|.
 
-Comparison also benefits from a smart constructor.
+Comparison also benefits from smart constructors.
 \begin{code}
-(.==.)       :: (Syntactic a, Eq (Internal a)) => a -> a -> E Bool
-a .==. b     =  Prim2 "(==)" (==) (toE a) (toE b)
+(.==.)       ::  (Syntactic a, Eq (Internal a)) => a -> a -> E Bool
+a .==. b     =   Prim2 "(==)" (==) (toE a) (toE b)
+
+(.<.)        ::  (Syntactic a, Ord (Internal a)) => a -> a -> E Bool
+a .<. b      =   Prim2 "(<)" (<) (toE a) (toE b)
 \end{code}
 Overloading cannot apply here, because Haskell requires
 |(==)| return a result of type |Bool|, while |(.==.)| returns
-a result of type |E Bool|.  A similar declaration works for |(.<.)|.
+a result of type |E Bool|, and similarly for |(.<.)|.
 
 
 \subsection{Embedding pairs}
 
-We set up a correspondence between pairs in the
-host language and pairs in the target language.
+We set up a correspondence between host language pairs
+in the shallow embedding and target language pairs in the deep embedding.
 \begin{code}
 instance (Syntactic a, Syntactic b) where
   type  Internal (a,b)  =  (Internal a, Internal b)
   toE (a,b)             =  Pair (toE a, toE b)
   fromE p               =  (fromE (Fst p), fromE (Snd p))
 \end{code}
-This permits us to manipulate pairs in the host language as normal,
-with |(a,b)|, |fst a|, and |snd a|, using class |Syntactic| to convert
-to the target language as necessary.  Argument |p| is duplicated in
-the definition of |fromE|, which may require common
-subexpression elimination or observable sharing, as discussed in
-Section~\ref{sec:first-example}.
+This permits us to manipulate pairs as normal, with |(a,b)|, |fst a|,
+and |snd a|.  (Argument |p| is duplicated in the definition of
+|fromE|, which may require common subexpression elimination or
+observable sharing, as discussed in Section~\ref{sec:first-example}.)
 
 We have now developed sufficient machinery to define a |for| loop
 in terms of a |while| loop.
 \begin{code}
-for :: Syntactic a => E Int -> a -> (E Int -> a -> a) -> a
-for n x0 b  =  snd (while (\(i,x) -> i .<. n) (\(i,x) -> (i+1, b i x)) (0,x0))
+for          ::  Syntactic a => E Int -> a -> (E Int -> a -> a) -> a
+for n x_0 b  =   snd (while (\(i,x) -> i .<. n) (\(i,x) -> (i+1, b i x)) (0,x0))
 \end{code}
 The state of the |while| loop is a pair consisting of a counter and
 the state of the |for| loop. The body |b| of the |for| loop is a function
@@ -756,21 +790,266 @@ state using ordinary pair syntax, and the initial state is constructed
 as a standard Haskell pair.
 
 
+\subsection{Embedding undefined}
+
+For the next section, which defines an analogue of the |Maybe| type, it
+will prove convenient to work with types which have a distinguished
+value at each type, which we call |undef|.
+
+% (A better name might be `default' or `undefined', if each did not
+% already have another meaning in Haskell.)
+
+It is straightforward to define a type class |Undef|, where type |a|
+belongs to |Undef| if it belongs to |Syntactic| and it has an
+undefined value.
+\begin{code}
+class Syntactic a => Undef a where
+  undef :: a
+
+instance Undef (E Bool) where
+  undef = false
+
+instance Undef (E Int) where
+  undef = 0
+
+instance Undef (E Float) where
+  undef = 0
+
+instance (Undef a, Undef b) => Undef (a,b) where
+  undef = (undef, undef)
+\end{code}
+
+For example,
+\begin{code}
+(/#)    ::  E Float -> E Float -> F Float
+x /# y  =   (y .==. 0) ? (undef, x/y)
+\end{code}
+behaves as division, save that when the divisor is zero
+it returns the undefined value of type |Float|, which
+is also zero.
+
+\citet{SvenningssonA12} claim that it is not possible to support
+|undef| without changing the deep embedding, but here defined |undef|
+entirely as a shallow embedding.  (It appears they underestimated the
+power of their own technique!)
+
+
 \subsection{Embedding option}
 
 We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
 
+The deep-and-shallow technique cleverly represents deep embeddding
+|E (a,b)| by shallow embedding |(E a, E b)|.  Hence, it is tempting to
+represent |E (Maybe a)| by |Maybe (E a)|, but this cannot work,
+because |fromE| would have to decide at generation-time whether to
+return |Just| or |Nothing|, but which to use is not known until
+run-time.
+
+Indeed, rather than extending the deep embedding to support the type
+|E (Maybe a)|, \citet{SvenningssonA12} prefer a different choice, that
+represents optional values while leaving |E| unchanged.  Following
+their development, we represent values of type |Maybe a| by the type
+|Opt_R a|, which pairs a boolean with a value of type |a|.  For a
+value corresponding to |Just x|, the boolean is true and the value is
+|x|, while for one corresponding to |Nothing|, the boolean is false
+and the value is |undef|.  We define |some_R|, |none_R|, and |opt_R|
+as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syntactic|
+instance is straightforward, mapping options to and from the pairs
+already defined for |E|.
+\begin{code}
+data Opt_R a = Opt_R { def :: E Bool, val :: a }
+
+instance Syntactic a => Syntactic (Opt_R a) where
+  type Internal (Opt_R a)  =  (Bool, Internal a)
+  toE (Opt_R b x)          =  Pair b (toE x)
+  fromE p                  =  Opt_R (Fst p) (fromE (Snd p))
+
+some_R         ::  a -> Opt_R a
+some_R x       =   Opt_R true x
+
+none_R         ::  Undef a => Opt_R a
+none_R         =   Opt_R false undef
+
+opt_R          ::  Syntactic b => b -> (a -> b) -> Opt_R a -> b
+opt_R d f o    =   def o ? (f (val o), d)
+\end{code}
+
+The next obvious step is to define a suitable monad over the type |Opt_R|.
+The natural definitions to use are as follows.
+\begin{code}
+return    ::  a -> Opt_R a
+return x  =   some_R x
+
+(>>=)     ::  (Undef b) => Opt_R a -> (a -> Opt_R b) -> Opt_R b
+o >>= g   =   Opt_R  (def o ? (def (g (val o)), false))
+                     (def o ? (val (g (val o)), undef))
+\end{code}
+However, this adds type constraint |Undef b| 
+to the type of |(>>=)|, which is not permitted.
+This need to add constraints often arises, and has
+been dubbed the constrained-monad problem 
+\citet{hughes:restricted-monad,SculthorpeBGG13}.
+To solve it, we follow a trick due to \cite{PerssonAS11}.
+
+We introduce a second continuation-passing style (cps) type |Opt|,
+defined in terms of the representation type |Opt_R|.  It is
+straightforward to define |Monad| and |Syntax| instances for the cps
+type, operations to lift the representation type to cps and to lower
+cps to the representation type, and to lift |some|, |none|, and
+|option| from the representation type to the cps type.
+The |lift| operation is closely related to the |(>>=)| operation
+we could not define above; it is properly typed,
+thanks to the type constraint on |b| in the definition of |Opt a|.
+
+\todo{fix typesetting of dot after $\forall$}
+\begin{code}
+newtype Opt a = O { unO :: forall b . Undef b => ((a -> Opt_R b) -> Opt_R b) }
+
+instance Monad Opt where
+  return x    =  O (\g -> g x)
+  m >>= k     =  O (\g -> unO m (\x -> unO (k x) g))
+
+instance Undef a => Syntactic (Opt a) where
+  type Internal (Opt a)  =  (Bool, Internal a)
+  fromE                  =  lift . fromE
+  toE                    =  toE . lower
+
+lift          ::  Opt_R a -> Opt a
+lift o        =   O (\g -> Opt_R  (def o ? (def (g (val o)), false))
+                                  (def o ? (val (g (val o)), undef)))
+
+lower         ::  Undef a => Opt a -> Opt_R a
+lower m       =   unO m some_R
+
+some          ::  a -> Opt a
+some a        =   lift (some_R a)
+
+none          ::  Undef a => Opt a
+none          =   lift none_R
+
+option        ::  (Undef a, Undef b) => b -> (a -> b) -> Opt a -> b
+option d f o  =   option_R d f (lower o) 
+\end{code}
+
+These definitions are adequate to support the EDSL code presented
+in Section~\ref{sec:second-example}.
+
+\todo{After discussing the subformula property, a different solution
+to this problem becomes available.}
 
 
-%   Arr           :: E Int -> (E Int -> E a) -> E (Array Int a)
-%   ArrLen        :: E (Array Int a) -> E Int
-%   ArrIx         :: E (Array Int a) -> E Int -> E a
+\subsection{Embedding Vector}
+
+Array programming is central to the intended application domain
+of MiniFeldspar. In this section, we extend our EDSL to handle
+arrays.
+
+First, extend our deep embedding |E| to support arrays. We add three constructs.
+The first accepts a length and a body that computes the array element
+for each index. The second extracts the length from an array, and the
+third fetches the element at a given index.
+\begin{code}
+  Arr           ::  E Int -> (E Int -> E a) -> E (Array Int a)
+  ArrLen        ::  E (Array Int a) -> E Int
+  ArrIx         ::  E (Array Int a) -> E Int -> E a
+\end{code}
+The exact sematics is given by |eval|.
+\begin{code}
+eval (Arr n g)        =  array (0,n-1) [ (i, eval (g (LitI i))) | i <- [0..n-1] ]
+eval (ArrLen a)       =  u-l+1  where (l,u) = bounds (eval a)
+eval (ArrIx a i)      =  eval a ! eval i
+\end{code}
+Corresponding to the deep embedding |Array| is a shallow embedding |Vector|.
+\begin{code}
+data Vector a = Vec (E Int) (E Int -> a)
+
+instance Syntactic a => Syntactic (Vector a) where
+  type Internal (Vector a)  =  Array Int (Internal a)
+  toE (Vec n g)             =  Arr n (toE . g)
+  fromE a                   =  Vec (ArrLen a) (\i -> fromE (ArrIx a i))
+
+instance Functor Vector where
+  fmap f (Vec n g)          =  Vec n (f . g)
+\end{code}
+The shallow embedding |Vec| resembles the constructor |Arr|, but whereas
+the body of |Arr| must return values of type |E a|, the body of a vector
+may return values of any type |a| that satisfies |Syntactic a|.
+It is straightforward to make |Vector| an instance of |Functor|.
+
+Here are some primitive operations on vectors
+\begin{code}
+zipWithVec  ::  (Syntactic a, Syntactic b) => 
+                (a -> b -> c) -> Vector a -> Vector b -> Vector c
+zipWithVec f (Vec m g) (Vec n h)  =   Vec (min m n) (\i -> f (g i) (h i))
+
+sumVec                            ::  (Syntactic a, Num a) => Vector a -> a
+sumVec (Vec n g)                  =   for n 0 (\x -> x + g i)
+\end{code}
+Computing |zipWithVec f u v| combines vectors |u| and |v| pointwise with |f|,
+and computing |sumVec v| sums the elements of vector |v|.
+
+This style of definition extends well to any functions where each vector
+element is computed independently, including |drop|, |take|, |reverse|,
+vector concatentation, and the like, but may work less well when there are
+dependencies between elements, as in computing a running sum.
+
+\todo{Check that running sum is a good example of something that is 
+hard in MiniFeldspar}
+
+\subsection{Fusion}
+
+Using our primitives, it is easy to compute the scalar product of two vectors.
+\begin{code}
+scalarProd      ::  (Syntactic a, Num a) => Vector a -> Vector a -> a
+scalarProd u v  =   sumVec (zipWith (*) u v)
+\end{code}
+An important consequence of the style of definition we have adopted is
+that it provides lightweight fusion. The above definition would not produce
+good C code if it first computed |zipWith (*) u v|, put the result into an
+intermediate vector |w|, and then computed |sumVec w|. Fortunately, it does
+not. Assume |u| is |Vec m g| and |v| is |Vec n h|. Then we can simplify
+|scalarProd u v| as follows.
+\[
+\begin{array}{cl}
+         &  |scalarProd u v|  \\
+\leadsto &  |sumVec (zipWith (*) u v)|  \\
+\leadsto &  |sumVec (zipWith (*) (Vec m g) (Vec n h)|  \\
+\leadsto &  |sumVec (Vec (min m n) (\i -> g i * h i)|  \\
+\leadsto &  |for (min m n) (\i x -> x + g i * h i)|
+\end{array}
+\]
+Indeed, we can see that by construction that whenever we combine two
+primitives the intermediate vector is always eliminated, a stronger
+guarantee than provided by conventional optimising compilers.
+
+There are some situations where fusion is not beneficial, notably
+when an intermediate vector is accessed many times fusion will cause
+the elements to be recomputed.  An alternative is to materialise the
+vector in memory with the following function.
+\begin{code}
+memorise            ::  Synactic a => Vector a -> Vector a
+memorise (Vec n g)  =   Vec n (\i -> ArrIx (Arr n (toE . g)) i)
+\end{code}
+The above definition depends on common subexpression elimination
+or observable sharing to ensure |Arr n (toE .g)| is computed
+once, rather than once for each element of the resulting vector.
+
+For example, if 
+\begin{code}
+blur :: Synactic a => Vector a -> Vector a
+\end{code}
+averages adjacent elements of a vector, then one may choose to
+compute either
+\begin{center}
+|blur (blur v)| ~~~or~~~ |blur (memorise (blur v))|
+\end{center}
+with different trade-offs between recomputation and memory usage.
+Strong guarantees for fusion in combination with |memorize| gives
+the programmer a simple interface which provides powerful optimisation
+combined with fine control over memory usage.
 
 
-% eval (Arr n f)        =  array (0,n') [ (i, eval (f (LitI i))) | i <- [0..n'] ]
-%                          where n' = eval n - 1
-% eval (ArrLen a)       =  u - l + 1  where (l,u) = bounds (eval a)
-% eval (ArrIx a i)      =  eval a ! eval i
+\section{MiniFeldspar as a QDSL}
 
 
 \section{The subformula property}
