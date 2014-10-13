@@ -36,6 +36,7 @@ instance (HasSin TFG.Typ t, r' ~ r , t' ~ t) =>
     Ind ea ei                -> FGV.ind  <$@> ea <*@> ei
     Let el eb                -> FGV.lett <$@> el <*@> eb
     Cmx er ei                -> FGV.cmx  <$@> er <*@> ei
+    Tag _  e                 -> cnvImp e
     Tmp _                    -> fail "Not Supported!"
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , ta' ~ ta , tb' ~ tb) =>

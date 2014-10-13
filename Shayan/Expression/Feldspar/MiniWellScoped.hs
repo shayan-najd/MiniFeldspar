@@ -36,6 +36,7 @@ data Exp :: [TFA.Typ] -> TFA.Typ -> * where
            Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
   Cmx   :: Exp r TFA.Flt -> Exp r TFA.Flt -> Exp r TFA.Cmx
   Tmp   :: String -> Exp r t  -- dummy constructor
+  Tag   :: String -> Exp r t -> Exp r t
 
 deriving instance Show (Exp r t)
 
@@ -95,6 +96,8 @@ eql (Let (el :: Exp r ta) eb) (Let (el' :: Exp r ta') eb') =
     _       -> False
 eql (Cmx ei er) (Cmx ei' er') = eql ei ei' && eql er er'
 eql (Tmp x    ) (Tmp x')      = x == x'
+eql (Tag _ e)   e'            = eql e e'
+eql e          (Tag _ e')     = eql e e'
 eql _           _             = False
 
 refEql :: IORef Int
@@ -134,6 +137,7 @@ mapVar f g (Ind ea ei)    = Ind (mapVar f g ea) (mapVar f g ei)
 mapVar f g (Let el eb)    = Let (mapVar f g el) (mapVar f g . eb . mapVar g f)
 mapVar f g (Cmx er ei)    = Cmx (mapVar f g er) (mapVar f g ei)
 mapVar _ _ (Tmp x)        = Tmp x
+mapVar f g (Tag x e)      = Tag x (mapVar f g e)
 
 absTmp :: forall r t t'. (HasSin TFG.Typ t', HasSin TFG.Typ t) =>
           Exp r t' -> String -> Exp r t -> Exp r t
@@ -161,6 +165,7 @@ absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
       Rgt Rfl               -> xx
       _                     -> ee
     | otherwise             -> ee
+  Tag x e                   -> Tag x (absTmp xx s e)
 
 -- when input string is not "__dummy__"
 hasTmp :: String -> Exp r t -> Bool
@@ -182,6 +187,7 @@ hasTmp s ee = case ee of
   Tmp x
     | s == x                -> True
     | otherwise             -> False
+  Tag _ e                   -> hasTmp s e
 
 hasTmpF :: String -> (Exp r ta -> Exp r tb) -> Bool
 hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))

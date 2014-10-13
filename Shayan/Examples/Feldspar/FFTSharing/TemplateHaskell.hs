@@ -12,10 +12,13 @@ import qualified Expression.Feldspar.GADTValue       as FGV
 import qualified Type.Feldspar.GADT                  as TFG
 import Compiler (scompileWith)
 
-import qualified Expression.Feldspar.GADTHigherOrder as FGHO
 import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Expression.Feldspar.Conversion ()
+
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
+import CSE
 
 fft :: Data (Ary Complex -> Ary Complex)
 fft = [|| \ v ->
@@ -76,14 +79,12 @@ fftFMWS :: FMWS.Exp (TFA.Ary TFA.Cmx ': Prelude) (TFA.Ary TFA.Cmx)
 fftFMWS = MP.frmRgt (cnv ([|| $$fft dummyAry  ||]
                          , TFG.Ary TFG.Cmx <:> etTFG
                          , 'dummyAry <+> esTH))
-{-
+
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt
-                          (scompileWith [("v0" , TFA.Ary TFA.Cmx)]
-                           (TFG.Ary TFG.Cmx)
-                           ("v0" <+> esString) 1
-                           ({- nrmIf (as MP./= "NoNrm") -} fftFMWS))
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-                  in MP.writeFile (as MP.++ "FFTTemplateHaskell.c") f')
--}
+main = let f = MP.frmRgt
+               (scompileWith [("v0" , TFA.Ary TFA.Cmx)]
+                (TFG.Ary TFG.Cmx)
+                ("v0" <+> esString) 1
+                (nrm (cse fftFMWS)))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in MP.writeFile "FFTTemplateHaskell.c" f'

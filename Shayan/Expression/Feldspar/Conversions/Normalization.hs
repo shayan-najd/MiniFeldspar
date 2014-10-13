@@ -85,6 +85,7 @@ instance (HasSin TFG.Typ t , t' ~ t , r' ~ r) =>
     FMWS.Ind ea ei            -> FGHO.Ind <$@> ea <*@> ei
     FMWS.Let el eb            -> FGHO.Let <$@> el <*@> eb
     FMWS.Cmx er ei            -> FGHO.Cmx <$@> er <*@> ei
+    FMWS.Tag _  e             -> cnvImp e
     FMWS.Tmp x                -> pure (FGHO.Tmp x)
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb, ta ~ ta' , tb ~ tb' , r ~ r') =>

@@ -1,0 +1,75 @@
+#!/bin/bash
+for a in IPBW IPGray CRC FFT Windowing
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    ./clean
+	    rm ${a}${n}
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Compile ghc -o ${a}${n} Examples/Feldspar/${a}Sharing/${n}.hs -Wall -fno-warn-orphans -XNoMonomorphismRestriction -XPolyKinds -XDataKinds -XConstraintKinds -XTypeOperators -XTypeFamilies -XGADTs -XFlexibleInstances -XFlexibleContexts -XStandaloneDeriving -XDeriveFoldable -XDeriveFunctor -XDeriveTraversable -XDeriveDataTypeable -XDeriveGeneric -XNoUndecidableInstances -XMonoLocalBinds -XScopedTypeVariables -XMultiParamTypeClasses -XImplicitParams -XTemplateHaskell -XRankNTypes -XPatternSynonyms -XViewPatterns -XNoImplicitPrelude
+	done
+    done
+done
+./clean
+for a in IPBW IPGray CRC FFT Windowing
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    rm ${a}${n}.c
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Gen ./${a}${n}
+	done
+    done
+done
+./clean
+
+for a in IPBW IPGray CRC FFT Windowing
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    rm ${a}${n}
+	    /usr/bin/time -f "%e" -a -o time${a}${n}GCC gcc -o ${a}${n} ${a}${n}.c -lm -std=c99
+	done
+    done
+done
+for a in IPBW IPGray CRC FFT Windowing
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	for i in {1..10}
+	do
+	    #if [ ${a}${n} != FFTMiniWellScoped ]; then
+	    rm ImageIPBW.pbm
+	    rm ImageIPGray.pgm
+	    rm ImageFFT.pgm
+	    rm ImageWindowing.pgm
+	    /usr/bin/time -f "%e" -a -o time${a}${n}Run ./${a}${n}
+            #fi
+	done
+    done
+done
+for a in IPBW IPGray CRC FFT Windowing
+do
+    for n in MiniWellScoped TemplateHaskell
+    do
+	    rm ${a}${n}
+	    rm ${a}${n}.c
+	    rm ${a}${n}
+    done
+done
+rm ImageIPBW.pbm
+rm ImageIPGray.pgm
+rm ImageFFT.pgm
+rm ImageWindowing.pgm
+./clean
+F=Experiment_Sharing_$(date +%Y-%m-%d-%H-%M-%S)
+mkdir $F
+for file in time*; do
+    mv $file ./$F/$file
+done
+./Process ./$F/
+./csv ./$F/

@@ -13,6 +13,9 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler (scompileWith)
 
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
+
 crc32 :: Vec Integer -> Data Integer
 crc32 = foldl updCrc 0
 
@@ -43,11 +46,10 @@ crcAry :: Data (Ary Integer) -> Data Integer
 crcAry = crc32 MP.. ary2vec
 
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let f  = MP.frmRgt
-                           (scompileWith []
-                            TFG.Int
-                            esString 0
-                            crcAry)
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-                  in  MP.writeFile (as MP.++ "CRCMiniWellScoped.c") f')
+main = let f  = MP.frmRgt
+                (scompileWith []
+                 TFG.Int
+                 esString 0
+                 (nrm crcAry))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in MP.writeFile "CRCMiniWellScoped.c" f'

@@ -7,7 +7,7 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,Complex,cmx,real,imag
        ,Vec,vec,lenV,indV
        ,Ary,ary,len,ind
-       ,ifThenElse,whl,forLoop,forLoopVec,share --memorize
+       ,ifThenElse,whl,forLoop,forLoopVec,share,shared --memorize
        ,not,and,or
        ,Equality(eql),notEql
        ,Ordering(lt),gt,lte,gte,min
@@ -15,19 +15,24 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis,ary2vec,vec2ary
        ,frmTo,permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
+       ,replicate,append
        ,frmToA,permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
+       ,replicateA,appendA
        ) where
 
 import qualified Prelude   as P
 import qualified MyPrelude as MP
 
-import Expression.Feldspar.MiniWellScoped
+import Expression.Feldspar.MiniWellScoped hiding (eql)
 import qualified Type.Feldspar.ADT             as TFA
 import qualified Type.Feldspar.GADT            as TFG
 
 import Singleton
 import Environment.Typed (Env(Emp,Ext))
 import Examples.Feldspar.Prelude.Environment
+
+import Data.Unique
+import System.IO.Unsafe
 
 type Type t = HasSin TFG.Typ t
 
@@ -154,6 +159,9 @@ whl = Whl
 
 share :: Type tl => Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
 share = Let
+
+shared :: Exp r t -> Exp r t
+shared e = Tag (unsafePerformIO (P.fmap (P.show P.. hashUnique) newUnique)) e
 
 forLoop :: Type s => Data Integer -> Data s ->
            (Data Integer -> Data s -> Data s ) -> Data s
@@ -326,7 +334,7 @@ vec2ary :: Vec t -> Data (Ary t)
 vec2ary v = Ary (lenV v) (indV v)
 
 ary2vec :: Type t => Data (Ary t) -> Vec t
-ary2vec v = vec (Len v) (\i -> Ind v i)
+ary2vec v = let v' = shared v in vec (Len v') (\i -> Ind v' i)
 
 ---------------------------------------------------------------------------------
 -- Vector Operators
@@ -371,6 +379,15 @@ sum = foldl add (ConI 0)
 scalarProd :: Vec Integer -> Vec Integer -> Data Integer
 scalarProd v1 v2 = sum (zipWith mul v1 v2)
 
+replicate :: Data Integer -> Data a -> Vec a
+replicate n x = vec n (\ _i -> x)
+
+append :: Vec a -> Vec a -> Vec a
+append v1 v2 = vec (add (lenV v1) (lenV v2))
+                   (\ i -> ifThenElse (lt i (lenV v1))
+                                      (indV v1 i)
+                                      (indV v2 i))
+
 ---------------------------------------------------------------------------------
 -- Ary Operators
 ---------------------------------------------------------------------------------
@@ -409,6 +426,15 @@ sumA = foldlA add (ConI 0)
 
 scalarProdA :: Data (Ary Integer) -> Data (Ary Integer) -> Data Integer
 scalarProdA v1 v2 = sumA (zipWithA mul v1 v2)
+
+replicateA :: Data Integer -> Data a -> Data (Ary a)
+replicateA n x = ary n (\ _i -> x)
+
+appendA ::Type a => Data (Ary a) -> Data (Ary a) -> Data (Ary a)
+appendA a1 a2 = ary (add (len a1) (len a2))
+                    (\ i -> ifThenElse (lt i (len a1))
+                                       (ind a1 i)
+                                       (ind a2 i))
 
 ---------------------------------------------------------------------------------
 -- Helper Operators

@@ -2,7 +2,7 @@ module Normalization.Feldspar.MiniWellscoped () where
 
 import MyPrelude hiding (foldl,fmap)
 
-import Expression.Feldspar.MiniWellScoped hiding (ref)
+import Expression.Feldspar.MiniWellScoped
 
 import Normalization
 import Data.IORef
@@ -33,6 +33,7 @@ isVal ee = case ee of
   Let  _  _    -> False
   Cmx  _  _    -> False
   Tmp  _       -> True
+  Tag  _  e    -> isVal e
 
 val :: Exp n t -> (Bool,Exp n t)
 val ee = (isVal ee , ee)
@@ -138,6 +139,7 @@ instance HasSin TFG.Typ t => NrmOne (Exp n t) where
       | isFresh eb               -> chg (eb v)
     Let el             eb        -> Let  <$@> el <*@> eb
     Tmp x                        -> pure (Tmp x)
+    Tag x e                      -> Tag x <$@> e
 
 ref :: IORef Int
 {-# NOINLINE ref #-}

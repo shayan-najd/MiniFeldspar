@@ -16,6 +16,9 @@ import qualified Expression.Feldspar.MiniWellScoped  as FMWS
 import qualified Type.Feldspar.ADT                   as TFA
 import Expression.Feldspar.Conversion ()
 
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
+
 crc32 :: Data (Ary Integer -> Integer)
 crc32 = [|| $$foldl $$updCrc 0 ||]
 
@@ -52,11 +55,10 @@ crc32FMWS = MP.frmRgt (cnv ([|| $$crc32 dummyAry0 ||]
                                 , 'dummyAry0 <+> esTH))
 
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt
-                          (scompileWith [("v0" , TFA.Ary TFA.Int)]
-                           TFG.Int
-                           ("v0" <+> esString) 1
-                           crc32FMWS)
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-                  in  MP.writeFile (as MP.++ "CRCTemplateHaskell.c") f')
+main = let f = MP.frmRgt
+               (scompileWith [("v0" , TFA.Ary TFA.Int)]
+                TFG.Int
+                ("v0" <+> esString) 1
+                (nrm crc32FMWS))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in  MP.writeFile "CRCTemplateHaskell.c" f'

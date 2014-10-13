@@ -2,7 +2,7 @@ module Normalization.Feldspar.GADTHigherOrder (eta) where
 
 import MyPrelude
 
-import Expression.Feldspar.GADTHigherOrder hiding (ref)
+import Expression.Feldspar.GADTHigherOrder
 
 import Normalization
 import Data.IORef

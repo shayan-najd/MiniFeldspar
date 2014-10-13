@@ -14,6 +14,7 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis
        ,frmTo,permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
+       ,replicate,append
        ) where
 
 import MyPrelude (Integer,Array,Float,Bool(..))
@@ -316,6 +317,15 @@ sum = [|| $$foldl $$add ($$frmInt 0) ||]
 
 scalarProd :: Data (Ary Integer -> Ary Integer -> Integer)
 scalarProd  = [|| \ v1 -> \ v2 -> $$sum ($$zipWith $$mul v1 v2) ||]
+
+replicate :: FO a => Data (Integer -> a -> Ary a)
+replicate = [|| \ n -> \ x -> ary n (\ _i -> x) ||]
+
+append :: FO a => Data (Ary a -> Ary a -> Ary a)
+append = [|| \ a1 -> \ a2 -> ary ($$add (len a1) (len a2))
+                                 (\ i -> if $$lt i (len a1)
+                                         then ind a1 i
+                                         else ind a2 i) ||]
 
 fromList :: FO a => [Data a] -> Data a -> Data (Ary a)
 fromList lst k =  let l = MP.fromInteger (MP.toInteger (MP.length lst))

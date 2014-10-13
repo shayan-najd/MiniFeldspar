@@ -1,4 +1,4 @@
-module Examples.Feldspar.IP.Common where
+module Examples.Feldspar.IPGray.Common where
 
 import MyPrelude
 
@@ -33,10 +33,10 @@ loaderC = "\nint main()\
 \\n  func(aryIn , &aryOut);\
 \\n  Image imgOut = {.sizeX = imgIn.sizeX, \
 \\n                  .sizeY = imgIn.sizeY,\
-\\n                  .type  = 1,\
+\\n                  .type  = 2,\
 \\n                  .data  = malloc(lenAryInt(aryOut) * sizeof(Int))}; \
 \\n  for(Int i = 0; i < lenAryInt(aryOut); i++)\
 \\n    imgOut.data[i] = indAryInt(aryOut , i);\
-\\n  writeImage (\"Image.pbm\" , imgOut);\
+\\n  writeImage (\"ImageIPGray.pgm\" , imgOut);\
 \\n  return 0;\
 \\n}"

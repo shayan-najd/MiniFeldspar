@@ -13,9 +13,13 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler(scompile)
 
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
+import CSE
+
 fft :: Vec Complex -> Vec Complex
 fft = \ v ->
-      let steps = sub (ilog2 (lenV v)) 1 in
+      let steps = shared (sub (ilog2 (lenV v)) 1) in
       bitRev steps (fftCore steps v)
 
 fftCore :: Data Integer -> Vec Complex -> Vec Complex
@@ -24,15 +28,16 @@ fftCore = \ n -> \ vv ->
                 (\ j -> \ v ->
                         vec (lenV vv) (\ i -> ixf v (sub n j) i))
 
-ixf :: Vec Complex -> Data Integer -> Data Integer -> Data Complex
+ixf :: Vec Complex
+    -> Data Integer -> Data Integer -> Data Complex
 ixf = \ v -> \ k -> \ i ->
-      share (shfLft 1 k)                                   (\ k2 ->
-      share (cis (div (mul pi (i2f (lsbs k i))) (i2f k2))) (\ twid ->
-      share (indV v i)                                     (\ a ->
-      share (indV v (bitXor i k2))                         (\ b ->
+      let k2   = shared (shfLft 1 k) in
+      let twid = shared (cis (div (mul pi (i2f (lsbs k i))) (i2f k2))) in
+      let a    = shared (indV v i) in
+      let b    = shared (indV v (bitXor i k2)) in
         if testBit i k
         then mul twid (sub b a)
-        else add a b))))
+        else add a b
 
 bitRev :: Data Integer -> Vec Complex -> Vec Complex
 bitRev = \ n -> \ x ->
@@ -61,20 +66,11 @@ prop = test out
 fftAry :: Data (Ary Complex) -> Data (Ary Complex)
 fftAry = vec2ary MP.. fft MP.. ary2vec
 
-c = let f = MP.frmRgt
-            (scompile
-             (TFG.Ary TFG.Cmx)
-             esString
-             fftAry)
-        f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-    in MP.writeFile ("FFTSharingMiniWellScoped.c") f'
-
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt
-                          (scompile
-                           (TFG.Ary TFG.Cmx)
-                           esString
-                           fftAry)
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-                  in  MP.writeFile (as MP.++ "FFTSharingMiniWellScoped.c") f')
+main = let f = MP.frmRgt
+               (scompile
+                (TFG.Ary TFG.Cmx)
+                esString
+                (nrm (cseF fftAry)))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in  MP.writeFile "FFTMiniWellScoped.c" f'

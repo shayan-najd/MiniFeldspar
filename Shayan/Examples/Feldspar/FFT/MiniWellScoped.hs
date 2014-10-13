@@ -13,6 +13,9 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler(scompile)
 
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
+
 fft :: Vec Complex -> Vec Complex
 fft = \ v ->
       let steps = sub (ilog2 (lenV v)) 1 in
@@ -63,11 +66,10 @@ fftAry :: Data (Ary Complex) -> Data (Ary Complex)
 fftAry = vec2ary MP.. fft MP.. ary2vec
 
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let f = MP.frmRgt
-                          (scompile
-                           (TFG.Ary TFG.Cmx)
-                           esString
-                           fftAry)
-                      f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-                  in  MP.writeFile (as MP.++ "FFTMiniWellScoped.c") f')
+main = let f = MP.frmRgt
+               (scompile
+                (TFG.Ary TFG.Cmx)
+                esString
+                (nrm fftAry))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in  MP.writeFile "FFTMiniWellScoped.c" f'

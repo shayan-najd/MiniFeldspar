@@ -4,7 +4,7 @@ import qualified MyPrelude as MP
 
 import Examples.Feldspar.Prelude.MiniWellScoped
 import Examples.Feldspar.Prelude.Environment
-import Examples.Feldspar.IP.Common
+import Examples.Feldspar.IPGray.Common
 
 import Conversion
 import Expression.Feldspar.Conversions.Evaluation.MiniWellScoped ()
@@ -13,8 +13,8 @@ import qualified Expression.Feldspar.GADTValue as FGV
 import qualified Type.Feldspar.GADT            as TFG
 import Compiler (scompileWith)
 
-toBW :: Vec Integer -> Vec Integer
-toBW = map (\x -> if lt x 135 then 1 else 0)
+import Normalization
+import Normalization.Feldspar.MiniWellscoped ()
 
 redCoefficient :: Data Integer
 redCoefficient   = 30
@@ -43,30 +43,25 @@ toGray = \ v ->
                          (indV v (add j 1))
                          (indV v (add j 2)))
 
-fromColoredtoBW :: Vec Integer -> Vec Integer
-fromColoredtoBW = \ v -> toBW (toGray v)
-
 inp :: Vec Integer
 inp = fromList (MP.fmap (\ i -> litI (MP.fromIntegral i)) tstPPM) 0
 
 out :: [MP.Integer]
 out  = let FGV.Exp e = MP.frmRgt (cnv ((vec2ary MP..
-                                        fromColoredtoBW) inp, etFGV))
+                                        toGray) inp, etFGV))
        in  MP.elems e
 
 prop :: MP.Bool
-prop = out MP.== tstPBM
+prop = out MP.== tstPGM
 
-fromColoredtoBWAry :: Data (Ary Integer) -> Data (Ary Integer)
-fromColoredtoBWAry = vec2ary MP.. fromColoredtoBW MP.. ary2vec
+toGrayAry :: Data (Ary Integer) -> Data (Ary Integer)
+toGrayAry = vec2ary MP.. toGray MP.. ary2vec
 
 main :: MP.IO ()
-main = MP.getArgs MP.>>=
-       (\ [as] -> let
-            f = MP.frmRgt
-                (scompileWith []
-                 (TFG.Ary TFG.Int)
-                 esString 0
-                 fromColoredtoBWAry)
-            f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
-       in  MP.writeFile (as MP.++ "IPMiniWellScoped.c") f')
+main = let f = MP.frmRgt
+               (scompileWith []
+                (TFG.Ary TFG.Int)
+                esString 0
+                (nrm toGrayAry))
+           f' = "#include\"ppm.h\"\n" MP.++ f MP.++ loaderC
+       in  MP.writeFile "IPGrayMiniWellScoped.c" f'
