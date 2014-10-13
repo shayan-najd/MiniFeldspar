@@ -192,7 +192,7 @@ CDSL means any embedded domain-specific language, and includes
 all techniques covered here.) The technique is clearly described
 by \citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
 and \citet{SvenningssonS13}. Essentially the same technique is also
-applied in Obsidian \citep{obsidian} and Nicola \citep{nicola}.
+applied in Obsidian \citep{obsidian} and Nikola \citep{NIKOLA}.
 
 In a single landmark paper, \citet{gentzen35} introduced the two
 formulations of logic most widely used today, natural deduction and
