@@ -13,7 +13,8 @@ main = do [d] <- getArgs
                           fc <- readFile (d </> f)
                           let ls = lines fc
                           return (drop 4 f
-                                 , sum (map (read :: String -> Float) ls)
-                                           / fromIntegral (length ls))
+                                 , {-sum-} minimum
+                                               (map (read :: String -> Float) ls)
+                                          {- / fromIntegral (length ls)-})
                        ) fs
           writeFile (d </> "result") (show avgs)

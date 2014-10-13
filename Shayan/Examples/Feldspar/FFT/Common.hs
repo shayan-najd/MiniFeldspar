@@ -20,7 +20,7 @@ tstInp = [-4.71238898038469,
 loaderC :: String
 loaderC = "\nint main()\
 \\n{\
-\\n  Image   imgIn = readImage(\"Image.pgm\");\
+\\n  Image   imgIn = readImage(\"ImageBig.pgm\");\
 \\n  AryCmx  aryIn = newAryCmx(size(imgIn)); \
 \\n  for (Int i = 0; i < size(imgIn); i++)\
 \\n    aryIn = setAryCmx(aryIn , i , cmx(i2f(imgIn.data[i]),0.0));\

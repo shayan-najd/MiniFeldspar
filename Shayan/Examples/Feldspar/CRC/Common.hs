@@ -66,7 +66,7 @@ tblLst = [
 loaderC :: String
 loaderC = "\nint main()\
 \\n{\
-\\n  Image   imgIn = readImage(\"Image.pgm\");\
+\\n  Image   imgIn = readImage(\"ImageBig.pgm\");\
 \\n  AryInt  aryIn = newAryInt(size(imgIn));\
 \\n  for (Int i = 0; i < size(imgIn); i++)\
 \\n    aryIn = setAryInt(aryIn , i , imgIn.data[i]);\
