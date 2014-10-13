@@ -1,7 +1,7 @@
 module Expression.Feldspar.Conversions.Unquoting () where
 
 import MyPrelude (pure,fail,toRational,toInteger,fromInteger,fromRational
-                 ,show,(++),(==),Maybe(..))
+                 ,show,(++),(==),Maybe(..),(<$>),(<*>),ErrM)
 
 import qualified Expression.Feldspar.ADTUntypedNamed as FAUN
 import qualified Language.Haskell.TH.Syntax          as TH
@@ -9,6 +9,21 @@ import qualified Language.Haskell.TH.Syntax          as TH
 import Conversion
 
 import Examples.Feldspar.Prelude.TemplateHaskell
+
+mkDo :: [TH.Stmt] -> ErrM (FAUN.Exp TH.Name)
+mkDo st = let ?r = () in case st of
+  [TH.NoBindS e]                -> cnvImp e
+  (TH.BindS (TH.VarP x) e : es) -> FAUN.App <$>
+                                   (FAUN.App (FAUN.Var (TH.mkName "bind"))
+                                            <$> (FAUN.Abs <$@> x <*@> e ))
+                                   <*> mkDo es
+  (TH.NoBindS           e : es) -> FAUN.App <$>
+                                   (FAUN.App (FAUN.Var (TH.mkName "bind"))
+                                            <$> (FAUN.Abs
+                                                         (TH.mkName "__dummyb__")
+                                                         <$@> e ))
+                                   <*> mkDo es
+  _                             -> fail ("Syntax Error!\n" ++ (show st))
 
 instance Cnv (TH.Exp , ()) (FAUN.Exp TH.Name) where
   cnv (ee , r) = let ?r = r in case ee of
@@ -20,8 +35,10 @@ instance Cnv (TH.Exp , ()) (FAUN.Exp TH.Name) where
     TH.ConE n
       | n == 'True          -> FAUN.ConB <$@> True
       | n == 'False         -> FAUN.ConB <$@> False
+    TH.ConE n               -> FAUN.Var  <$@> n
     TH.VarE n               -> FAUN.Var  <$@> n
     TH.LamE [TH.VarP x] eb  -> FAUN.Abs  <$@> x <*@> eb
+    TH.DoE stmts            -> mkDo stmts
     TH.AppE (TH.VarE n) ea
       | n == 'fst           -> FAUN.Fst  <$@> ea
       | n == 'snd           -> FAUN.Snd  <$@> ea
