@@ -973,9 +973,6 @@ element is computed independently, including |drop|, |take|, |reverse|,
 vector concatentation, and the like, but may work less well when there are
 dependencies between elements, as in computing a running sum.
 
-\todo{Check that running sum is a good example of something that is 
-hard in MiniFeldspar}
-
 \subsection{Fusion}
 
 Using our primitives, it is easy to compute the scalar product of two vectors.
