@@ -173,7 +173,7 @@ The QDSL technique to building domain-specific languages was proposed
 by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
 They conjectured that the technique applies more widely, and here we
 test that conjecture by applying QDSL to Feldspar, an CDSL for signal
-processing in Haskell that generates C \citep{feldspar}. Our technique
+processing in Haskell that generates C \citep{FELDSPAR}. Our technique
 depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
 So far as we know, the full QDSL approach---which, crucially, includes
