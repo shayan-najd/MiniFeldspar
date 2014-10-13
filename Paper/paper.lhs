@@ -685,7 +685,7 @@ Type |Internal| is a GHC type family \citep{type-families}.  Functions
 |toDp| and |fromDp| translate between the shallow embedding |a| and the
 deep embedding |Dp (Internal a)|.
 
-The first instance of |Syntactic| is |E| itself, and is straightforward.
+The first instance of |Syntactic| is |Dp| itself, and is straightforward.
 \begin{code}
 instance Syntactic (Dp a) where
   type Internal (Dp a)  =  a
@@ -827,7 +827,7 @@ run-time.
 
 Indeed, rather than extending the deep embedding to support the type
 |Dp (Maybe a)|, \citet{SvenningssonA12} prefer a different choice, that
-represents optional values while leaving |E| unchanged.  Following
+represents optional values while leaving |Dp| unchanged.  Following
 their development, we represent values of type |Maybe a| by the type
 |Opt_R a|, which pairs a boolean with a value of type |a|.  For a
 value corresponding to |Just x|, the boolean is true and the value is
@@ -835,7 +835,7 @@ value corresponding to |Just x|, the boolean is true and the value is
 and the value is |undef|.  We define |some_R|, |none_R|, and |opt_R|
 as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syntactic|
 instance is straightforward, mapping options to and from the pairs
-already defined for |E|.
+already defined for |Dp|.
 \begin{code}
 data Opt_R a = Opt_R { def :: Dp Bool, val :: a }
 
@@ -924,7 +924,7 @@ Array programming is central to the intended application domain
 of MiniFeldspar. In this section, we extend our CDSL to handle
 arrays.
 
-First, extend our deep embedding |E| to support arrays. We add three constructs.
+First, extend our deep embedding |Dp| to support arrays. We add three constructs.
 The first accepts a length and a body that computes the array element
 for each index. The second extracts the length from an array, and the
 third fetches the element at a given index.
