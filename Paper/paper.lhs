@@ -809,7 +809,7 @@ it returns the undefined value of type |Float|, which
 is also zero.
 
 \citet{SvenningssonA12} claim that it is not possible to support
-|undef| without changing the deep embedding, but here defined |undef|
+|undef| without changing the deep embedding, but here we have defined |undef|
 entirely as a shallow embedding.  (It appears they underestimated the
 power of their own technique!)
 
