@@ -128,26 +128,27 @@ Good artists copy, great artists steal. --- Picasso
 \end{quotation}
 \vspace{2ex}
 
-Should you use EDSL or QDSL?
+Which shall it be, CDSL or QDSL?
 
 Say you wish to use a domain-specific language embedded in a host
 language to generate code in a target language.  One widely-used
 technique combines deep and shallow embedding, which we refer to as
-EDSL.  Here we introduce a second technique based on quotation and
-normalisation of quoted terms, which we refer to as QDSL.
+CDSL (Combined Domain Specific Language).  Here we introduce a second
+technique based on quotation and normalisation of quoted terms, which
+we refer to as QDSL (Quoted Domain Specific Language).
 
-EDSL is great in part because it steals the type system of its host
+CDSL is great in part because it steals the type system of its host
 language. Arguably, QDSL is greater because it steals the type system,
 the concrete syntax, and the abstract syntax of its host language.
 
-EDSL sometimes, but not always, avoids the need for normalisation.
-QDSL depends crucially on normalisation. Each EDSL has a
+CDSL sometimes, but not always, avoids the need for normalisation.
+QDSL depends crucially on normalisation. Each CDSL has a
 different deep embedding, so when normalisation is required, a new
-normaliser needs to be written for each EDSL. In contrast, all QDSLs for a
+normaliser needs to be written for each CDSL. In contrast, all QDSLs for a
 host language share the same deep embedding---namely, the abstact
 syntax of the host language---so they can share a single normaliser.
 
-Both EDSL and QDSL steal types from the host language. Sometimes, it
+Both CDSL and QDSL steal types from the host language. Sometimes, it
 proves convenient to steal a type from the host even when we expect it
 never to appear in target. The most common example is when we exploit
 higher-order types in the host even when the target supports only
@@ -171,7 +172,7 @@ by saying: it is not roundabout.
 The QDSL technique to building domain-specific languages was proposed
 by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
 They conjectured that the technique applies more widely, and here we
-test that conjecture by applying QDSL to Feldspar, an EDSL for signal
+test that conjecture by applying QDSL to Feldspar, an CDSL for signal
 processing in Haskell that generates C \citep{feldspar}. Our technique
 depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
@@ -186,8 +187,8 @@ explicit, as here, while in C\# LINQ and Scala LMS, quotation and
 anti-quotation is controlled by type inference.
 
 Feldspar exploits a combination of deep and shallow embedding, 
-a technique which we here refer to as simply EDSL. (In other contexts,
-EDSL means any embedded domain-specific language, and includes
+a technique which we here refer to as simply CDSL. (In other contexts,
+CDSL means any embedded domain-specific language, and includes
 all techniques covered here.) The technique is clearly described
 by \citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
 and \citet{SvenningssonS13}. Essentially the same technique is also
@@ -206,14 +207,14 @@ first-order queries, easily translated to SQL.  Similarly here, our
 QDSL source may refer to higher-order concepts or data types such as
 |Maybe|, while we ensure that these do not appear in the generated
 code.  The idea is not limited to QDSL, as
-Section~\ref{sec:edsl-maybe} applies the same idea to EDSL.
+Section~\ref{sec:edsl-maybe} applies the same idea to CDSL.
 
 The paper makes the following contributions.
 \begin{itemize}
 \item Section~\ref{sec:overview} introduces and compares the
-EDSL and QDSL approaches, in the context of a simple example.
+CDSL and QDSL approaches, in the context of a simple example.
 
-\item Section~\ref{sec:edsl} reviews how the EDSL approach
+\item Section~\ref{sec:edsl} reviews how the CDSL approach
 works in detail, in the context of Feldspar.
 
 \item Section~\ref{sec:qdsl} describes how the QDSL approach
@@ -224,7 +225,7 @@ that ensures the subformula property while not losing sharing,
 which can be applied to both call-by-need and call-by-value semantics.
 
 \item Section~\ref{sec:empirical} presents empirical results for
-Feldspar programs written and executed in both styles, showing EDSL
+Feldspar programs written and executed in both styles, showing CDSL
 and QDSL achieve comparable results.
 
 \end{itemize}
@@ -269,16 +270,16 @@ For example,
 \end{lstlisting}
 should result from instantiating |power| to |(-6)|.
 
-For EDSL, we assume a type |EDSL a| to represent a term
+For CDSL, we assume a type |Dp a| to represent a term
 of type |a|, and function
 \begin{code}
-edslC :: (EDSL a -> EDSL b) -> C
+edslC :: (Dp a -> Dp b) -> C
 \end{code}
 to generate a \texttt{main} function corresponding to its
 argument, where |C| is a type that represents |C| code.
-Here is a solution to our problem using EDSL.
+Here is a solution to our problem using Dp.
 \begin{code}
-power :: Int -> EDSL Float -> EDSL Float
+power :: Int -> Dp Float -> Dp Float
 power n x =
   if n < 0 then
     x .==. 0 ? (0,  1 / power (-n) x)
@@ -289,20 +290,20 @@ power n x =
   else
     x * power (n-1) x
 
-sqr    ::  EDSL Float -> EDSL Float
+sqr    ::  Dp Float -> Dp Float
 sqr y  =   y * y
 \end{code}
 Invoking |edslC (power (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes
 \[
-|EDSL Float -> EDSL Float|
+|Dp Float -> Dp Float|
 \]
-in the EDSL solution, meaning that |power n| accepts a representation
+in the CDSL solution, meaning that |power n| accepts a representation
 of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
-In EDSL, the body of the code remains almost---but not
+In CDSL, the body of the code remains almost---but not
 quite!---identical to the original.  Clever encoding tricks, which we
 will explain later, permit declarations, function calls, arithmetic
 operations, and numbers to appear the same whether they are to be
@@ -312,7 +313,7 @@ depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
 |M .==. N| and |L ?  (M, N)| for the latter.
 
-Assuming |x| contains a value of type |EDSL Float| denoting an object
+Assuming |x| contains a value of type |Dp Float| denoting an object
 variable |u| of type float, evaluating |power (-6) x| yields following.
 \begin{code}
 (u .==. 0) ? (0, 1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1))))
@@ -328,10 +329,10 @@ as observable sharing, permits recovering the sharing structure.
 \]
 It is easy to generate the final C code from this structure.
 
-By contrast, for QDSL, we assume a type |QDSL a| to represent a
+By contrast, for QDSL, we assume a type |Qt a| to represent a
 quoted term of type |a|, and function
 \begin{code}
-qdslC :: QDSL (a -> b) -> C
+qdslC :: Qt (a -> b) -> C
 \end{code}
 to generate a \texttt{main} function corresponding to its
 argument.  Here is a solution to our problem using QDSL.
@@ -354,7 +355,7 @@ Invoking |qdslC (power (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes
 \[
-|QDSL (Float -> Float)|
+|Qt (Float -> Float)|
 \]
 in the QDSL solution, meaning that |power n| returns a quotation
 of a function that accepts an argument and returns that
@@ -388,12 +389,12 @@ the normalised term.
 Here are some points of comparison between the two approaches.
 \begin{itemize}
 
-\item EDSL requires some term forms, such as comparison and
+\item CDSL requires some term forms, such as comparison and
 conditionals, to differ between the host and embedded languages.
 In contrast, QDSL enables the host and embedded languages to
 appear identical.
 
-\item EDSL permits the host and embedded languages to intermingle
+\item CDSL permits the host and embedded languages to intermingle
 seamlessly. In contrast, QDSL requires syntax to separate quoted and
 unquoted terms, which (depending on your point of view) may be
 considered as an unnessary distraction or as drawing a useful
@@ -401,21 +402,21 @@ distinction between generation-time and run-time.  If one takes the
 former view, the type-based approach to quotation found in C\# and
 Scala might be preferred.
 
-\item EDSL typically develops custom shallow and deep embeddings for
+\item CDSL typically develops custom shallow and deep embeddings for
 each application, although these may follow a fairly standard pattern
 (as we review in Section~\ref{sec:shallow-deep}).  In contrast, QDSL
 may share the same representation for quoted terms across a range of
 applications; the quoted language is the host language, and does not
 vary with the specific domain.
 
-\item EDSL loses sharing, which must later be recovered be either
+\item CDSL loses sharing, which must later be recovered be either
 common subexpression elimination or applying a technique such as
 observable sharing.  Common subexpression elimination can be
 expensive, as we will see in the FFT example in Section~\ref{sec:fft}.
 Observable sharing is less costly, but requires stepping outside a
 pure functional model. In contrast, QDSL preserves sharing throughout.
 
-\item EDSL yields the term in normalised form in this case, though
+\item CDSL yields the term in normalised form in this case, though
 there are other situations where a normaliser is required (see
 Section~\ref{sec:second-example}).  In contrast, QDSL yields an unwieldy term
 that requires normalisation.  However, just as a single representation
@@ -467,10 +468,10 @@ The same C code as before should result from instantiating |power''| to |(-6)|.
 (In this case, the refactored function is arguably clumsier than the original,
 but clearly it is desirable to support this form of refactoring in general.)
 
-In EDSL, type |Maybe| is represented by type |Option|.
+In CDSL, type |Maybe| is represented by type |Option|.
 Here is the refactored code.
 \begin{code}
-power' :: Int -> EDSL Float -> Option (EDSL Float)
+power' :: Int -> Dp Float -> Option (Dp Float)
 power' n x  =
   if n < 0 then
     (x .==. 0) ? (none, do y <- power' (-n) x; return (1 / y))
@@ -481,7 +482,7 @@ power' n x  =
   else
     do y <- power' (n-1) x; return (x*y)
 
-power''      ::  Int -> EDSL Float -> EDSL Float
+power''      ::  Int -> Dp Float -> Dp Float
 power'' n x  =   option 0 (\y -> y) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses the functions
@@ -491,7 +492,7 @@ return 	::  a -> Option a
 (>>=)  	::  Option a -> (a -> Option b) -> Option b
 option 	::  (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
 \end{code}
-from the EDSL library. Details of the type |Option| and the type class |Syntactic|
+from the CDSL library. Details of the type |Option| and the type class |Syntactic|
 are explained in Section~\ref{sec:option}.
 Type |Option| is declared as a monad, enabling the |do| notation,
 which translates into |(>>=)|.
@@ -501,7 +502,7 @@ the previous example.
 In order to be easily represented in C, type |Option a| is represented as a pair
 consisting of a boolean and the representation of the type |a|; in the case that
 corresponds to |Nothing|, the boolean is false and a default value of type |a|
-is provided.  The EDSL term generated by evaluating |power (-6) 0| is large and
+is provided.  The CDSL term generated by evaluating |power (-6) 0| is large and
 unscrutable:
 \begin{code}
 (((fst ((x == (0.0)) ? ((((False) ? ((True), (False))), ((False) ?  (undef,
@@ -514,7 +515,7 @@ undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 (1.0)) * (x * (1.0)))))))))), undef)), (0.0)))
 \end{code}
 (Details of why this is the term generated will become clearer after
-Section~\ref{sec:option}.)  Before, evaluating |power| yielded an EDSL term
+Section~\ref{sec:option}.)  Before, evaluating |power| yielded an CDSL term
 essentially in normal form, save for the need to use common subexpression
 elimination or observable sharing to recover shared structure.  However, this is
 not the case here. Rewrite rules including the following need to be repeatedly
@@ -531,13 +532,13 @@ applied.
 |(L ? (M, N)) ? (P,Q)| &\leadsto& |L ? (M ? (P,Q)) ? (N ? (P,Q))| \\
 |L ? (M, N)| &\leadsto& |L ? (M[L:=True], N[L:=False])|
 \end{eqnarray*}
-Here |L|,|M|,|N|,|P|,|Q| range over |EDSL| terms, and
+Here |L|,|M|,|N|,|P|,|Q| range over |Dp| terms, and
 |M[L:=P]| stands for |M| with each occurence of |L| replaced by |P|.
 After applying these rules, common subexpression
 elimination yields the same structure as in the previous subsection,
 from which the same C code is generated.
 
-Hence, an advantages of the EDSL approach---that it generates
+Hence, an advantages of the CDSL approach---that it generates
 terms essentially in normal form---turns out to be restricted
 to a limited set of types, including functions and products,
 but excluding sums. If one wishes to deal with sum types,
@@ -549,7 +550,7 @@ In QDSL, the type |Maybe| can be represented by its
 run-time equivalent, which we also call |Maybe|.
 Here is the refactored code.
 \begin{code}
-power' :: Int -> QDSL (Float -> Maybe Float)
+power' :: Int -> Qt (Float -> Maybe Float)
 power' n =
   if n < 0 then
     <|| \x ->  if x == 0 then Nothing else
@@ -561,32 +562,32 @@ power' n =
   else
     <|| \x -> do y <- $(power' (n-1) x); return (x * y) ||>
 
-power''      ::  Int -> QDSL (Float -> Float)
+power''      ::  Int -> Qt (Float -> Float)
 power'' n x  =   <|| maybe 0 (\x -> x) $(power' n x) ||>
 \end{code}
 Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are typed as before,
 and provided for use in quoted terms by the QDSL library.
 
-Evaluating |QDSL (powerQ'' (-6))| yields a term of similar complexity
-to the term yielded by the EDSL. Normalisation by the rules discussed
+Evaluating |Qt (powerQ'' (-6))| yields a term of similar complexity
+to the term yielded by the CDSL. Normalisation by the rules discussed
 in Section~\ref{sec:normalise} reduces the term to the same form
 as before, which in turn generates the same C as before.  
 
 Here are some further points of comparison between the two approaches.
 \begin{itemize}
 
-\item Both EDSL and QDSL can exploit notational conveniences in the
+\item Both CDSL and QDSL can exploit notational conveniences in the
 host language. The example here exploits Haskell |do| notation; the
 embedding SQL in F\# by \citet{CheneyLW13} expoited F\# sequence
-notation. For the EDSL, exploiting |do| notation just requires
+notation. For the CDSL, exploiting |do| notation just requires
 instantiating |return| and |(>>=)| correctly. For the QDSL, it is
 also necessary for the normaliser to recognise and expand
 |do| notation and to substitute appropriate instances of 
 |return| and |(>>=)|.
 
-\item As this example shows, sometimes both EDSLs and QDSLs
-may require normalisation. Each EDSL usually has a distinct
+\item As this example shows, sometimes both CDSLs and QDSLs
+may require normalisation. Each CDSL usually has a distinct
 deep representation and so requires a distinct normaliser.
 In contrast, all QDSLs can share the representation of the
 quoted host language, and so can share a normaliser.
@@ -594,7 +595,7 @@ quoted host language, and so can share a normaliser.
 \end{itemize}
 
 
-\section{MiniFeldspar as an EDSL}
+\section{MiniFeldspar as a CDSL}
 \label{sec:edsl}
 
 We now review the usual approach to embedding a DSL into
@@ -605,30 +606,29 @@ Much of this section reprises \citet{SvenningssonA12}.
 
 \subsection{The deep embedding}
 
-Recall that a value of type |EDSL a| represents a term of type |a|,
-and is called a deep embedding.  In what follows, we shorten |EDSL a|
-to |E a|.
+Recall that a value of type |Dp a| represents a term of type |a|,
+and is called a deep embedding.
 \begin{code}
-data E a where
-  LitB		::  Bool -> E Bool
-  LitI		::  Int -> E Int
-  LitF		::  Float -> E Float
-  If		::  E Bool -> E a -> E a -> E a
-  While		::  (E a -> E Bool) -> (E a -> E a) -> E a -> E a
-  Pair		::  E a -> E b -> E (a,b)
-  Fst		::  E (a,b) -> E a
-  Snd           ::  E (a,b) -> E b
-  Prim1		::  String -> (a -> b) -> E a -> E b
-  Prim2         ::  String -> (a -> b -> c) -> E a -> E b -> E c
-  Variable      ::  String -> E a
-  Value         ::  a -> E a
+data Dp a where
+  LitB		::  Bool -> Dp Bool
+  LitI		::  Int -> Dp Int
+  LitF		::  Float -> Dp Float
+  If		::  Dp Bool -> Dp a -> Dp a -> Dp a
+  While		::  (Dp a -> Dp Bool) -> (Dp a -> Dp a) -> Dp a -> Dp a
+  Pair		::  Dp a -> Dp b -> Dp (a,b)
+  Fst		::  Dp (a,b) -> Dp a
+  Snd           ::  Dp (a,b) -> Dp b
+  Prim1		::  String -> (a -> b) -> Dp a -> Dp b
+  Prim2         ::  String -> (a -> b -> c) -> Dp a -> Dp b -> Dp c
+  Variable      ::  String -> Dp a
+  Value         ::  a -> Dp a
 \end{code}
 The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
 \citet{hoas}.
 
-Our EDSL has boolean, integer, and floating point literals,
+Our CDSL has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives,
 and special-purpose constructs for variables and values.
 (Later we will add constructs for arrays.)
@@ -649,7 +649,7 @@ so we define an infix strict application operator |(<*>)|.
 (<*>)                 ::  (a -> b) -> a -> b
 f x                   =   seq x (f x)
 
-eval                  ::  E a -> a
+eval                  ::  Dp a -> a
 eval (LitI i)         =   i
 eval (LitF x)         =   x
 eval (LitB b)         =   b
@@ -662,7 +662,7 @@ eval (Prim1 _ f a)    =   f <*> eval a
 eval (Prim2 _ f a b)  =   f <*> eval a <*> eval b
 eval (Value a)        =   a
 
-evalFun               ::  (E a -> E b) -> a -> b
+evalFun               ::  (Dp a -> Dp b) -> a -> b
 evalFun f x           =   (eval . f . Value) <*> x
 
 evalWhile             ::  (a -> Bool) -> (a -> a) -> a -> a
@@ -678,21 +678,21 @@ shallow embeddings to and from deep embeddings.
 \begin{code}
 class Syntactic a where
   type Internal a
-  toE    	   ::  a -> E (Internal a)
-  fromE  	   ::  E (Internal a) -> a
+  toDp    	   ::  a -> Dp (Internal a)
+  fromDp  	   ::  Dp (Internal a) -> a
 \end{code}
 Type |Internal| is a GHC type family \citep{type-families}.  Functions
-|toE| and |fromE| translate between the shallow embedding |a| and the
-deep embedding |E (Internal a)|.
+|toDp| and |fromDp| translate between the shallow embedding |a| and the
+deep embedding |Dp (Internal a)|.
 
 The first instance of |Syntactic| is |E| itself, and is straightforward.
 \begin{code}
-instance Syntactic (E a) where
-  type Internal (E a)  =  a
-  toE    	       =  id         
-  fromE  	       =  id
+instance Syntactic (Dp a) where
+  type Internal (Dp a)  =  a
+  toDp    	        =  id         
+  fromDp  	        =  id
 \end{code}
-Our representation of a run-time |Bool| will have type |E Bool| in
+Our representation of a run-time |Bool| will have type |Dp Bool| in
 both the deep and shallow embeddings, and similarly for |Int| and
 |Float|.
 
@@ -700,15 +700,15 @@ We do not code the target language using its constructors
 directly. Instead, for each constructor we define a corresponding
 ``smart constructor'' using class |Syntactic|.
 \begin{code}
-true, false  ::  E Bool
+true, false  ::  Dp Bool
 true         =   LitB True
 false        =   LitB False
 
-(?)          ::  Syntactic a => E Bool -> (a,a) -> a
-c ? (t,e)    =   fromE (If c (toE t) (toE e))
+(?)          ::  Syntactic a => Dp Bool -> (a,a) -> a
+c ? (t,e)    =   fromDp (If c (toDp t) (toDp e))
 
-while        ::  Syntactic a => (a -> E Bool) -> (a -> a) -> a -> a
-while c b i  =   fromE (While (c . fromE) (toE . b . fromE) (toE i))
+while        ::  Syntactic a => (a -> Dp Bool) -> (a -> a) -> a -> a
+while c b i  =   fromDp (While (c . fromDp) (toDp . b . fromDp) (toDp i))
 \end{code}
 
 Numbers are made convenient to manipulate via overloading.
@@ -719,22 +719,22 @@ instance Num (FunC Int) where
   a * b          =  Prim2 "(*)" (*) a b
   fromInteger a  =  LitI (fromInteger a)
 \end{code}
-With this declaration, |1+2 :: E Int| evaluates to
+With this declaration, |1+2 :: Dp Int| evaluates to
 |Prim2 "(+)" (+) (LitI 1) (LitI 2)|, permitting code
 executed at generation-time and run-time to appear identical.
 A similar declaration works for |Float|.
 
 Comparison also benefits from smart constructors.
 \begin{code}
-(.==.)       ::  (Syntactic a, Eq (Internal a)) => a -> a -> E Bool
-a .==. b     =   Prim2 "(==)" (==) (toE a) (toE b)
+(.==.)       ::  (Syntactic a, Eq (Internal a)) => a -> a -> Dp Bool
+a .==. b     =   Prim2 "(==)" (==) (toDp a) (toDp b)
 
-(.<.)        ::  (Syntactic a, Ord (Internal a)) => a -> a -> E Bool
-a .<. b      =   Prim2 "(<)" (<) (toE a) (toE b)
+(.<.)        ::  (Syntactic a, Ord (Internal a)) => a -> a -> Dp Bool
+a .<. b      =   Prim2 "(<)" (<) (toDp a) (toDp b)
 \end{code}
 Overloading cannot apply here, because Haskell requires
 |(==)| return a result of type |Bool|, while |(.==.)| returns
-a result of type |E Bool|, and similarly for |(.<.)|.
+a result of type |Dp Bool|, and similarly for |(.<.)|.
 
 
 \subsection{Embedding pairs}
@@ -744,18 +744,18 @@ in the shallow embedding and target language pairs in the deep embedding.
 \begin{code}
 instance (Syntactic a, Syntactic b) where
   type  Internal (a,b)  =  (Internal a, Internal b)
-  toE (a,b)             =  Pair (toE a, toE b)
-  fromE p               =  (fromE (Fst p), fromE (Snd p))
+  toDp (a,b)            =  Pair (toDp a, toDp b)
+  fromDp p              =  (fromDp (Fst p), fromDp (Snd p))
 \end{code}
 This permits us to manipulate pairs as normal, with |(a,b)|, |fst a|,
 and |snd a|.  (Argument |p| is duplicated in the definition of
-|fromE|, which may require common subexpression elimination or
+|fromDp|, which may require common subexpression elimination or
 observable sharing, as discussed in Section~\ref{sec:first-example}.)
 
 We have now developed sufficient machinery to define a |for| loop
 in terms of a |while| loop.
 \begin{code}
-for          ::  Syntactic a => E Int -> a -> (E Int -> a -> a) -> a
+for          ::  Syntactic a => Dp Int -> a -> (Dp Int -> a -> a) -> a
 for n x_0 b  =   snd (while (\(i,x) -> i .<. n) (\(i,x) -> (i+1, b i x)) (0,x0))
 \end{code}
 The state of the |while| loop is a pair consisting of a counter and
@@ -786,13 +786,13 @@ undefined value.
 class Syntactic a => Undef a where
   undef :: a
 
-instance Undef (E Bool) where
+instance Undef (Dp Bool) where
   undef = false
 
-instance Undef (E Int) where
+instance Undef (Dp Int) where
   undef = 0
 
-instance Undef (E Float) where
+instance Undef (Dp Float) where
   undef = 0
 
 instance (Undef a, Undef b) => Undef (a,b) where
@@ -801,7 +801,7 @@ instance (Undef a, Undef b) => Undef (a,b) where
 
 For example,
 \begin{code}
-(/#)    ::  E Float -> E Float -> F Float
+(/#)    ::  Dp Float -> Dp Float -> F Float
 x /# y  =   (y .==. 0) ? (undef, x/y)
 \end{code}
 behaves as division, save that when the divisor is zero
@@ -819,14 +819,14 @@ power of their own technique!)
 We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
 
 The deep-and-shallow technique cleverly represents deep embeddding
-|E (a,b)| by shallow embedding |(E a, E b)|.  Hence, it is tempting to
-represent |E (Maybe a)| by |Maybe (E a)|, but this cannot work,
-because |fromE| would have to decide at generation-time whether to
+|Dp (a,b)| by shallow embedding |(Dp a, Dp b)|.  Hence, it is tempting to
+represent |Dp (Maybe a)| by |Maybe (Dp a)|, but this cannot work,
+because |fromDp| would have to decide at generation-time whether to
 return |Just| or |Nothing|, but which to use is not known until
 run-time.
 
 Indeed, rather than extending the deep embedding to support the type
-|E (Maybe a)|, \citet{SvenningssonA12} prefer a different choice, that
+|Dp (Maybe a)|, \citet{SvenningssonA12} prefer a different choice, that
 represents optional values while leaving |E| unchanged.  Following
 their development, we represent values of type |Maybe a| by the type
 |Opt_R a|, which pairs a boolean with a value of type |a|.  For a
@@ -837,12 +837,12 @@ as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syntactic|
 instance is straightforward, mapping options to and from the pairs
 already defined for |E|.
 \begin{code}
-data Opt_R a = Opt_R { def :: E Bool, val :: a }
+data Opt_R a = Opt_R { def :: Dp Bool, val :: a }
 
 instance Syntactic a => Syntactic (Opt_R a) where
   type Internal (Opt_R a)  =  (Bool, Internal a)
-  toE (Opt_R b x)          =  Pair b (toE x)
-  fromE p                  =  Opt_R (Fst p) (fromE (Snd p))
+  toDp (Opt_R b x)         =  Pair b (toDp x)
+  fromDp p                 =  Opt_R (Fst p) (fromDp (Snd p))
 
 some_R         ::  a -> Opt_R a
 some_R x       =   Opt_R true x
@@ -891,8 +891,8 @@ instance Monad Opt where
 
 instance Undef a => Syntactic (Opt a) where
   type Internal (Opt a)  =  (Bool, Internal a)
-  fromE                  =  lift . fromE
-  toE                    =  toE . lower
+  fromDp                  =  lift . fromDp
+  toDp                    =  toDp . lower
 
 lift          ::  Opt_R a -> Opt a
 lift o        =   O (\g -> Opt_R  (def o ? (def (g (val o)), false))
@@ -911,7 +911,7 @@ option        ::  (Undef a, Undef b) => b -> (a -> b) -> Opt a -> b
 option d f o  =   option_R d f (lower o) 
 \end{code}
 
-These definitions are adequate to support the EDSL code presented
+These definitions are adequate to support the CDSL code presented
 in Section~\ref{sec:second-example}.
 
 \todo{After discussing the subformula property, a different solution
@@ -921,7 +921,7 @@ to this problem becomes available.}
 \subsection{Embedding Vector}
 
 Array programming is central to the intended application domain
-of MiniFeldspar. In this section, we extend our EDSL to handle
+of MiniFeldspar. In this section, we extend our CDSL to handle
 arrays.
 
 First, extend our deep embedding |E| to support arrays. We add three constructs.
@@ -929,9 +929,9 @@ The first accepts a length and a body that computes the array element
 for each index. The second extracts the length from an array, and the
 third fetches the element at a given index.
 \begin{code}
-  Arr           ::  E Int -> (E Int -> E a) -> E (Array Int a)
-  ArrLen        ::  E (Array Int a) -> E Int
-  ArrIx         ::  E (Array Int a) -> E Int -> E a
+  Arr           ::  Dp Int -> (Dp Int -> Dp a) -> Dp (Array Int a)
+  ArrLen        ::  Dp (Array Int a) -> Dp Int
+  ArrIx         ::  Dp (Array Int a) -> Dp Int -> Dp a
 \end{code}
 The exact sematics is given by |eval|.
 \begin{code}
@@ -941,18 +941,18 @@ eval (ArrIx a i)      =  eval a ! eval i
 \end{code}
 Corresponding to the deep embedding |Array| is a shallow embedding |Vector|.
 \begin{code}
-data Vector a = Vec (E Int) (E Int -> a)
+data Vector a = Vec (Dp Int) (Dp Int -> a)
 
 instance Syntactic a => Syntactic (Vector a) where
   type Internal (Vector a)  =  Array Int (Internal a)
-  toE (Vec n g)             =  Arr n (toE . g)
-  fromE a                   =  Vec (ArrLen a) (\i -> fromE (ArrIx a i))
+  toDp (Vec n g)            =  Arr n (toDp . g)
+  fromDp a                  =  Vec (ArrLen a) (\i -> fromDp (ArrIx a i))
 
 instance Functor Vector where
   fmap f (Vec n g)          =  Vec n (f . g)
 \end{code}
 The shallow embedding |Vec| resembles the constructor |Arr|, but whereas
-the body of |Arr| must return values of type |E a|, the body of a vector
+the body of |Arr| must return values of type |Dp a|, the body of a vector
 may return values of any type |a| that satisfies |Syntactic a|.
 It is straightforward to make |Vector| an instance of |Functor|.
 
@@ -1008,10 +1008,10 @@ the elements to be recomputed.  An alternative is to materialise the
 vector in memory with the following function.
 \begin{code}
 memorise            ::  Synactic a => Vector a -> Vector a
-memorise (Vec n g)  =   Vec n (\i -> ArrIx (Arr n (toE . g)) i)
+memorise (Vec n g)  =   Vec n (\i -> ArrIx (Arr n (toDp . g)) i)
 \end{code}
 The above definition depends on common subexpression elimination
-or observable sharing to ensure |Arr n (toE .g)| is computed
+or observable sharing to ensure |Arr n (toDp .g)| is computed
 once, rather than once for each element of the resulting vector.
 
 For example, if 
