@@ -53,87 +53,6 @@
 \newcommand{\citet}[1]{\cite{#1}}
 \newcommand{\citep}[1]{(\cite{#1})}
 
-%% Draft outline
-
-%% (0) Abstract
-%% (1) Keywords
-%% (2) Introduction
-%%     (i) very general introduction to the problem and the solution without
-%%          (a) terms not understandable by a third year CS student
-%%          (b) references
-%%     (ii) general technical introduction to the problem we are trying to solve
-%%     (iii) why the problem is important (why the problem matters)
-%%     (iv) general technical introduction to the solution we are providing
-%%     (v) our contributions (why our solution matters)
-%%     (vi) paper layout
-%% (3) Background
-%%     (i) background on embedding including
-%%         (a) introducing MiniFeldspar's first-order language, vectors and the unique benefits of it (free fusion and guarantees)
-%%         (b) introducing the essence of the Practical Theory's embedding technique of SQL including what subformula property is and why it matters
-%% (4) Our proposal
-%%     (i) vector processing examples in MiniFeldspar's first-order language
-%%     (ii) vector processing examples in TH language
-%%     (iii) describing benefits of our approach in details (e.g. syntax, absence of vectors, and reusing the host language normalizer)
-%%     (iv) stressing that normalizer does more optimization than evaluation in the spirit of MiniFeldspar's shallow embedding
-%% (5) First Attempt (naive solution)
-%%    describing the conversion, normalization, and why subformula property fails
-%% (6) Second Attempt (real solution)
-%%    describing the conversion with the FO constraint and theorems that subformula property holds
-%% (7) Performance
-%%    (i) examples of free fusion (e.g. scalarProd from MiniFeldspar) and showing that we do as good
-%%    (ii) the table and discussions around the table
-%% (8) Related Work
-%% (9) Future Work
-%% (10) Conclusion
-%% (11) Acknowledgements
-
-%%  Notes of First Meeting With Phil at ICFP
-%% -----------------------------------------
-%% Examples:
-%% * sums and for loops
-%% * Syntax
-%%   - Conditional and less than
-%%      + Haskell Only
-%%      + Mixing host and embedded code
-%%   - Deep and Shallow Embedding
-%%      + simulates functions and tuples but not sums and for loops
-%%      + types get more complicated
-%% * Normalisation
-%%   - ?
-%% * Sharing
-%%   - Observable sharing
-%%   - CSE
-%%   - Explicit sharing
-%%
-%%
-%% ---------------
-%% Possible Approaches:
-%% 1. Implementations of ICFP'13 SQL, Lava, and Feldspar
-%% 2. Compare Feldspar (deep + shallow + CSE + Opt.) with QDSL
-%%    - Introduction: Compare Feldspar implemented with QDSL to Feldspar implemented with deep and
-%%                    shallow embedding achieve the same effect with significantly less effort.
-%%                    QDSL approach is straightforward and reuses a normaliser and typechecker.
-%%                    In comparison, deep and shallow embedding requires
-%%                      + repeating standard boilerplate for map between deep and shallow represnations
-%%                      + more complicated type structures
-%%                      + more complicated error messages
-%%                      + implementing a CSE phase
-%%                      + implementing more opt. (cost of special purpose optimisation to cancel out inverse conversions)
-%%                      + cost of CSE on exponentially larger programs at program generation time (not at runtime)
-%%                          / check with observable sharing stuff, e.g.
-%%                                 dup v = (v , v)
-%%                                 dup v = let v' = lable unique v in (v' , v')
-%%
-%%                    Deep and shallow embedding approach reuses the type system, some syntax of the host language for EDSL.
-%%                    QDSL approach reuses the type system, and all the host language syntax.
-%%                    Deep and shallow embedding uses the host language evaluator to normalise all occurences of function and product types.
-%%                    QDSL approach uses a reusable normaliser to normalise all occurences of function, product types.
-%%                    Two-layers
-%%
-%% ---------------------------------------------------------------------------
-%% QDSLs: Why it is nicer to be quoted nor
-
-
 \begin{document}
 
 %% \conferenceinfo{WXYZ '05}{date, City.}
@@ -204,9 +123,10 @@ domain-specific languages into a given host language.
 
 \section{Introduction}
 
-\begin{quotation}
+\begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
+\vspace{2ex}
 
 Should you use EDSL or QDSL?
 
@@ -236,21 +156,80 @@ an example of using the |Maybe| type of the host even though we don't
 expect to provide that type in the target. We show how these
 situations are neatly handled by an application of Gentzen's
 subformula property, exploiting a result from logic in 1935 to advance
-computing fourscore years later.
+computing eight decades later.
 
-\todo{Put Gentzen quote here, as a break?}
+\begin{quotation}\flushright
+Perhaps we may express the essential properties of such a normal proof
+by saying: it is not roundabout.
+% No concepts enter into the proof other
+% than those contained in its final result, and their use was therefore
+% essential to the achievement of that result.
+--- Gerhard Gentzen
+\end{quotation}
+\vspace{2ex}
 
-\todo{Explain Feldspar}
+The QDSL technique to building domain-specific languages was proposed
+by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
+They conjectured that the technique applies more widely, and here we
+test that conjecture by applying QDSL to Feldspar, an EDSL for signal
+processing in Haskell that generates C \citep{feldspar}. Our technique
+depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
-\todo{Explain other EDSLs}
+So far as we know, the full QDSL approach---which, crucially, includes
+normalisation of quoted terms---has only been applied here and by
+\citet{CheneyLW13}.  However, the other part of the QDSL
+approach---viewing domain-specific languages as quoted terms---is
+widely used in other systems, including F\# LINQ \citep{fsharplinq},
+C\# LINQ \citep{csharplinq}, and Scala Lightweight Modular Staging
+(LMS) \citep{scalalms}. In F\# LINQ quotation and anti-quotation are
+explicit, as here, while in C\# LINQ and Scala LMS, quotation and
+anti-quotation is controlled by type inference.
 
-\todo{Explain `Practical Theory'}
+Feldspar exploits a combination of deep and shallow embedding, 
+a technique which we here refer to as simply EDSL. (In other contexts,
+EDSL means any embedded domain-specific language, and includes
+all techniques covered here.) The technique is clearly described
+by \citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
+and \citet{SvenningssonS13}. Essentially the same technique is also
+applied in Obsidian \citep{obsidian} and Nicola \citep{nicola}.
 
-\todo{Explain QDSLs in LINQ and Scala}
+In a single landmark paper, \citet{gentzen35} introduced the two
+formulations of logic most widely used today, natural deduction and
+sequent calculus, in both intuitionistic and classical variants.  (The
+same paper introduced $\forall$ for universal quantification.)
+Gentzen's main technical result was to establish the \emph{subformula}
+property: any natural deduction proof may be put in a normal form
+where all formulas it contains are subformulas of either its
+hypotheses or conclusion. \citet{CheneyLW13} applied this result to
+ensure queries with higher-order components always simplif to
+first-order queries, easily translated to SQL.  Similarly here, our
+QDSL source may refer to higher-order concepts or data types such as
+|Maybe|, while we ensure that these do not appear in the generated
+code.  The idea is not limited to QDSL, as
+Section~\ref{sec:edsl-maybe} applies the same idea to EDSL.
 
-\todo{Explain Gentzen's paper and subformula property}
+The paper makes the following contributions.
+\begin{itemize}
+\item Section~\ref{sec:overview} introduces and compares the
+EDSL and QDSL approaches, in the context of a simple example.
 
-\todo{Summary of contributions of paper/outline}
+\item Section~\ref{sec:edsl} reviews how the EDSL approach
+works in detail, in the context of Feldspar.
+
+\item Section~\ref{sec:qdsl} describes how the QDSL approach
+works in detail, reworking the examples of Section~\ref{sec:edsl}.
+
+\item Section~\ref{sec:subformula} describes a normaliser
+that ensures the subformula property while not losing sharing,
+which can be applied to both call-by-need and call-by-value semantics.
+
+\item Section~\ref{sec:empirical} presents empirical results for
+Feldspar programs written and executed in both styles, showing EDSL
+and QDSL achieve comparable results.
+
+\end{itemize}
+Section~\ref{sec:related} summarises related work, and
+Section~\ref{sec:conclusion} concludes.
 
 \section{Overview}
 
@@ -616,6 +595,7 @@ quoted host language, and so can share a normaliser.
 
 
 \section{MiniFeldspar as an EDSL}
+\label{sec:edsl}
 
 We now review the usual approach to embedding a DSL into
 a host language by combining deep and shallow embedding.
@@ -1050,18 +1030,29 @@ combined with fine control over memory usage.
 
 
 \section{MiniFeldspar as a QDSL}
+\label{sec:qdsl}
 
 
 \section{The subformula property}
-
-
-\section{The design of QuickDSL}
+\label{sec:subformula}
 
 
 \section{Empirical results}
+\label{sec:empirical}
 
 
-This is a test.
+%\section{The design of Haskell DSL}
+%\label{sec:tool}
+
+\section{Related work}
+\label{sec:related}
+
+\section{Conclusion}
+\label{sec:conclude}
+
+\paragraph*{Acknowledgements}
+This work was funded by EPSRC Programme Grant EP/K034413/1.
+
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
