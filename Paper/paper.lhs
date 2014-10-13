@@ -192,7 +192,7 @@ CDSL means any embedded domain-specific language, and includes
 all techniques covered here.) The technique is clearly described
 by \citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
 and \citet{SvenningssonS13}. Essentially the same technique is also
-applied in Obsidian \citep{obsidian} and Nikola \citep{NIKOLA}.
+applied in Obsidian \citep{svensson2011obsidian} and Nikola \citep{NIKOLA}.
 
 In a single landmark paper, \citet{gentzen35} introduced the two
 formulations of logic most widely used today, natural deduction and
@@ -1043,6 +1043,29 @@ combined with fine control over memory usage.
 
 \section{Related work}
 \label{sec:related}
+
+Domain specific languages are becoming increasingly popular as a way
+to deal with software complexity. Yet, they have a long and rich
+history \citep{Bentley:1986:PPL:6424.315691}.
+
+In this paper we have, like many other DSL writers, used Haskell as it
+has proven to be very suitable for \emph{embedding} domain specific
+languages.  Examples include \citep{reid1999prototyping,
+hudak1997domain, bjesse1998lava, NIKOLA, svensson2011obsidian,
+FELDSPAR}.
+
+In this paper we have specifically built on the technique of combining
+deep and shallow embeddings \citep{SvenningssonA12} and
+contrasted it with our new QDSL technique. Languages which have used
+this technique include Feldspar \citep{FELDSPAR}, Obsidian
+\citep{svensson2011obsidian} and Meta-Repa \citep{ankner2013edsl}.
+
+The loss of sharing when implementing embedded DSLs was identified by
+\citet{claessen1999observable}. They proposed to introduce a little
+bit of impurity in Haskell, referred to as \emph{observable sharing}
+to be able to recover the loss of sharing. Later, \citet{gill2009type}
+proposed a somewhat safer way of recover sharing, though still relying
+on impurity.
 
 \section{Conclusion}
 \label{sec:conclude}
