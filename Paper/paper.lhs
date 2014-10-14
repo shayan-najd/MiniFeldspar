@@ -608,6 +608,7 @@ quoted host language, and so can share a normaliser.
 \section{MiniFeldspar as a QDSL}
 \label{sec:qdsl}
 
+%include section4.lhs
 
 \section{The subformula property}
 \label{sec:subformula}
