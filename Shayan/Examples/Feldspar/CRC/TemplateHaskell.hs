@@ -32,7 +32,7 @@ updCrc = [|| \ cc -> \ ch ->
              0xFFFFFFFF ||]
 
 tbl :: Data (Ary Integer)
-tbl = fromList (MP.fmap (\ i -> [|| i ||]) tblLst)  [|| 0 ||]
+tbl = hashTable
 
 inp :: Data (Ary Integer)
 inp = fromList (MP.fmap (\ i -> [|| i ||]) tstInp) [|| 0 ||]

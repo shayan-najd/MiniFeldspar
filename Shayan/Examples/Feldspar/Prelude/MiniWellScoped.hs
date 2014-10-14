@@ -17,7 +17,7 @@ module Examples.Feldspar.Prelude.MiniWellScoped
        ,frmTo,permute,reverse,foldl,foldlVec,map,zipWith,sum,scalarProd,fromList
        ,replicate,append
        ,frmToA,permuteA,reverseA,foldlA,mapA,zipWithA,sumA,scalarProdA,fromListA
-       ,replicateA,appendA
+       ,replicateA,appendA,hashTable
        ) where
 
 import qualified Prelude   as P
@@ -463,3 +463,6 @@ fromListA lst k = ary
                                        acc)
                            k
                            (MP.enumFromTo 0 (MP.length lst MP.- 1)))
+
+hashTable :: Data (Ary Integer)
+hashTable = AppV hshTblVar Emp

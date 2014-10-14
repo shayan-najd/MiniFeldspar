@@ -29,7 +29,7 @@ updCrc = \ cc -> \ ch ->
           0xFFFFFFFF
 
 tblV :: Vec Integer
-tblV = fromList (MP.fmap (\ i -> litI (MP.fromIntegral i)) tblLst) 0
+tblV = ary2vec hashTable
 
 inp :: Vec Integer
 inp = fromList

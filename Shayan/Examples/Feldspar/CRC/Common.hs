@@ -8,6 +8,7 @@ test = (== 3632233996)
 tstInp :: [Integer]
 tstInp = fmap (fromIntegral . ord) "test"
 
+{-
 tblLst :: [Integer]
 tblLst = [
   0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419,
@@ -61,7 +62,7 @@ tblLst = [
   0xbdbdf21c, 0xcabac28a, 0x53b39330, 0x24b4a3a6, 0xbad03605,
   0xcdd70693, 0x54de5729, 0x23d967bf, 0xb3667a2e, 0xc4614ab8,
   0x5d681b02, 0x2a6f2b94, 0xb40bbe37, 0xc30c8ea1, 0x5a05df1b,
-  0x2d02ef8d ]
+  0x2d02ef8d ] -}
 
 loaderC :: String
 loaderC = "\nint main()\

@@ -14,7 +14,7 @@ module Examples.Feldspar.Prelude.TemplateHaskell
        ,bitXor,bitAnd,bitOr,shfRgt,shfLft,complement,testBit,lsbs,oneBits
        ,i2f,cis
        ,frmTo,permute,reverse,foldl,map,zipWith,sum,scalarProd,fromList
-       ,replicate,append
+       ,replicate,append,hashTable
        ) where
 
 import MyPrelude (Integer,Array,Float,Bool(..))
@@ -340,3 +340,6 @@ fromList lst k =  let l = MP.fromInteger (MP.toInteger (MP.length lst))
                                      )
                           )
                       ||]
+
+hashTable :: Data (Ary Integer)
+hashTable = [|| hshTblHsk ||]

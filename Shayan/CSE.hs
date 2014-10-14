@@ -28,6 +28,24 @@ cseF f  = let i = unsafePerformIO (do j <- readIORef reff
           in (\ x -> absTmp x v (cse (f (Tmp v))))
 
 
+remTag :: Exp r t -> Exp r t
+remTag ee = case ee of
+  ConI i                    -> ConI i
+  ConB i                    -> ConB i
+  ConF i                    -> ConF i
+  AppV v es                 -> AppV v (TFG.mapC (sinTyp v) remTag es)
+  Cnd ec et ef              -> Cnd (remTag ec) (remTag et) (remTag ef)
+  Whl ec eb ei              -> Whl (remTag . ec) (remTag . eb) (remTag ei)
+  Tpl ef es                 -> Tpl (remTag ef)   (remTag es)
+  Fst e                     -> Fst (remTag e)
+  Snd e                     -> Snd (remTag e)
+  Ary el ef                 -> Ary (remTag el)   (remTag . ef)
+  Len e                     -> Len (remTag e)
+  Ind ea ei                 -> Ind (remTag ea)   (remTag ei)
+  Let el eb                 -> Let (remTag el)   (remTag . eb)
+  Cmx er ei                 -> Cmx (remTag er)   (remTag ei)
+  Tmp x                     -> Tmp x
+  Tag _ e                   -> remTag e
 
 
 cseOne :: forall r t. HasSin TFG.Typ t => Exp r t -> Chg (Exp r t)
