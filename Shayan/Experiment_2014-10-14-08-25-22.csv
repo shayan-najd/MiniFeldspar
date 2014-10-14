@@ -1,0 +1,6 @@
+(QMiniFeldspar),Haskell Compile,Haskell Run,C Compile,C Run,,(MiniFeldspar),Haskell Compile,Haskell Run,C Compile,C Run
+IPGray,11.40,0.00,0.08,0.42,,IPGray,6.22,0.00,0.08,0.45
+IPBW,11.26,0.00,0.08,0.20,,IPBW,6.22,0.00,0.07,0.20
+FFT,11.36,0.24,0.08,5.08,,FFT,6.15,0.47,0.13,No Data
+CRC,11.29,0.01,0.08,0.15,,CRC,6.13,0.00,0.08,0.15
+Windowing,11.19,0.01,0.08,0.31,,Windowing,6.21,0.01,0.08,0.33
