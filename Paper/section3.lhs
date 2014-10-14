@@ -1,5 +1,3 @@
-\newcommand{\commentout}[1]{}
-
 %if False
 \begin{code}
 {-# LANGUAGE GADTs, TypeFamilies, FlexibleInstances, FlexibleContexts, Rank2Types #-}
