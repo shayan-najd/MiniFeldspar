@@ -1,0 +1,590 @@
+\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+
+% color framework
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+\definecolor{lightgray}{gray}{0.7}
+\newcommand{\highlight}[1]{%
+  \begingroup
+  \setlength{\fboxsep}{0pt}%
+  \colorbox{lightgray}{\reducedstrut\ensuremath{#1}\/}%
+  \endgroup
+}
+
+\newcommand{\etal}{\emph{et~al.}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\hole}{[\ ]}
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
+
+%% Types
+\newcommand{\typvar}[1]{#1}
+\newcommand{\typzro}{\mathbf{0}}
+\newcommand{\typone}{\mathbf{1}}
+\newcommand{\typarr}[2]{#1\boldsymbol{\rightarrow}#2}
+\newcommand{\typprd}[2]{#1\boldsymbol{\times}#2}
+\newcommand{\typsum}[2]{#1\boldsymbol{+}#2}
+\newcommand{\typrec}[2]{\boldsymbol{\mu}#1\boldsymbol{.}#2}
+
+%% Expressions
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expunt}{\boldsymbol{()}}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}\,#1\>\boldsymbol{.}\,#3}
+\newcommand{\expapp}[2]{#1\ #2}
+\newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3}
+\newcommand{\expshrind}[3]{\begin{array}[t]{@{}l@{}}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}}
+\newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
+\newcommand{\expfst}[1]{\mathbf{fst}\ #1}
+\newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
+\newcommand{\explft}[2]{\mathbf{inl}\ #1}
+\newcommand{\exprgt}[2]{\mathbf{inr}\ #2}
+\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}}
+\newcommand{\expcasind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
+\newcommand{\expcasindind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \ \ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \\[-1pt] \ \ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
+
+%% Environment
+\newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
+\newcommand{\envcon}[2]{\tp{#1,}\ #2}
+\newcommand{\env}{\tp{\Gamma}}
+\newcommand{\typing}[2]{\tm{#1:\ }\tp{#2}}
+
+\newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
+\newcommand{\sbs}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{\txt{FV}\,(#1)}
+\newcommand{\fresh}[1]{\txt{Fresh}\,(#1)}
+\newcommand{\txt}[1]{\text{\textit{#1}}}
+\newcommand{\rewrite}[3]{#1 \mapsto_{#2} #3}
+\newcommand{\reduce}[3]{#1 \rightarrow_{#2} #3}
+\newcommand{\reducestar}[3]{#1 \twoheadrightarrow_{#2} #3}
+\newcommand{\valuep}[1]{\txt{Value}\,(#1)}
+\newcommand{\cnd}[1]{\begin{array}[t]{@{}l@{}}\txt{if}\ #1\end{array}}
+\newcommand{\subformulas}[1]{\txt{Subformulas}\,(#1)}
+\newcommand{\psubformulas}[1]{\txt{ProperSubformulas}\,(#1)}
+\newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
+\newcommand{\norm}[1]{\txt{Norm}\,(#1)}
+
+\newcommand{\nv}{P}
+               %% {\txt{N\kern-3ptV}}
+               %% {\txt{N\kern-3ptW}}
+\newcommand{\na}{L^{\text{\textcrlambda}}}
+
+\subsection{The Source Language}
+Metavariables $x$, $y$, and $z$ range over variables. Wherever
+variables are used, renaming of bound variables is allowed;
+we work up to renamings.
+
+Types are \textbf{closed} terms defined by the abstract syntax in
+Figure~\ref{fig:typ}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{llll}
+A,B,C & \mathbin{\ ::=\ }
+         & \typone       & \textrm{unit}         \\
+& \ |\ \ & \typarr{A}{B} & \textrm{function}  \\
+& \ |\ \ & \typprd{A}{B} & \textrm{product}      \\
+& \ |\ \ & \typsum{A}{B} & \textrm{sum}
+\end{array}
+\]
+\caption{Types}
+\label{fig:typ}
+\end{figure*}
+
+Metavariables $A$, $B$, and $C$ range over types. Types
+correspond to formulas in minimal propositional logic.
+
+Expressions are \textbf{open} terms defined by the abstract syntax in
+Figure~\ref{fig:exp}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}{llll}
+L,M,N & \mathbin{\ ::=\ }
+         & \expvar{x}             & \textrm{variable}          \\
+& \ |\ \ & \expunt                & \textrm{unit}              \\
+& \ |\ \ & \expabs{x}{A}{N}       & \textrm{abstraction}       \\
+& \ |\ \ & \expapp{L}{M}          & \textrm{application}       \\
+& \ |\ \ & \expshr{x}{M}{N}       & \textrm{sharing}           \\
+& \ |\ \ & \expprd{M}{N}          & \textrm{product}           \\
+& \ |\ \ & \expfst{L}             & \textrm{projection-first}  \\
+& \ |\ \ & \expsnd{L}             & \textrm{projection-second} \\
+& \ |\ \ & \explft{M}{\tm{B}}     & \textrm{injection-left}    \\
+& \ |\ \ & \exprgt{\tm{A}}{N}     & \textrm{injection-right}   \\
+& \ |\ \ & \expcas{L}{x}{M}{y}{N} & \textrm{case}
+\end{array}
+\]
+\caption{Expressions}
+\label{fig:exp}
+\end{figure*}
+
+Metavariables $L$, $M$, and $N$ range over expressions. Expressions
+correspond to proofs in minimal propositional logic.
+
+%Erasing the types, colored in red, yields the usual untyped
+%$\lambda$-calculus.
+
+Capture-free substitution is defined as usual and it is denoted as
+$\sbs{N}{x}{M}$ for substitution of the expression $M$ for the variable
+$x$ in the expression $N$. Set of free variables in an expression is
+calculated as usual and it is denote as $\fv{N}$ for set of free
+variables in $N$. Moreover, the notation $count(x,N)$ is used to denote a
+metafunction returning the number of times the free variable $x$ is
+used syntactically in the expression $N$.
+% We follow Barendregt convension such that we assume variables in a
+% term are all distinct.
+Type %, normalisation, and evaluation
+ environments are all maps from
+variable names. The metavariables $\Gamma$, and $\Delta$ range over
+type environments.  The inference rules are equivalent up to exchange,
+contraction, and weakening operations.
+
+The typing judgement is defined by the inference rules in
+Figure~\ref{fig:typing}.
+
+\begin{figure*}[h]
+\[\colored
+\begin{array}{@{}ll@{}}
+\fbox{$\env \vdash \typing{M}{A}$}
+\\~\\
+\inference
+{\typing{x}{A} \in \env}
+{\mathbf{Ax}}
+{
+  \env \vdash \typing{x}{A}
+}
+&
+\inference
+{}
+{\typone}
+{
+   \env \vdash \typing{\expunt}{\typone}
+}
+\\~\\
+\inference
+{
+  \typenvcon{x}{A} \vdash \typing{N}{B}
+}
+{{\to}\intro}
+{
+  \env \vdash \typing{\expabs{x}{A}{N}}{\typarr{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typarr{A}{B}}
+& \env \vdash \typing{M}{A}
+}
+{{\to}\elim}
+{
+  \env \vdash \typing{\expapp{L}{M}}{B}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{M}{A}
+  &
+  \typenvcon{x}{A} \vdash \typing{N}{B}
+}
+{\mathbf{let}}
+{
+  \env \vdash \typing{\expshr{x}{M}{N}}{B}
+}
+&
+\inference
+{
+  \env \vdash \typing{M}{A}
+  &
+  \env \vdash \typing{N}{B}
+}
+{{\times}\intro}
+{
+  \env \vdash \typing{\expprd{M}{N}}{\typprd{A}{B}}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}}
+}
+{{\times}\elim_1}
+{
+  \env \vdash \typing{\expfst{L}}{A}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}}
+}
+{{\times}\elim_2}
+{
+  \env \vdash \typing{\expsnd{L}}{B}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{M}{A}
+}
+{{+}\intro_1}
+{
+  \env \vdash \typing{\explft{M}{B}}{\typsum{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{N}{B}
+}
+{{+}\intro_2}
+{
+  \env \vdash \typing{\exprgt{A}{N}}{\typsum{A}{B}}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{L}{\typsum{A}{B}}
+&
+  \typenvcon{x}{A} \vdash \typing{M}{C}
+&
+  \typenvcon{y}{B} \vdash \typing{N}{C}
+}
+{{+}\elim}
+{
+  \env \vdash \typing{\expcas{L}{x}{M}{y}{N}}{C}
+}
+\end{array}
+\]
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+
+Typing rules are syntax-directed and algorithmic.
+The correspondence to minimal logic is made evident by using colored
+fonts in typing rules; removing the red bits (i.e. expressions) from
+the typing rules yields the corresponding logical inference rules.\\
+
+Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}lll@{}}
+V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
+\end{array}
+\]
+\caption{Values}
+\label{fig:val}
+\end{figure*}
+
+The metavariables $V$, and $W$ range over values. The metavariable
+$\nv$ range over expressions that are not values, also referred to as non-values.
+
+\subsection{Normal Forms and Restrictions}
+The normal forms that we are interested about, denoted as $N$, is defined in Figure~\ref{fig:nf}.
+
+%% \begin{figure*}[h]
+%% \[\uncolored
+%% \begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
+%% \ \\[-22pt]
+%% (\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{U} & \ |\ \  & \expapp{Q}{U} & \ |\ \  & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+%% \\
+%% (\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% (\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{T}{U} & \ |\ \ & \explft{T}{B} & \ |\ \ & \exprgt{A}{U}
+%% \\
+%% (\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+%% \\
+%%  & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K}}
+%% \\
+%% (\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% \end{array}
+%% \]
+%% \caption{Normal Forms}
+%% \label{fig:nf}
+%% \end{figure*}
+
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
+\ \\[-22pt]
+(\txt{Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{W} & \ |\ \  & \expapp{Q}{W} & \ |\ \  & \expfst{x} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{x}}
+\\
+(\txt{Value Normal Forms}) & V,W & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expabs{x}{A}{N} & \ |\ \  & \expunt{} & \ |\ \  &  \expprd{V}{W}  & \ |\ \  & \explft{V}{B} & \ |\ \  & \exprgt{A}{W}
+\\
+(\txt{Normal Forms}) & N & \mathbin{\ ::=\ } & Q & \ |\ \  & V & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expcas{z}{x}{N}{y}{M}}
+\\
+ & & \ \ \ \ | & \multicolumn{11}{l@{}}{\expshr{x}{Q}{N}}
+\\
+\end{array}
+\]
+\caption{Normal Forms}
+\label{fig:nf}
+\end{figure*}
+
+Restricting the types of free variables, and the type of terms results
+in interesting normal forms.
+
+For a normal form which is easily compilable to \emph{C}, the
+restriction $\Phi$ is applied. The restriction $\Phi$ is defined in
+Figure~\ref{fig:phi}.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}llll@{}}
+
+\inference
+{}
+{\Phi_0\typone}
+{\Phi_0(\typone)}
+
+&
+
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_0\times}
+{\Phi_0(\typprd{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_0+}
+{\Phi_0(\typsum{A}{B})}
+
+
+\\~\\
+
+\inference
+{}
+{\Phi_{n+1}\typone}
+{\Phi_{n+1}(\typone)}
+&
+\inference
+{\Phi_n(A) & \Phi_{n+1}(B)}
+{\Phi_{n+1}\rightarrow}
+{\Phi_{n+1}(\typarr{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_{n+1}\times}
+{\Phi_{n+1}(\typprd{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_{n+1}+}
+{\Phi_{n+1}(\typsum{A}{B})}
+
+
+\end{array}
+\]
+\caption{$\Phi$ Restriction}
+\label{fig:phi}
+\end{figure*}
+
+Having $\Gamma \vdash M : B$, by restricting the type of every free
+variable $\typing{x_i}{A_i} \in \Gamma$ such that $\Phi_2(A_i)$, and
+by restricting the type of the term $M$ such that $\Phi_1(B)$, we have
+the normal form defined in Figure~\ref{fig:rnf}. The terms of this
+normal form are easily compilable to \emph{C}.  The notation
+$\overline{M}$ is used to denote a non-empty sequence of terms $M_i$.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
+\ \\[-22pt]
+(\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{\highlight{\overline{U}}} & \ |\ \ & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+\\
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+(\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{\highlight{R}}{\highlight{S}} & \ |\ \ & \explft{\highlight{R}}{B} & \ |\ \ & \exprgt{A}{\highlight{S}}
+\\
+(\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+\\
+ & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+\\
+(\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+\end{array}
+\]
+\caption{$\Phi-$Restricted Normal Forms}
+\label{fig:rnf}
+\end{figure*}
+
+\subsection{Normalisation}
+Rewrite rules, denoted as $\rewrite{}{i}{}$ for phase $i$, are defined in
+Figure~\ref{fig:red}. The metavariables $F$, and $G$ denote
+capture-allowing evaluation frames. The metafunctions defined for
+expressions carry over to evaluation frames trivially.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}lllll@{}}
+\multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+(\eta_{\rightarrow})
+& L
+& \ \rewrite{}{1}{}\ \
+& \expabs{x}{A}{\expapp{L}{x}}
+& %\cnd{%% \neg\valuep{M},\ and\\\ \ \ \fresh{x}}
+\\[0pt]
+\multicolumn{5}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\env \vdash \typing{L}{\typarr{A}{B}},\ L \neq \expabs{y}{A}{N}\txt{, and }\fresh{x}}
+\\[10pt]
+
+\multicolumn{5}{@{}c@{}}{\txt{Phase 2}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+
+\multicolumn{5}{@{}l@{}}{F \mathbin{\ ::=\ }
+    \expapp{M}{\hole}\
+ |\ \expprd{\hole}{N}\
+ |\ \expprd{V}{\hole}\
+ |\ \expfst{\hole}\
+ |\ \expsnd{\hole}\
+ |\ \explft{\hole}{B}\
+ |\ \exprgt{A}{\hole}\
+ |\ \expcasind{\hole}{x}{M}{y}{N}}\\[1pt]
+
+(\txt{let}_{\rightarrow\times+})
+& F[\nv]
+& \ \rewrite{}{2}{}\ \
+& \expshr{x}{\nv}{F[x]}
+& \cnd{%% \neg\valuep{M},\ and\\\ \ \
+       \fresh{x}} \\[8pt]
+
+\multicolumn{5}{@{}c@{}}{\txt{Phase 3}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+
+\multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ }
+    \expapp{\hole}{V}\
+ |\ \expshr{x}{\hole}{N}}\\[1pt]
+
+(\kappa_{\txt{let}})
+& G[\expshr{x}{\nv}{N}]
+& \ \rewrite{}{3}{}\ \
+& \expshr{x}{\nv}{G[N]}
+& \cnd{x \notin \fv{G}}\\[0pt]
+
+(\kappa_{\txt{case}})
+& G[\expcasind{z}{x}{M}{y}{N}]
+& \ \rewrite{}{3}{}\ \
+& \expcasind{z}{x}{G[M]}{y}{G[N]}
+& \cnd{x \notin \fv{G},\ \txt{and}\\\ \ \ \, y \notin \fv{G}} \\[20pt]
+
+%% \multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{z}{x}{\hole}{y}{N}\ |\ \expcas{z}{x}{M}{y}{\hole}}\\[1pt]
+
+%% (\kappa_{\lambda})
+%% & H[\expabs{x}{A}{N}]
+%% & \ \rewrite{}{}{}\ \
+%% & \expabs{x}{A}{H[N]}
+%% & \cnd{x \notin \fv{H}} \\[8pt]
+
+
+(\beta_{\rightarrow})
+& \expapp{(\expabs{x}{A}{N})}{V}
+& \ \rewrite{}{3}{}\ \
+& \sbs{N}{x}{V}
+& \\[0pt]
+
+(\beta_{\times_1})
+& \expfst{\expprd{V}{W}}
+& \ \rewrite{}{3}{}\ \
+& V
+& \\[0pt]
+
+(\beta_{\times_2})
+& \expsnd{\expprd{V}{W}}
+& \ \rewrite{}{3}{}\ \
+& W
+& \\[0pt]
+
+(\beta_{+_1})
+& \expcasind{(\explft{V}{B})}{x}{M}{y}{N}
+& \ \rewrite{}{3}{}\ \
+& \sbs{M}{x}{V}
+& \\[0pt]
+
+(\beta_{+_2})
+& \expcasind{(\exprgt{A}{W})}{x}{M}{y}{N}
+& \ \rewrite{}{3}{}\ \
+& \sbs{N}{y}{W}
+& \\[0pt]
+
+(\beta_{\txt{let}})
+& \expshr{x}{V}{N}
+& \ \rewrite{}{3}{}\ \
+& \sbs{N}{x}{V}
+& \\[8pt]
+
+\multicolumn{5}{@{}c@{}}{\txt{Phase 4}}\\[-9pt]
+\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+
+(\txt{need})
+& \expshr{x}{\nv}{N}
+& \ \rewrite{}{4}{}\ \
+& N %%\sbs{N}{x}{\nv}
+& \cnd{%% \neg\valuep{M},\ and\\\ \ \
+       %%Count(x,N) < 2
+       x \notin \fv{N}}\\[0pt]
+\end{array}
+\]
+\caption{Rewrite Rules}
+\label{fig:red}
+\end{figure*}
+
+One-step reduction relation, denoted as $\reduce{}{i}{}$ for phase
+$i$, is compatible closure of the corresponding rewrite rule
+$\rewrite{}{i}{}$. One-step reduction relation for phase 1 has an
+extra condition such that a redex should not be immediately at the
+left-hand side of an application, i.e. $E \neq
+{E}'[\expapp{\hole}{M}]$ for the compatible contexts $E$ and $E'$.
+
+Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
+reflexive transitive closure of the corresponding one-step reduction
+relation $\reduce{}{i}{}$. The overall normalisation, denoted as
+$\reducestar{}{}{}$, is composition of the reduction for all four
+phases,
+i.e. $\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
+
+\subsection{Theorems and Proofs}
+
+\begin{proposition}[Normal Form Syntax]\ \\
+\label{prop_normal}
+An expression $M$ is in normal form, if and only if, it matches the
+abstract syntax in Figure~\ref{fig:nf}, given by the entry $N$.
+\end{proposition}
+
+
+\begin{proposition}[Preservation]\ \\
+\label{prop_preservation}
+Reduction preserves the type of the source expression:
+
+ if $\env \vdash \typing{M}{A}$ and $\reducestar{M}{}{N}$, then
+$\env \vdash \typing{N}{A}$.
+\end{proposition}

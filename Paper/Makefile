@@ -16,7 +16,7 @@ paper.pdf: paper.aux paper.bbl
 	pdflatex paper
 
 clean:
-	rm -f *.out *.aux *.log *.bbl *.blg *.ptb *~ \
+	rm -f *.out *.aux *.log *.bbl *.blg *.ptb *.brf *~ \
 	paper.tex
 
 clean-all: clean

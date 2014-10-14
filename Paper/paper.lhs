@@ -27,17 +27,24 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
+%%\usepackage[round]{natbib}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
+%%\usepackage{amsthm}
 \usepackage{stmaryrd}
+\usepackage{proof}
 \usepackage{xspace}
-\usepackage{hyperref}
+\usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
+                      ,pdftitle={QDSLs: Why its nicer to be quoted normally}
+                      ,pagebackref=true,pdftex]{hyperref}
+\usepackage{tabularx}
+\usepackage{graphicx}
 \usepackage{url}
 \usepackage{color}
+\usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{listings}
 \lstset{language=C,identifierstyle=\ttfamily,keywordstyle=\bfseries\ttfamily}
-%% \usepackage[table]{xcolor}
 %% \usepackage{colortbl}
 
 %%% macros
@@ -186,7 +193,7 @@ C\# LINQ \citep{csharplinq}, and Scala Lightweight Modular Staging
 explicit, as here, while in C\# LINQ and Scala LMS, quotation and
 anti-quotation is controlled by type inference.
 
-Feldspar exploits a combination of deep and shallow embedding, 
+Feldspar exploits a combination of deep and shallow embedding,
 a technique which we here refer to as simply CDSL. (In other contexts,
 CDSL means any embedded domain-specific language, and includes
 all techniques covered here.) The technique is clearly described
@@ -247,7 +254,7 @@ power n x =
     if x == 0 then 0 else 1 / power (-n) x
   else if n == 0 then
     1
-  else if even n then 
+  else if even n then
     sqr (power (n `div` 2) x)
   else
     x * power (n-1) x
@@ -266,7 +273,7 @@ For example,
       float w = u * (v * v);
       return 1 / (w * w);
     }
-  } 
+  }
 \end{lstlisting}
 should result from instantiating |power| to |(-6)|.
 
@@ -285,7 +292,7 @@ power n x =
     x .==. 0 ? (0,  1 / power (-n) x)
   else if n == 0 then
     1
-  else if even n then 
+  else if even n then
     sqr (power (n `div` 2) x)
   else
     x * power (n-1) x
@@ -338,12 +345,12 @@ to generate a \texttt{main} function corresponding to its
 argument.  Here is a solution to our problem using QDSL.
 \begin{code}
 power :: Int -> Exp (Float -> Float)
-power n = 
+power n =
   if n < 0 then
     <|| \x -> if x == 0 then 0 else 1 / $(power (-n)) x ||>
   else if n == 0 then
     <|| \x -> 1 ||>
-  else if even n then 
+  else if even n then
     <|| \x -> $(sqr) ($(power (n `div` 2)) x) ||>
   else
     <|| \x -> x * $(power (n-1)) x ||>
@@ -426,7 +433,7 @@ normaliser---it can be built once and reused many times.
 \item Once the deep embedding or the normalised quoted term is
 produced, generating the domain-specific code is similar for
 both approaches.
- 
+
 \end{itemize}
 
 \subsection{Second example}
@@ -446,7 +453,7 @@ power' n x =
     if x == 0 then Nothing else do y <- power' (-n) x; return (1 / y)
   else if n == 0 then
     return 1
-  else if even n then 
+  else if even n then
     do y <- power' (n `div` 2) x; return (sqr y)
   else
     do y <- power' (n-1) x; return (x * y)
@@ -462,7 +469,7 @@ return  ::  a -> Maybe a
 maybe   ::  b -> (a -> b) -> Maybe a -> b
 \end{code}
 from the Haskell prelude. Type |Maybe| is declared as a monad, enabling the |do| notation,
-which translates into |(>>=)|. 
+which translates into |(>>=)|.
 The same C code as before should result from instantiating |power''| to |(-6)|.
 
 (In this case, the refactored function is arguably clumsier than the original,
@@ -477,7 +484,7 @@ power' n x  =
     (x .==. 0) ? (none, do y <- power' (-n) x; return (1 / y))
   else if n == 0 then
     return 1
-  else if even n then 
+  else if even n then
     do y <- power' (n `div` 2) x; return (sqr y)
   else
     do y <- power' (n-1) x; return (x*y)
@@ -557,7 +564,7 @@ power' n =
                  do y <- $(power' (-n) x); return (1 / y) ||>
   else if n == 0 then
     <|| \x -> return 1 ||>
-  else if even n then 
+  else if even n then
     <|| \x -> do y <- $(power' (n `div` 2) x); return $(sqr y) ||>
   else
     <|| \x -> do y <- $(power' (n-1) x); return (x * y) ||>
@@ -572,7 +579,7 @@ and provided for use in quoted terms by the QDSL library.
 Evaluating |Qt (powerQ'' (-6))| yields a term of similar complexity
 to the term yielded by the CDSL. Normalisation by the rules discussed
 in Section~\ref{sec:normalise} reduces the term to the same form
-as before, which in turn generates the same C as before.  
+as before, which in turn generates the same C as before.
 
 Here are some further points of comparison between the two approaches.
 \begin{itemize}
@@ -583,7 +590,7 @@ embedding SQL in F\# by \citet{CheneyLW13} expoited F\# sequence
 notation. For the CDSL, exploiting |do| notation just requires
 instantiating |return| and |(>>=)| correctly. For the QDSL, it is
 also necessary for the normaliser to recognise and expand
-|do| notation and to substitute appropriate instances of 
+|do| notation and to substitute appropriate instances of
 |return| and |(>>=)|.
 
 \item As this example shows, sometimes both CDSLs and QDSLs
@@ -689,7 +696,7 @@ The first instance of |Syntactic| is |Dp| itself, and is straightforward.
 \begin{code}
 instance Syntactic (Dp a) where
   type Internal (Dp a)  =  a
-  toDp    	        =  id         
+  toDp    	        =  id
   fromDp  	        =  id
 \end{code}
 Our representation of a run-time |Bool| will have type |Dp Bool| in
@@ -714,8 +721,8 @@ while c b i  =   fromDp (While (c . fromDp) (toDp . b . fromDp) (toDp i))
 Numbers are made convenient to manipulate via overloading.
 \begin{code}
 instance Num (FunC Int) where
-  a + b          =  Prim2 "(+)" (+) a b 
-  a - b          =  Prim2 "(-)" (-) a b 
+  a + b          =  Prim2 "(+)" (+) a b
+  a - b          =  Prim2 "(-)" (-) a b
   a * b          =  Prim2 "(*)" (*) a b
   fromInteger a  =  LitI (fromInteger a)
 \end{code}
@@ -864,10 +871,10 @@ return x  =   some_R x
 o >>= g   =   Opt_R  (def o ? (def (g (val o)), false))
                      (def o ? (val (g (val o)), undef))
 \end{code}
-However, this adds type constraint |Undef b| 
+However, this adds type constraint |Undef b|
 to the type of |(>>=)|, which is not permitted.
 This need to add constraints often arises, and has
-been dubbed the constrained-monad problem 
+been dubbed the constrained-monad problem
 \citet{hughes:restricted-monad,SculthorpeBGG13,SvenningssonS13}.
 To solve it, we follow a trick due to \cite{PerssonAS11}.
 
@@ -908,7 +915,7 @@ none          ::  Undef a => Opt a
 none          =   lift none_R
 
 option        ::  (Undef a, Undef b) => b -> (a -> b) -> Opt a -> b
-option d f o  =   option_R d f (lower o) 
+option d f o  =   option_R d f (lower o)
 \end{code}
 
 These definitions are adequate to support the CDSL code presented
@@ -958,7 +965,7 @@ It is straightforward to make |Vector| an instance of |Functor|.
 
 Here are some primitive operations on vectors
 \begin{code}
-zipWithVec  ::  (Syntactic a, Syntactic b) => 
+zipWithVec  ::  (Syntactic a, Syntactic b) =>
                 (a -> b -> c) -> Vector a -> Vector b -> Vector c
 zipWithVec f (Vec m g) (Vec n h)  =   Vec (min m n) (\i -> f (g i) (h i))
 
@@ -1011,7 +1018,7 @@ The above definition depends on common subexpression elimination
 or observable sharing to ensure |Arr n (toDp .g)| is computed
 once, rather than once for each element of the resulting vector.
 
-For example, if 
+For example, if
 \begin{code}
 blur :: Synactic a => Vector a -> Vector a
 \end{code}
@@ -1033,6 +1040,8 @@ combined with fine control over memory usage.
 \section{The subformula property}
 \label{sec:subformula}
 
+
+\input{formalism}
 
 \section{Empirical results}
 \label{sec:empirical}
@@ -1108,10 +1117,10 @@ Nicola, benefit from allowing programmers to exploit higher-order
 features while generating efficient first-order code.
 They achieve this by utilizing the evaluator of the host language;
 We achieve it by using a normaliser instead. Our normaliser is gauranteed to work because of the theorems depending on subformula property.
- 
+
 We present a new approach to implementing embedded domain specific languages based on quotations called QDSLs (Quoted DSLs).
 
- 
+
 \section{Background}
 
 \subsection{Feldspar}
@@ -1166,4 +1175,3 @@ We present a new approach to implementing embedded domain specific languages bas
 %% \end{thebibliography}
 
 \end{document}
-
