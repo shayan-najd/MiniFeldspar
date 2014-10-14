@@ -22,8 +22,8 @@ main :: IO()
 main = do
  [d] <- getArgs
  f   <- readFile (d </> "result")
- let ls  = (read f):: [(String,Float)]
-     lk s = printf "%.2f" (maybe (error s) id (lookup s ls))
+ let ls   = (read f):: [(String,Float)]
+     lk s = maybe "No Data" (printf "%.2f") (lookup s ls)
  writeFile (init d ++ ".csv") $
    "(QMiniFeldspar)"<|>"Haskell Compile"                  <|> "Haskell Run"                 <|>"C Compile"                    <|>"C Run"                        <->
    "(MiniFeldspar)" <|>"Haskell Compile"                  <|> "Haskell Run"                 <|>"C Compile"                    <|>"C Run"                        <@>

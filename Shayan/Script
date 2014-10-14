@@ -42,13 +42,13 @@ do
     do
 	for i in {1..10}
 	do
-	    #if [ ${a}${n} != FFTMiniWellScoped ]; then
-	    rm ImageIPBW.pbm
-	    rm ImageIPGray.pgm
-	    rm ImageFFT.pgm
-	    rm ImageWindowing.pgm
-	    /usr/bin/time -f "%e" -a -o time${a}${n}Run ./${a}${n}
-            #fi
+	    if [ ${a}${n} != FFTMiniWellScoped ]; then
+		rm ImageIPBW.pbm
+		rm ImageIPGray.pgm
+		rm ImageFFT.pgm
+		rm ImageWindowing.pgm
+		/usr/bin/time -f "%e" -a -o time${a}${n}Run ./${a}${n}
+            fi
 	done
     done
 done
