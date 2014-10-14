@@ -461,7 +461,7 @@ Strong guarantees for fusion in combination with |memorize| gives
 the programmer a simple interface which provides powerful optimisation
 combined with fine control over memory usage.
 
-%if
+%if False
 \begin{code}
 idVec     ::  Dp Int -> Vector (Dp Int)
 idVec n   =   Vec n id
