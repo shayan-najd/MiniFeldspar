@@ -1,0 +1,87 @@
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+----------------------------
+"Good artists copy, great artists steal." --- Picasso
+
+Domain specific embedded languages are great: they steal the type
+system of the host language.  This paper presents quoted domain
+specific languages, which are greater still: they steal the type
+system and syntax of the host language, and exploit a normaliser for
+the quoted expressions that can be reused between many implementations
+of embedded languages.
+-----------------------------
+-- Higher-order is the secret sauce of functional programming.
+Many embedded domain specific languages, such as Feldspar, Hydra, and
+Nicola, benefit from allowing programmers to exploit higher-order
+features while generating efficient first-order code.
+The reason this works is Gentzen's \emph{subformula property}, which gaurantees that higher-order constructs
+
+
+-----------------------------
+Sometimes a detour is the shortest way to one's destination.
+Often, a concept can be most concisely expressed using higher-order
+functions, eventhought, the final result is first-order.
+Many embedded domain specific languages, such as Feldspar, Hydra, and
+Nicola, benefit from allowing programmers to exploit higher-order
+features while generating efficient first-order code.
+They achieve this by utilizing the evaluator of the host language;
+We achieve it by using a normaliser instead. Our normaliser is gauranteed to work because of the theorems depending on subformula property.
+
+We present a new approach to implementing embedded domain specific languages based on quotations called QDSLs (Quoted DSLs).
+
+
+\section{Background}
+
+\subsection{Feldspar}
+
+\subsection{Quotation-based DSLs}
+
+\section{Template Feldspar}
+
+\section{Performance Evaluation}
+
+\section{Related Work}
+
+\section{Conclusion}
+
+%% \begin{abstract}
+%% This is the text of the abstract.
+%% \end{abstract}
+
+%% \category{CR-number}{subcategory}{third-level}
+
+%% \terms
+%% term1, term2
+
+%% \keys
+%% keyword1, keyword2
+
+%% \section{Introduction}
+
+%% The text of the paper begins here.
+
+%% \appendix
+%% \section{Appendix Title}
+
+%% This is the text of the appendix, if you need one.
+
+%% \acks
+
+%% Acknowledgments, if needed.
+
+% We recommend abbrvnat bibliography style.
+
+% \bibliographystyle{abbrvnat} \bibliography{paper}
+
+% The bibliography should be embedded for final submission.
+
+%% \begin{thebibliography}{}
+%% \softraggedright
+
+%% \bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
+%% P. Q. Smith, and X. Y. Jones. ...reference text...
+
+%% \end{thebibliography}
+
+\end{document}

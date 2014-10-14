@@ -1,7 +1,7 @@
 %if False
 \begin{code}
 {-# LANGUAGE GADTs, TypeFamilies, FlexibleInstances, FlexibleContexts, Rank2Types #-}
-module CDSL where
+module Section3 where
 import Data.Array
 \end{code}
 %endif
