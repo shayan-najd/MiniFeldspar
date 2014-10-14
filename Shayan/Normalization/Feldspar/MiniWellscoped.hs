@@ -21,17 +21,18 @@ isVal ee = case ee of
   ConI _       -> True
   ConB _       -> True
   ConF _       -> True
-  AppV _  _    -> False
+  AppV _ Emp   -> True
+  AppV _ _     -> False
   Cnd  _  _  _ -> False
   Whl  _  _  _ -> False
   Tpl  ef es   -> isVal ef && isVal es
   Fst  _       -> False
   Snd  _       -> False
-  Ary  _  _    -> False
+  Ary  el _    -> isVal el
   Len  _       -> False
   Ind  _  _    -> False
   Let  _  _    -> False
-  Cmx  _  _    -> False
+  Cmx  _  _    -> True
   Tmp  _       -> True
   Tag  _  e    -> isVal e
 
@@ -82,7 +83,7 @@ cmt v r r' = case r' of
       Sub Dict  -> cmt v (add r (Ext x Emp)) xs
 
 hasNV :: Env (Exp r) r' -> Bool
-hasNV = foldl (\ b e -> b || isVal e) False
+hasNV = foldl (\ b e -> b || (not (isVal e))) False
 
 instance HasSin TFG.Typ t => NrmOne (Exp n t) where
   nrmOne ee = let t = sin :: TFG.Typ t in case ee of

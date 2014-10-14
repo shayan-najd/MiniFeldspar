@@ -12,7 +12,7 @@ import System.IO.Unsafe
 import Singleton
 
 cse :: forall r t. HasSin TFG.Typ t => Exp r t -> Exp r t
-cse e = tilNotChg cseOne e
+cse e = remTag (tilNotChg cseOne e)
 
 
 reff :: IORef Int
@@ -25,7 +25,7 @@ cseF f  = let i = unsafePerformIO (do j <- readIORef reff
                                       modifyIORef ref (+1)
                                       return j)
               v = "_xn" ++ show i
-          in (\ x -> absTmp x v (cse (f (Tmp v))))
+          in remTag . (\ x -> absTmp x v (cse (f (Tmp v))))
 
 
 remTag :: Exp r t -> Exp r t
