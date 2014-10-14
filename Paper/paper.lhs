@@ -1046,6 +1046,7 @@ combined with fine control over memory usage.
 \section{Empirical results}
 \label{sec:empirical}
 
+\input{table}
 
 %\section{The design of Haskell DSL}
 %\label{sec:tool}
