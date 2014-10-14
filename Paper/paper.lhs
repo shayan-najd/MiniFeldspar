@@ -239,6 +239,7 @@ Section~\ref{sec:related} summarises related work, and
 Section~\ref{sec:conclusion} concludes.
 
 \section{Overview}
+\label{sec:overview}
 
 \subsection{First example}
 \label{sec:first-example}
