@@ -1,5 +1,4 @@
-\documentclass[citeauthoryear]{llncs}
-%\documentclass[preprint]{sigplanconf}
+\documentclass{llncs}
 
 %include polycode.fmt
 %format == = "\longeq "
@@ -27,7 +26,7 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
-%%\usepackage[round]{natbib}
+\usepackage[round]{natbib}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -57,8 +56,8 @@
 \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
 
-\newcommand{\citet}[1]{\cite{#1}}
-\newcommand{\citep}[1]{(\cite{#1})}
+%%\newcommand{\citet}[1]{\cite{#1}}
+%%\newcommand{\citep}[1]{(\cite{#1})}
 
 \begin{document}
 
