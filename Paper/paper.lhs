@@ -619,6 +619,7 @@ quoted host language, and so can share a normaliser.
 \section{Empirical results}
 \label{sec:empirical}
 
+\input{table}
 
 %\section{The design of Haskell DSL}
 %\label{sec:tool}
