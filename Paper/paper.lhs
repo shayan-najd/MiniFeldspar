@@ -78,10 +78,10 @@
   \and Josef Svenningsson\inst{2}
   \and Philip Wadler\inst{1}}
 
-\institute{The University of Edinburgh
+\institute{The University of Edinburgh\\
 \email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
 \and
-Chalmers University of Technology
+Chalmers University of Technology\\
 \email{josefs@@chalmers.se}}
 
 \maketitle
