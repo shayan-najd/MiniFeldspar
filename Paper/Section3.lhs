@@ -397,10 +397,11 @@ sumVec (Vec n g)                  =   for n 0 (\i x -> x + g i)
 Computing |zipWithVec f u v| combines vectors |u| and |v| pointwise with |f|,
 and computing |sumVec v| sums the elements of vector |v|.
 
-This style of definition extends well to any functions where each vector
-element is computed independently, including |drop|, |take|, |reverse|,
-vector concatentation, and the like, but may work less well when there are
-dependencies between elements, as in computing a running sum.
+We can easily define any function over vectors where each vector
+element is computed independently, including |drop|, |take|,
+|reverse|, vector concatentation, and the like, but it may be harder
+to do so when there are dependencies between elements, as in computing
+a running sum.
 
 \subsection{Fusion}
 
