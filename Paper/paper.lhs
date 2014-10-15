@@ -116,6 +116,9 @@ domain-specific languages into a given host language.
 
 \section{Introduction}
 
+\todo{NBE citations - Sam}
+\todo{push array citations - Josef}
+
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
@@ -202,6 +205,19 @@ QDSL source may refer to higher-order concepts or data types such as
 code.  The idea is not limited to QDSL, as
 Section~\ref{sec:edsl-maybe} applies the same idea to CDSL.
 
+%%
+The paper makes the following contributions.
+
+  * introduce notion of QDSL
+  * introduce term CDSL (but not the concept)
+  * compare QDSL with CDSL
+  * observe that subformula property has general application to QDSLs and CDSLs
+  * formalisation of normaliser
+  * implementation of Feldspar as a QDSL
+  * evaluation of Feldspar CDSL and Feldspar QDSL
+
+%%
+
 The paper makes the following contributions.
 \begin{itemize}
 \item Section~\ref{sec:overview} introduces and compares the
@@ -216,6 +232,8 @@ works in detail, reworking the examples of Section~\ref{sec:edsl}.
 \item Section~\ref{sec:subformula} describes a normaliser
 that ensures the subformula property while not losing sharing,
 which can be applied to both call-by-need and call-by-value semantics.
+
+\todo{Clarify what we really do about sharing}
 
 \item Section~\ref{sec:empirical} presents empirical results for
 Feldspar programs written and executed in both styles, showing CDSL
