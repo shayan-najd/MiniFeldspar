@@ -73,10 +73,10 @@ instance FrmInt Float where
 
 type Tpl a b = (a , b)
 
-fst :: (FO a , FO b) => (a , b) -> a
+fst :: (a , b) -> a
 fst = VP.fst
 
-snd :: (FO a , FO b) => (a , b) -> b
+snd :: (a , b) -> b
 snd = VP.snd
 
 ---------------------------------------------------------------------------------
