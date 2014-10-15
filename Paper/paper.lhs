@@ -207,15 +207,15 @@ Section~\ref{sec:edsl-maybe} applies the same idea to CDSL.
 
 %%
 The paper makes the following contributions.
-
-  * introduce notion of QDSL
-  * introduce term CDSL (but not the concept)
-  * compare QDSL with CDSL
-  * observe that subformula property has general application to QDSLs and CDSLs
-  * formalisation of normaliser
-  * implementation of Feldspar as a QDSL
-  * evaluation of Feldspar CDSL and Feldspar QDSL
-
+\begin{itemize}
+  \item introduce notion of QDSL
+  \item introduce term CDSL (but not the concept)
+  \item compare QDSL with CDSL
+  \item observe that subformula property has general application to QDSLs and CDSLs
+  \item formalisation of normaliser
+  \item implementation of Feldspar as a QDSL
+  \item evaluation of Feldspar CDSL and Feldspar QDSL
+\end{itemize}
 %%
 
 The paper makes the following contributions.
