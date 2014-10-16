@@ -133,7 +133,8 @@ its occurrences.
 Here are some primitive operators on vectors, in QDSL style.
 \begin{code}
 zipWithVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
-zipWithVec   =   <|| \f (Vec m g) (Vec n h) -> Vec ($$minim m n) (\i -> f (g i) (h i)) ||>
+zipWithVec   =   <||  \f (Vec m g) (Vec n h) ->
+                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||>
 
 sumVec       ::  Num a => Qt (Vec a -> a)
 sumVec       =   <|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||>
