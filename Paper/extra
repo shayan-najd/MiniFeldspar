@@ -126,3 +126,117 @@ normaliser described in the next section will then completely eliminate
 all occurrences of the |Maybe| type from the target program.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+FROM SECTION 5 (SUBFORMULA)
+
+%% \begin{figure*}[h]
+%% \[\uncolored
+%% \begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
+%% \ \\[-22pt]
+%% (\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{U} & \ |\ \  & \expapp{Q}{U} & \ |\ \  & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+%% \\
+%% (\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% (\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{T}{U} & \ |\ \ & \explft{T}{B} & \ |\ \ & \exprgt{A}{U}
+%% \\
+%% (\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+%% \\
+%%  & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K}}
+%% \\
+%% (\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+%% \\
+%% \end{array}
+%% \]
+%% \caption{Normal Forms}
+%% \label{fig:nf}
+%% \end{figure*}
+
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}llll@{}}
+
+\inference
+{}
+{\Phi_0\typone}
+{\Phi_0(\typone)}
+
+&
+
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_0\times}
+{\Phi_0(\typprd{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_0+}
+{\Phi_0(\typsum{A}{B})}
+
+
+\\~\\
+
+\inference
+{}
+{\Phi_{n+1}\typone}
+{\Phi_{n+1}(\typone)}
+&
+\inference
+{\Phi_n(A) & \Phi_{n+1}(B)}
+{\Phi_{n+1}\rightarrow}
+{\Phi_{n+1}(\typarr{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_{n+1}\times}
+{\Phi_{n+1}(\typprd{A}{B})}
+&
+\inference
+{\Phi_0(A) & \Phi_0(B)}
+{\Phi_{n+1}+}
+{\Phi_{n+1}(\typsum{A}{B})}
+
+
+\end{array}
+\]
+\caption{$\Phi$ Restriction}
+\label{fig:phi}
+\end{figure*}
+
+Restricting the types of free variables, and the type of terms results
+in interesting normal forms.
+
+For a normal form which is easily compilable to \emph{C}, the
+restriction $\Phi$ is applied. The restriction $\Phi$ is defined in
+Figure~\ref{fig:phi}.
+
+Having $\Gamma \vdash M : B$, by restricting the type of every free
+variable $\typing{x_i}{A_i} \in \Gamma$ such that $\Phi_2(A_i)$, and
+by restricting the type of the term $M$ such that $\Phi_1(B)$, we have
+the normal form defined in Figure~\ref{fig:rnf}. The terms of this
+normal form are easily compilable to \emph{C}.  The notation
+$\overline{M}$ is used to denote a non-empty sequence of terms $M_i$.
+
+\begin{figure*}[h]
+\[\uncolored
+\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
+\ \\[-22pt]
+(\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{\highlight{\overline{U}}} & \ |\ \ & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
+\\
+(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+(\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{\highlight{R}}{\highlight{S}} & \ |\ \ & \explft{\highlight{R}}{B} & \ |\ \ & \exprgt{A}{\highlight{S}}
+\\
+(\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
+\\
+ & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
+\\
+(\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
+\\
+\end{array}
+\]
+\caption{$\Phi-$Restricted Normal Forms}
+\label{fig:rnf}
+\end{figure*}
+

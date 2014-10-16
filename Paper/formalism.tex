@@ -1,5 +1,5 @@
-\newcommand{\incolor}[1]{#1}    % Use to typeset in color
-%\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+%\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+\newcommand{\incolor}[1]{}     % Use to typeset in black and white
 
 % color framework
 
@@ -99,79 +99,45 @@
                %% {\txt{N\kern-3ptW}}
 \newcommand{\na}{L^{\text{\textcrlambda}}}
 
-\subsection{The Source Language}
-Metavariables $x$, $y$, and $z$ range over variables. Wherever
-variables are used, renaming of bound variables is allowed;
-we work up to renamings.
 
-Types are \textbf{closed} terms defined by the abstract syntax in
-Figure~\ref{fig:typ}.
-
-\begin{figure*}[h]
+\newcommand{\figterm}{
+\begin{figure*}[t]
 \[\uncolored
-\begin{array}{llll}
-A,B,C & \mathbin{\ ::=\ }
-         & \typone       & \textrm{unit}         \\
-& \ |\ \ & \typarr{A}{B} & \textrm{function}  \\
-& \ |\ \ & \typprd{A}{B} & \textrm{product}      \\
-& \ |\ \ & \typsum{A}{B} & \textrm{sum}
+\begin{array}{lrcl}
+\text{Types} & A,B,C & ::=&
+% \typone             %   & \textrm{unit}      \\
+  \typarr{A}{B} \mid  %   & \textrm{function}  \\
+  \typprd{A}{B} \mid  %   & \textrm{product}   \\
+  \typsum{A}{B}       %   & \textrm{sum}
+\\[1ex]
+\text{Terms} & L,M,N & ::= &
+% \expunt                \mid   % \textrm{unit}              \\
+  \expvar{x}             \mid   % \textrm{variable}          \\
+  \expabs{x}{A}{N}       \mid   % \textrm{abstraction}       \\
+  \expapp{L}{M}          \mid   % \textrm{application}       \\
+  \expshr{x}{M}{N}       \mid   % \textrm{sharing}           \\
+  \expprd{M}{N}          \mid   % \textrm{product}           \\
+  \expfst{L}             \mid   % \textrm{projection-first}  \\
+  \expsnd{L}             \\&&&  % \textrm{projection-second} \\
+  \explft{M}{\tm{B}}     \mid   % \textrm{injection-left}    \\
+  \exprgt{\tm{A}}{N}     \mid   % \textrm{injection-right}   \\
+  \expcas{L}{x}{M}{y}{N}        % \textrm{case}
+\\[1ex]
+\text{Values} & V,W & ::= &
+% \expunt\               \mid
+  \expvar{x}             \mid
+  \expabs{x}{A}{N}       \mid
+  \expprd{V}{W}          \mid
+  \explft{V}{B}          \mid
+  \exprgt{A}{W}
 \end{array}
 \]
-\caption{Types}
-\label{fig:typ}
+\caption{Types, Terms, and Values}
+\label{fig:term}
 \end{figure*}
+}
 
-Metavariables $A$, $B$, and $C$ range over types. Types
-correspond to formulas in minimal propositional logic.
-
-Expressions are \textbf{open} terms defined by the abstract syntax in
-Figure~\ref{fig:exp}.
-
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}{llll}
-L,M,N & \mathbin{\ ::=\ }
-         & \expvar{x}             & \textrm{variable}          \\
-& \ |\ \ & \expunt                & \textrm{unit}              \\
-& \ |\ \ & \expabs{x}{A}{N}       & \textrm{abstraction}       \\
-& \ |\ \ & \expapp{L}{M}          & \textrm{application}       \\
-& \ |\ \ & \expshr{x}{M}{N}       & \textrm{sharing}           \\
-& \ |\ \ & \expprd{M}{N}          & \textrm{product}           \\
-& \ |\ \ & \expfst{L}             & \textrm{projection-first}  \\
-& \ |\ \ & \expsnd{L}             & \textrm{projection-second} \\
-& \ |\ \ & \explft{M}{\tm{B}}     & \textrm{injection-left}    \\
-& \ |\ \ & \exprgt{\tm{A}}{N}     & \textrm{injection-right}   \\
-& \ |\ \ & \expcas{L}{x}{M}{y}{N} & \textrm{case}
-\end{array}
-\]
-\caption{Expressions}
-\label{fig:exp}
-\end{figure*}
-
-Metavariables $L$, $M$, and $N$ range over expressions. Expressions
-correspond to proofs in minimal propositional logic.
-
-%Erasing the types, colored in red, yields the usual untyped
-%$\lambda$-calculus.
-
-Capture-free substitution is defined as usual and it is denoted as
-$\sbs{N}{x}{M}$ for substitution of the expression $M$ for the variable
-$x$ in the expression $N$. Set of free variables in an expression is
-calculated as usual and it is denote as $\fv{N}$ for set of free
-variables in $N$. Moreover, the notation $count(x,N)$ is used to denote a
-metafunction returning the number of times the free variable $x$ is
-used syntactically in the expression $N$.
-% We follow Barendregt convension such that we assume variables in a
-% term are all distinct.
-Type %, normalisation, and evaluation
- environments are all maps from
-variable names. The metavariables $\Gamma$, and $\Delta$ range over
-type environments.  The inference rules are equivalent up to exchange,
-contraction, and weakening operations.
-
-The typing judgement is defined by the inference rules in
-Figure~\ref{fig:typing}.
-
+\newcommand{\figtyping}{
 \begin{figure*}[h]
 \[\colored
 \begin{array}{@{}ll@{}}
@@ -285,166 +251,38 @@ Figure~\ref{fig:typing}.
 \caption{Typing Rules}
 \label{fig:typing}
 \end{figure*}
+}
 
-Typing rules are syntax-directed and algorithmic.
-The correspondence to minimal logic is made evident by using colored
-fonts in typing rules; removing the red bits (i.e. expressions) from
-the typing rules yields the corresponding logical inference rules.\\
-
-Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
-
-\begin{figure*}[h]
+\newcommand{\fignf}{
+\begin{figure*}[t]
 \[\uncolored
-\begin{array}[t]{@{}lll@{}}
-V,W & \mathbin{\ ::=\ } & \expvar{x}\ |\ \expabs{x}{A}{N}\ |\ \expunt\ |\ \expprd{V}{W}\ |\ \explft{V}{B}\ |\ \exprgt{A}{W}
-\end{array}
-\]
-\caption{Values}
-\label{fig:val}
-\end{figure*}
-
-The metavariables $V$, and $W$ range over values. The metavariable
-$\nv$ range over expressions that are not values, also referred to as non-values.
-
-\subsection{Normal Forms and Restrictions}
-The normal forms that we are interested about, denoted as $N$, is defined in Figure~\ref{fig:nf}.
-
-%% \begin{figure*}[h]
-%% \[\uncolored
-%% \begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
-%% \ \\[-22pt]
-%% (\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{U} & \ |\ \  & \expapp{Q}{U} & \ |\ \  & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
-%% \\
-%% (\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
-%% \\
-%% (\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{T}{U} & \ |\ \ & \explft{T}{B} & \ |\ \ & \exprgt{A}{U}
-%% \\
-%% (\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
-%% \\
-%%  & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K}}
-%% \\
-%% (\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
-%% \\
-%% \end{array}
-%% \]
-%% \caption{Normal Forms}
-%% \label{fig:nf}
-%% \end{figure*}
-
-
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
-\ \\[-22pt]
-(\txt{Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{W} & \ |\ \  & \expapp{Q}{W} & \ |\ \  & \expfst{x} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{x}}
-\\
-(\txt{Value Normal Forms}) & V,W & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expabs{x}{A}{N} & \ |\ \  & \expunt{} & \ |\ \  &  \expprd{V}{W}  & \ |\ \  & \explft{V}{B} & \ |\ \  & \exprgt{A}{W}
-\\
-(\txt{Normal Forms}) & N,M & \mathbin{\ ::=\ } & Q & \ |\ \  & V & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expcas{z}{x}{N}{y}{M}}
-\\
- & & \ \ \ \ | & \multicolumn{11}{l@{}}{\expshr{x}{Q}{N}}
+\begin{array}{lrcl}
+\text{Neutral Forms} & Q & ::= &
+   \expapp{x}{W}   \mid
+   \expapp{Q}{W}   \mid
+   \expfst{x}      \mid
+   \expsnd{x}      
+\\[1ex]
+\text{Value Forms} & V,W & ::= &
+% \expunt{}          \mid
+   \expvar{x}        \mid
+   \expabs{x}{A}{N}  \mid
+   \expprd{V}{W}     \mid
+   \explft{V}{B}     \mid 
+   \exprgt{A}{W}
+\\[1ex]
+\text{Normal Forms} & N,M & ::= &
+   Q  \mid  V  \mid \expcas{z}{x}{N}{y}{M} \mid \expshr{x}{Q}{N}
 \\
 \end{array}
 \]
 \caption{Normal Forms}
 \label{fig:nf}
 \end{figure*}
+}
 
-Restricting the types of free variables, and the type of terms results
-in interesting normal forms.
-
-For a normal form which is easily compilable to \emph{C}, the
-restriction $\Phi$ is applied. The restriction $\Phi$ is defined in
-Figure~\ref{fig:phi}.
-
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}[t]{@{}llll@{}}
-
-\inference
-{}
-{\Phi_0\typone}
-{\Phi_0(\typone)}
-
-&
-
-&
-\inference
-{\Phi_0(A) & \Phi_0(B)}
-{\Phi_0\times}
-{\Phi_0(\typprd{A}{B})}
-&
-\inference
-{\Phi_0(A) & \Phi_0(B)}
-{\Phi_0+}
-{\Phi_0(\typsum{A}{B})}
-
-
-\\~\\
-
-\inference
-{}
-{\Phi_{n+1}\typone}
-{\Phi_{n+1}(\typone)}
-&
-\inference
-{\Phi_n(A) & \Phi_{n+1}(B)}
-{\Phi_{n+1}\rightarrow}
-{\Phi_{n+1}(\typarr{A}{B})}
-&
-\inference
-{\Phi_0(A) & \Phi_0(B)}
-{\Phi_{n+1}\times}
-{\Phi_{n+1}(\typprd{A}{B})}
-&
-\inference
-{\Phi_0(A) & \Phi_0(B)}
-{\Phi_{n+1}+}
-{\Phi_{n+1}(\typsum{A}{B})}
-
-
-\end{array}
-\]
-\caption{$\Phi$ Restriction}
-\label{fig:phi}
-\end{figure*}
-
-Having $\Gamma \vdash M : B$, by restricting the type of every free
-variable $\typing{x_i}{A_i} \in \Gamma$ such that $\Phi_2(A_i)$, and
-by restricting the type of the term $M$ such that $\Phi_1(B)$, we have
-the normal form defined in Figure~\ref{fig:rnf}. The terms of this
-normal form are easily compilable to \emph{C}.  The notation
-$\overline{M}$ is used to denote a non-empty sequence of terms $M_i$.
-
-\begin{figure*}[h]
-\[\uncolored
-\begin{array}[t]{@{}llll@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}l@{}}
-\ \\[-22pt]
-(\txt{Non-Value Neutral Forms}) & Q & \mathbin{\ ::=\ } & \expapp{x}{\highlight{\overline{U}}} & \ |\ \ & \expfst{z} & \ |\ \  &  \multicolumn{3}{@{}l@{}}{\expsnd{z}}
-\\
-(\txt{Value Normal Forms}) & T,U & \mathbin{\ ::=\ } & S & \ |\ \  & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
-\\
-(\txt{Non-Abstraction Value Normal Forms}) & R,S & \mathbin{\ ::=\ } & \expvar{x} & \ |\ \  & \expunt & \ |\ \ & \expprd{\highlight{R}}{\highlight{S}} & \ |\ \ & \explft{\highlight{R}}{B} & \ |\ \ & \exprgt{A}{\highlight{S}}
-\\
-(\txt{Non-Abstraction Normal Forms}) & J,K & \mathbin{\ ::=\ } & Q &\ |\ \ & S &\ |\ \ & \multicolumn{5}{@{}l@{}}{\expcas{z}{x}{J}{y}{K}}
-\\
- & & \ \ \ \ | & \multicolumn{9}{l@{}}{\expshr{x}{Q}{K,\ \cnd{x \in \fv{K}}}}
-\\
-(\txt{Normal Forms}) & P & \mathbin{\ ::=\ } & K &\ |\ \ & \multicolumn{7}{@{}l@{}}{\expabs{x}{A}{P}}
-\\
-\end{array}
-\]
-\caption{$\Phi-$Restricted Normal Forms}
-\label{fig:rnf}
-\end{figure*}
-
-\subsection{Normalisation}
-Rewrite rules, denoted as $\rewrite{}{i}{}$ for phase $i$, are defined in
-Figure~\ref{fig:red}. The metavariables $F$, and $G$ denote
-capture-allowing evaluation frames. The metafunctions defined for
-expressions carry over to evaluation frames trivially.
-
-\begin{figure*}[h]
+\newcommand{\fignorm}{
+\begin{figure*}[t]
 \[\uncolored
 \begin{array}[t]{@{}lllll@{}}
 \multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
@@ -554,9 +392,72 @@ expressions carry over to evaluation frames trivially.
        x \notin \fv{N}}\\[0pt]
 \end{array}
 \]
-\caption{Rewrite Rules}
-\label{fig:red}
+\caption{Normalisation by rewrite}
+\label{fig:norm}
 \end{figure*}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\figterm
+\fignf
+\fignorm
+
+\todo{Either remover unit type or add empty type}
+
+Metavariables $x$, $y$, and $z$ range over variables. Wherever
+variables are used, renaming of bound variables is allowed;
+we work up to renamings.
+
+Types are \textbf{closed} terms defined by the abstract syntax in
+Figure~\ref{fig:typ}.
+
+Metavariables $A$, $B$, and $C$ range over types. Types
+correspond to formulas in minimal propositional logic.
+
+Expressions are \textbf{open} terms defined by the abstract syntax in
+Figure~\ref{fig:exp}.
+
+Metavariables $L$, $M$, and $N$ range over expressions. Expressions
+correspond to proofs in minimal propositional logic.
+
+%Erasing the types, colored in red, yields the usual untyped
+%$\lambda$-calculus.
+
+Capture-free substitution is defined as usual and it is denoted as
+$\sbs{N}{x}{M}$ for substitution of the expression $M$ for the variable
+$x$ in the expression $N$. Set of free variables in an expression is
+calculated as usual and it is denote as $\fv{N}$ for set of free
+variables in $N$. Moreover, the notation $count(x,N)$ is used to denote a
+metafunction returning the number of times the free variable $x$ is
+used syntactically in the expression $N$.
+% We follow Barendregt convension such that we assume variables in a
+% term are all distinct.
+Type %, normalisation, and evaluation
+ environments are all maps from
+variable names. The metavariables $\Gamma$, and $\Delta$ range over
+type environments.  The inference rules are equivalent up to exchange,
+contraction, and weakening operations.
+
+The typing judgement is defined by the inference rules in
+Figure~\ref{fig:typing}.
+
+Typing rules are syntax-directed and algorithmic.
+The correspondence to minimal logic is made evident by using colored
+fonts in typing rules; removing the red bits (i.e. expressions) from
+the typing rules yields the corresponding logical inference rules.\\
+
+Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
+
+The metavariables $V$, and $W$ range over values. The metavariable
+$\nv$ range over expressions that are not values, also referred to as non-values.
+
+The normal forms that we are interested about, denoted as $N$, is defined in Figure~\ref{fig:nf}.
+
+Rewrite rules, denoted as $\rewrite{}{i}{}$ for phase $i$, are defined in
+Figure~\ref{fig:red}. The metavariables $F$, and $G$ denote
+capture-allowing evaluation frames. The metafunctions defined for
+expressions carry over to evaluation frames trivially.
 
 One-step reduction relation, denoted as $\reduce{}{i}{}$ for phase
 $i$, is compatible closure of the corresponding rewrite rule
