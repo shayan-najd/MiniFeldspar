@@ -359,7 +359,7 @@ in Section~\ref{sec:second-example}.
 to this problem becomes available.}
 
 
-\subsection{Embedding Vector}
+\subsection{Embedding vector}
 
 Array programming is central to the intended application domain
 of MiniFeldspar. In this section, we extend our CDSL to handle
@@ -438,7 +438,7 @@ memorise            ::  Syntactic a => Vector a -> Vector a
 memorise (Vec n g)  =   Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
 The above definition depends on common subexpression elimination
-or observable sharing to ensure |Arr n (toDp .g)| is computed
+or observable sharing to ensure |Arr n (toDp . g)| is computed
 once, rather than once for each element of the resulting vector.
 
 For example, if
