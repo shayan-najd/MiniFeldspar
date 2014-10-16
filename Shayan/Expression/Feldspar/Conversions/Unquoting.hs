@@ -1,7 +1,7 @@
 module Expression.Feldspar.Conversions.Unquoting () where
 
 import MyPrelude (pure,fail,toRational,toInteger,fromInteger,fromRational
-                 ,show,(++),(==),Maybe(..),(<$>),(<*>),ErrM)
+                 ,show,(++),(==),Maybe(..),(<$>),(<*>),ErrM,otherwise)
 
 import qualified Expression.Feldspar.ADTUntypedNamed as FAUN
 import qualified Language.Haskell.TH.Syntax          as TH
@@ -35,10 +35,13 @@ instance Cnv (TH.Exp , ()) (FAUN.Exp TH.Name) where
     TH.ConE n
       | n == 'True          -> FAUN.ConB <$@> True
       | n == 'False         -> FAUN.ConB <$@> False
-    TH.ConE n               -> FAUN.Var  <$@> n
-    TH.VarE n               -> FAUN.Var  <$@> n
+      | n == 'Nothing       -> pure FAUN.Non
+      | otherwise           -> FAUN.Var  <$@> n
+    TH.VarE x               -> FAUN.Var  <$@> x
     TH.LamE [TH.VarP x] eb  -> FAUN.Abs  <$@> x <*@> eb
     TH.DoE stmts            -> mkDo stmts
+    TH.AppE (TH.ConE n) e
+      | n == 'Just          -> FAUN.Som  <$@> e
     TH.AppE (TH.VarE n) ea
       | n == 'fst           -> FAUN.Fst  <$@> ea
       | n == 'snd           -> FAUN.Snd  <$@> ea
@@ -63,6 +66,10 @@ instance Cnv (TH.Exp , ()) (FAUN.Exp TH.Name) where
     TH.TupE [ef , es]       -> FAUN.Tpl  <$@> ef <*@> es
     TH.LetE [TH.ValD (TH.VarP x) (TH.NormalB el) []] eb
                             -> FAUN.Let  <$@> x  <*@> el <*@> eb
+    TH.CaseE ec [TH.Match (TH.ConP nl []) (TH.NormalB el) []
+                ,TH.Match (TH.ConP nr [TH.VarP xr]) (TH.NormalB er) []]
+        | nl == 'Nothing , nr == 'Just -> FAUN.May <$@> ec
+                                          <*@> el <*@> xr <*@> er
     e                       -> fail  ("Syntax Error!\n" ++ (show e))
 
 instance Cnv (FAUN.Exp TH.Name , ()) TH.Exp where
@@ -103,3 +110,13 @@ instance Cnv (FAUN.Exp TH.Name , ()) TH.Exp where
     FAUN.Cmx er ei          -> do er' <- cnvImp er
                                   ei' <- cnvImp ei
                                   pure (TH.AppE (TH.AppE (TH.VarE 'cmx) er') ei')
+    FAUN.Non                -> pure (TH.ConE 'Nothing)
+    FAUN.Som e              -> TH.AppE (TH.ConE 'Just) <$@> e
+    FAUN.May em en x es     -> do em' <- cnvImp em
+                                  en' <- cnvImp en
+                                  es' <- cnvImp es
+                                  pure (TH.CaseE em'
+                                       [TH.Match (TH.ConP 'Nothing [])
+                                                 (TH.NormalB en') [],
+                                        TH.Match (TH.ConP 'Just [TH.VarP x])
+                                                 (TH.NormalB es') []])

@@ -46,7 +46,8 @@ type EnvFld r = $(natT 0 "NA.") ':
                 $(natT 2 "NA.") ':
                 $(natT 1 "NA.") ':
                 $(natT 0 "NA.") ':
-                $(natT 0 "NA.") ': r
+                $(natT 0 "NA.") ':
+                $(natT 1 "NA.") ':r
 
 pattern Int       = App $(natP 0 "") Emp
 pattern Arr ta tb = App $(natP 1 "") (Ext ta (Ext tb Emp))
@@ -55,3 +56,4 @@ pattern Tpl tf ts = App $(natP 3 "") (Ext tf (Ext ts Emp))
 pattern Ary ta    = App $(natP 4 "") (Ext ta  Emp)
 pattern Flt       = App $(natP 5 "") Emp
 pattern Cmx       = App $(natP 6 "") Emp
+pattern May a     = App $(natP 7 "") (Ext a Emp)

@@ -1,5 +1,8 @@
 %if False
 \begin{code}
+{-# LANGUAGE TemplateHaskell #-}
+import Language.Haskell.TH
+type Qt a = Q (TExp a)
 \end{code}
 %endif
 
@@ -60,9 +63,9 @@ While  ::  (Dp a -> Dp Bool) -> (Dp a -> Dp a) -> Dp a -> Dp a
 while  ::  Syntactic a => (a -> Dp Bool) -> (a -> a) -> (a -> a)
 \end{spec}
 For QDSL, we follow the same pattern, but it's even simpler:
-\begin{code}
+\begin{spec}
 while  ::  (a -> Bool) -> (a -> a) -> (a -> a)
-\end{code}
+\end{spec}
 This identifier is declared in the QDSL library with the appropriate
 type, and conversion from |while| to |While| occurs when translating
 |Qt| to |Dp|.
@@ -70,7 +73,7 @@ type, and conversion from |while| to |While| occurs when translating
 The definition of the |for| loop is given by:
 \begin{code}
 for  ::  Qt (Int -> a -> (Int -> a -> a) -> a)
-for  =   <|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1) b i x) (0, x_0) ||>
+for  =   [|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1) b i x) (0, x_0)) ||]
 \end{code}
 In other words, the code is similar in structure to that for CDSL, except
 the type is simpler, quasi-quotes surround the body, and |(.<.)| in CDSL
@@ -104,7 +107,7 @@ The QDSL processor permits the constructors
 normaliser performs simplifications including the rules below.
 \begin{eqnarray*}
 |case Nothing of { Nothing -> M; Just x -> N }| &\leadsto&  M  \\
-|case Just L of {Nothing -> M; Just x -> N }|   &\leadsto&  N[x:=L] 
+|case Just L of {Nothing -> M; Just x -> N }|   &\leadsto&  N[x:=L]
 \end{eqnarray*}
 This is adequate to eliminate all occurrences of the |Maybe| type from
 the code in Section~\ref{sec:second-example} after normalisation. The
@@ -133,11 +136,11 @@ its occurrences.
 Here are some primitive operators on vectors, in QDSL style.
 \begin{code}
 zipWithVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
-zipWithVec   =   <||  \f (Vec m g) (Vec n h) ->
-                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||>
+zipWithVec   =   [||  \f (Vec m g) (Vec n h) ->
+                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
 
 sumVec       ::  Num a => Qt (Vec a -> a)
-sumVec       =   <|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||>
+sumVec       =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]
 \end{code}
 This is identical to the previous code, save for additions of quotation and
 anti-quotation.
@@ -145,7 +148,7 @@ anti-quotation.
 Using our primitives, it is easy to compute the scalar product of two vectors.
 \begin{code}
 scalarProd   ::  Num a => Qt (Vec a -> Vec a -> a)
-scalarProd   =   <|| \u v -> $$sumVec ($$zipWithVec (*) u v) ||>
+scalarProd   =   [|| \u v -> $$sumVec ($$zipWithVec (*) u v) ||]
 \end{code}
 With CDSL, evaluation in the host language achieves fusion.
 With QDSL, normalisation in the QDSL processor achieves fusion.
@@ -153,7 +156,7 @@ As noted above, the subformula property is sufficient to guarantee
 fusion is achieved.
 
 Ultimately, we need to be able to manipulate actual arrays. For this
-purpose, we provide three constants analogous to three constructs of 
+purpose, we provide three constants analogous to three constructs of
 the type |Dp|.
 \begin{spec}
 ary      ::  Int -> (Int -> a) -> Array Int a
@@ -167,13 +170,13 @@ types, and conversion from |ary|, |aryLen|, |aryIx| to |Ary|,
 We convert between vectors and arrays as follows.
 \begin{code}
 toAry        ::  Qt (Vec a -> Ary a)
-toAry        =   <|| \(Vec n g) -> ary n g ||>
+toAry        =   [|| \(Vec n g) -> ary n g ||]
 
 fromAry      ::  Qt (Ary a -> Vec a)
-fromAry      =   <|| \a -> Vec (aryLen a) (\i -> aryIx a i) ||>
+fromAry      =   [|| \a -> Vec (aryLen a) (\i -> aryIx a i) ||]
 
 memorise     ::  Qt (Vec a -> Vec a)
-memorise     =   <|| fromAry . toAry ||>
+memorise     =   [|| fromAry . toAry ||]
 \end{code}
 The last performs the same purpose as |memorise| for CDSL,
 enabling the user to decide when a vector is to be materialised

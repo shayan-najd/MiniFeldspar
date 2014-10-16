@@ -32,6 +32,11 @@ data Exp :: [TFA.Typ] -> TFA.Typ -> * where
   Let  :: HasSin TFG.Typ tl => Exp r tl -> (Exp r tl -> Exp r tb) -> Exp r tb
   Cmx  :: Exp r TFA.Flt -> Exp r TFA.Flt -> Exp r TFA.Cmx
   Tmp  :: String -> Exp r a
+  Non  :: Exp r (TFA.May tl)
+  Som  :: Exp r tl -> Exp r (TFA.May tl)
+  May  :: HasSin TFG.Typ a =>
+          Exp r (TFA.May a) -> Exp r b -> (Exp r a -> Exp r b) -> Exp r b
+
 deriving instance Show (Exp r t)
 
 ref :: IORef Int
@@ -83,6 +88,13 @@ eql (Let (el :: Exp r ta) eb) (Let (el' :: Exp r ta') eb') =
     _       -> False
 eql (Cmx ei er) (Cmx ei' er') = eql ei ei' && eql er er'
 eql (Tmp x    ) (Tmp x')      = x == x'
+eql Non         Non           = True
+eql (Som e)     (Som e')      = eql e e'
+eql (May (em  :: Exp r (TFA.May tm)) en  es)
+    (May (em' :: Exp r (TFA.May tm')) en' es') =
+  case eqlSin (sin :: TFG.Typ tm)(sin :: TFG.Typ tm') of
+    Rgt Rfl -> eql em em' && eql en en' && eqlF es es'
+    _       -> False
 eql _           _             = False
 
 refEql :: IORef Int
@@ -107,23 +119,31 @@ mapVar :: (forall t'. Var r  t' -> Var r' t') ->
           (forall t'. Var r' t' -> Var r  t') ->
           Exp r t -> Exp r' t
 mapVar _ _ (ConI i)       = ConI i
-mapVar _ _ (ConB i)       = ConB i
-mapVar _ _ (ConF i)       = ConF i
+mapVar _ _ (ConB b)       = ConB b
+mapVar _ _ (ConF f)       = ConF f
 mapVar f _ (Var v)        = Var (f v)
-mapVar f g (Abs eb)       = Abs (mapVar f g . eb .  mapVar g f)
+mapVar f g (Abs eb)       = Abs (mapVarF f g eb)
 mapVar f g (App ef ea)    = App (mapVar f g ef) (mapVar f g ea)
 mapVar f g (Cnd ec et ef) = Cnd (mapVar f g ec) (mapVar f g et) (mapVar f g ef)
-mapVar f g (Whl ec eb ei) = Whl (mapVar f g . ec . mapVar g f)
-                                (mapVar f g . eb . mapVar g f) (mapVar f g ei)
+mapVar f g (Whl ec eb ei) = Whl (mapVarF f g ec)
+                                (mapVarF f g eb) (mapVar f g ei)
 mapVar f g (Tpl ef es)    = Tpl (mapVar f g ef) (mapVar f g es)
 mapVar f g (Fst e)        = Fst (mapVar f g e)
 mapVar f g (Snd e)        = Snd (mapVar f g e)
-mapVar f g (Ary el ef)    = Ary (mapVar f g el) (mapVar f g . ef . mapVar g f)
+mapVar f g (Ary el ef)    = Ary (mapVar f g el) (mapVarF f g ef)
 mapVar f g (Len e)        = Len (mapVar f g e)
 mapVar f g (Ind ea ei)    = Ind (mapVar f g ea) (mapVar f g ei)
-mapVar f g (Let el eb)    = Let (mapVar f g el) (mapVar f g . eb . mapVar g f)
+mapVar f g (Let el eb)    = Let (mapVar f g el) (mapVarF f g eb)
 mapVar f g (Cmx er ei)    = Cmx (mapVar f g er) (mapVar f g ei)
 mapVar _ _ (Tmp x)        = Tmp x
+mapVar _ _ Non            = Non
+mapVar f g (Som e)        = Som (mapVar f g e)
+mapVar f g (May em en es) = May (mapVar f g em) (mapVar f g en) (mapVarF f g es)
+
+mapVarF :: (forall t'. Var r  t' -> Var r' t') ->
+           (forall t'. Var r' t' -> Var r  t') ->
+           (Exp r a -> Exp r b) -> (Exp r' a -> Exp r' b)
+mapVarF f g ff = mapVar f g . ff . mapVar g f
 
 absTmp :: forall r t t'. (HasSin TFG.Typ t', HasSin TFG.Typ t) =>
           Exp r t' -> String -> Exp r t -> Exp r t
@@ -154,6 +174,11 @@ absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
       Rgt Rfl               -> xx
       _                     -> ee
     | otherwise             -> ee
+  Non                       -> Non
+  Som e                     -> case TFG.getPrfHasSinMay t of
+   PrfHasSin                -> Som (absTmp xx s e)
+  May ec en es              -> May (absTmp xx s ec) (absTmp xx s en)
+                                   (absTmp xx s . es)
 
 -- when input string is not "__dummy__"
 hasTmp :: String -> Exp r t -> Bool
@@ -177,6 +202,9 @@ hasTmp s ee = case ee of
   Tmp x
     | s == x                -> True
     | otherwise             -> False
+  Non                       -> False
+  Som e                     -> hasTmp s e
+  May em en es              -> hasTmp s em || hasTmp s en || hasTmpF s es
 
 hasTmpF :: String -> (Exp r ta -> Exp r tb) -> Bool
 hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))

@@ -28,3 +28,12 @@ ind = (!)
 
 cmx :: Float -> Float -> Complex Float
 cmx = (:+)
+
+non :: Maybe a
+non = MP.Nothing
+
+som :: a -> Maybe a
+som = MP.Just
+
+may :: Maybe a -> b -> (a -> b) -> b
+may em en es = MP.maybe en es em

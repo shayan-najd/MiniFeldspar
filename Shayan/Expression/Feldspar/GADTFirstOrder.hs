@@ -28,6 +28,10 @@ data Exp :: [TFA.Typ] -> TFA.Typ -> * where
   Ind  :: Exp r (TFA.Ary ta) -> Exp r TFA.Int -> Exp r ta
   Let  :: HasSin TFG.Typ tl => Exp r tl -> Exp (tl ': r) tb -> Exp r tb
   Cmx  :: Exp r TFA.Flt -> Exp r TFA.Flt -> Exp r TFA.Cmx
+  Non  :: Exp r (TFA.May tl)
+  Som  :: Exp r tl -> Exp r (TFA.May tl)
+  May  :: HasSin TFG.Typ a =>
+          Exp r (TFA.May a) -> Exp r b -> Exp (a ': r) b -> Exp r b
 
 sucAll :: Exp r t' -> Exp (t ': r) t'
 sucAll = mapVar Suc
@@ -54,6 +58,9 @@ mapVar f ee = case ee of
   Ind ea ei    -> Ind (m ea)  (m ei)
   Let el eb    -> Let (m el)  (mf eb)
   Cmx er ei    -> Cmx (m er)  (m ei)
+  Non          -> Non
+  Som e        -> Som (m e)
+  May ec en es -> May (m ec)  (m en) (mf es)
   where
     m :: Exp r tt -> Exp r' tt
     m  = mapVar f

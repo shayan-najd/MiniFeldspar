@@ -37,6 +37,9 @@ instance Eq x =>
     FAUN.Ind  ea ei          -> FAUD.Ind  <$@> ea <*@> ei
     FAUN.Let  xl el eb       -> FAUD.Let  <$@> el <*@> (xl , eb)
     FAUN.Cmx  er ei          -> FAUD.Cmx  <$@> er <*@> ei
+    FAUN.Non                 -> pure FAUD.Non
+    FAUN.Som  e              -> FAUD.Som  <$@> e
+    FAUN.May  em en xs es    -> FAUD.May  <$@> em <*@> en <*@> (xs , es)
 
 instance Eq x =>
          Cnv ((x , FAUN.Exp x) , EM.Env x Var)
@@ -67,6 +70,10 @@ instance (x ~ x') =>
     FAUD.Let  el eb    -> do (xl , eb') <- cnvf eb
                              FAUN.Let  <$> pure xl <*@> el <*> pure eb'
     FAUD.Cmx  er ei    -> FAUN.Cmx  <$@> er <*@> ei
+    FAUD.Non           -> pure FAUN.Non
+    FAUD.Som  e        -> FAUN.Som  <$@> e
+    FAUD.May  em en es -> do (xs , es') <- cnvf es
+                             FAUN.May <$@> em <*@> en <*> pure xs <*> pure es'
     where
       cnvf :: FAUD.Exp -> ErrM (x , FAUN.Exp x)
       cnvf e = case r of

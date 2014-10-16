@@ -23,4 +23,7 @@ data Exp :: NA.Nat -> * where
   Ind  :: Exp n -> Exp n -> Exp n
   Let  :: Exp n -> Exp (NA.Suc n) -> Exp n
   Cmx  :: Exp n -> Exp n -> Exp n
+  Non  :: Exp n
+  Som  :: Exp n -> Exp n
+  May  :: Exp n -> Exp n -> Exp (NA.Suc n) -> Exp n
   deriving Eq

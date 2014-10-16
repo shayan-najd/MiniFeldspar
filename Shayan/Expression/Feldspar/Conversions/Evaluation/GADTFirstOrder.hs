@@ -17,26 +17,30 @@ import Singleton
 
 instance (HasSin TFG.Typ t , t' ~ t) =>
          Cnv (Exp r t , Env FGV.Exp r) (FGV.Exp t') where
-  cnv (ee , r) = let ?r = r in case ee of
-    ConI i                   -> FGV.conI <$@> i
-    ConB b                   -> FGV.conB <$@> b
-    ConF b                   -> FGV.conF <$@> b
+  cnv (ee , r) = let ?r = r in let t = sin :: TFG.Typ t in case ee of
+    ConI i                   -> pure (FGV.conI i)
+    ConB b                   -> pure (FGV.conB b)
+    ConF f                   -> pure (FGV.conF f)
     Var x                    -> FGV.var  <$@> x
-    Abs eb                   -> case TFG.getPrfHasSinArr (T :: T t) of
+    Abs eb                   -> case TFG.getPrfHasSinArr t of
      (PrfHasSin , PrfHasSin) -> cnv (eb , r)
     App ef ea                -> FGV.app  <$@> ef <*@> ea
     Cnd ec et ef             -> FGV.cnd  <$@> ec <*@> et <*@> ef
     Whl ec eb ei             -> FGV.whl  <$@> ec <*@> eb <*@> ei
-    Tpl ef es                -> case TFG.getPrfHasSinTpl (T :: T t) of
+    Tpl ef es                -> case TFG.getPrfHasSinTpl t of
      (PrfHasSin , PrfHasSin) -> FGV.tpl  <$@> ef <*@> es
     Fst e                    -> FGV.fst  <$@> e
     Snd e                    -> FGV.snd  <$@> e
-    Ary el ef                -> case TFG.getPrfHasSinAry (T :: T t) of
+    Ary el ef                -> case TFG.getPrfHasSinAry t of
      PrfHasSin               -> FGV.ary  <$@> el <*@> ef
     Len e                    -> FGV.len  <$@> e
     Ind ea ei                -> FGV.ind  <$@> ea <*@> ei
     Let el eb                -> cnv (App (Abs eb) el , r)
     Cmx er ei                -> FGV.cmx  <$@> er <*@> ei
+    Non                      -> pure FGV.non
+    Som e                    -> case TFG.getPrfHasSinMay t of
+     PrfHasSin               -> FGV.som  <$@> e
+    May em en es             -> FGV.may  <$@> em <*@> en <*@> es
 
 instance (ta' ~ ta , tb' ~ tb , HasSin TFG.Typ ta , HasSin TFG.Typ tb) =>
          Cnv (Exp (ta ': r) tb , Env FGV.Exp r)  (FGV.Exp (TFA.Arr ta' tb'))

@@ -37,6 +37,10 @@ data Exp :: [TFA.Typ] -> TFA.Typ -> * where
   Cmx   :: Exp r TFA.Flt -> Exp r TFA.Flt -> Exp r TFA.Cmx
   Tmp   :: String -> Exp r t  -- dummy constructor
   Tag   :: String -> Exp r t -> Exp r t
+  Non   :: Exp r (TFA.May tl)
+  Som   :: Exp r tl -> Exp r (TFA.May tl)
+  May   :: HasSin TFG.Typ a =>
+           Exp r (TFA.May a) -> Exp r b -> (Exp r a -> Exp r b) -> Exp r b
 
 deriving instance Show (Exp r t)
 
@@ -98,6 +102,13 @@ eql (Cmx ei er) (Cmx ei' er') = eql ei ei' && eql er er'
 eql (Tmp x    ) (Tmp x')      = x == x'
 eql (Tag _ e)   e'            = eql e e'
 eql e          (Tag _ e')     = eql e e'
+eql Non         Non           = True
+eql (Som e)     (Som e')      = eql e e'
+eql (May (em  :: Exp r (TFA.May tm)) en  es)
+    (May (em' :: Exp r (TFA.May tm')) en' es') =
+  case eqlSin (sin :: TFG.Typ tm)(sin :: TFG.Typ tm') of
+    Rgt Rfl -> eql em em' && eql en en' && eqlF es es'
+    _       -> False
 eql _           _             = False
 
 refEql :: IORef Int
@@ -138,6 +149,14 @@ mapVar f g (Let el eb)    = Let (mapVar f g el) (mapVar f g . eb . mapVar g f)
 mapVar f g (Cmx er ei)    = Cmx (mapVar f g er) (mapVar f g ei)
 mapVar _ _ (Tmp x)        = Tmp x
 mapVar f g (Tag x e)      = Tag x (mapVar f g e)
+mapVar _ _ Non            = Non
+mapVar f g (Som e)        = Som (mapVar f g e)
+mapVar f g (May em en es) = May (mapVar f g em) (mapVar f g en) (mapVarF f g es)
+
+mapVarF :: (forall t'. Var r  t' -> Var r' t') ->
+           (forall t'. Var r' t' -> Var r  t') ->
+           (Exp r a -> Exp r b) -> (Exp r' a -> Exp r' b)
+mapVarF f g ff = mapVar f g . ff . mapVar g f
 
 absTmp :: forall r t t'. (HasSin TFG.Typ t', HasSin TFG.Typ t) =>
           Exp r t' -> String -> Exp r t -> Exp r t
@@ -166,6 +185,11 @@ absTmp xx s ee = let t = sin :: TFG.Typ t in case ee of
       _                     -> ee
     | otherwise             -> ee
   Tag x e                   -> Tag x (absTmp xx s e)
+  Non                       -> Non
+  Som e                     -> case TFG.getPrfHasSinMay t of
+   PrfHasSin                -> Som (absTmp xx s e)
+  May ec en es              -> May (absTmp xx s ec) (absTmp xx s en)
+                                   (absTmp xx s . es)
 
 -- when input string is not "__dummy__"
 hasTmp :: String -> Exp r t -> Bool
@@ -174,20 +198,23 @@ hasTmp s ee = case ee of
   ConB _                    -> False
   ConF _                    -> False
   AppV _ es                 -> foldl (\ b e -> b || hasTmp s e) False es
-  Cnd ec et ef              -> hasTmp s ec || hasTmp s et || hasTmp s ef
-  Whl ec eb ei              -> hasTmpF s ec || hasTmpF s eb || hasTmp s ei
-  Tpl ef es                 -> hasTmp s ef || hasTmp s es
-  Fst e                     -> hasTmp s e
-  Snd e                     -> hasTmp s e
-  Ary el ef                 -> hasTmp s el || hasTmpF s ef
-  Len e                     -> hasTmp s e
-  Ind ea ei                 -> hasTmp s ea || hasTmp s ei
-  Let el eb                 -> hasTmp s el || hasTmpF s eb
-  Cmx er ei                 -> hasTmp s er || hasTmp s ei
+  Cnd ec et ef              -> hasTmp  s ec || hasTmp  s et || hasTmp  s ef
+  Whl ec eb ei              -> hasTmpF s ec || hasTmpF s eb || hasTmp  s ei
+  Tpl ef es                 -> hasTmp  s ef || hasTmp  s es
+  Fst e                     -> hasTmp  s e
+  Snd e                     -> hasTmp  s e
+  Ary el ef                 -> hasTmp  s el || hasTmpF s ef
+  Len e                     -> hasTmp  s e
+  Ind ea ei                 -> hasTmp  s ea || hasTmp  s ei
+  Let el eb                 -> hasTmp  s el || hasTmpF s eb
+  Cmx er ei                 -> hasTmp  s er || hasTmp  s ei
   Tmp x
     | s == x                -> True
     | otherwise             -> False
-  Tag _ e                   -> hasTmp s e
+  Tag _ e                   -> hasTmp  s e
+  Non                       -> False
+  Som e                     -> hasTmp  s e
+  May em en es              -> hasTmp  s em || hasTmp  s en || hasTmpF  s es
 
 hasTmpF :: String -> (Exp r ta -> Exp r tb) -> Bool
 hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))

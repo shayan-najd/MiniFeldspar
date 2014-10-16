@@ -1,6 +1,10 @@
-module Expression.Feldspar.GADTValue where
+module Expression.Feldspar.GADTValue
+    (Exp(..)
+    ,conI,conB,conF,var,abs,app,cnd,whl,fst,snd,tpl,ary,len,ind,leT
+    ,cmx,non,som,may
+    ,getTrm,mapTrm) where
 
-import MyPrelude hiding (Int)
+import MyPrelude hiding (Int,abs,fst,snd)
 import qualified VanillaPrelude as VP
 
 import Singleton
@@ -13,11 +17,11 @@ data Exp :: Typ -> * where
 
 mapTrm :: (Trm t -> Trm t') -> Exp t -> Exp t'
 mapTrm f (Exp x) = Exp (f x)
-
+{-
 (===) :: (Eq t', Trm t ~ t') =>
          Exp t -> Exp t -> Bool
 (Exp x) === (Exp y) = x == y
-
+-}
 getTrm :: Exp t -> Trm t
 getTrm (Exp x) = x
 
@@ -63,8 +67,18 @@ len (Exp e)  = Exp (VP.len e)
 ind :: Exp (Ary a) -> Exp Int -> Exp a
 ind (Exp v) (Exp vi) = Exp (VP.ind v vi)
 
-lett :: Exp tl -> Exp (Arr tl tb) -> Exp tb
-lett (Exp vl) (Exp vb) = Exp (vb vl)
+leT :: Exp tl -> Exp (Arr tl tb) -> Exp tb
+leT (Exp vl) (Exp vb) = Exp (vb vl)
 
 cmx :: Exp Flt -> Exp Flt -> Exp Cmx
 cmx (Exp fr) (Exp fi) = Exp (VP.cmx fr fi)
+
+non :: Exp (May a)
+non = Exp VP.non
+
+som :: Exp a -> Exp (May a)
+som (Exp e) = Exp (VP.som e)
+
+may :: Exp (May a) -> Exp b -> Exp (Arr a b) -> Exp b
+may (Exp em) (Exp en) (Exp es) = Exp (VP.may em en es)
+

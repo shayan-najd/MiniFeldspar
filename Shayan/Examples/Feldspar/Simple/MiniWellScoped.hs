@@ -32,5 +32,5 @@ test = case cnv (four
                 , Ext (FGV.Exp (+)
                        :: FGV.Exp (TFA.Arr TFA.Int (TFA.Arr TFA.Int TFA.Int)))
                   Emp) of
-  Rgt x -> x FGV.=== FGV.Exp (4 :: Integer)
-  Lft _ -> False
+  Rgt (FGV.Exp x) -> x == (4 :: Integer)
+  Lft _           -> False

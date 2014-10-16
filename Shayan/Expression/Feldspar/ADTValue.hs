@@ -1,7 +1,8 @@
 module Expression.Feldspar.ADTValue
-    (Exp(..),Lft(..),CoLft(..)
-    ,conI,conB,conF,var,abs,app,addV,add,cnd,whl,fst,snd,tpl,ary,len,ind,cmx)
-        where
+    (Exp(..)
+    ,conI,conB,conF,var,abs,app,cnd,whl,fst,snd,tpl,ary,len,ind
+    ,cmx,non,som,may
+    ,Lft(..),CoLft(..),addV,add) where
 
 import MyPrelude hiding (abs,fst,snd)
 
@@ -12,6 +13,8 @@ data Exp = ConI Integer
          | Tpl (Exp , Exp)
          | Ary (Array Integer Exp)
          | Cmx (Complex Float)
+         | Non
+         | Som Exp
 
 class Lft t where
   lft :: t -> Exp
@@ -36,6 +39,9 @@ instance Lft a => Lft (Array Integer a) where
 
 instance Lft (Complex Float) where
   lft = Cmx
+
+instance Lft a => Lft (Maybe a) where
+  lft = maybe Non lft
 
 class CoLft t where
   colft :: Exp -> t
@@ -66,6 +72,11 @@ instance CoLft a => CoLft (Array Integer a) where
 
 instance CoLft (Complex Float) where
   colft (Cmx c) = c
+  colft _       = badTypVal
+
+instance CoLft a => CoLft (Maybe a) where
+  colft Non     = Nothing
+  colft (Som x) = colft x
   colft _       = badTypVal
 
 var :: a -> ErrM a
@@ -133,3 +144,14 @@ ind _       _        = badTypValM
 cmx :: Exp -> Exp -> ErrM Exp
 cmx (ConF fr) (ConF fi) = return (Cmx (fr :+ fi))
 cmx _         _         = badTypValM
+
+non :: ErrM Exp
+non = return Non
+
+som :: Exp -> ErrM Exp
+som = return . Som
+
+may :: Exp -> Exp -> (Exp -> Exp) -> ErrM Exp
+may Non     en _ = return en
+may (Som e) _  f = return (f e)
+may _       _  _ = badTypValM

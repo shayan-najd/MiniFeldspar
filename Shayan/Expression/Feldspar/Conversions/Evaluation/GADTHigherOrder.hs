@@ -38,6 +38,11 @@ instance (HasSin TFG.Typ t , t' ~ t) =>
     Let el eb                -> cnvImp (App (Abs eb) el)
     Cmx er ei                -> FGV.cmx  <$@> er <*@> ei
     Tmp _                    -> fail "Not Supported!"
+    Non                      -> pure FGV.non
+    Som e                    -> case TFG.getPrfHasSinMay t of
+     PrfHasSin               -> FGV.som  <$@> e
+    May em en es             -> FGV.may  <$@> em <*@> en <*@> es
+
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , ta' ~ ta , tb' ~ tb) =>
          Cnv (Exp r ta -> Exp r tb , Env FGV.Exp r) (FGV.Exp (TFA.Arr ta' tb')) where
@@ -51,8 +56,7 @@ instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , ta' ~ ta , tb' ~ tb) =>
 instance (HasSin TFG.Typ t , r ~ r' , t ~ t') =>
          Cnv (FGV.Exp t' , Env FGV.Exp r') (Exp r t)
          where
-  cnv (FGV.Exp v , r) = let ?r = r in
-    let t = Singleton.sin :: TFG.Typ t in case t of
+  cnv (FGV.Exp v , r) = let ?r = r in let t = sin :: TFG.Typ t in case t of
     TFG.Int                   -> ConI <$@> v
     TFG.Bol                   -> ConB <$@> v
     TFG.Flt                   -> ConF <$@> v
@@ -69,6 +73,10 @@ instance (HasSin TFG.Typ t , r ~ r' , t ~ t') =>
         | otherwise           -> fail "Bad Array!"
     TFG.Cmx                   -> Cmx <$@> FGV.Exp (realPart v)
                                      <*@> FGV.Exp (imagPart v)
+    TFG.May _                 -> case TFG.getPrfHasSinMay t of
+      PrfHasSin               -> case v of
+                                   Nothing -> pure Non
+                                   Just vv -> Som <$@> FGV.Exp vv
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , r ~ r' , ta ~ ta' , tb ~ tb')=>
          Cnv (FGV.Exp (TFA.Arr ta' tb') , Env FGV.Exp r') (Exp r ta -> Exp r tb)

@@ -12,23 +12,26 @@ import qualified Type.Feldspar.GADT as TFG
 
 isVal :: Exp n t -> Bool
 isVal ee = case ee of
-    ConI _       -> True
-    ConB _       -> True
-    ConF _       -> True
-    Var  _       -> True
-    Abs  _       -> True
-    App  _  _    -> False
-    Cnd  _  _  _ -> False
-    Whl  _  _  _ -> False
-    Tpl  ef es   -> isVal ef && isVal es
-    Fst  _       -> False
-    Snd  _       -> False
-    Ary  el  _   -> isVal el
-    Len  _       -> False
-    Ind  _  _    -> False
-    Let  _  _    -> False
-    Cmx  _  _    -> True
-    Tmp  _       -> True
+    ConI _        -> True
+    ConB _        -> True
+    ConF _        -> True
+    Var  _        -> True
+    Abs  _        -> True
+    App  _  _     -> False
+    Cnd  _  _  _  -> False
+    Whl  _  _  _  -> False
+    Tpl  ef es    -> isVal ef && isVal es
+    Fst  _        -> False
+    Snd  _        -> False
+    Ary  el  _    -> isVal el
+    Len  _        -> False
+    Ind  _  _     -> False
+    Let  _  _     -> False
+    Cmx  _  _     -> True
+    Tmp  _        -> True
+    Non           -> True
+    Som  e        -> isVal e
+    May  _ _  _   -> False
 
 val :: Exp n t -> (Bool,Exp n t)
 val ee = (isVal ee , ee)
@@ -70,6 +73,10 @@ etasub ee = let t = sin :: TFG.Typ t in case ee of
     Let el eb                 -> Let (eta el) (etaF eb)
     Cmx er ei                 -> Cmx (eta er) (eta ei)
     Tmp x                     -> Tmp x
+    Non                       -> Non
+    Som e                     -> case TFG.getPrfHasSinMay t of
+      PrfHasSin               -> Som (eta e)
+    May em en es              -> May (eta em) (eta en) (etaF es)
 
 etaF :: forall n ta tb. (HasSin TFG.Typ ta , HasSin TFG.Typ tb) =>
            (Exp n ta -> Exp n tb) -> (Exp n ta -> Exp n tb)
@@ -141,6 +148,20 @@ instance HasSin TFG.Typ t => NrmOne (Exp n t) where
       | isFresh eb               -> chg (eb v)
     Let el             eb        -> Let  <$@> el <*@> eb
     Tmp x                        -> pure (Tmp x)
+
+    Non                          -> pure Non
+
+    Som (NV e)                   -> case TFG.getPrfHasSinMay t of
+      PrfHasSin                  -> chg (Let e  (\ x -> Som x))
+    Som e                        -> case TFG.getPrfHasSinMay t of
+      PrfHasSin                  -> Som  <$@> e
+
+    May (NV em) en      es       -> chg (Let em (\ x -> May x  en es))
+    May (V  em) (NV en) es       -> chg (Let en (\ x -> May em x  es))
+    May Non     en      _        -> chg en
+    May (Som e) _       es       -> chg (es e)
+    May em      en      es       -> May  <$@> em <*@> en <*@> es
+
 
 ref :: IORef Int
 {-# NOINLINE ref #-}

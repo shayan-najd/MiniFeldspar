@@ -19,25 +19,30 @@ import Singleton
 instance (HasSin TFG.Typ t, r' ~ r , t' ~ t) =>
          Cnv (Exp r t , Env FGV.Exp r) (FGV.Exp t')
          where
-  cnv (egfo , r) = let ?r = r in case egfo of
+  cnv (egfo , r) = let ?r = r in let t = sin :: TFG.Typ t in case egfo of
     ConI i                   -> FGV.conI <$@> i
     ConB b                   -> FGV.conB <$@> b
     ConF b                   -> FGV.conF <$@> b
-    AppV (v :: Var rv tv) es ->   appV (T :: T tv) <$@> v <*@> (T :: T tv , es)
+    AppV (v :: Var rv tv) es -> appV (T :: T tv) <$@> v <*@> (T :: T tv , es)
     Cnd ec et ef             -> FGV.cnd  <$@> ec <*@> et <*@> ef
     Whl ec eb ei             -> FGV.whl  <$@> ec <*@> eb <*@> ei
-    Tpl ef es                -> case TFG.getPrfHasSinTpl (T :: T t) of
+    Tpl ef es                -> case TFG.getPrfHasSinTpl t of
      (PrfHasSin , PrfHasSin) -> FGV.tpl  <$@> ef <*@> es
     Fst e                    -> FGV.fst  <$@> e
     Snd e                    -> FGV.snd  <$@> e
-    Ary el ef                -> case TFG.getPrfHasSinAry (T :: T t) of
+    Ary el ef                -> case TFG.getPrfHasSinAry t of
      PrfHasSin               -> FGV.ary  <$@> el <*@> ef
     Len e                    -> FGV.len  <$@> e
     Ind ea ei                -> FGV.ind  <$@> ea <*@> ei
-    Let el eb                -> FGV.lett <$@> el <*@> eb
+    Let el eb                -> FGV.leT  <$@> el <*@> eb
     Cmx er ei                -> FGV.cmx  <$@> er <*@> ei
     Tag _  e                 -> cnvImp e
     Tmp _                    -> fail "Not Supported!"
+    Non                      -> pure FGV.non
+    Som e                    -> case TFG.getPrfHasSinMay t of
+     PrfHasSin               -> FGV.som  <$@> e
+    May em en es             -> FGV.may  <$@> em <*@> en <*@> es
+
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , ta' ~ ta , tb' ~ tb) =>
          Cnv (Exp r ta -> Exp r tb , Env FGV.Exp r) (FGV.Exp (TFA.Arr ta' tb'))
@@ -67,6 +72,8 @@ instance (HasSin TFG.Typ t , t' ~ TFG.Arg t) =>
     (TFG.Ary _     , _)        -> impossibleM
     (TFG.Cmx       , Emp)      -> pure Emp
     (TFG.Cmx       , _)        -> impossibleM
+    (TFG.May _     , Emp)      -> pure Emp
+    (TFG.May _     , _)        -> impossibleM
 
 appV :: forall t. HasSin TFG.Typ t => T t ->
           FGV.Exp t -> Env FGV.Exp (TFG.Arg t) -> FGV.Exp (TFG.Out t)
@@ -79,11 +86,12 @@ appV T vv vss  = case (Singleton.sin :: TFG.Typ t , vss) of
   (TFG.Tpl _  _  , Emp)     -> vv
   (TFG.Ary _     , Emp)     -> vv
   (TFG.Cmx       , Emp)     -> vv
+  (TFG.May _     , Emp)     -> vv
 
 instance (HasSin TFG.Typ t , r ~ r' , t ~ t') =>
          Cnv (FGV.Exp t' , Env FGV.Exp r') (Exp r t)
          where
-  cnv (FGV.Exp v , r) = let ?r = r in case Singleton.sin :: TFG.Typ t of
+  cnv (FGV.Exp v , r) = let ?r = r in let t = sin :: TFG.Typ t in case t of
     TFG.Int                   -> ConI <$@> v
     TFG.Bol                   -> ConB <$@> v
     TFG.Flt                   -> ConF <$@> v
@@ -99,6 +107,11 @@ instance (HasSin TFG.Typ t , r ~ r' , t ~ t') =>
     TFG.Cmx                   -> Cmx <$@> FGV.Exp (realPart v)
                                      <*@> FGV.Exp (imagPart v)
     TFG.Arr _ _               -> fail "Type Error!"
+    TFG.May _                 -> case TFG.getPrfHasSinMay t of
+      PrfHasSin               -> case v of
+                                   Nothing -> pure Non
+                                   Just vv -> Som <$@> FGV.Exp vv
+
 
 instance (HasSin TFG.Typ ta , HasSin TFG.Typ tb , r ~ r' , ta ~ ta' , tb ~ tb')=>
          Cnv (FGV.Exp (TFA.Arr ta' tb') , Env FGV.Exp r') (Exp r ta -> Exp r tb)

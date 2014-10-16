@@ -25,6 +25,8 @@ instance Cnv (TFA.Typ) (ExsSin TFG.Typ) where
   cnv (TFA.Ary t)     = do ExsSin t' <- cnv t
                            return (ExsSin (TFG.Ary t'))
   cnv TFA.Cmx         = return (ExsSin TFG.Cmx)
+  cnv (TFA.May t)     = do ExsSin t' <- cnv t
+                           return (ExsSin (TFG.May t'))
 
 instance Cnv (TFA.Typ , r) (TH.Typ (TH.EnvFld '[])) where
   cnv (th , r) = let ?r = r in case th of
@@ -34,6 +36,7 @@ instance Cnv (TFA.Typ , r) (TH.Typ (TH.EnvFld '[])) where
     TFA.Arr ta tb -> TH.Arr <$@> ta <*@> tb
     TFA.Tpl tf ts -> TH.Tpl <$@> tf <*@> ts
     TFA.Ary ta    -> TH.Ary <$@> ta
+    TFA.May ta    -> TH.May <$@> ta
     TFA.Cmx       -> pure TH.Cmx
 
 ---------------------------------------------------------------------------------
@@ -47,6 +50,7 @@ instance Cnv (TFG.Typ a , r) TFA.Typ where
     TFG.Arr ta tb -> TFA.Arr <$@> ta <*@> tb
     TFG.Tpl tf ts -> TFA.Tpl <$@> tf <*@> ts
     TFG.Ary ta    -> TFA.Ary <$@> ta
+    TFG.May ta    -> TFA.May <$@> ta
     TFG.Cmx       -> pure TFA.Cmx
 
 ---------------------------------------------------------------------------------
@@ -60,6 +64,7 @@ instance Cnv (TH.Typ (TH.EnvFld '[]) , r) TFA.Typ where
     TH.Arr ta tb -> TFA.Arr <$@> ta <*@> tb
     TH.Tpl tf ts -> TFA.Tpl <$@> tf <*@> ts
     TH.Ary t     -> TFA.Ary <$@> t
+    TH.May t     -> TFA.May <$@> t
     TH.Cmx       -> pure TFA.Cmx
     _            -> fail ("Type Error:\n" ++ show th)
 

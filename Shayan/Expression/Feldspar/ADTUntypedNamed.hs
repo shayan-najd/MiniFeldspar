@@ -19,6 +19,9 @@ data Exp x = ConI Integer
            | Ind (Exp x) (Exp x)
            | Let x (Exp x) (Exp x)
            | Cmx (Exp x) (Exp x)
+           | Non
+           | Som (Exp x)
+           | May (Exp x) (Exp x) x (Exp x)
 
 deriving instance Eq x   => Eq   (Exp x)
 deriving instance Show x => Show (Exp x)

@@ -29,7 +29,11 @@ instance Cnv (Exp n t , Env n FAV.Exp) FAV.Exp where
     Len _  e     -> FAV.len  <$@> e
     Ind ea ei    -> FAV.ind  <$@> ea <*@> ei
     Let _  el eb -> return   <$@> App impossible (Abs eb) el
-    Cmx er ei    -> FAV.cmx  <$@> er <*@> ei)
+    Cmx er ei    -> FAV.cmx  <$@> er <*@> ei
+    Non          -> pure FAV.non
+    Som e        -> FAV.som  <$@> e
+    May _ em en es -> FAV.may  <$@> em <*@> en <*@> es)
+
 
 instance Cnv (Exp (Suc n) t , Env n FAV.Exp) (FAV.Exp -> FAV.Exp) where
   cnv (e , r) = pure (frmRgt . curry cnv e . (flip Ext r))

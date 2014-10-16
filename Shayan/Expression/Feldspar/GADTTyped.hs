@@ -23,6 +23,9 @@ data Exp :: NA.Nat -> * -> * where
   Ind  :: Exp n t -> Exp n t -> Exp n t
   Let  :: t -> Exp n t -> Exp (NA.Suc n) t -> Exp n t
   Cmx  :: Exp n t -> Exp n t -> Exp n t
+  Non  :: Exp n t
+  Som  :: Exp n t -> Exp n t
+  May  :: t -> Exp n t -> Exp n t -> Exp (NA.Suc n) t -> Exp n t
 
 deriving instance Eq t   => Eq   (Exp n t)
 deriving instance Show t => Show (Exp n t)
@@ -54,6 +57,9 @@ mapVar f ebb = case ebb of
   Ind ea ei    -> Ind (m ea) (m ei)
   Let t  el eb -> Let t (m el) (mf eb)
   Cmx er ei    -> Cmx (m er) (m ei)
+  Non          -> Non
+  Som e        -> Som (m e)
+  May t em en es -> May t (m em) (m en) (mf es)
   where
     m  = mapVar f
     mf = mapVar (inc f)
@@ -78,15 +84,18 @@ sbs ebb v eaa = case ebb of
   Ind ea ei      -> Ind (s ea) (s ei)
   Let t  el eb   -> Let t (s el) (sf eb)
   Cmx er ei      -> Cmx (s er) (s ei)
+  Non            -> Non
+  Som e          -> Som (s e)
+  May t em en es -> May t (s em) (s en) (sf es)
   where
     s  e = sbs e v eaa
     sf e = sbs e (Suc v) (sucAll eaa)
 
 fre :: Exp (NA.Suc n) t -> [Var (NA.Suc n)]
-fre = flip fre' Zro
+fre = fre' Zro
 
-fre' :: forall n t. Exp n t -> Var n -> [Var n]
-fre' ee v = case ee of
+fre' :: forall n t. Var n -> Exp n t -> [Var n]
+fre' v ee = case ee of
   ConI _       -> []
   ConB _       -> []
   ConF _       -> []
@@ -105,8 +114,11 @@ fre' ee v = case ee of
   Ind ea ei    -> f  ea ++ f  ei
   Let _  el eb -> f  el ++ ff eb
   Cmx er ei    -> f  er ++ f  ei
+  Non          -> []
+  Som e        -> f  e
+  May _ em en es -> f em ++ f en ++ ff es
   where
-    f  e = fre' e v
+    f  e = fre' v e
 
     ff :: Exp (NA.Suc n) t -> [Var n]
-    ff e = fmap prd (fre' e (Suc v))
+    ff e = fmap prd (fre' (Suc v) e)

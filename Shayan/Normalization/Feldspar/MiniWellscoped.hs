@@ -35,6 +35,9 @@ isVal ee = case ee of
   Cmx  _  _    -> True
   Tmp  _       -> True
   Tag  _  e    -> isVal e
+  Non          -> True
+  Som  e       -> isVal e
+  May  _ _  _  -> False
 
 val :: Exp n t -> (Bool,Exp n t)
 val ee = (isVal ee , ee)
@@ -54,6 +57,7 @@ getPrf TFG.Flt                   _          _           = impossible
 getPrf (TFG.Tpl _ _)             _          _           = impossible
 getPrf (TFG.Ary _)               _          _           = impossible
 getPrf TFG.Cmx                   _          _           = impossible
+getPrf (TFG.May _)               _          _           = impossible
 getPrf (TFG.Arr t TFG.Int)       Emp        (Ext T Emp) = getPrfHasSin t
 getPrf (TFG.Arr _ TFG.Int)       _          _           = impossible
 getPrf (TFG.Arr t TFG.Bol)       Emp        (Ext T Emp) = getPrfHasSin t
@@ -66,6 +70,8 @@ getPrf (TFG.Arr t (TFG.Ary _))   Emp        (Ext T Emp) = getPrfHasSin t
 getPrf (TFG.Arr _ (TFG.Ary _))   _          _           = impossible
 getPrf (TFG.Arr t TFG.Cmx)       Emp        (Ext T Emp) = getPrfHasSin t
 getPrf (TFG.Arr _ TFG.Cmx)       _          _           = impossible
+getPrf (TFG.Arr t (TFG.May _))   Emp        (Ext T Emp) = getPrfHasSin t
+getPrf (TFG.Arr _ (TFG.May _))   _          _           = impossible
 getPrf (TFG.Arr t (TFG.Arr _ _)) Emp        (Ext T _)   = getPrfHasSin t
 getPrf (TFG.Arr _ ts@(TFG.Arr _ _)) (Ext T es) es'      = getPrf ts es es'
 
@@ -139,8 +145,24 @@ instance HasSin TFG.Typ t => NrmOne (Exp n t) where
     Let (NV v)         eb
       | isFresh eb               -> chg (eb v)
     Let el             eb        -> Let  <$@> el <*@> eb
+
     Tmp x                        -> pure (Tmp x)
+
     Tag x e                      -> Tag x <$@> e
+
+    Non                          -> pure Non
+
+    Som (NV e)                   -> case TFG.getPrfHasSinMay t of
+      PrfHasSin                  -> chg (Let e  (\ x -> Som x))
+    Som e                        -> case TFG.getPrfHasSinMay t of
+      PrfHasSin                  -> Som  <$@> e
+
+    May (NV em) en      es       -> chg (Let em (\ x -> May x  en es))
+    May (V  em) (NV en) es       -> chg (Let en (\ x -> May em x  es))
+    May Non     en      _        -> chg en
+    May (Som e) _       es       -> chg (es e)
+    May em      en      es       -> May  <$@> em <*@> en <*@> es
+
 
 ref :: IORef Int
 {-# NOINLINE ref #-}

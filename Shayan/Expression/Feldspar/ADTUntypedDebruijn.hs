@@ -21,6 +21,9 @@ data Exp = ConI Integer
          | Ind  Exp Exp
          | Let  Exp Exp
          | Cmx  Exp Exp
+         | Non
+         | Som  Exp
+         | May  Exp Exp Exp
 
 deriving instance Eq   Exp
 deriving instance Show Exp
@@ -31,17 +34,23 @@ fre ee = case ee of
   ConB _        -> []
   ConF _        -> []
   Var  n        -> [n]
-  Abs  eb       -> drpZro (fre eb)
-  App  ef ea    -> fre ef ++ fre ea
-  Cnd  ec et ef -> fre ec ++ fre et ++ fre ef
-  Whl  ec eb ei -> drpZro (fre ec) ++ drpZro (fre eb) ++ fre ei
-  Tpl  ef es    -> fre ef ++ fre es
-  Fst  e        -> fre e
-  Snd  e        -> fre e
-  Ary  el ef    -> fre el ++ drpZro (fre ef)
-  Len  e        -> fre e
-  Ind  e ei     -> fre e  ++ fre ei
-  Let  el eb    -> fre el ++ drpZro (fre eb)
-  Cmx  er ei    -> fre er ++ fre ei
+  Abs  eb       -> freF eb
+  App  ef ea    -> fre  ef ++ fre  ea
+  Cnd  ec et ef -> fre  ec ++ fre  et ++ fre ef
+  Whl  ec eb ei -> freF ec ++ freF eb ++ fre ei
+  Tpl  ef es    -> fre  ef ++ fre es
+  Fst  e        -> fre  e
+  Snd  e        -> fre  e
+  Ary  el ef    -> fre  el ++ freF ef
+  Len  e        -> fre  e
+  Ind  e  ei    -> fre  e  ++ fre ei
+  Let  el eb    -> fre  el ++ freF eb
+  Cmx  er ei    -> fre  er ++ fre ei
+  Non           -> []
+  Som  e        -> fre  e
+  May  em en es -> fre  em ++ fre en ++ freF es
+
+freF :: Exp -> [Nat]
+freF f = drpZro (fre f)
   where
     drpZro = fmap prd . filter (/= Zro)
