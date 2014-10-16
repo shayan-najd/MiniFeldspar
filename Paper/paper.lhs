@@ -15,6 +15,15 @@
 %format none_R
 %format opt_R
 %format forall = "\forall"
+%format Opt_R
+%format power_Dp
+%format power_Dp'
+%format power_Dp''
+%format sqr_Dp
+%format power_Qt
+%format power_Qt'
+%format power_Qt''
+%format sqr_Qt
 
 % US Letter page size
 %\pdfpagewidth=8.5in

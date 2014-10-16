@@ -1,3 +1,11 @@
+%if False
+\begin{code}
+{-# LANGUAGE TemplateHaskell #-}
+import Section3 hiding (return,main)
+import Language.Haskell.TH
+type Qt a = Q (TExp a)
+\end{code}
+%endif
 
 \subsection{First example}
 \label{sec:first-example}
@@ -37,26 +45,26 @@ should result from instantiating |power| to |(-6)|.
 
 For CDSL, we assume a type |Dp a| to represent a term
 of type |a|, and function
-\begin{code}
+\begin{spec}
 edslC :: (Dp a -> Dp b) -> C
-\end{code}
+\end{spec}
 to generate a \texttt{main} function corresponding to its
 argument, where |C| is a type that represents |C| code.
 Here is a solution to our problem using Dp.
 \begin{code}
-power :: Int -> Dp Float -> Dp Float
-power n x =
+power_Dp :: Int -> Dp Float -> Dp Float
+power_Dp n x =
   if n < 0 then
-    x .==. 0 ? (0,  1 / power (-n) x)
+    x .==. 0 ? (0,  1 / power_Dp (-n) x)
   else if n == 0 then
     1
   else if even n then
-    sqr (power (n `div` 2) x)
+    sqr_Dp (power_Dp (n `div` 2) x)
   else
-    x * power (n-1) x
+    x * power_Dp (n-1) x
 
-sqr    ::  Dp Float -> Dp Float
-sqr y  =   y * y
+sqr_Dp    ::  Dp Float -> Dp Float
+sqr_Dp y  =   y * y
 \end{code}
 Invoking |edslC (power (-6))| generates the C code above.
 
@@ -80,9 +88,9 @@ run-time, using |M == N| and |if L then M else N| for the former but
 
 Assuming |x| contains a value of type |Dp Float| denoting an object
 variable |u| of type float, evaluating |power (-6) x| yields following.
-\begin{code}
+\begin{spec}
 (u .==. 0) ? (0, 1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1))))
-\end{code}
+\end{spec}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
 \[
@@ -96,25 +104,25 @@ It is easy to generate the final C code from this structure.
 
 By contrast, for QDSL, we assume a type |Qt a| to represent a
 quoted term of type |a|, and function
-\begin{code}
+\begin{spec}
 qdslC :: Qt (a -> b) -> C
-\end{code}
+\end{spec}
 to generate a \texttt{main} function corresponding to its
 argument.  Here is a solution to our problem using QDSL.
 \begin{code}
-power :: Int -> Exp (Float -> Float)
-power n =
+power_Qt :: Int -> Qt (Float -> Float)
+power_Qt n =
   if n < 0 then
-    <|| \x -> if x == 0 then 0 else 1 / $(power (-n)) x ||>
+    [|| \x -> if x == 0 then 0 else 1 / $$(power_Qt (-n)) x ||]
   else if n == 0 then
-    <|| \x -> 1 ||>
+    [|| \x -> 1 ||]
   else if even n then
-    <|| \x -> $(sqr) ($(power (n `div` 2)) x) ||>
+    [|| \x -> $$sqr_Qt ($$(power_Qt (n `div` 2)) x) ||]
   else
-    <|| \x -> x * $(power (n-1)) x ||>
+    [|| \x -> x * $$(power_Qt (n-1)) x ||]
 
-sqr  ::  Exp (Float -> Float)
-sqr  =   <|| \y -> y * y ||>
+sqr_Qt  ::  Qt (Float -> Float)
+sqr_Qt  =   [|| \y -> y * y ||]
 \end{code}
 Invoking |qdslC (power (-6))| generates the C code above.
 
@@ -130,24 +138,24 @@ In QDSL, the body of the code changes more substantially. The typed
 quasi-quoting mechanism of Template Haskell is used to indicate which
 code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by \( <|| \cdots ||> \) and unquoting by \( \$(\cdots) \).
+indicated by \( [|| \cdots ||] \) and unquoting by \( \$(\cdots) \).
 Here, by the mechanism of quoting, without any need for tricks,
 the syntax for code excecuted at both generation-time and run-time is
 identical for all constructs, including comparison and conditionals.
 
 Now evaluating |power (-6)| yields the following.
-\begin{code}
-<|| \x ->  if x == 0 then 0 else
-             1 / (\y -> y * y) (x * (\y -> y * y) (x * 1)) ||>
-\end{code}
+\begin{spec}
+[|| \x ->  if x == 0 then 0 else
+             1 / (\y -> y * y) (x * (\y -> y * y) (x * 1)) ||]
+\end{spec}
 Normalising the term, with variables renamed
 for readability, yields the following.
-\begin{code}
-<|| \u ->  if u == 0 then 0 else
+\begin{spec}
+[|| \u ->  if u == 0 then 0 else
              let v = u * 1 in
              let w = u * (v * v) in
-             1 / w * w  ||>
-\end{code}
+             1 / w * w  ||]
+\end{spec}
 It is easy to generate the final C code from
 the normalised term.
 
@@ -220,12 +228,12 @@ power''      ::  Int -> Float -> Float
 power'' n x  =   maybe 0 (\x -> x) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses
-\begin{code}
+\begin{spec}
 data Maybe a = Nothing | Just a
 return  ::  a -> Maybe a
 (>>=)   ::  Maybe a -> (a -> Maybe b) -> Maybe b
 maybe   ::  b -> (a -> b) -> Maybe a -> b
-\end{code}
+\end{spec}
 from the Haskell prelude. Type |Maybe| is declared as a monad, enabling the |do| notation,
 which translates into |(>>=)|.
 The same C code as before should result from instantiating |power''| to |(-6)|.
@@ -233,43 +241,43 @@ The same C code as before should result from instantiating |power''| to |(-6)|.
 (In this case, the refactored function is arguably clumsier than the original,
 but clearly it is desirable to support this form of refactoring in general.)
 
-In CDSL, type |Maybe| is represented by type |Option|.
+In CDSL, type |Maybe| is represented by type |Opt|.
 Here is the refactored code.
 \begin{code}
-power' :: Int -> Dp Float -> Option (Dp Float)
-power' n x  =
+power_Dp' :: Int -> Dp Float -> Opt (Dp Float)
+power_Dp' n x  =
   if n < 0 then
-    (x .==. 0) ? (none, do y <- power' (-n) x; return (1 / y))
+    (x .==. 0) ? (none, do y <- power_Dp' (-n) x; return (1 / y))
   else if n == 0 then
     return 1
   else if even n then
-    do y <- power' (n `div` 2) x; return (sqr y)
+    do y <- power_Dp' (n `div` 2) x; return (sqr_Dp y)
   else
-    do y <- power' (n-1) x; return (x*y)
+    do y <- power_Dp' (n-1) x; return (x*y)
 
-power''      ::  Int -> Dp Float -> Dp Float
-power'' n x  =   option 0 (\y -> y) (power' n x)
+power_Dp''      ::  Int -> Dp Float -> Dp Float
+power_Dp'' n x  =  option 0 (\y -> y) (power_Dp' n x)
 \end{code}
 Here |sqr| is as before. The above uses the functions
-\begin{code}
-none   	::  Option a
-return 	::  a -> Option a
-(>>=)  	::  Option a -> (a -> Option b) -> Option b
-option 	::  (Syntactic a, Syntactic b) => b -> (a -> b) -> Option a -> b
-\end{code}
-from the CDSL library. Details of the type |Option| and the type class |Syntactic|
+\begin{spec}
+none   	::  Opt a
+return 	::  a -> Opt a
+(>>=)  	::  Opt a -> (a -> Opt b) -> Opt b
+option 	::  (Syntactic a, Syntactic b) => b -> (a -> b) -> Opt a -> b
+\end{spec}
+from the CDSL library. Details of the type |Opt| and the type class |Syntactic|
 are explained in Section~\ref{sec:option}.
-Type |Option| is declared as a monad, enabling the |do| notation,
+Type |Opt| is declared as a monad, enabling the |do| notation,
 which translates into |(>>=)|.
 Invoking |edslC (power'' (-6))| generates the same C code as
 the previous example.
 
-In order to be easily represented in C, type |Option a| is represented as a pair
+In order to be easily represented in C, type |Opt a| is represented as a pair
 consisting of a boolean and the representation of the type |a|; in the case that
 corresponds to |Nothing|, the boolean is false and a default value of type |a|
 is provided.  The CDSL term generated by evaluating |power (-6) 0| is large and
 unscrutable:
-\begin{code}
+\begin{spec}
 (((fst ((x == (0.0)) ? ((((False) ? ((True), (False))), ((False) ?  (undef,
 undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 (1.0)) * (x * (1.0)))))))))) ? ((True), (False))) ?  (((fst ((x == (0.0)) ?
@@ -278,7 +286,7 @@ undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 ((snd ((x == (0.0)) ?  ((((False) ? ((True), (False))), ((False) ? (undef,
 undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 (1.0)) * (x * (1.0)))))))))), undef)), (0.0)))
-\end{code}
+\end{spec}
 (Details of why this is the term generated will become clearer after
 Section~\ref{sec:option}.)  Before, evaluating |power| yielded an CDSL term
 essentially in normal form, save for the need to use common subexpression
@@ -315,20 +323,20 @@ In QDSL, the type |Maybe| can be represented by its
 run-time equivalent, which we also call |Maybe|.
 Here is the refactored code.
 \begin{code}
-power' :: Int -> Qt (Float -> Maybe Float)
-power' n =
+power_Qt' :: Int -> Qt (Float -> Maybe Float)
+power_Qt' n =
   if n < 0 then
-    <|| \x ->  if x == 0 then Nothing else
-                 do y <- $(power' (-n) x); return (1 / y) ||>
+    [|| \x ->  if x == 0 then Nothing else
+                 do y <- $$(power_Qt' (-n)) x; return (1 / y) ||]
   else if n == 0 then
-    <|| \x -> return 1 ||>
+    [|| \x -> return 1 ||]
   else if even n then
-    <|| \x -> do y <- $(power' (n `div` 2) x); return $(sqr y) ||>
+    [|| \x -> do y <- $$(power_Qt' (n `div` 2)) x; return ($$sqr_Qt y) ||]
   else
-    <|| \x -> do y <- $(power' (n-1) x); return (x * y) ||>
+    [|| \x -> do y <- $$(power_Qt' (n-1)) x; return (x * y) ||]
 
-power''      ::  Int -> Qt (Float -> Float)
-power'' n x  =   <|| maybe 0 (\x -> x) $(power' n x) ||>
+power_Qt''      ::  Int -> Qt (Float -> Float)
+power_Qt'' n = [|| \ x ->  maybe 0 (\x -> x) ($$(power_Qt' n) x)||]
 \end{code}
 Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are typed as before,
