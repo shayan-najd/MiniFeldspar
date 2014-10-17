@@ -126,7 +126,6 @@ domain-specific languages into a given host language.
 \section{Introduction}
 
 \todo{NBE citations - Sam}
-\todo{push array citations - Josef}
 
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
