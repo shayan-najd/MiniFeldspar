@@ -1,5 +1,5 @@
 module Expression.Feldspar.MiniWellScoped
-    (Exp(..),sucAll,prdAll,mapVar,isFresh,absTmp,eql) where
+    (Exp(..),sucAll,prdAll,mapVar,isFresh,absTmp,absVar,eql) where
 
 import MyPrelude hiding (foldl)
 
@@ -221,3 +221,61 @@ hasTmpF s f = hasTmp s (f (Tmp "__dummy__"))
 
 isFresh :: (Exp r ta -> Exp r tb) -> Bool
 isFresh f = not (hasTmp "__fresh__" (f (Tmp "__fresh__")))
+
+absVar :: forall r a b. (HasSin TFG.Typ a, HasSin TFG.Typ b) =>
+         Exp (a ': r) b -> Exp r a -> Exp r b
+
+absVar ee xx = absVar' xx ee
+
+
+absVar' :: forall r a b. (HasSin TFG.Typ a, HasSin TFG.Typ b) =>
+          Exp r a -> Exp (a ': r) b -> Exp r b
+absVar' xx ee = let b = sin :: TFG.Typ b in case ee of
+  ConI i                    -> ConI i
+  ConB i                    -> ConB i
+  ConF i                    -> ConF i
+  AppV v@Zro _              -> case sinTyp v of
+    TFG.Int                 -> xx
+    TFG.Bol                 -> xx
+    TFG.Flt                 -> xx
+    TFG.Tpl _ _             -> xx
+    TFG.Ary _               -> xx
+    TFG.May _               -> xx
+    TFG.Cmx                 -> xx
+    TFG.Arr _ _             -> impossible
+  AppV v   es               -> AppV (prd v) (TFG.mapC (sinTyp v) (absVar' xx) es)
+  Cnd ec et ef              -> Cnd (absVar' xx ec)   (absVar' xx et)
+                                    (absVar' xx ef)
+  Whl ec eb ei              -> Whl (absVar'F xx ec) (absVar'F xx eb)
+                                   (absVar' xx ei)
+  Tpl ef es                 -> case TFG.getPrfHasSinTpl b of
+    (PrfHasSin , PrfHasSin) -> Tpl (absVar' xx ef)   (absVar' xx es)
+  Fst e                     -> Fst (absVar' xx e)
+  Snd e                     -> Snd (absVar' xx e)
+  Ary el ef                 -> case TFG.getPrfHasSinAry b of
+    PrfHasSin               -> Ary (absVar' xx el)   (absVar'F xx ef)
+  Len e                     -> Len (absVar' xx e)
+  Ind ea ei                 -> Ind (absVar' xx ea)   (absVar' xx ei)
+  Let el eb                 -> Let (absVar' xx el)   (absVar'F xx eb)
+  Cmx er ei                 -> Cmx (absVar' xx er)   (absVar' xx ei)
+  Tmp x                     -> Tmp x
+  Tag x e                   -> Tag x (absVar' xx e)
+  Non                       -> Non
+  Som e                     -> case TFG.getPrfHasSinMay b of
+   PrfHasSin                -> Som (absVar' xx e)
+  May ec en es              -> May (absVar' xx ec) (absVar' xx en)
+                                   (absVar'F xx es)
+refAbsVar :: IORef Int
+{-# NOINLINE refAbsVar #-}
+refAbsVar = unsafePerformIO (newIORef 0)
+
+absVar'F :: forall r a b c.
+            (HasSin TFG.Typ a, HasSin TFG.Typ b, HasSin TFG.Typ c) =>
+           Exp r a -> (Exp (a ': r) b -> Exp (a ': r) c) ->
+                      (Exp r b -> Exp r c)
+absVar'F xx ef = let i = unsafePerformIO
+                         (do j <- readIORef refAbsVar
+                             modifyIORef refAbsVar (+1)
+                             return j)
+                     v = "_x" ++ show i
+                 in (\ x -> absTmp x v (absVar' xx (ef (Tmp v))))
