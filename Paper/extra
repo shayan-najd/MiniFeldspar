@@ -81,6 +81,36 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+\begin{abstract}
+We describe a technique, based on quotation and normalisation of
+quoted terms, for embedding into a host-language a domain-specific
+language that translates into a target language. The technique was
+developed by Cheney, Lindley, and Wadler (2013), who applied it to
+embed queries into F\# that translate into SQL. They conjectured that
+the same technique applied in other situations, and here we test that
+conjecture by applying the technique to the Feldspar system of
+Axelsson and others (2010), which embeds signal processing programs
+into Haskell that translate into C. We validate our technique by
+re-implementing Feldspar using Template Haskell quasi-quotation, and
+confirm that Feldspar and our technique generate identical target code on
+a range of applications including image processing, FFT, and CRC.
+
+Feldspar, as well as similar languages such as Nicola and Hydra,
+benefits from a clever combination of deep and shallow embedding that
+permits programs in the embedded language to look almost---but not
+quite!---identical to programs in the host language. (For instance,
+arithmetic and pairing is identical in embedded and host languages,
+but comparison and conditionals are not.) In contrast, our technique
+makes the syntax of the embedded language identical to that of the
+host language. Apart from building a normaliser for quoted terms, our
+technique is simpler to apply than existing techniques; and we argue
+that a single normaliser can be built once and used to embed many
+domain-specific languages into a given host language.
+\end{abstract}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 FROM THE INTRODUCTION
 
 We summarise a standard way to engineer domain-specific languages by
@@ -240,3 +270,41 @@ $\overline{M}$ is used to denote a non-empty sequence of terms $M_i$.
 \label{fig:rnf}
 \end{figure*}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% FROM SECTION 4 (MINIFELDSPAR AS A QDSL)
+
+Thus, the key to our implementation is a transformer that converts
+the representation of a quoted term |Qt| into type |Dp|.
+\begin{spec}
+translate :: Qt (a -> b) -> Dp a -> Dp b
+\end{spec}
+Composing |translate| with |cdsl|, the translator from |Dp| to C,
+yields |qdsl|, our translator from quotations to C.
+\begin{spec}
+qdsl = cdsl . translate
+\end{spec}
+The processor translate is responsible for the following:
+\begin{itemize}
+\item It checks that only permitted primitives (those that can
+  be translated to |Dp| and C) appear. Permitted primitives include:
+  \begin{itemize}
+  \item |(==)| and |(<)|, treated as operations on integers.
+  \item |(+)|, |(*)|, and other operations on float.
+  \item |while|, with the type described below.
+  \item |ary|, |aryLen|, |aryIx|, with the type described below.
+  \end{itemize}
+\item It expands identifiers concerned with the types |(,)|, |Maybe|
+  and |Ary|.
+  \begin{itemize}
+  \item For |(,)|, identifiers |fst| and |snd|.
+  \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|,
+    as defined below.
+  \item For |Ary|, identifiers |aryLen| and |aryIx|,
+    as defined below.
+  \end{itemize}
+\end{itemize}
+We describe below how a general purpose tool could be defined
+to perform similar operations for any QDSL.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

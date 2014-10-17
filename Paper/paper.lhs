@@ -3,8 +3,6 @@
 %include polycode.fmt
 %format == = "\longeq "
 %format || = "||"
-%format <|| = "\openq "
-%format ||> = "\closeq "
 %format `div` = "\rmdiv"
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
@@ -15,7 +13,6 @@
 %format none_R
 %format opt_R
 %format forall = "\forall"
-%format Opt_R
 %format power_Dp
 %format power_Dp'
 %format power_Dp''
@@ -95,32 +92,15 @@ Chalmers University of Technology\\
 
 \maketitle
 
-\begin{abstract}
-We describe a technique, based on quotation and normalisation of
-quoted terms, for embedding into a host-language a domain-specific
-language that translates into a target language. The technique was
-developed by Cheney, Lindley, and Wadler (2013), who applied it to
-embed queries into F\# that translate into SQL. They conjectured that
-the same technique applied in other situations, and here we test that
-conjecture by applying the technique to the Feldspar system of
-Axelsson and others (2010), which embeds signal processing programs
-into Haskell that translate into C. We validate our technique by
-re-implementing Feldspar using Template Haskell quasi-quotation, and
-confirm that Feldspar and our technique generate identical target code on
-a range of applications including image processing, FFT, and CRC.
+\begin{abstract} We describe a technique for engineering
+domain-specific languages (DSLs) based on quotation and normalisation
+of quoted terms, which we dub QDSL. We compare our technique to a
+standard approach combining deep and shallow embedding, which we dub
+CDSL. We draw attention to the importance of normalisation and the
+subformula property for QDSLs in particular and DSLs in general. We
+implement our system, and measure five benchmarks in QDSL and CDSL
+implementations of Feldspar. \end{abstract}
 
-Feldspar, as well as similar languages such as Nicola and Hydra,
-benefits from a clever combination of deep and shallow embedding that
-permits programs in the embedded language to look almost---but not
-quite!---identical to programs in the host language. (For instance,
-arithmetic and pairing is identical in embedded and host languages,
-but comparison and conditionals are not.) In contrast, our technique
-makes the syntax of the embedded language identical to that of the
-host language. Apart from building a normaliser for quoted terms, our
-technique is simpler to apply than existing techniques; and we argue
-that a single normaliser can be built once and used to embed many
-domain-specific languages into a given host language.
-\end{abstract}
 
 
 \section{Introduction}
@@ -272,9 +252,77 @@ Section~\ref{sec:conclusion} concludes.
 \input{formalism}
 
 \section{Implementation and evaluation}
-\label{sec:empirical}
+\label{sec:evaluation}
+
+The transformer from |Qt| to |Dp| performs the following steps.
+\begin{itemize}
+\item It expands identifiers connected with the types |(,)|, |Maybe|
+  and |Vec|.
+  \begin{itemize}
+  \item For |(,)|, identifiers |fst| and |snd|.
+  \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
+  \item For |Vec|, there are no relevant identifiers.
+  \end{itemize}
+\item It normalises the term to ensure the subformula property.
+  Normalisation includes the special-purpose rules for |Maybe| and |Vec| given in
+  Section~\ref{sec:qdsl} and the general-purpose rules of Section~\ref{sec:subformula}.
+\item It traverses the term, converting |Qt| to |Dp|.
+  It checks that only permitted primitives appear in |Qt|, and translates
+  these to their corresponding representation in |Dp|. Permitted primitives include:
+  \begin{itemize}
+  \item |(==)| and |(<)|, treated as operations on integers.
+  \item |(+)|, |(*)|, and other operations on integer and float.
+  \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
+    |While|, |Arr|, |ArrLen|, and |ArrIx|.
+  \end{itemize}
+\end{itemize}
+
+An unfortunate feature of typed quasiquotation in GHC is that the
+implementation discards all type information when creating the
+representation of a term.  Type |Qt a| is equivalent to
+|TH.Q (TH.TExp a)|, where |TH| denotes the library for Typed Haskell,
+|TH.Q| is the quotation monad of Typed Haskell (used to look up
+identifiers and generate fresh names), and |TH.TExp a| is the parse
+tree for an expression that returns a value of type |a|. In the
+latter, |a| is a ghost variable; type |TH.TExp a| is a synonym for
+|TH.Exp|, the (untyped) parse tree of an expression in Template
+Haskell. Hence, the translator from |Qt a| to |Dp a| is forced to
+re-infer all the type information for the subterms of the term of type
+|Qt a|.  This is also why we translate the |Maybe| monad as a special
+case, rather than supporting overloading for monad operations.
+
+%%  As we noted in the introduction, rather than build a special-purpose tool for
+%%  each QDSL, it should be possible to design a single tool for each host language.
+%%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,
+%%  including support for type inference and overloading.
 
 \input{table}
+
+We measured the behaviour of five benchmark programs.
+\begin{center}
+\begin{tabular}{l@@{~}||@@{~}l}
+IPGray     & Image Processing (Grayscale)  \\
+IPBW       & Image Processing (Black and White) \\
+FFT        & Fast Fourier Transform \\
+CRC        & Cyclic Redundancy Check \\
+Windowing  & Average array in a sliding window \\
+\end{tabular}
+\end{center}
+Table~\ref{thetable} lists the results. Columns \hct\ and \hrt\
+list compile-time and run-time in Haskell, and \cct\ and \crt\
+list compile-time and run-time in C. 
+Runs for CDSL are shown both with and without common subexpression elimination (CSE),
+which is supported by a simple form of observable sharing. QDSL does not require CSE,
+since the normalisation algorithm preserves sharing. One benchmark, FFT, exhausts
+memory without CSE. All benchmarks produce essentially the same C for both QDSL
+and CDSL, which run in essentially the same time. The one exception is FFT, where
+class |Syn| appears to introduce spurious conversions that increase the
+runtime.
+
+Measurements were done on a PC with a quad-core Intel i7-2640M CPU
+running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
+GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
+
 
 %\section{The design of Haskell DSL}
 %\label{sec:tool}
@@ -314,10 +362,53 @@ on impurity.
 \section{Conclusion}
 \label{sec:conclude}
 
+We have compared CDSLs and QDSLs, arguing that QDSLs offer competing
+expressiveness and efficiency. CDSLs often (but not always) mimic the
+syntax of the host language, and often (but not always) perform
+normalisation in the host languages, while QDSLs (always) steal the
+syntax of the host language, and (always) guarantee adequate
+normalisation to ensure the subformula property, at the cost of
+requiring a normaliser, one per host language.
 
-\paragraph*{Acknowledgements}
-This work was funded by EPSRC Programme Grant EP/K034413/1.
+The subformula property may have applications in DSLs other that
+QDSLs. For instance, after Section~\ref{sec:option} of this paper was
+drafted, it occurred to us that a different approach to options in
+CDSL would be to extend type |Dp| with constructs for type |Maybe|.
+So long as type |Maybe| does not appear in the input or output of the
+program, a normaliser that ensures the subformula property could
+guarantee that C code for such constructs need never be generated.
 
+As we noted in the introduction, rather than build a special-purpose tool for
+each QDSL, it should be possible to design a single tool for each host language.
+Our next step is to design Haskell QDSL, with the following features.
+\begin{itemize}
+\item Full-strength type inference for the terms returned from typed
+  quasi-quotations, restoring type information currently discarded by GHC.
+\item Based on the above, full support for type classes and overloading
+  within quasi-quotation.
+\item The user may choose either an ADT or GADT representation of the
+  term returned by typed quasi-quotation, whichever is more convenient.
+\item A normaliser to ensure the subformula property, which works with any
+  datatype declared in Haskell.
+\item The user may supply a type environment indicating which constants
+  (or free variables) may appear in typed quasi-quotations.
+\end{itemize}
+Such a tool could easily subsume the special-purpose translator from
+|Qt| to |Dp| described at the beginning of Section~\ref{sec:evaluation},
+and lift most of its restrictions. For instance,
+the current prototype is restricted to the |Maybe| monad, while the
+envisioned tool will work with any monad.
+
+Moliere's Monsieur Jordan was surprised to discover he had been
+speaking prose his whole life. Similarly, many of us used QDSLs for
+years, if not by that name. DSL via quotation is the heart of Lisp
+macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
+by naming the concept and drawing attention to the central benefits of
+normalisation and the subformula propety, we may help the concept to
+flower further for many more years to come.
+
+\paragraph*{Acknowledgement} This work was funded by EPSRC Grant
+EP/K034413/1.
 
 \bibliographystyle{plainnat}
 \bibliography{paper}

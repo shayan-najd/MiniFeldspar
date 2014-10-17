@@ -7,52 +7,20 @@ type Qt a = Q (TExp a)
 %endif
 
 The CDSL technique is powerful. In a little over seven pages,
-we explained sufficiently how to combinine deep and shallow
+we explained sufficiently how to combine deep and shallow
 embedding to produce a library that allows all the CDSL code
 in Section~\ref{sec:overview} to run.
-
 We now review what is required to achieve the same effect in
-QDSL. Although the treatment of CDSL is pleasingly compact, the
+QDSL. While the treatment of CDSL is pleasingly compact, the
 treatment of QDSL is even more compact.
 
 For purposes of comparison, our CDSL and QDSL implementations both
 produce abstract syntax trees for target code represented as terms of
 type |Dp|. The postprocessor that converts |Dp| to C code is shared
-among both implementations.
-
-Thus, the key to our implementation is a transformer that converts
-the representation of a quoted term |Qt| into type |Dp|.
-\begin{spec}
-translate :: Qt (a -> b) -> Dp a -> Dp b
-\end{spec}
-Composing |translate| with |cdsl|, the translator from |Dp| to C,
-yields |qdsl|, our translator from quotations to C.
-\begin{spec}
-qdsl = cdsl . translate
-\end{spec}
-The processor translate is responsible for the following:
-\begin{itemize}
-\item It checks that only permitted primitives (those that can
-  be translated to |Dp| and C) appear. Permitted primitives include:
-  \begin{itemize}
-  \item |(==)| and |(<)|, treated as operations on integers.
-  \item |(+)|, |(*)|, and other operations on float.
-  \item |while|, with the type described below.
-  \item |ary|, |aryLen|, |aryIx|, with the type described below.
-  \end{itemize}
-\item It expands identifiers concerned with the types |(,)|, |Maybe|
-  and |Ary|.
-  \begin{itemize}
-  \item For |(,)|, identifiers |fst| and |snd|.
-  \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|,
-    as defined below.
-  \item For |Ary|, identifiers |aryLen| and |aryIx|,
-    as defined below.
-  \end{itemize}
-\end{itemize}
-We describe below how a general purpose tool could be defined
-to perform similar operations for any QDSL.
-
+among both implementations.  Central to our implementation is a
+translator that converts the representation of a quoted term |Qt|
+into type |Dp|.  Prior to translation, terms of |Qt| are normalised
+to ensure the subformula property.
 
 \subsection{While and for}
 
@@ -92,14 +60,10 @@ return        ::  a -> Maybe a
 return        =   Just
 
 (>>=)         ::  Maybe a -> (a -> Maybe b) -> Maybe b
-m >>= k       =   case m of
-                    Nothing  ->  Nothing
-                    Just x   ->  k x
+m >>= k       =   case m of { Nothing  ->  Nothing ; Just x   ->  k x }
 
 maybe         ::  b -> (a -> b) -> Maybe a -> b
-maybe x g m   =   case m of
-                    Nothing  ->  x
-                    Just y   ->  g y
+maybe x g m   =   case m of { Nothing  ->  x ; Just y   ->  g y }
 \end{spec}
 The QDSL processor permits the constructors
 |Nothing| and |Just|, and replaces occurrences of |return|, |(>>=)|, and
@@ -122,7 +86,7 @@ The |Vec| type is defined as follows.
 \begin{code}
 data Vec a  =  Vec Int (Int -> a)
 \end{code}
-The QDSL processor permits the constructor |Ary|, and performs
+The QDSL processor permits the constructor |Arr|, and performs
 simplifications including the rule below.
 \begin{eqnarray*}
 |case Vec L M of { Vec n g -> N }| &\leadsto&  N[n:=L, g:=M]
@@ -159,30 +123,30 @@ Ultimately, we need to be able to manipulate actual arrays. For this
 purpose, we provide three constants analogous to three constructs of
 the type |Dp|.
 \begin{spec}
-ary      ::  Int -> (Int -> a) -> Array Int a
-aryLen   ::  Array Int a -> Int
-aryIx    ::  Array Int a -> Int -> a
+arr      ::  Int -> (Int -> a) -> Array Int a
+arrLen   ::  Array Int a -> Int
+arrIx    ::  Array Int a -> Int -> a
 \end{spec}
 These identifiers are declared in the QDSL library with the appropriate
-types, and conversion from |ary|, |aryLen|, |aryIx| to |Ary|,
-|AryLen|, |AryIx|  occurs when translating |Qt| to |Dp|.
+types, and conversion from |arr|, |arrLen|, |arrIx| to |Arr|,
+|ArrLen|, |ArrIx|  occurs when translating |Qt| to |Dp|.
 
 We convert between vectors and arrays as follows.
 \begin{code}
-toAry        ::  Qt (Vec a -> Ary a)
-toAry        =   [|| \(Vec n g) -> ary n g ||]
+toArr        ::  Qt (Vec a -> Arr a)
+toArr        =   [|| \(Vec n g) -> arr n g ||]
 
-fromAry      ::  Qt (Ary a -> Vec a)
-fromAry      =   [|| \a -> Vec (aryLen a) (\i -> aryIx a i) ||]
+fromArr      ::  Qt (Arr a -> Vec a)
+fromArr      =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
 
 memorise     ::  Qt (Vec a -> Vec a)
-memorise     =   [|| fromAry . toAry ||]
+memorise     =   [|| fromArr . toArr ||]
 \end{code}
 The last performs the same purpose as |memorise| for CDSL,
 enabling the user to decide when a vector is to be materialised
 in memory.
 
-\todo{Need an end-to-end use, to see where |toAry| and |fromAry| appear.}
+\todo{Need an end-to-end use, to see where |toArr| and |fromArr| appear.}
 
 
 
