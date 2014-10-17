@@ -14,14 +14,15 @@
 %format some_R
 %format none_R
 %format opt_R
-%format power_Dp
-%format power_Dp'
-%format power_Dp''
-%format sqr_Dp
-%format power_Qt
-%format power_Qt'
-%format power_Qt''
-%format sqr_Qt
+%format power_Dp = power
+%format power_Dp' = power'
+%format power_Dp'' = power''
+%format sqr_Dp = sqr
+%format power_Qt = power
+%format power_Qt' = power'
+%format power_Qt'' = power''
+%format sqr_Qt = sqr
+%format ^ = " "
 
 % US Letter page size
 %\pdfpagewidth=8.5in

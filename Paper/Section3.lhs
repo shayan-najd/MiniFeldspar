@@ -256,6 +256,7 @@ power of their own technique!)
 
 
 \subsection{Embedding option}
+\label{sec:option}
 
 We now explain in detail the |Option| type seen in Section~\ref{sec:second-example}.
 
