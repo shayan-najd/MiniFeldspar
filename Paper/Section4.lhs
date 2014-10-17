@@ -133,20 +133,34 @@ types, and conversion from |arr|, |arrLen|, |arrIx| to |Arr|,
 
 We convert between vectors and arrays as follows.
 \begin{code}
-toArr        ::  Qt (Vec a -> Arr a)
+toArr        ::  Qt (Vec a -> Array Int a)
 toArr        =   [|| \(Vec n g) -> arr n g ||]
 
-fromArr      ::  Qt (Arr a -> Vec a)
+fromArr      ::  Qt (Array Int a -> Vec a)
 fromArr      =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
+\end{code}
+If we define
+\begin{code}
+norm     ::  Qt (Vec Float -> Float)
+norm v   =   scalarProd v v
+\end{code}
+invoking |qdsl (norm . fromArr)| yields C code that accepts
+an array. In contrast to CDSL, the coercion must be inserted
+by hand. The advantage is that whereas for CDSL we must resort
+to operational reasoning to determine which instances of |Vec|
+are eliminated, with QDSL we can apply the subformula property.
+We know that all occurrences of |Vec| must be
+eliminated since it appears as neither an input nor output
+of the final program.
 
+Defining an analogue of |memorise| is straightforward.
+\begin{code}
 memorise     ::  Qt (Vec a -> Vec a)
 memorise     =   [|| fromArr . toArr ||]
 \end{code}
 The last performs the same purpose as |memorise| for CDSL,
 enabling the user to decide when a vector is to be materialised
 in memory.
-
-\todo{Need an end-to-end use, to see where |toArr| and |fromArr| appear.}
 
 
 

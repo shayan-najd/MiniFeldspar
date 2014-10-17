@@ -10,10 +10,16 @@
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
 %format x_0
-%format Opt_R
-%format some_R
-%format none_R
-%format opt_R
+%format Opt_R = Opt'
+%format some_R = some'
+%format none_R = none'
+%format opt_R = opt'
+%format option_R = option'
+%format Opt_0
+%format some_0
+%format none_0
+%format opt_0
+%format option_0
 %format power_Dp = power
 %format power_Dp' = power'
 %format power_Dp'' = power''
