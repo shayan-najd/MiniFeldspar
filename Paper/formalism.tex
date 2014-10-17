@@ -301,12 +301,12 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-    \expapp{M}{\hole}\
-  \mid \expprd{\hole}{N}\
-  \mid \expprd{V}{\hole}\
-  \mid \expfst{\hole}\
-  \mid \expsnd{\hole}\
-  \mid \explft{\hole}{B}\
+    \expapp{M}{\hole}
+  \mid \expprd{\hole}{N}
+  \mid \expprd{V}{\hole}
+  \mid \expfst{\hole}
+  \mid \expsnd{\hole}
+  \mid \explft{\hole}{B}
   \mid \exprgt{A}{\hole} \\
  &\mid& \expcas{\hole}{x}{M}{y}{N} \\
  \end{array}
@@ -330,12 +330,12 @@ G \mathbin{::=}
 & G[\expshr{x}{\nv}{N}]
 & \ \rewrite{}{2}{}\ \
 & \expshr{x}{\nv}{G[N]}, \\
-&&&x \notin \fv{G}\\
+&&&\quad x \notin \fv{G}\\
 
 (\kappa.{\txt{case}})
 & G[\expcas{z}{x}{M}{y}{N}] & \ \rewrite{}2{} \\
-\multicolumn{4}{@{}l@{}}
-{\qquad\qquad\qquad \expcas{z}{x}{G[M]}{y}{G[N]}, \quad  \cnd{x,y \notin \fv{G}}} \\[1ex]
+\multicolumn{3}{@{}l@{}}
+{\qquad\qquad\qquad\quad \expcas{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
 
 %% \multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{z}{x}{\hole}{y}{N}\ |\ \expcas{z}{x}{M}{y}{\hole}}\\[1pt]
 
@@ -417,7 +417,8 @@ Types, terms, and values are presented in Figure~\ref{fig:term}. We
 let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
-variables. We follow the usual convention that terms are equivalent up
+variables, and $c$ range over primitive constants, which must be fully
+applied. We follow the usual convention that terms are equivalent up
 to renaming of bound variables. We write $\fv{N}$ for the set of free
 variables of $N$, and $\sbs{N}{x}{M}$ for substitution of $M$ for $x$
 in $N$.
@@ -486,6 +487,16 @@ call-by-value rather than call-by-need.
 %%  
 The grammar of Figure~\ref{fig:nf} characterises normal forms
 precisely.
+
+\begin{proposition}[Strong normalisation]
+Each of the reduction relations $\rewrite{}{i}{}$ is strongly
+normalising: all $\rewrite{}{i}{}$ reduction sequences on well-typed
+terms are finite.
+\end{proposition}
+The only non-trivial proof is for $\rewrite{}{2}{}$, which can be
+proved via a standard reducibility argument
+(e.g. \cite{Lindley07}). If the target language includes general
+recursion, then we may include a fixed point constant.
 
 \begin{proposition}[Normal Form Syntax]
 \label{prop_normal}

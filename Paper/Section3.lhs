@@ -94,12 +94,12 @@ evalWhile c b i       =   if c i then evalWhile c b <*> b i else i
 Function |eval| plays no role in generating C, but may be useful for testing.
 
 
-\subsection{Class |Syntactic|}
+\subsection{Class |Syn|}
 
-We introduce a type class |Syntactic| that allows us to convert
+We introduce a type class |Syn| that allows us to convert
 shallow embeddings to and from deep embeddings.
 \begin{code}
-class Syntactic a where
+class Syn a where
   type Internal a
   toDp    	   ::  a -> Dp (Internal a)
   fromDp  	   ::  Dp (Internal a) -> a
@@ -108,9 +108,9 @@ Type |Internal| is a GHC type family \citep{type-families}.  Functions
 |toDp| and |fromDp| translate between the shallow embedding |a| and the
 deep embedding |Dp (Internal a)|.
 
-The first instance of |Syntactic| is |Dp| itself, and is straightforward.
+The first instance of |Syn| is |Dp| itself, and is straightforward.
 \begin{code}
-instance Syntactic (Dp a) where
+instance Syn (Dp a) where
   type Internal (Dp a)  =  a
   toDp    	        =  id
   fromDp  	        =  id
@@ -121,16 +121,16 @@ both the deep and shallow embeddings, and similarly for |Int| and
 
 We do not code the target language using its constructors
 directly. Instead, for each constructor we define a corresponding
-``smart constructor'' using class |Syntactic|.
+``smart constructor'' using class |Syn|.
 \begin{code}
 true, false  ::  Dp Bool
 true         =   LitB True
 false        =   LitB False
 
-(?)          ::  Syntactic a => Dp Bool -> (a,a) -> a
+(?)          ::  Syn a => Dp Bool -> (a,a) -> a
 c ? (t,e)    =   fromDp (If c (toDp t) (toDp e))
 
-while        ::  Syntactic a => (a -> Dp Bool) -> (a -> a) -> a -> a
+while        ::  Syn a => (a -> Dp Bool) -> (a -> a) -> a -> a
 while c b i  =   fromDp (While (c . fromDp) (toDp . b . fromDp) (toDp i))
 \end{code}
 
@@ -161,10 +161,10 @@ instance Fractional (Dp Float) where
 
 Comparison also benefits from smart constructors.
 \begin{code}
-(.==.)       ::  (Syntactic a, Eq (Internal a)) => a -> a -> Dp Bool
+(.==.)       ::  (Syn a, Eq (Internal a)) => a -> a -> Dp Bool
 a .==. b     =   Prim2 "(==)" (==) (toDp a) (toDp b)
 
-(.<.)        ::  (Syntactic a, Ord (Internal a)) => a -> a -> Dp Bool
+(.<.)        ::  (Syn a, Ord (Internal a)) => a -> a -> Dp Bool
 a .<. b      =   Prim2 "(<)" (<) (toDp a) (toDp b)
 \end{code}
 Overloading cannot apply here, because Haskell requires
@@ -183,7 +183,7 @@ minim m n     =   (m .<. n) ? (m, n)
 We set up a correspondence between host language pairs
 in the shallow embedding and target language pairs in the deep embedding.
 \begin{code}
-instance (Syntactic a, Syntactic b) => Syntactic (a,b) where
+instance (Syn a, Syn b) => Syn (a,b) where
   type  Internal (a,b)  =  (Internal a, Internal b)
   toDp (a,b)            =  Pair (toDp a) (toDp b)
   fromDp p              =  (fromDp (Fst p), fromDp (Snd p))
@@ -196,7 +196,7 @@ observable sharing, as discussed in Section~\ref{sec:first-example}.)
 We have now developed sufficient machinery to define a |for| loop
 in terms of a |while| loop.
 \begin{code}
-for          ::  Syntactic a => Dp Int -> a -> (Dp Int -> a -> a) -> a
+for          ::  Syn a => Dp Int -> a -> (Dp Int -> a -> a) -> a
 for n x_0 b  =   snd (while (\(i,x) -> i .<. n) (\(i,x) -> (i+1, b i x)) (0,x_0))
 \end{code}
 The state of the |while| loop is a pair consisting of a counter and
@@ -221,10 +221,10 @@ value at each type, which we call |undef|.
 % already have another meaning in Haskell.)
 
 It is straightforward to define a type class |Undef|, where type |a|
-belongs to |Undef| if it belongs to |Syntactic| and it has an
+belongs to |Undef| if it belongs to |Syn| and it has an
 undefined value.
 \begin{code}
-class Syntactic a => Undef a where
+class Syn a => Undef a where
   undef :: a
 
 instance Undef (Dp Bool) where
@@ -275,13 +275,13 @@ their development, we represent values of type |Maybe a| by the type
 value corresponding to |Just x|, the boolean is true and the value is
 |x|, while for one corresponding to |Nothing|, the boolean is false
 and the value is |undef|.  We define |some_R|, |none_R|, and |opt_R|
-as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syntactic|
+as the analogues of |Just|, |Nothing|, and |maybe|.  The |Syn|
 instance is straightforward, mapping options to and from the pairs
 already defined for |Dp|.
 \begin{code}
 data Opt_R a = Opt_R { def :: Dp Bool, val :: a }
 
-instance Syntactic a => Syntactic (Opt_R a) where
+instance Syn a => Syn (Opt_R a) where
   type Internal (Opt_R a)  =  (Bool, Internal a)
   toDp (Opt_R b x)         =  Pair b (toDp x)
   fromDp p                 =  Opt_R (Fst p) (fromDp (Snd p))
@@ -292,7 +292,7 @@ some_R x          =   Opt_R true x
 none_R            ::  Undef a => Opt_R a
 none_R            =   Opt_R false undef
 
-option_R          ::  Syntactic b => b -> (a -> b) -> Opt_R a -> b
+option_R          ::  Syn b => b -> (a -> b) -> Opt_R a -> b
 option_R d f o    =   def o ? (f (val o), d)
 \end{code}
 
@@ -330,7 +330,7 @@ instance Monad Opt where
   return x    =  O (\g -> g x)
   m >>= k     =  O (\g -> unO m (\x -> unO (k x) g))
 
-instance Undef a => Syntactic (Opt a) where
+instance Undef a => Syn (Opt a) where
   type Internal (Opt a)  =  (Bool, Internal a)
   fromDp                  =  lift . fromDp
   toDp                    =  toDp . lower
@@ -368,30 +368,29 @@ arrays.
 Recall that values of type |Array| are created by construct |Arr|,
 while |ArrLen| extracts the length and |ArrIx| fetches the element at
 the given index.  Corresponding to the deep embedding |Array| is a
-shallow embedding |Vector|.
+shallow embedding |Vec|.
 \begin{code}
-data Vector a = Vec (Dp Int) (Dp Int -> a)
+data Vec a = Vec (Dp Int) (Dp Int -> a)
 
-instance Syntactic a => Syntactic (Vector a) where
-  type Internal (Vector a)  =  Array Int (Internal a)
+instance Syn a => Syn (Vec a) where
+  type Internal (Vec a)  =  Array Int (Internal a)
   toDp (Vec n g)            =  Arr n (toDp . g)
   fromDp a                  =  Vec (ArrLen a) (\i -> fromDp (ArrIx a i))
 
-instance Functor Vector where
+instance Functor Vec where
   fmap f (Vec n g)          =  Vec n (f . g)
 \end{code}
 The shallow embedding |Vec| resembles the constructor |Arr|, but whereas
 the body of |Arr| must return values of type |Dp a|, the body of a vector
-may return values of any type |a| that satisfies |Syntactic a|.
-It is straightforward to make |Vector| an instance of |Functor|.
+may return values of any type |a| that satisfies |Syn a|.
+It is straightforward to make |Vec| an instance of |Functor|.
 
 Here are some primitive operations on vectors
 \begin{code}
-zipWithVec  ::  (Syntactic a, Syntactic b) =>
-                (a -> b -> c) -> Vector a -> Vector b -> Vector c
+zipWithVec  ::  (Syn a, Syn b) => (a -> b -> c) -> Vec a -> Vec b -> Vec c
 zipWithVec f (Vec m g) (Vec n h)  =   Vec (minim m n) (\i -> f (g i) (h i))
 
-sumVec                            ::  (Syntactic a, Num a) => Vector a -> a
+sumVec                            ::  (Syn a, Num a) => Vec a -> a
 sumVec (Vec n g)                  =   for n 0 (\i x -> x + g i)
 \end{code}
 Computing |zipWithVec f u v| combines vectors |u| and |v| pointwise with |f|,
@@ -407,8 +406,8 @@ a running sum.
 
 Using our primitives, it is easy to compute the scalar product of two vectors.
 \begin{code}
-scalarProd      ::  (Syntactic a, Num a) => Vector a -> Vector a -> a
-scalarProd u v  =   sumVec (zipWithVec (*) u v)
+scalarProd        ::  (Syn a, Num a) => Vec a -> Vec a -> a
+scalarProd u v    =   sumVec (zipWithVec (*) u v)
 \end{code}
 An important consequence of the style of definition we have adopted is
 that it provides lightweight fusion. The above definition would not produce
@@ -429,12 +428,21 @@ Indeed, we can see that by construction that whenever we combine two
 primitives the intermediate vector is always eliminated, a stronger
 guarantee than provided by conventional optimising compilers.
 
+If we define
+\begin{code}
+norm     ::  Vec Float -> Float
+norm v   =   scalarProd v v
+\end{code}
+invoking |cdsl scalarProd| yields C code that accepts an array.
+The coercion from array to |Vec| is
+automatically inserted thanks to the |Syn| class.
+
 There are some situations where fusion is not beneficial, notably
 when an intermediate vector is accessed many times fusion will cause
 the elements to be recomputed.  An alternative is to materialise the
 vector in memory with the following function.
 \begin{code}
-memorise            ::  Syntactic a => Vector a -> Vector a
+memorise            ::  Syn a => Vec a -> Vec a
 memorise (Vec n g)  =   Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
 The above definition depends on common subexpression elimination
@@ -443,7 +451,7 @@ once, rather than once for each element of the resulting vector.
 
 For example, if
 \begin{code}
-blur :: Syntactic a => Vector a -> Vector a
+blur :: Syn a => Vec a -> Vec a
 \end{code}
 %if False
 \begin{code}
@@ -462,7 +470,7 @@ combined with fine control over memory usage.
 
 %if False
 \begin{code}
-idVec     ::  Dp Int -> Vector (Dp Int)
+idVec     ::  Dp Int -> Vec (Dp Int)
 idVec n   =   Vec n id
 
 ex0       ::  Dp Int
