@@ -1,6 +1,8 @@
 \documentclass{llncs}
 
 %include polycode.fmt
+%include forall.fmt
+
 %format == = "\longeq "
 %format || = "||"
 %format <|| = "\openq "
@@ -14,7 +16,6 @@
 %format some_R
 %format none_R
 %format opt_R
-%format forall = "\forall"
 %format Opt_R
 %format power_Dp
 %format power_Dp'

@@ -322,7 +322,6 @@ The |lift| operation is closely related to the |(>>=)| operation
 we could not define above; it is properly typed,
 thanks to the type constraint on |b| in the definition of |Opt a|.
 
-\todo{fix typesetting of dot after $\forall$}
 \begin{code}
 newtype Opt a = O { unO :: forall b . Undef b => ((a -> Opt_R b) -> Opt_R b) }
 
