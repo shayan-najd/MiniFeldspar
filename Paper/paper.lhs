@@ -318,7 +318,8 @@ relying on impurity.
 
 
 \paragraph*{Acknowledgements}
-This work was funded by EPSRC Programme Grant EP/K034413/1.
+This work was funded by EPSRC Programme Grant EP/K034413/1 and by the
+Swedish Foundation for Strategic Research, under grant RAWFP.
 
 
 \bibliographystyle{plainnat}
