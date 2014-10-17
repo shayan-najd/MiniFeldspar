@@ -305,11 +305,12 @@ arrays \citep{claessen2012expressive} and sequential arrays
 and streams as used in Feldspar \citep{feldspar-github}.
 
 The loss of sharing when implementing embedded DSLs was identified by
-\citet{claessen1999observable}. They proposed to introduce a little
+\citet{o1993generating} in the context of embedded circuit descriptions.
+\citet{claessen1999observable} proposed to introduce a little
 bit of impurity in Haskell, referred to as \emph{observable sharing}
-to be able to recover the loss of sharing. Later, \citet{gill2009type}
-proposed a somewhat safer way of recover sharing, though still relying
-on impurity.
+to be able to recover from the loss of sharing. Later, \citet{gill2009type}
+proposed a somewhat safer way of recover sharing, though still ultimately
+relying on impurity.
 
 \section{Conclusion}
 \label{sec:conclude}
