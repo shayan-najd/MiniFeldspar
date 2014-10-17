@@ -3,6 +3,9 @@
 
 % color framework
 
+% boldsymbol is evil!
+\renewcommand{\boldsymbol}[1]{#1}
+
 \newcommand{\judgecolor}{}
 \newcommand{\typecolor}{}
 \newcommand{\termcolor}{}
@@ -61,18 +64,16 @@
 %% Expressions
 \newcommand{\expvar}[1]{#1}
 \newcommand{\expunt}{\boldsymbol{()}}
-\newcommand{\expabs}[3]{\boldsymbol{\lambda}\,#1\>\boldsymbol{.}\,#3}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{.}#3}
 \newcommand{\expapp}[2]{#1\ #2}
 \newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3}
 \newcommand{\expshrind}[3]{\begin{array}[t]{@{}l@{}}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}}
-\newcommand{\expprd}[2]{\boldsymbol{(}#1\ \boldsymbol{,}\ #2\boldsymbol{)}}
+\newcommand{\expprd}[2]{\boldsymbol{(}#1 \boldsymbol{,} #2\boldsymbol{)}}
 \newcommand{\expfst}[1]{\mathbf{fst}\ #1}
 \newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
 \newcommand{\explft}[2]{\mathbf{inl}\ #1}
 \newcommand{\exprgt}[2]{\mathbf{inr}\ #2}
-\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}}
-\newcommand{\expcasind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
-\newcommand{\expcasindind}[5]{\begin{array}[t]{@{}l@{}}\mathbf{case}\ #1\ \mathbf{of}\\[-1pt] \ \ \ \ \boldsymbol{\{}\mathbf{inl}\ #2.\ #3\ \\[-1pt] \ \ \boldsymbol{;}\ \mathbf{inr}\ #4.\ #5\boldsymbol{\}}\end{array}}
+\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \boldsymbol{\{}\mathbf{inl}\ #2.#3 \boldsymbol{;} \mathbf{inr}\ #4.#5\boldsymbol{\}}}
 
 %% Environment
 \newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
@@ -82,7 +83,7 @@
 
 \newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
 \newcommand{\sbs}[3]{#1[#2:=#3]}
-\newcommand{\fv}[1]{\txt{FV}\,(#1)}
+\newcommand{\fv}[1]{\txt{FV}(#1)}
 \newcommand{\fresh}[1]{#1 \txt{ fresh}}
 \newcommand{\txt}[1]{\text{\textit{#1}}}
 \newcommand{\rewrite}[3]{#1 \mapsto_{#2} #3}
@@ -285,8 +286,6 @@
 
 \newcommand{\fignorm}{
 \begin{figure*}[t]
-\[\uncolored
-\begin{array}[t]{@{}llll@{\qquad}l@{}}
 %% \multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
 %% \multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
 %% (\eta_{\rightarrow})
@@ -298,12 +297,10 @@
 %% \multicolumn{5}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\env \vdash \typing{L}{\typarr{A}{B}},\ L \neq \expabs{y}{A}{N}\txt{, and }\fresh{x}}
 %% \\[10pt]
 
-\multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
-\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
-
-\multicolumn{5}{@{}l@{}}{
+Phase 1 (let-insertion)
+\[
   \begin{array}{lcl}
-   F &\mathbin{~::=~}&
+   F &\mathbin{::=}&
     \expapp{M}{\hole}\
   \mid \expprd{\hole}{N}\
   \mid \expprd{V}{\hole}\
@@ -312,31 +309,33 @@
   \mid \explft{\hole}{B}\
   \mid \exprgt{A}{\hole} \\
  &\mid& \expcas{\hole}{x}{M}{y}{N} \\
- \end{array}}\\[1pt]
-
+ \end{array}
+\]%
+\[
+\begin{array}[t]{@{}lll@{\quad}l@{}}
 (\txt{let})
 & F[\nv]
-& \ \rewrite{}{2}{}\ \
-& \expshr{x}{\nv}{F[x]}
-& \fresh{x} \\[8pt]
-
-\multicolumn{5}{@{}c@{}}{\txt{Phase 2}}\\[-9pt]
-\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
-
-\multicolumn{5}{@{}l@{}}{G \mathbin{\ ::=\ }
-    \expapp{\hole}{V}\
- |\ \expshr{x}{\hole}{N}}\\[1pt]
-
-(\kappa_{\txt{let}})
+& \ \rewrite{}{1}{}\ \
+& \expshr{x}{\nv}{F[x]}, \quad x \text{ fresh} \\
+\end{array}
+\]%
+Phase 2 (symbolic evaluation)
+\[
+G \mathbin{::=}
+    \expapp{\hole}{V} \mid \expshr{x}{\hole}{N}
+\]
+\[
+\begin{array}[t]{@{\quad}llll@{}}
+(\kappa.{\txt{let}})
 & G[\expshr{x}{\nv}{N}]
-& \ \rewrite{}{3}{}\ \
-& \expshr{x}{\nv}{G[N]}
-& \cnd{x \notin \fv{G}}\\[0pt]
+& \ \rewrite{}{2}{}\ \
+& \expshr{x}{\nv}{G[N]}, \\
+&&&x \notin \fv{G}\\
 
-(\kappa_{\txt{case}})
-& \multicolumn{4}{@{}l}{G[\expcas{z}{x}{M}{y}{N}] \rewrite{}3{}} \\
+(\kappa.{\txt{case}})
+& G[\expcas{z}{x}{M}{y}{N}] & \ \rewrite{}2{} \\
 \multicolumn{4}{@{}l@{}}
-{\qquad\qquad\qquad \expcas{z}{x}{G[M]}{y}{G[N]}} & \cnd{x,y \notin \fv{G}} \\[20pt]
+{\qquad\qquad\qquad \expcas{z}{x}{G[M]}{y}{G[N]}, \quad  \cnd{x,y \notin \fv{G}}} \\[1ex]
 
 %% \multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{z}{x}{\hole}{y}{N}\ |\ \expcas{z}{x}{M}{y}{\hole}}\\[1pt]
 
@@ -347,52 +346,49 @@
 %% & \cnd{x \notin \fv{H}} \\[8pt]
 
 
-(\beta_{\rightarrow})
+(\beta.{\rightarrow})
 & \expapp{(\expabs{x}{A}{N})}{V}
-& \ \rewrite{}{3}{}\ \
-& \sbs{N}{x}{V}
-& \\[0pt]
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{x}{V} \\
 
-(\beta_{\times_1})
+(\beta.{\times_1})
 & \expfst{\expprd{V}{W}}
-& \ \rewrite{}{3}{}\ \
-& V
-& \\[0pt]
+& \ \rewrite{}{2}{}\ \
+& V \\
 
-(\beta_{\times_2})
+(\beta.{\times_2})
 & \expsnd{\expprd{V}{W}}
-& \ \rewrite{}{3}{}\ \
-& W
-& \\[0pt]
+& \ \rewrite{}{2}{}\ \
+& W \\
 
-(\beta_{+_1})
-& \expcasind{(\explft{V}{B})}{x}{M}{y}{N}
-& \ \rewrite{}{3}{}\ \
-& \sbs{M}{x}{V}
-& \\[0pt]
+(\beta.{+_1})
+& \expcas{(\explft{V}{B})}{x}{M}{y}{N}
+& \ \rewrite{}{2}{}\ \
+& \sbs{M}{x}{V} \\
 
-(\beta_{+_2})
-& \expcasind{(\exprgt{A}{W})}{x}{M}{y}{N}
-& \ \rewrite{}{3}{}\ \
-& \sbs{N}{y}{W}
-& \\[0pt]
+(\beta.{+_2})
+& \expcas{(\exprgt{A}{W})}{x}{M}{y}{N}
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{y}{W} \\
 
-(\beta_{\txt{let}})
+(\beta.{\txt{let}})
 & \expshr{x}{V}{N}
-& \ \rewrite{}{3}{}\ \
-& \sbs{N}{x}{V}
-& \\[8pt]
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{x}{V} \\
+\end{array}
+\]
 
-\multicolumn{5}{@{}c@{}}{\txt{Phase 3}}\\[-9pt]
-\multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+Phase 3 (garbage collection)
+\[
+\begin{array}[t]{@{}llll@{\quad}l@{}}
 
 (\txt{need})
 & \expshr{x}{\nv}{N}
-& \ \rewrite{}{4}{}\ \
+& \ \rewrite{}{3}{}\ \
 & N %%\sbs{N}{x}{\nv}
 & \cnd{%% \neg\valuep{M},\ and\\\ \ \
        %%Count(x,N) < 2
-       x \notin \fv{N}}\\[0pt]
+       x \notin \fv{N}}\\
 \end{array}
 \]
 \caption{Normalisation rules}
@@ -438,8 +434,6 @@ variables with types $x:A$. We write $\Gamma \vdash M:A$ to indicate
 that term $M$ has type $A$ under environment $\Gamma$. The typing
 rules are standard, and omitted to save space.
 
-\todo{perhaps the typing rules should appear in an appendix?}
-
 The grammar of normal forms is given in Figure~\ref{fig:nf}. We re-use
 $L,M,N$ to ranges over terms in normal form, $V,W$ to range over
 values in normal form, and $Q$ to range of neutral forms.
@@ -455,7 +449,7 @@ The reduction relation is closed under compatible closure.
 
 The overall normalisation procedure consists of exhaustively applying
 the reductions of Phase~1 until no more apply, then similarly for
-Phase~2, and finally for Phase~3. Phase~1 performs let-insertation,
+Phase~2, and finally for Phase~3. Phase~1 performs let-insertion,
 naming subterms that are not values.
 %% along the lines of a translation to A-normal form
 %% \citep{a-normal-form} or reductions (let.1) and (let.2) in Moggi's
