@@ -9,7 +9,7 @@
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
-%format x_0
+%format x_0 = x
 %format Opt_R = Opt'
 %format some_R = some'
 %format none_R = none'
@@ -109,13 +109,13 @@ Chalmers University of Technology\\
 \maketitle
 
 \begin{abstract} We describe a technique for engineering
-domain-specific languages (DSLs) based on quotation and normalisation
-of quoted terms, which we dub QDSL. We compare our technique to a
+domain-specific languages based on quotation and normalisation of
+quoted terms, which we dub QDSL. We compare our technique to a
 standard approach combining deep and shallow embedding, which we dub
-CDSL. We draw attention to the importance of normalisation and the
-subformula property for QDSLs in particular and DSLs in general. We
-implement our system, and measure five benchmarks in QDSL and CDSL
-implementations of Feldspar. \end{abstract}
+CDSL. We draw attention to the importance of normalisation and
+Gentzen's subformula property for QDSLs. We implement our system, and
+measure five benchmarks in QDSL and CDSL implementations of
+Feldspar. \end{abstract}
 
 
 
@@ -224,7 +224,7 @@ This paper makes the following contributions.
 The paper is organised as follows.
 Section~\ref{sec:overview} introduces and compares the
 CDSL and QDSL approaches, in the context of a simple example.
-Section~\ref{sec:edsl} reviews how the CDSL approach
+Section~\ref{sec:cdsl} reviews how the CDSL approach
 works in detail, in the context of Feldspar.
 Section~\ref{sec:qdsl} describes how the QDSL approach
 works in detail, reworking the examples of Section~\ref{sec:edsl}.
@@ -243,7 +243,7 @@ Section~\ref{sec:conclusion} concludes.
 %include Section2.lhs
 
 \section{MiniFeldspar as a CDSL}
-\label{sec:edsl}
+\label{sec:cdsl}
 
 %include Section3.lhs
 
