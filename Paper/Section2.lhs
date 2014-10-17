@@ -48,15 +48,17 @@ should result from instantiating |power| to |(-6)|.
 For CDSL, we assume a type |Dp a| to represent a term
 of type |a|, its \emph{deep} representation. Function
 \begin{spec}
-cdsl :: (FO a, FO b) => (Dp a -> Dp b) -> C
+cdsl :: (Dp a -> Dp b) -> C
 \end{spec}
 generates a \texttt{main} function corresponding to its argument,
-where |C| is a type that represents C code.  Type class |FO| restricts
-the arguments and results to \emph{first-order} types that can be
-easily represented in our target language: booleans, integers, floats,
-pairs of first-order type, and arrays of first-order type, but not
-(say) higher-order function or |Maybe| type.
-
+where |C| is a type that represents C code.
+%%
+%%  Type class |FO| restricts the arguments and results to
+%%  \emph{first-order} types that can be easily represented in our target
+%%  language: booleans, integers, floats, pairs of first-order type, and
+%%  arrays of first-order type, but not (say) higher-order function or
+%%  |Maybe| type.
+%%
 Here is a solution to our problem using CDSL.
 \begin{code}
 power_Dp :: Int -> Dp Float -> Dp Float
@@ -81,11 +83,11 @@ of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
 In CDSL, the body of the code remains almost---but not
-quite!---identical to the original.  Clever encoding tricks, which we
-explain later, permit declarations, function calls, arithmetic
+quite!---identical to the original.  Clever encoding tricks, 
+explained later, permit declarations, function calls, arithmetic
 operations, and numbers to appear the same whether they are to be
-executed at generation-time or run-time.  However, for reasons we
-explain later, comparison and conditionals appear differently
+executed at generation-time or run-time.  However, 
+as explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
 |M .==. N| and |L ?  (M, N)| for the latter.
@@ -111,10 +113,10 @@ It is easy to generate the final C code from this structure.
 By contrast, for QDSL, we assume a type |Qt a| to represent a
 term of type |a|, its \emph{quoted} representation.  Function
 \begin{spec}
-qdslC :: (FO a, FO b) => Qt (a -> b) -> C
+qdsl :: Qt (a -> b) -> C
 \end{spec}
 generates a \texttt{main} function corresponding to its
-argument, where |FO| and |C| are as before.
+argument, where |C| is as before.
 Here is a solution to our problem using QDSL.
 \begin{code}
 power_Qt :: Int -> Qt (Float -> Float)
@@ -131,7 +133,7 @@ power_Qt n =
 sqr_Qt  ::  Qt (Float -> Float)
 sqr_Qt  =   [|| \y -> y * y ||]
 \end{code}
-Invoking |qdslC (power (-6))| generates the C code above.
+Invoking |qdsl (power (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes |Qt (Float -> Float)|
 in the QDSL solution, meaning that |power n| returns a quotation
@@ -274,9 +276,9 @@ Here |sqr| is as before. The above uses the functions
 none   	::  Opt a
 return 	::  a -> Opt a
 (>>=)  	::  Opt a -> (a -> Opt b) -> Opt b
-option 	::  (Syntactic a, Syntactic b) => b -> (a -> b) -> Opt a -> b
+option 	::  (Syn a, Syn b) => b -> (a -> b) -> Opt a -> b
 \end{spec}
-from the CDSL library. Details of the type |Opt| and the type class |Syntactic|
+from the CDSL library. Details of the type |Opt| and the type class |Syn|
 are explained in Section~\ref{sec:option}.
 Type |Opt| is declared as a monad, enabling the |do| notation,
 which translates into |(>>=)|.
