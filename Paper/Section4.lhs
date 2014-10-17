@@ -47,8 +47,6 @@ In other words, the code is similar in structure to that for CDSL, except
 the type is simpler, quasi-quotes surround the body, and |(.<.)| in CDSL
 may be replaced by |(<)| in QDSL.
 
-An example of the use of |for| appears in Section~\ref{sec:qdsl-vec}.
-
 
 \subsection{Embedding maybe}
 
@@ -60,10 +58,10 @@ return        ::  a -> Maybe a
 return        =   Just
 
 (>>=)         ::  Maybe a -> (a -> Maybe b) -> Maybe b
-m >>= k       =   case m of { Nothing  ->  Nothing ; Just x   ->  k x }
+m >>= k       =   case m of { Nothing -> Nothing ; Just x -> k x }
 
 maybe         ::  b -> (a -> b) -> Maybe a -> b
-maybe x g m   =   case m of { Nothing  ->  x ; Just y   ->  g y }
+maybe x g m   =   case m of { Nothing -> x ; Just y -> g y }
 \end{spec}
 The QDSL processor permits the constructors
 |Nothing| and |Just|, and replaces occurrences of |return|, |(>>=)|, and

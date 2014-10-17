@@ -9,7 +9,7 @@
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
-%format x_0
+%format x_0 = x
 %format Opt_R = Opt'
 %format some_R = some'
 %format none_R = none'
@@ -109,13 +109,13 @@ Chalmers University of Technology\\
 \maketitle
 
 \begin{abstract} We describe a technique for engineering
-domain-specific languages (DSLs) based on quotation and normalisation
-of quoted terms, which we dub QDSL. We compare our technique to a
+domain-specific languages based on quotation and normalisation of
+quoted terms, which we dub QDSL. We compare our technique to a
 standard approach combining deep and shallow embedding, which we dub
-CDSL. We draw attention to the importance of normalisation and the
-subformula property for QDSLs in particular and DSLs in general. We
-implement our system, and measure five benchmarks in QDSL and CDSL
-implementations of Feldspar. \end{abstract}
+CDSL. We draw attention to the importance of normalisation and
+Gentzen's subformula property for QDSLs. We implement our system, and
+measure five benchmarks in QDSL and CDSL implementations of
+Feldspar. \end{abstract}
 
 
 
@@ -224,7 +224,7 @@ This paper makes the following contributions.
 The paper is organised as follows.
 Section~\ref{sec:overview} introduces and compares the
 CDSL and QDSL approaches, in the context of a simple example.
-Section~\ref{sec:edsl} reviews how the CDSL approach
+Section~\ref{sec:cdsl} reviews how the CDSL approach
 works in detail, in the context of Feldspar.
 Section~\ref{sec:qdsl} describes how the QDSL approach
 works in detail, reworking the examples of Section~\ref{sec:edsl}.
@@ -235,7 +235,7 @@ Section~\ref{sec:evaluation} compares Feldspar CDSL and QDSL.
 Section~\ref{sec:related} summarises related work.
 Section~\ref{sec:conclusion} concludes.
 
-\todo{Explain termination of normaliser and fix}
+% \todo{Explain termination of normaliser and fix}
 
 \section{Overview}
 \label{sec:overview}
@@ -243,7 +243,7 @@ Section~\ref{sec:conclusion} concludes.
 %include Section2.lhs
 
 \section{MiniFeldspar as a CDSL}
-\label{sec:edsl}
+\label{sec:cdsl}
 
 %include Section3.lhs
 
@@ -264,23 +264,25 @@ The transformer from |Qt| to |Dp| performs the following steps.
 \begin{itemize}
 \item It expands identifiers connected with the types |(,)|, |Maybe|
   and |Vec|.
-  \begin{itemize}
-  \item For |(,)|, identifiers |fst| and |snd|.
-  \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
-  \item For |Vec|, there are no relevant identifiers.
-  \end{itemize}
+%%    \begin{itemize}
+%%    \item For |(,)|, identifiers |fst| and |snd|.
+%%    \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
+%%    \item For |Vec|, there are no relevant identifiers.
+%%    \end{itemize}
 \item It normalises the term to ensure the subformula property.
   Normalisation includes the special-purpose rules for |Maybe| and |Vec| given in
   Section~\ref{sec:qdsl} and the general-purpose rules of Section~\ref{sec:subformula}.
 \item It traverses the term, converting |Qt| to |Dp|.
   It checks that only permitted primitives appear in |Qt|, and translates
   these to their corresponding representation in |Dp|. Permitted primitives include:
-  \begin{itemize}
-  \item |(==)| and |(<)|, treated as operations on integers.
-  \item |(+)|, |(*)|, and other operations on integer and float.
-  \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
-    |While|, |Arr|, |ArrLen|, and |ArrIx|.
-  \end{itemize}
+  |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
+  |while|, |arr|, |arrLen|, and |arrIx|.
+%%    \begin{itemize}
+%%    \item |(==)| and |(<)|, treated as operations on integers.
+%%    \item |(+)|, |(*)|, and other operations on integer and float.
+%%    \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
+%%      |While|, |Arr|, |ArrLen|, and |ArrIx|.
+%%    \end{itemize}
 \end{itemize}
 
 An unfortunate feature of typed quasiquotation in GHC is that the

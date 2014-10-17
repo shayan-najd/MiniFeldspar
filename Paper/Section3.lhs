@@ -190,8 +190,8 @@ instance (Syn a, Syn b) => Syn (a,b) where
 \end{code}
 This permits us to manipulate pairs as normal, with |(a,b)|, |fst a|,
 and |snd a|.  (Argument |p| is duplicated in the definition of
-|fromDp|, which may require common subexpression elimination or
-observable sharing, as discussed in Section~\ref{sec:first-example}.)
+|fromDp|, which may require common subexpression elimination
+as discussed in Section~\ref{sec:first-example}.)
 
 We have now developed sufficient machinery to define a |for| loop
 in terms of a |while| loop.
@@ -355,9 +355,6 @@ option d f o  =   option_R d f (lower o)
 These definitions are adequate to support the CDSL code presented
 in Section~\ref{sec:second-example}.
 
-\todo{After discussing the subformula property, a different solution
-to this problem becomes available.}
-
 
 \subsection{Embedding vector}
 
@@ -433,7 +430,7 @@ If we define
 norm     ::  Vec Float -> Float
 norm v   =   scalarProd v v
 \end{code}
-invoking |cdsl scalarProd| yields C code that accepts an array.
+invoking |cdsl norm| yields C code that accepts an array.
 The coercion from array to |Vec| is
 automatically inserted thanks to the |Syn| class.
 
@@ -446,8 +443,8 @@ memorise            ::  Syn a => Vec a -> Vec a
 memorise (Vec n g)  =   Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
 The above definition depends on common subexpression elimination
-or observable sharing to ensure |Arr n (toDp . g)| is computed
-once, rather than once for each element of the resulting vector.
+to ensure |Arr n (toDp . g)| is computed once, rather than once
+for each element of the resulting vector.
 
 For example, if
 \begin{code}
