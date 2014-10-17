@@ -47,8 +47,6 @@ In other words, the code is similar in structure to that for CDSL, except
 the type is simpler, quasi-quotes surround the body, and |(.<.)| in CDSL
 may be replaced by |(<)| in QDSL.
 
-An example of the use of |for| appears in Section~\ref{sec:qdsl-vec}.
-
 
 \subsection{Embedding maybe}
 

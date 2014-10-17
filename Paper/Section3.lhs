@@ -355,9 +355,6 @@ option d f o  =   option_R d f (lower o)
 These definitions are adequate to support the CDSL code presented
 in Section~\ref{sec:second-example}.
 
-\todo{After discussing the subformula property, a different solution
-to this problem becomes available.}
-
 
 \subsection{Embedding vector}
 

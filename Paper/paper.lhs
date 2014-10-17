@@ -235,7 +235,7 @@ Section~\ref{sec:evaluation} compares Feldspar CDSL and QDSL.
 Section~\ref{sec:related} summarises related work.
 Section~\ref{sec:conclusion} concludes.
 
-\todo{Explain termination of normaliser and fix}
+% \todo{Explain termination of normaliser and fix}
 
 \section{Overview}
 \label{sec:overview}
@@ -264,23 +264,25 @@ The transformer from |Qt| to |Dp| performs the following steps.
 \begin{itemize}
 \item It expands identifiers connected with the types |(,)|, |Maybe|
   and |Vec|.
-  \begin{itemize}
-  \item For |(,)|, identifiers |fst| and |snd|.
-  \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
-  \item For |Vec|, there are no relevant identifiers.
-  \end{itemize}
+%%    \begin{itemize}
+%%    \item For |(,)|, identifiers |fst| and |snd|.
+%%    \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
+%%    \item For |Vec|, there are no relevant identifiers.
+%%    \end{itemize}
 \item It normalises the term to ensure the subformula property.
   Normalisation includes the special-purpose rules for |Maybe| and |Vec| given in
   Section~\ref{sec:qdsl} and the general-purpose rules of Section~\ref{sec:subformula}.
 \item It traverses the term, converting |Qt| to |Dp|.
   It checks that only permitted primitives appear in |Qt|, and translates
   these to their corresponding representation in |Dp|. Permitted primitives include:
-  \begin{itemize}
-  \item |(==)| and |(<)|, treated as operations on integers.
-  \item |(+)|, |(*)|, and other operations on integer and float.
-  \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
-    |While|, |Arr|, |ArrLen|, and |ArrIx|.
-  \end{itemize}
+  |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
+  |while|, |arr|, |arrLen|, and |arrIx|.
+%%    \begin{itemize}
+%%    \item |(==)| and |(<)|, treated as operations on integers.
+%%    \item |(+)|, |(*)|, and other operations on integer and float.
+%%    \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
+%%      |While|, |Arr|, |ArrLen|, and |ArrIx|.
+%%    \end{itemize}
 \end{itemize}
 
 An unfortunate feature of typed quasiquotation in GHC is that the
