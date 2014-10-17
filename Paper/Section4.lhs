@@ -6,29 +6,25 @@ type Qt a = Q (TExp a)
 \end{code}
 %endif
 
-The CDSL technique is powerful. In a little over seven pages,
-we explained sufficiently how to combine deep and shallow
-embedding to produce a library that allows all the CDSL code
-in Section~\ref{sec:overview} to run.
-We now review what is required to achieve the same effect in
-QDSL. While the treatment of CDSL is pleasingly compact, the
-treatment of QDSL is even more compact.
+In seven pages, we explained how to combine deep and
+shallow embedding to produce a library that allows all CDSL code in
+Section~\ref{sec:overview} to run.  Now, in three pages, we will
+cover what is required to achieve the same effect in QDSL.
 
-For purposes of comparison, our CDSL and QDSL implementations both
-produce abstract syntax trees for target code represented as terms of
-type |Dp|. The postprocessor that converts |Dp| to C code is shared
+Our CDSL and QDSL implementations both represent target code as terms
+of type |Dp|. The postprocessor that converts |Dp| to C code is shared
 among both implementations.  Central to our implementation is a
-translator that converts the representation of a quoted term |Qt|
-into type |Dp|.  Prior to translation, terms of |Qt| are normalised
-to ensure the subformula property.
+translator that converts the representation of a quoted term |Qt| into
+type |Dp|.  Prior to translation, terms of |Qt| are normalised to
+ensure the subformula property.
 
 \subsection{While and for}
 
-For CDSL, one had a deep construct and a corresponding ``smart
-constructor'' exploiting class |Syntactic|.
+For CDSL, we had a deep construct and corresponding ``smart
+constructor''.
 \begin{spec}
 While  ::  (Dp a -> Dp Bool) -> (Dp a -> Dp a) -> Dp a -> Dp a
-while  ::  Syntactic a => (a -> Dp Bool) -> (a -> a) -> (a -> a)
+while  ::  Syn a => (a -> Dp Bool) -> (a -> a) -> (a -> a)
 \end{spec}
 For QDSL, we follow the same pattern, but it's even simpler:
 \begin{spec}
@@ -43,9 +39,9 @@ The definition of the |for| loop is given by:
 for  ::  Qt (Int -> a -> (Int -> a -> a) -> a)
 for  =   [|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1) b i x) (0, x_0)) ||]
 \end{code}
-In other words, the code is similar in structure to that for CDSL, except
+The code is similar in structure to that for CDSL, except
 the type is simpler, quasi-quotes surround the body, and |(.<.)| in CDSL
-may be replaced by |(<)| in QDSL.
+is replaced by |(<)| in QDSL.
 
 
 \subsection{Embedding maybe}

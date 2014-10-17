@@ -160,29 +160,26 @@ computing eight decades later.
 \begin{quotation}\flushright
 Perhaps we may express the essential properties of such a normal proof
 by saying: it is not roundabout.
-% No concepts enter into the proof other
-% than those contained in its final result, and their use was therefore
-% essential to the achievement of that result.
 --- Gerhard Gentzen
 \end{quotation}
 \vspace{2ex}
 
-The QDSL technique to building domain-specific languages was proposed
+The QDSL technique (though not the name) was first proposed
 by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
 They conjectured that the technique applies more widely, and here we
-test that conjecture by applying QDSL to Feldspar, an CDSL for signal
+test that conjecture by applying QDSL to Feldspar, a DSL for signal
 processing in Haskell that generates C \citep{FELDSPAR}. Our technique
 depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
-So far as we know, the full QDSL approach---which, crucially, includes
-normalisation of quoted terms---has only been applied here and by
-\citet{CheneyLW13}.  However, the rest of the QDSL approach---viewing
-domain-specific languages as quoted terms---is widely used in other
-systems, including Lisp macros, F\# and C\# LINQ \citep{fsharplinq,
-csharplinq}, and Scala Lightweight Modular Staging (LMS)
-\citep{scalalms}. In F\# LINQ quotation and anti-quotation are
-explicit, as here, while in C\# LINQ and Scala LMS, quotation and
-anti-quotation is controlled by type inference.
+One key aspect of the QDSL approach---normalisation
+of quoted terms---appears only in \citet{CheneyLW13} and here.
+However, the rest of the QDSL approach---viewing domain-specific
+languages as quoted terms---is widely used in other systems, including
+Lisp macros, F\# and C\# LINQ \citep{fsharplinq, csharplinq}, and
+Scala Lightweight Modular Staging (LMS) \citep{scalalms}. In F\# LINQ
+quotation and anti-quotation are explicit, as here, while in C\# LINQ
+and Scala LMS, quotation and anti-quotation is controlled by type
+inference.
 
 Feldspar exploits a combination of deep and shallow embedding, here
 dubbed CDSL.  The technique is clearly described by
@@ -193,8 +190,8 @@ applied in Obsidian \citep{svensson2011obsidian} and Nikola
 
 In a single landmark paper, \citet{gentzen35} introduced the two
 formulations of logic most widely used today, natural deduction and
-sequent calculus, in both intuitionistic and classical variants.  (The
-same paper introduced $\forall$ for universal quantification.)
+sequent calculus, in both intuitionistic and classical variants.
+% (The same paper introduced $\forall$ for universal quantification.)
 Gentzen's main technical result was to establish the \emph{subformula}
 property: any natural deduction proof may be put in a normal form
 where all formulas it contains are subformulas of either its
@@ -213,25 +210,26 @@ This paper makes the following contributions.
   \item It introduces the name CDSL (but not the notion).
   \item It provide concise description and comparison of CDSL and QDSL.
   \item It observes how the subformula property applies to DSLs.
-  \item It formalises a normalisation algorithm based on
-        call-by-need reduction that ensures the subformula
+  \item It formalises a normalisation algorithm that ensures the subformula
         property while not losing sharing, and proves its correctness.
+        The algorithm is suitable for targets with call-by-need or
+        call-by-value semantics.
   \item It describes an implementation of Feldspar as a QDSL
-  \item It compares Feldspar CDSL and QDSL on five benchmarks.
+  \item It empirically evaluates CDSL and QDSL implementations of Feldspar
+        on five benchmarks.
 \end{itemize}
 %%
-
-The paper is organised as follows.
+%
+%The paper is organised as follows.
 Section~\ref{sec:overview} introduces and compares the
-CDSL and QDSL approaches, in the context of a simple example.
-Section~\ref{sec:cdsl} reviews how the CDSL approach
+CDSL and QDSL approaches.
+Section~\ref{sec:cdsl} reviews how CDSL
 works in detail, in the context of Feldspar.
-Section~\ref{sec:qdsl} describes how the QDSL approach
-works in detail, reworking the examples of Section~\ref{sec:edsl}.
-Section~\ref{sec:subformula} describes a normaliser
-that ensures the subformula property while not losing sharing,
-which can be applied to both call-by-need and call-by-value semantics.
-Section~\ref{sec:evaluation} compares Feldspar CDSL and QDSL.
+Section~\ref{sec:qdsl} describes how QDSL
+works in detail, reworking the examples of Section~\ref{sec:cdsl}.
+Section~\ref{sec:subformula} describes our normalisation algorithm.
+Section~\ref{sec:evaluation} describes our implementation and
+empirical evaluation.
 Section~\ref{sec:related} summarises related work.
 Section~\ref{sec:conclusion} concludes.
 

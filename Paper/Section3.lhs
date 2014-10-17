@@ -311,7 +311,7 @@ to the type of |(>>=)|, which is not permitted.
 This need to add constraints often arises, and has
 been dubbed the constrained-monad problem
 \citet{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
-To solve it, we follow a trick due to \cite{PerssonAS11}.
+We solve it with a trick due to \cite{PerssonAS11}.
 
 We introduce a second continuation-passing style (cps) type |Opt|,
 defined in terms of the representation type |Opt_R|.  It is
@@ -351,8 +351,7 @@ none          =   lift none_R
 option        ::  (Undef a, Undef b) => b -> (a -> b) -> Opt a -> b
 option d f o  =   option_R d f (lower o)
 \end{code}
-
-These definitions are adequate to support the CDSL code presented
+These definitions support the CDSL code presented
 in Section~\ref{sec:second-example}.
 
 
@@ -377,9 +376,9 @@ instance Syn a => Syn (Vec a) where
 instance Functor Vec where
   fmap f (Vec n g)          =  Vec n (f . g)
 \end{code}
-The shallow embedding |Vec| resembles the constructor |Arr|, but whereas
-the body of |Arr| must return values of type |Dp a|, the body of a vector
-may return values of any type |a| that satisfies |Syn a|.
+The constructor |Vec| resembles the constructor |Arr|, but the former
+constructs a high-level representation of the array and the latter an
+actual array.
 It is straightforward to make |Vec| an instance of |Functor|.
 
 Here are some primitive operations on vectors
