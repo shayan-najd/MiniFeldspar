@@ -66,6 +66,14 @@
 \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
 
+\makeatletter
+\renewcommand\bibsection%
+{
+  \section{\refname
+    \@@mkboth{\MakeUppercase{\refname}}{\MakeUppercase{\refname}}}
+}
+\makeatother
+
 \begin{document}
 
 %if False
@@ -297,7 +305,7 @@ In this paper we have specifically built on the technique of combining
 deep and shallow embeddings \citep{SvenningssonA12} and
 contrasted it with our new QDSL technique. Languages which have used
 this technique include Feldspar \citep{FELDSPAR}, Obsidian
-\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra 
+\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra
 \citep{giorgidze2011embedding} and Meta-Repa \citep{ankner2013edsl}.
 
 The vector type used in this paper is one of several types which
@@ -320,7 +328,6 @@ relying on impurity.
 \paragraph*{Acknowledgements}
 This work was funded by EPSRC Programme Grant EP/K034413/1 and by the
 Swedish Foundation for Strategic Research, under grant RAWFP.
-
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
