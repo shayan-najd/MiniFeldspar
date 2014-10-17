@@ -272,14 +272,13 @@ Section~\ref{sec:conclusion} concludes.
 
 \input{formalism}
 
-\section{Empirical results}
+\section{Implementation and evaluation}
 \label{sec:empirical}
 
 \input{table}
 
 %\section{The design of Haskell DSL}
 %\label{sec:tool}
-
 
 
 \section{Related work}
@@ -292,14 +291,14 @@ history \citep{Bentley:1986:PPL:6424.315691}.
 In this paper we have, like many other DSL writers, used Haskell as it
 has proven to be very suitable for \emph{embedding} domain specific
 languages.  Examples include \citep{reid1999prototyping,
-hudak1997domain, bjesse1998lava, NIKOLA, svensson2011obsidian,
-FELDSPAR}.
+hudak1997domain, bjesse1998lava}.
 
 In this paper we have specifically built on the technique of combining
 deep and shallow embeddings \citep{SvenningssonA12} and
 contrasted it with our new QDSL technique. Languages which have used
 this technique include Feldspar \citep{FELDSPAR}, Obsidian
-\citep{svensson2011obsidian} and Meta-Repa \citep{ankner2013edsl}.
+\citep{svensson2011obsidian} Meta-Repa \citep{ankner2013edsl},
+and Nikola \citet{NIKOLA}.
 
 The loss of sharing when implementing embedded DSLs was identified by
 \citet{claessen1999observable}. They proposed to introduce a little

@@ -47,6 +47,7 @@
 \newcommand{\hole}{[\ ]}
 \newcommand{\intro}{\mathcal{I}}
 \newcommand{\elim}{\mathcal{E}}
+\newcommand{\nv}{P}
 
 %% Types
 \newcommand{\typvar}[1]{#1}
@@ -94,18 +95,16 @@
 \newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
 \newcommand{\norm}[1]{\txt{Norm}\,(#1)}
 
-\newcommand{\nv}{P}
-               %% {\txt{N\kern-3ptV}}
-               %% {\txt{N\kern-3ptW}}
 \newcommand{\na}{L^{\text{\textcrlambda}}}
 
 
 \newcommand{\figterm}{
 \begin{figure*}[t]
 \[\uncolored
-\begin{array}{lrcl}
+\begin{array}{l@{\quad}rcl}
 \text{Types} & A,B,C & ::=&
 % \typone             %   & \textrm{unit}      \\
+  \iota         \mid  %   & \textrm{base type} \\
   \typarr{A}{B} \mid  %   & \textrm{function}  \\
   \typprd{A}{B} \mid  %   & \textrm{product}   \\
   \typsum{A}{B}       %   & \textrm{sum}
@@ -256,7 +255,7 @@
 \newcommand{\fignf}{
 \begin{figure*}[t]
 \[\uncolored
-\begin{array}{lrcl}
+\begin{array}{l@{\quad}rcl}
 \text{Neutral Forms} & Q & ::= &
    \expapp{x}{W}   \mid
    \expapp{Q}{W}   \mid
@@ -403,89 +402,108 @@
 \fignf
 \fignorm
 
-\todo{Either remover unit type or add empty type}
+%\todo{Removed unit type. Either remove unit type or add empty type.}
 
-Metavariables $x$, $y$, and $z$ range over variables. Wherever
-variables are used, renaming of bound variables is allowed;
-we work up to renamings.
+This section introduces a set of rewriting rules that normalise terms
+to ensure the subformula property. Care is taken to ensure sharing is
+preserved. We present rules suitable for both call-by-need and
+call-by-value reduction.
 
-Types are \textbf{closed} terms defined by the abstract syntax in
-Figure~\ref{fig:typ}.
+We work with simply-typed lambda calculus, which is adequate for
+our purpose. The only polymorphism in our examples corresponds to
+instantiating variables (such as $\mathit{while}$) at different types,
+which is easily modelled by a family of variables.
 
-Metavariables $A$, $B$, and $C$ range over types. Types
-correspond to formulas in minimal propositional logic.
+Types, terms, and values are presented as in Figure~\ref{fig:term}.
+Let $A$, $B$, $C$ range over types, which include base types
+$\iota$, function, product, and sum types. 
+Let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range
+over variables. We follow the usual convention that terms are
+equivalent up to variable renaming. Write $\fv{N}$ for the set of
+free variables of $N$, and $\sbs{N}{x}{M}$ for
+substitution of $M$ for $x$ in $N$. Types correspond to
+propositions and terms to proofs in minimal propositional logic.
+Let $V$, $W$ range over values, and
+$\nv$ range over non-values (that is, any term that is not a value).
 
-Expressions are \textbf{open} terms defined by the abstract syntax in
-Figure~\ref{fig:exp}.
+Let $\Gamma$ range over environments, which are sets of pairs
+of variables with types $x:A$. Write $\Gamma \vdash M:A$ to indicate
+that term $M$ has type $A$ under environment $\Gamma$.
+Typing rules are as normal, and omitted to save space.
 
-Metavariables $L$, $M$, and $N$ range over expressions. Expressions
-correspond to proofs in minimal propositional logic.
+The normal forms of interest are presented in Figure~\ref{fig:nf}.
+We reuse $L,M,N$ to ranges over terms in normal form, and
+$V,W$ to range over value in normal form, and $Q$ to range of
+neutral forms.
 
-%Erasing the types, colored in red, yields the usual untyped
-%$\lambda$-calculus.
+Rewrite rules for normalisation are presented in Figure~\ref{fig:norm},
+and broken into four phases. Write $M \mapsto_i N$ to indicate
+that $M$ reduces to $N$ in phase $i$.  Let $F$ and $G$ range over two
+different forms of evaluation context used in Phases~2 and~3
+respectively. Write $\fv{F}$ for the set of free variables of $F$, and
+similarly for $G$.
 
-Capture-free substitution is defined as usual and it is denoted as
-$\sbs{N}{x}{M}$ for substitution of the expression $M$ for the variable
-$x$ in the expression $N$. Set of free variables in an expression is
-calculated as usual and it is denote as $\fv{N}$ for set of free
-variables in $N$. Moreover, the notation $count(x,N)$ is used to denote a
-metafunction returning the number of times the free variable $x$ is
-used syntactically in the expression $N$.
-% We follow Barendregt convension such that we assume variables in a
-% term are all distinct.
-Type %, normalisation, and evaluation
- environments are all maps from
-variable names. The metavariables $\Gamma$, and $\Delta$ range over
-type environments.  The inference rules are equivalent up to exchange,
-contraction, and weakening operations.
+Reductions are closed under transitivity and compatible closure.
+Overall normalisation consists of applying reductions of Phase~1 until
+no more apply, then Phase~2 similarly, and so on through Phase~4.
+Phase~1 introduces $\eta$-expansions; some of these may be eliminated by
+Phase~3 but that is not a problem. Phase~2 names subterms that are
+not values, similar to A normal form \citep{a-normal-form} or
+reductions (let.1) and (let.2) in Moggi's metalanguage for monads
+\citep{moggi}. Phase~3 performs standard beta and commuting reductions.
+Phase~4 ``garbage collects'' unused terms, similar to the
+call-by-need lambda calculus \citep{call-by-need}.
+Phase~4 may be omitted if the intended semantics of the target
+language is call-by-value rather than call-by-need.
 
-The typing judgement is defined by the inference rules in
-Figure~\ref{fig:typing}.
+%%  \todo{Following sentence to be deleted and replaced by suitable
+%%  formalism, e.g., definition of evaluation contexts $E$.}
+%%  One-step reduction relation for phase 1 has an
+%%  extra condition such that a redex should not be immediately at the
+%%  left-hand side of an application, i.e. $E \neq
+%%  {E}'[\expapp{\hole}{M}]$ for the compatible contexts $E$ and $E'$.
 
-Typing rules are syntax-directed and algorithmic.
-The correspondence to minimal logic is made evident by using colored
-fonts in typing rules; removing the red bits (i.e. expressions) from
-the typing rules yields the corresponding logical inference rules.\\
+%%  Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
+%%  reflexive transitive closure of the corresponding one-step reduction
+%%  relation $\reduce{}{i}{}$. The overall normalisation, denoted as
+%%  $\reducestar{}{}{}$, is composition of the reduction for all four
+%%  phases,
+%%  i.e. $\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
 
-Values are expressions that do not compute and they follow the abstract syntax in Figure~\ref{fig:val}.
+%%  Typed terms and reduction satisfy the usual progress and preservation property.
+%%  \todo{Fix! Progress requires adjustment for phases}
+%%  
+%%  \begin{proposition}[Progress and preservation]
+%%  \label{prop_preservation}
+%%  If $\Gamma \vdash M:A$ then either $M$ is a value, or there exists a
+%%  term $N$ such that $M \mapsto_i N$ and $\Gamma \vdash N:A$.
+%%  \end{proposition}
+%%  
+Our grammar characterises normal forms precisely.
 
-The metavariables $V$, and $W$ range over values. The metavariable
-$\nv$ range over expressions that are not values, also referred to as non-values.
-
-The normal forms that we are interested about, denoted as $N$, is defined in Figure~\ref{fig:nf}.
-
-Rewrite rules, denoted as $\rewrite{}{i}{}$ for phase $i$, are defined in
-Figure~\ref{fig:red}. The metavariables $F$, and $G$ denote
-capture-allowing evaluation frames. The metafunctions defined for
-expressions carry over to evaluation frames trivially.
-
-One-step reduction relation, denoted as $\reduce{}{i}{}$ for phase
-$i$, is compatible closure of the corresponding rewrite rule
-$\rewrite{}{i}{}$. One-step reduction relation for phase 1 has an
-extra condition such that a redex should not be immediately at the
-left-hand side of an application, i.e. $E \neq
-{E}'[\expapp{\hole}{M}]$ for the compatible contexts $E$ and $E'$.
-
-Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
-reflexive transitive closure of the corresponding one-step reduction
-relation $\reduce{}{i}{}$. The overall normalisation, denoted as
-$\reducestar{}{}{}$, is composition of the reduction for all four
-phases,
-i.e. $\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
-
-\subsection{Theorems and Proofs}
-
-\begin{proposition}[Normal Form Syntax]\ \\
+\begin{proposition}[Normal Form Syntax]
 \label{prop_normal}
-An expression $M$ is in normal form, if and only if, it matches the
-abstract syntax in Figure~\ref{fig:nf}, given by the entry $N$.
+An expression $N$ matches the syntax of normal forms in Figure~\ref{fig:nf}
+if and only if it is in normal form with regard to the reduction rules of
+Figure~\ref{fig:norm}.
+\end{proposition}
+
+The \emph{subformulas} of a type are the type itself and its components;
+for instance, the subformulas of $A \to B$ are $A \to B$ itself
+and the subformulas of $A$ and $B$. The \emph{proper subformulas} of a
+type are all its subformulas other than the type itself.
+Terms in normal form satisfy the subformula property.
+
+\begin{proposition}[Subformula property]
+\label{prop_subformula}
+If $\Gamma \vdash M:A$ and the normal form of $M$ is $N$
+by the reduction rules of Figure~\ref{fig:norm}, then
+$\Gamma \vdash N:A$ and every subterm of $N$ has a type
+that is either a subformula of $A$ or a subformula of a type in $\Gamma$.
+Further, every subterm other than $N$ itself and free variables of $N$
+has a type that is a proper subformula of $A$ or a proper subformula of a type in $\Gamma$.
 \end{proposition}
 
 
-\begin{proposition}[Preservation]\ \\
-\label{prop_preservation}
-Reduction preserves the type of the source expression:
 
- if $\env \vdash \typing{M}{A}$ and $\reducestar{M}{}{N}$, then
-$\env \vdash \typing{N}{A}$.
-\end{proposition}
+

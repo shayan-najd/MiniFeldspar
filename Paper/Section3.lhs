@@ -83,13 +83,13 @@ eval (Arr n g)        =   array (0,n') [ (i, eval (g (LitI i))) | i <- [0..n'] ]
                           where n' = eval n - 1
 eval (ArrLen a)       =   u-l+1  where (l,u) = bounds (eval a)
 eval (ArrIx a i)      =   eval a ! eval i
-eval (Value a)        =   a
+eval (Value v)        =   v
 
 evalFun               ::  (Dp a -> Dp b) -> a -> b
 evalFun f x           =   (eval . f . Value) <*> x
 
 evalWhile             ::  (a -> Bool) -> (a -> a) -> a -> a
-evalWhile c b i       =   if c i then evalWhile c b (b i) else i
+evalWhile c b i       =   if c i then evalWhile c b <*> b i else i
 \end{code}
 Function |eval| plays no role in generating C, but may be useful for testing.
 
