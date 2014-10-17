@@ -331,8 +331,6 @@ GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
 \section{Related work}
 \label{sec:related}
 
-\todo{NBE citations - Sam}
-
 Domain specific languages are becoming increasingly popular as a way
 to deal with software complexity. Yet, they have a long and rich
 history \citep{Bentley:1986:PPL:6424.315691}.
