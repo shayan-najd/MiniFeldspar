@@ -138,7 +138,7 @@ In QDSL, the body of the code changes more substantially. The typed
 quasi-quoting mechanism of Template Haskell is used to indicate which
 code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by \( [|| \cdots ||] \) and unquoting by \( \$(\cdots) \).
+indicated by \( [||||\cdots ||||] \) and unquoting by \( \$\$(\cdots) \).
 Here, by the mechanism of quoting, without any need for tricks,
 the syntax for code excecuted at both generation-time and run-time is
 identical for all constructs, including comparison and conditionals.

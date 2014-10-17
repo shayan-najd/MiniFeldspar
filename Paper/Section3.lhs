@@ -309,7 +309,7 @@ However, this adds type constraint |Undef b|
 to the type of |(>>=)|, which is not permitted.
 This need to add constraints often arises, and has
 been dubbed the constrained-monad problem
-\citet{hughes:restricted-monad,SculthorpeBGG13,SvenningssonS13}.
+\citet{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
 To solve it, we follow a trick due to \cite{PerssonAS11}.
 
 We introduce a second continuation-passing style (cps) type |Opt|,
