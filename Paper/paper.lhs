@@ -126,7 +126,6 @@ domain-specific languages into a given host language.
 \section{Introduction}
 
 \todo{NBE citations - Sam}
-\todo{push array citations - Josef}
 
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
@@ -207,7 +206,7 @@ Gentzen's main technical result was to establish the \emph{subformula}
 property: any natural deduction proof may be put in a normal form
 where all formulas it contains are subformulas of either its
 hypotheses or conclusion. \citet{CheneyLW13} applied this result to
-ensure queries with higher-order components always simplif to
+ensure queries with higher-order components always simplify to
 first-order queries, easily translated to SQL.  Similarly here, our
 QDSL source may refer to higher-order concepts or data types such as
 |Maybe|, while we ensure that these do not appear in the generated
@@ -297,8 +296,13 @@ In this paper we have specifically built on the technique of combining
 deep and shallow embeddings \citep{SvenningssonA12} and
 contrasted it with our new QDSL technique. Languages which have used
 this technique include Feldspar \citep{FELDSPAR}, Obsidian
-\citep{svensson2011obsidian} Meta-Repa \citep{ankner2013edsl},
-and Nikola \citet{NIKOLA}.
+\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra 
+\citep{giorgidze2011embedding} and Meta-Repa \citep{ankner2013edsl}.
+
+The vector type used in this paper is one of several types which
+enjoy fusion in the CDSL framework. Other examples include push
+arrays \citep{claessen2012expressive} and sequential arrays
+and streams as used in Feldspar \citep{feldspar-github}.
 
 The loss of sharing when implementing embedded DSLs was identified by
 \citet{claessen1999observable}. They proposed to introduce a little
