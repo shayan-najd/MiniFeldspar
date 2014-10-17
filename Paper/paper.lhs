@@ -49,7 +49,7 @@
 \usepackage{xspace}
 \usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
                       ,pdftitle={QDSLs: Why its nicer to be quoted normally}
-                      ,pagebackref=true,pdftex]{hyperref}
+                      ,pagebackref=true,pdftex,backref=none]{hyperref}
 \usepackage{tabularx}
 \usepackage{graphicx}
 \usepackage{url}
@@ -316,7 +316,7 @@ Windowing  & Average array in a sliding window \\
 \end{center}
 Table~\ref{thetable} lists the results. Columns \hct\ and \hrt\
 list compile-time and run-time in Haskell, and \cct\ and \crt\
-list compile-time and run-time in C. 
+list compile-time and run-time in C.
 Runs for CDSL are shown both with and without common subexpression elimination (CSE),
 which is supported by a simple form of observable sharing. QDSL does not require CSE,
 since the normalisation algorithm preserves sharing. One benchmark, FFT, exhausts
