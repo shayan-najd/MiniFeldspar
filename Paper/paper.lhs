@@ -1,6 +1,8 @@
 \documentclass{llncs}
 
 %include polycode.fmt
+%include forall.fmt
+
 %format == = "\longeq "
 %format || = "||"
 %format `div` = "\rmdiv"
@@ -12,7 +14,6 @@
 %format some_R
 %format none_R
 %format opt_R
-%format forall = "\forall"
 %format power_Dp
 %format power_Dp'
 %format power_Dp''
@@ -61,6 +62,14 @@
 \newcommand{\openq}{[||||\,}
 \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
+
+\makeatletter
+\renewcommand\bibsection%
+{
+  \section{\refname
+    \@@mkboth{\MakeUppercase{\refname}}{\MakeUppercase{\refname}}}
+}
+\makeatother
 
 \begin{document}
 
@@ -344,7 +353,7 @@ In this paper we have specifically built on the technique of combining
 deep and shallow embeddings \citep{SvenningssonA12} and
 contrasted it with our new QDSL technique. Languages which have used
 this technique include Feldspar \citep{FELDSPAR}, Obsidian
-\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra 
+\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra
 \citep{giorgidze2011embedding} and Meta-Repa \citep{ankner2013edsl}.
 
 The vector type used in this paper is one of several types which
@@ -353,11 +362,12 @@ arrays \citep{claessen2012expressive} and sequential arrays
 and streams as used in Feldspar \citep{feldspar-github}.
 
 The loss of sharing when implementing embedded DSLs was identified by
-\citet{claessen1999observable}. They proposed to introduce a little
+\citet{o1993generating} in the context of embedded circuit descriptions.
+\citet{claessen1999observable} proposed to introduce a little
 bit of impurity in Haskell, referred to as \emph{observable sharing}
-to be able to recover the loss of sharing. Later, \citet{gill2009type}
-proposed a somewhat safer way of recover sharing, though still relying
-on impurity.
+to be able to recover from the loss of sharing. Later, \citet{gill2009type}
+proposed a somewhat safer way of recover sharing, though still ultimately
+relying on impurity.
 
 \section{Conclusion}
 \label{sec:conclude}
