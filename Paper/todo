@@ -1,0 +1,30 @@
+To Do list.
+
+* Revise Abstract
+
+* Revise Sections 2, 3, 4
+   - Add FO
+   - Add mention of TH.Q and TH.Exp
+
+* Finish Section 5 (Subformula property)
+
+* Finish Section 6 (Implementation and Evaluation)
+
+* Finish Section 8 (Conclusion)
+
+  - Paragraph: apply subformula property to use Maybe in CDSL,
+      make toArr, fromArr explicit?
+  - Paragraph: design of general QDSL library for Haskell
+  - Paragraph: current typed quasi-quotes loose too much type information.
+      Need to recover this to support overloading.
+  - Rousing concluding line!
+
+* IF TIME PERMITS
+
+  - Repackage each subsection of Section 2 as three files. Get rid of subscripts.
+
+  - Replace CDSL by something better?
+
+  - Think of a new title for paper?
+
+  - There is a lot of prelude material. Review with Shayan.
