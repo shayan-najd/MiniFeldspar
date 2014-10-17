@@ -114,8 +114,6 @@ implementations of Feldspar. \end{abstract}
 
 \section{Introduction}
 
-\todo{NBE citations - Sam}
-
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
@@ -125,10 +123,10 @@ Which shall it be, CDSL or QDSL?
 
 Say you wish to use a domain-specific language embedded in a host
 language to generate code in a target language.  One widely-used
-technique combines deep and shallow embedding, which we refer to as
+technique combines deep and shallow embedding, which we dub
 CDSL (Combined Domain Specific Language).  Here we introduce a second
 technique based on quotation and normalisation of quoted terms, which
-we refer to as QDSL (Quoted Domain Specific Language).
+dub QDSL (Quoted Domain Specific Language).
 
 CDSL is great in part because it steals the type system of its host
 language. Arguably, QDSL is greater because it steals the type system,
@@ -171,21 +169,20 @@ depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
 So far as we know, the full QDSL approach---which, crucially, includes
 normalisation of quoted terms---has only been applied here and by
-\citet{CheneyLW13}.  However, the other part of the QDSL
-approach---viewing domain-specific languages as quoted terms---is
-widely used in other systems, including F\# LINQ \citep{fsharplinq},
-C\# LINQ \citep{csharplinq}, and Scala Lightweight Modular Staging
-(LMS) \citep{scalalms}. In F\# LINQ quotation and anti-quotation are
+\citet{CheneyLW13}.  However, the rest of the QDSL approach---viewing
+domain-specific languages as quoted terms---is widely used in other
+systems, including Lisp macros, F\# and C\# LINQ \citep{fsharplinq,
+csharplinq}, and Scala Lightweight Modular Staging (LMS)
+\citep{scalalms}. In F\# LINQ quotation and anti-quotation are
 explicit, as here, while in C\# LINQ and Scala LMS, quotation and
 anti-quotation is controlled by type inference.
 
-Feldspar exploits a combination of deep and shallow embedding,
-a technique which we here refer to as simply CDSL. (In other contexts,
-CDSL means any embedded domain-specific language, and includes
-all techniques covered here.) The technique is clearly described
-by \citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
+Feldspar exploits a combination of deep and shallow embedding, here
+dubbed CDSL.  The technique is clearly described by
+\citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
 and \citet{SvenningssonS13}. Essentially the same technique is also
-applied in Obsidian \citep{svensson2011obsidian} and Nikola \citep{NIKOLA}.
+applied in Obsidian \citep{svensson2011obsidian} and Nikola
+\citep{NIKOLA}.
 
 In a single landmark paper, \citet{gentzen35} introduced the two
 formulations of logic most widely used today, natural deduction and
@@ -199,46 +196,39 @@ ensure queries with higher-order components always simplify to
 first-order queries, easily translated to SQL.  Similarly here, our
 QDSL source may refer to higher-order concepts or data types such as
 |Maybe|, while we ensure that these do not appear in the generated
-code.  The idea is not limited to QDSL, as
-Section~\ref{sec:edsl-maybe} applies the same idea to CDSL.
+code.  The idea is not limited to QDSL, and the conclusion sketches
+how to apply the same idea to CDSL.
 
 %%
-The paper makes the following contributions.
+This paper makes the following contributions.
 \begin{itemize}
-  \item introduce notion of QDSL
-  \item introduce term CDSL (but not the concept)
-  \item compare QDSL with CDSL
-  \item observe that subformula property has general application to QDSLs and CDSLs
-  \item formalisation of normaliser
-  \item implementation of Feldspar as a QDSL
-  \item evaluation of Feldspar CDSL and Feldspar QDSL
+  \item It introduces the name and the notion of QDSL.
+  \item It introduces the name CDSL (but not the notion).
+  \item It provide concise description and comparison of CDSL and QDSL.
+  \item It observes how the subformula property applies to DSLs.
+  \item It formalises a normalisation algorithm based on
+        call-by-need reduction that ensures the subformula
+        property while not losing sharing, and proves its correctness.
+  \item It describes an implementation of Feldspar as a QDSL
+  \item It compares Feldspar CDSL and QDSL on five benchmarks.
 \end{itemize}
 %%
 
-The paper makes the following contributions.
-\begin{itemize}
-\item Section~\ref{sec:overview} introduces and compares the
+The paper is organised as follows.
+Section~\ref{sec:overview} introduces and compares the
 CDSL and QDSL approaches, in the context of a simple example.
-
-\item Section~\ref{sec:edsl} reviews how the CDSL approach
+Section~\ref{sec:edsl} reviews how the CDSL approach
 works in detail, in the context of Feldspar.
-
-\item Section~\ref{sec:qdsl} describes how the QDSL approach
+Section~\ref{sec:qdsl} describes how the QDSL approach
 works in detail, reworking the examples of Section~\ref{sec:edsl}.
-
-\item Section~\ref{sec:subformula} describes a normaliser
+Section~\ref{sec:subformula} describes a normaliser
 that ensures the subformula property while not losing sharing,
 which can be applied to both call-by-need and call-by-value semantics.
-
-\todo{Clarify what we really do about sharing}
-
-\item Section~\ref{sec:empirical} presents empirical results for
-Feldspar programs written and executed in both styles, showing CDSL
-and QDSL achieve comparable results.
-
-\end{itemize}
-Section~\ref{sec:related} summarises related work, and
+Section~\ref{sec:evaluation} compares Feldspar CDSL and QDSL.
+Section~\ref{sec:related} summarises related work.
 Section~\ref{sec:conclusion} concludes.
+
+\todo{Explain termination of normaliser and fix}
 
 \section{Overview}
 \label{sec:overview}
@@ -340,6 +330,8 @@ GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
 \section{Related work}
 \label{sec:related}
 
+\todo{NBE citations - Sam}
+
 Domain specific languages are becoming increasingly popular as a way
 to deal with software complexity. Yet, they have a long and rich
 history \citep{Bentley:1986:PPL:6424.315691}.
@@ -370,7 +362,7 @@ proposed a somewhat safer way of recover sharing, though still ultimately
 relying on impurity.
 
 \section{Conclusion}
-\label{sec:conclude}
+\label{sec:conclusion}
 
 We have compared CDSLs and QDSLs, arguing that QDSLs offer competing
 expressiveness and efficiency. CDSLs often (but not always) mimic the
