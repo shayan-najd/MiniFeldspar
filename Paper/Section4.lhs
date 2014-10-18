@@ -11,12 +11,11 @@ shallow embedding to produce a library that allows all CDSL code in
 Section~\ref{sec:overview} to run.  Now, in three pages, we will
 cover what is required to achieve the same effect in QDSL.
 
-Our CDSL and QDSL implementations both represent target code as terms
+To aid comparison, our CDSL and QDSL implementations both represent
+target code as terms of type |Dp|. Terms of |Qt| are normalised to
+ensure the subformula property and then translated to equivalent terms
 of type |Dp|. The postprocessor that converts |Dp| to C code is shared
-among both implementations.  Central to our implementation is a
-translator that converts the representation of a quoted term |Qt| into
-type |Dp|.  Prior to translation, terms of |Qt| are normalised to
-ensure the subformula property.
+among both implementations.
 
 \subsection{While and for}
 
