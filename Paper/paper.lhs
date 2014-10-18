@@ -415,7 +415,7 @@ normalisation and the subformula propety, we may help the concept to
 flower further for many more years to come.
 
 \paragraph*{Acknowledgement} This work was funded by EPSRC Grant
-EP/K034413/1.
+EP/K034413/1 and a Google European Doctoral Fellowship.
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
