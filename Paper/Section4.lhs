@@ -6,7 +6,7 @@ type Qt a = Q (TExp a)
 \end{code}
 %endif
 
-In under eight pages, we explained how to combine deep and
+In eight pages, we explained how to combine deep and
 shallow embedding to produce a library that allows all CDSL code in
 Section~\ref{sec:overview} to run.  Now, in three pages, we will
 cover what is required to achieve the same effect in QDSL.
