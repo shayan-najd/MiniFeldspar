@@ -119,7 +119,7 @@ Our representation of a run-time |Bool| will have type |Dp Bool| in
 both the deep and shallow embeddings, and similarly for |Int| and
 |Float|.
 
-We do not code the target language using its constructors
+We do not code the target language using its constructs
 directly. Instead, for each constructor we define a corresponding
 ``smart constructor'' using class |Syn|.
 \begin{code}
