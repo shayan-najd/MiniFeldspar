@@ -169,7 +169,7 @@ by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
 They conjectured that the technique applies more widely, and here we
 test that conjecture by applying QDSL to Feldspar, a DSL for signal
 processing in Haskell that generates C \citep{FELDSPAR}. Our technique
-depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
+depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted,metahaskell}.
 
 One key aspect of QDSL---normalisation
 of quoted terms---appears only in \citet{CheneyLW13} and here.
@@ -212,7 +212,7 @@ We make the following contributions.
   \item We highlight the benefits of normalisation and the
         subformula property.
   \item We introduce a collection of reduction rules for
-        normalising terms that enforces the subformula property 
+        normalising terms that enforces the subformula property
         while ensuring sharing is preserved. The rules adapt to
         both call-by-need and call-by-value.
   \item We empirically evaluate CDSL and QDSL implementations of Feldspar
@@ -286,11 +286,11 @@ The transformer from |Qt| to |Dp| performs the following steps.
 An unfortunate feature of typed quasiquotation in GHC is that the
 implementation discards all type information when creating the
 representation of a term.  Type |Qt a| is equivalent to
-|TH.Q (TH.TExp a)|, where |TH| denotes the library for Typed Haskell,
-|TH.Q| is the quotation monad of Typed Haskell (used to look up
+|TH.Q (TH.TExp a)|, where |TH| denotes the library for Template Haskell,
+|TH.Q| is the quotation monad of Template Haskell (used to look up
 identifiers and generate fresh names), and |TH.TExp a| is the parse
 tree for an expression that returns a value of type |a|. In the
-latter, |a| is a ghost variable; type |TH.TExp a| is a synonym for
+latter, |a| is a phantom variable; type |TH.TExp a| is just a wrapper for
 |TH.Exp|, the (untyped) parse tree of an expression in Template
 Haskell. Hence, the translator from |Qt a| to |Dp a| is forced to
 re-infer all the type information for the subterms of the term of type
@@ -415,7 +415,9 @@ normalisation and the subformula propety, we may help the concept to
 flower further for many more years to come.
 
 \paragraph*{Acknowledgement} This work was funded by EPSRC Grant
-EP/K034413/1 and a Google European Doctoral Fellowship.
+EP/K034413/1. Shayan Najd is a recipient of the Google Europe
+Fellowship in Programming Technology, and this research is supported
+in part by this Google Fellowship. %% <-- Google's requested format
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
