@@ -83,10 +83,10 @@ of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
 In CDSL, the body of the code remains almost---but not
-quite!---identical to the original.  Clever encoding tricks, 
+quite!---identical to the original.  Clever encoding tricks,
 explained later, permit declarations, function calls, arithmetic
 operations, and numbers to appear the same whether they are to be
-executed at generation-time or run-time.  However, 
+executed at generation-time or run-time.  However,
 as explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
@@ -355,7 +355,7 @@ and provided for use in quoted terms by the QDSL library.
 
 Evaluating |Qt (powerQ'' (-6))| yields a term of similar complexity
 to the term yielded by the CDSL. Normalisation by the rules discussed
-in Section~\ref{sec:normalise} reduces the term to the same form
+in Section~\ref{sec:subformula} reduces the term to the same form
 as before, which in turn generates the same C as before.
 
 \subsubsection{Comparison}
