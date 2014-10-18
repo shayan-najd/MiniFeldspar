@@ -318,7 +318,10 @@ Phase 1 (let-insertion)
 & \ \rewrite{}{1}{}\ \
 & \expshr{x}{\nv}{F[x]}, \quad x \text{ fresh} \\
 \end{array}
-\]%
+\]
+
+\vspace{2ex}
+
 Phase 2 (symbolic evaluation)
 \[
 G \mathbin{::=}
@@ -378,6 +381,8 @@ G \mathbin{::=}
 \end{array}
 \]
 
+\vspace{2ex}
+
 Phase 3 (garbage collection)
 \[
 \begin{array}[t]{@{}llll@{\quad}l@{}}
@@ -413,8 +418,10 @@ Types, terms, and values are presented in Figure~\ref{fig:term}. We
 let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
-variables, and $c$ range over primitive constants, which must be fully
-applied. We follow the usual convention that terms are equivalent up
+variables.  We let $c$ range over primitive constants, which are
+fully applied (applied to a sequence of terms of length equal to
+the constant's arity).
+We follow the usual convention that terms are equivalent up
 to renaming of bound variables. We write $\fv{N}$ for the set of free
 variables of $N$, and $\sbs{N}{x}{M}$ for substitution of $M$ for $x$
 in $N$.

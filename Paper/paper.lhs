@@ -373,9 +373,8 @@ We have compared CDSLs and QDSLs, arguing that QDSLs offer competing
 expressiveness and efficiency. CDSLs often (but not always) mimic the
 syntax of the host language, and often (but not always) perform
 normalisation in the host languages, while QDSLs (always) steal the
-syntax of the host language, and (always) guarantee adequate
-normalisation to ensure the subformula property, at the cost of
-requiring a normaliser, one per host language.
+syntax of the host language, and (always) ensure the subformula property,
+at the cost of requiring a normaliser, one per host language.
 
 The subformula property may have applications in DSLs other that
 QDSLs. For instance, after Section~\ref{sec:option} of this paper was
@@ -406,18 +405,19 @@ and lift most of its restrictions. For instance,
 the current prototype is restricted to the |Maybe| monad, while the
 envisioned tool will work with any monad.
 
-Moliere's Monsieur Jordan was surprised to discover he had been
-speaking prose his whole life. Similarly, many of us used QDSLs for
+Moliere's Monsieur Jordan was bemused to discover he had been
+speaking prose his whole life. Similarly, many of us have used QDSLs for
 years, if not by that name. DSL via quotation is the heart of Lisp
 macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
 by naming the concept and drawing attention to the central benefits of
 normalisation and the subformula propety, we may help the concept to
-flower further for many more years to come.
+flower further for decades to come.
 
 \paragraph*{Acknowledgement} This work was funded by EPSRC Grant
 EP/K034413/1. Shayan Najd is a recipient of the Google Europe
 Fellowship in Programming Technology, and this research is supported
 in part by this Google Fellowship. %% <-- Google's requested format
+Josef Svenningsson is a SICSA Visiting Fellow.
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
