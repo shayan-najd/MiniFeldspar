@@ -398,16 +398,12 @@ Phase 3 (garbage collection)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\figterm
-\fignf
-\fignorm
-
 %\todo{Removed unit type. Either remove unit type or add empty type.}
 
 This section introduces a collection of reduction rules for
 normalising terms that enforces the subformula property 
-while ensuring sharing is preserved. We present rules
-suitable for both call-by-need and call-by-value reduction.
+while ensuring sharing is preserved. The rules adapt to
+both call-by-need and call-by-value.
 
 We work with simple types. The only polymorphism in our examples
 corresponds to instantiating constants (such as $\mathit{while}$) at
@@ -433,22 +429,25 @@ We let $V$, $W$ range over values, and $\nv$ range over non-values
 We let $\Gamma$ range over environments, which are sets of pairs of
 variables with types $x:A$. We write $\Gamma \vdash M:A$ to indicate
 that term $M$ has type $A$ under environment $\Gamma$. The typing
-rules are standard, and omitted to save space.
+rules are standard.
 
 The grammar of normal forms is given in Figure~\ref{fig:nf}. We re-use
 $L,M,N$ to ranges over terms in normal form, $V,W$ to range over
-values in normal form, and $Q$ to range of neutral forms.
+values in normal form, and $Q$ to range over neutral forms.
 
 Reduction rules for normalisation are presented in
-Figure~\ref{fig:norm}, and broken into four phases. We write $M
+Figure~\ref{fig:norm}, broken into three phases. We write $M
 \mapsto_i N$ to indicate that $M$ reduces to $N$ in phase $i$. We let
 $F$ and $G$ range over two different forms of evaluation frame used in
 Phases~2 and~3 respectively. We write $\fv{F}$ for the set of free
 variables of $F$, and similarly for $G$.
-%
 The reduction relation is closed under compatible closure.
 
-The overall normalisation procedure consists of exhaustively applying
+\figterm
+\fignf
+\fignorm
+
+The normalisation procedure consists of exhaustively applying
 the reductions of Phase~1 until no more apply, then similarly for
 Phase~2, and finally for Phase~3. Phase~1 performs let-insertion,
 naming subterms that are not values.
@@ -462,32 +461,7 @@ the call-by-need lambda calculus \citep{call-by-need}. Phase~3 may be
 omitted if the intended semantics of the target language is
 call-by-value rather than call-by-need.
 
-%%  \todo{Following sentence to be deleted and replaced by suitable
-%%  formalism, e.g., definition of evaluation contexts $E$.}
-%%  One-step reduction relation for phase 1 has an
-%%  extra condition such that a redex should not be immediately at the
-%%  left-hand side of an application, i.e. $E \neq
-%%  {E}'[\expapp{\hole}{M}]$ for the compatible contexts $E$ and $E'$.
-
-%%  Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
-%%  reflexive transitive closure of the corresponding one-step reduction
-%%  relation $\reduce{}{i}{}$. The overall normalisation, denoted as
-%%  $\reducestar{}{}{}$, is composition of the reduction for all four
-%%  phases,
-%%  i.e. $\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
-
-%%  Typed terms and reduction satisfy the usual progress and preservation property.
-%%  \todo{Fix! Progress requires adjustment for phases}
-%%  
-%%  \begin{proposition}[Progress and preservation]
-%%  \label{prop_preservation}
-%%  If $\Gamma \vdash M:A$ then either $M$ is a value, or there exists a
-%%  term $N$ such that $M \mapsto_i N$ and $\Gamma \vdash N:A$.
-%%  \end{proposition}
-%%  
-The grammar of Figure~\ref{fig:nf} characterises normal forms
-precisely.
-
+Every term has a normal form.
 \begin{proposition}[Strong normalisation]
 Each of the reduction relations $\rewrite{}{i}{}$ is strongly
 normalising: all $\rewrite{}{i}{}$ reduction sequences on well-typed
@@ -496,8 +470,11 @@ terms are finite.
 The only non-trivial proof is for $\rewrite{}{2}{}$, which can be
 proved via a standard reducibility argument
 (e.g. \cite{Lindley07}). If the target language includes general
-recursion, then we may include a fixed point constant.
+recursion, normalisation should treat fixpoint as an uninterpreted
+constant (or free variable).
 
+The grammar of Figure~\ref{fig:nf} characterises normal forms
+precisely.
 \begin{proposition}[Normal Form Syntax]
 \label{prop_normal}
 An expression $N$ matches the syntax of normal forms in

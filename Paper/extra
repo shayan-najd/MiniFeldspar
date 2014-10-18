@@ -308,3 +308,30 @@ We describe below how a general purpose tool could be defined
 to perform similar operations for any QDSL.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+The Subformula Property
+
+%%  \todo{Following sentence to be deleted and replaced by suitable
+%%  formalism, e.g., definition of evaluation contexts $E$.}
+%%  One-step reduction relation for phase 1 has an
+%%  extra condition such that a redex should not be immediately at the
+%%  left-hand side of an application, i.e. $E \neq
+%%  {E}'[\expapp{\hole}{M}]$ for the compatible contexts $E$ and $E'$.
+
+%%  Reduction relation, denoted as $\reducestar{}{i}{}$ for phase $i$, is
+%%  reflexive transitive closure of the corresponding one-step reduction
+%%  relation $\reduce{}{i}{}$. The overall normalisation, denoted as
+%%  $\reducestar{}{}{}$, is composition of the reduction for all four
+%%  phases,
+%%  i.e. $\reducestar{}{4}{}\circ\reducestar{}{3}{}\circ\reducestar{}{2}{}\circ\reducestar{}{1}{}$.
+
+%%  Typed terms and reduction satisfy the usual progress and preservation property.
+%%  \todo{Fix! Progress requires adjustment for phases}
+%%  
+%%  \begin{proposition}[Progress and preservation]
+%%  \label{prop_preservation}
+%%  If $\Gamma \vdash M:A$ then either $M$ is a value, or there exists a
+%%  term $N$ such that $M \mapsto_i N$ and $\Gamma \vdash N:A$.
+%%  \end{proposition}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

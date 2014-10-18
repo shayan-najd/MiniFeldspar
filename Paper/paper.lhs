@@ -171,14 +171,14 @@ test that conjecture by applying QDSL to Feldspar, a DSL for signal
 processing in Haskell that generates C \citep{FELDSPAR}. Our technique
 depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted}.
 
-One key aspect of the QDSL approach---normalisation
+One key aspect of QDSL---normalisation
 of quoted terms---appears only in \citet{CheneyLW13} and here.
-However, the rest of the QDSL approach---viewing domain-specific
+However, another aspect of QDSL---viewing domain-specific
 languages as quoted terms---is widely used in other systems, including
 Lisp macros, F\# and C\# LINQ \citep{fsharplinq, csharplinq}, and
 Scala Lightweight Modular Staging (LMS) \citep{scalalms}. In F\# LINQ
 quotation and anti-quotation are explicit, as here, while in C\# LINQ
-and Scala LMS, quotation and anti-quotation is controlled by type
+and Scala LMS quotation and anti-quotation are controlled by type
 inference.
 
 Feldspar exploits a combination of deep and shallow embedding, here
@@ -188,13 +188,14 @@ and \citet{SvenningssonS13}. Essentially the same technique is also
 applied in Obsidian \citep{svensson2011obsidian} and Nikola
 \citep{NIKOLA}.
 
-In a single landmark paper, \citet{gentzen35} introduced the two
+In a landmark paper, \citet{gentzen35} introduced the two
 formulations of logic most widely used today, natural deduction and
-sequent calculus, in both intuitionistic and classical variants.
+sequent calculus.
+% in both intuitionistic and classical variants.
 % (The same paper introduced $\forall$ for universal quantification.)
 Gentzen's main technical result was to establish the \emph{subformula}
-property: any natural deduction proof may be put in a normal form
-where all formulas it contains are subformulas of either its
+property: any proof may be put in a normal form
+where all formulas it contains are subformulas of its
 hypotheses or conclusion. \citet{CheneyLW13} applied this result to
 ensure queries with higher-order components always simplify to
 first-order queries, easily translated to SQL.  Similarly here, our
@@ -204,18 +205,17 @@ code.  The idea is not limited to QDSL, and the conclusion sketches
 how to apply the same idea to CDSL.
 
 %%
-This paper makes the following contributions.
+We make the following contributions.
 \begin{itemize}
-  \item It introduces the name and the notion of QDSL.
-  \item It introduces the name CDSL (but not the notion).
-  \item It provide concise description and comparison of CDSL and QDSL.
-  \item It observes how the subformula property applies to DSLs.
-  \item It formalises a normalisation algorithm that ensures the subformula
-        property while not losing sharing, and proves its correctness.
-        The algorithm is suitable for targets with call-by-need or
-        call-by-value semantics.
-  \item It describes an implementation of Feldspar as a QDSL
-  \item It empirically evaluates CDSL and QDSL implementations of Feldspar
+  \item We introduces the names CDSL and QDSL, and provide a
+        concise description and comparison of the two techniques.
+  \item We highlight the benefits of normalisation and the
+        subformula property.
+  \item We introduce a collection of reduction rules for
+        normalising terms that enforces the subformula property 
+        while ensuring sharing is preserved. The rules adapt to
+        both call-by-need and call-by-value.
+  \item We empirically evaluate CDSL and QDSL implementations of Feldspar
         on five benchmarks.
 \end{itemize}
 %%
