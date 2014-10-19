@@ -93,7 +93,7 @@
 %% \titlebanner{banner above paper title}        % These are ignored unless
 %% \preprintfooter{short description of paper}   % 'preprint' option specified.
 
-\title{QDSLs: Why its nicer to be quoted normally}
+\title{QDSLs: Why it's nicer to be quoted normally}
 
 \author{Shayan Najd\inst{1}
   \and Sam Lindley\inst{1}
