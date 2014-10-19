@@ -1,0 +1,510 @@
+%\newcommand{\incolor}[1]{#1}    % Use to typeset in color
+\newcommand{\incolor}[1]{}     % Use to typeset in black and white
+
+% color framework
+
+% boldsymbol is evil!
+\renewcommand{\boldsymbol}[1]{#1}
+
+\newcommand{\judgecolor}{}
+\newcommand{\typecolor}{}
+\newcommand{\termcolor}{}
+\newcommand{\Typecolor}{}
+\newcommand{\Termcolor}{}
+
+\newcommand{\uncolored}{
+  \incolor{
+    \renewcommand{\judgecolor}{}
+    \renewcommand{\typecolor}{}
+    \renewcommand{\termcolor}{}
+    \renewcommand{\Typecolor}{}
+    \renewcommand{\Termcolor}{}
+  }
+}
+
+\newcommand{\colored}{
+  \incolor{
+    \renewcommand{\judgecolor}{\color{black}}
+    \renewcommand{\typecolor}{\color{blue}}
+    \renewcommand{\termcolor}{\color{red}}
+    \renewcommand{\Typecolor}{\color{cyan}}
+    \renewcommand{\Termcolor}{\color{magenta}}
+  }
+}
+
+\newcommand{\tp}[1]{{\typecolor #1}}
+\newcommand{\tm}[1]{{\termcolor #1}}
+
+\newcommand{\reducedstrut}{\vrule width 0pt height .9\ht\strutbox depth .9\dp\strutbox\relax}
+\definecolor{lightgray}{gray}{0.7}
+\newcommand{\highlight}[1]{%
+  \begingroup
+  \setlength{\fboxsep}{0pt}%
+  \colorbox{lightgray}{\reducedstrut\ensuremath{#1}\/}%
+  \endgroup
+}
+
+\newcommand{\etal}{\emph{et~al.}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+\newcommand{\Inference}[3]{\infer=[\mathsf{#2}]{#3}{#1}}
+\newcommand{\hole}{[\ ]}
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
+\newcommand{\nv}{P}
+
+%% Types
+\newcommand{\typvar}[1]{#1}
+\newcommand{\typzro}{\mathbf{0}}
+\newcommand{\typone}{\mathbf{1}}
+\newcommand{\typarr}[2]{#1\boldsymbol{\rightarrow}#2}
+\newcommand{\typprd}[2]{#1\boldsymbol{\times}#2}
+\newcommand{\typsum}[2]{#1\boldsymbol{+}#2}
+\newcommand{\typrec}[2]{\boldsymbol{\mu}#1\boldsymbol{.}#2}
+
+%% Expressions
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expunt}{\boldsymbol{()}}
+\newcommand{\expabs}[3]{\boldsymbol{\lambda}#1\boldsymbol{.}#3}
+\newcommand{\expapp}[2]{#1\ #2}
+\newcommand{\expshr}[3]{\mathbf{let}\ #1\boldsymbol{=}#2\ \mathbf{in}\ #3}
+\newcommand{\expshrind}[3]{\begin{array}[t]{@{}l@{}}\mathbf{let}\ #1\boldsymbol{=}#2\\ \mathbf{in}\ \ #3\end{array}}
+\newcommand{\expprd}[2]{\boldsymbol{(}#1 \boldsymbol{,} #2\boldsymbol{)}}
+\newcommand{\expfst}[1]{\mathbf{fst}\ #1}
+\newcommand{\expsnd}[1]{\mathbf{snd}\ #1}
+\newcommand{\explft}[2]{\mathbf{inl}\ #1}
+\newcommand{\exprgt}[2]{\mathbf{inr}\ #2}
+\newcommand{\expcas}[5]{\mathbf{case}\ #1\ \mathbf{of}\ \boldsymbol{\{}\mathbf{inl}\ #2.#3 \boldsymbol{;} \mathbf{inr}\ #4.#5\boldsymbol{\}}}
+
+%% Environment
+\newcommand{\envemp}{\tp{\boldsymbol{\emptyset}}}
+\newcommand{\envcon}[2]{\tp{#1,}\ #2}
+\newcommand{\env}{\tp{\Gamma}}
+\newcommand{\typing}[2]{\tm{#1:\ }\tp{#2}}
+
+\newcommand{\typenvcon}[2]{\tp{\Gamma,}\ \typing{#1}{#2}}
+\newcommand{\sbs}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{\txt{FV}(#1)}
+\newcommand{\fresh}[1]{#1 \txt{ fresh}}
+\newcommand{\txt}[1]{\text{\textit{#1}}}
+\newcommand{\rewrite}[3]{#1 \mapsto_{#2} #3}
+\newcommand{\reduce}[3]{#1 \rightarrow_{#2} #3}
+\newcommand{\reducestar}[3]{#1 \twoheadrightarrow_{#2} #3}
+\newcommand{\valuep}[1]{\txt{Value}\,(#1)}
+\newcommand{\cnd}[1]{#1}
+%\newcommand{\cnd}[1]{\begin{array}[t]{@{}l@{}}\txt{if}\ #1\end{array}}
+\newcommand{\subformulas}[1]{\txt{Subformulas}\,(#1)}
+\newcommand{\psubformulas}[1]{\txt{ProperSubformulas}\,(#1)}
+\newcommand{\subterm}[1]{\txt{Subterm}\,(#1)}
+\newcommand{\norm}[1]{\txt{Norm}\,(#1)}
+
+\newcommand{\na}{L^{\text{\textcrlambda}}}
+
+
+\newcommand{\figterm}{
+\begin{figure*}[t]
+\[\uncolored
+\begin{array}{l@{\quad}rcl}
+\text{Types} & A,B,C & ::=&
+% \typone             %   & \textrm{unit}      \\
+  \iota         \mid  %   & \textrm{base type} \\
+  \typarr{A}{B} \mid  %   & \textrm{function}  \\
+  \typprd{A}{B} \mid  %   & \textrm{product}   \\
+  \typsum{A}{B}       %   & \textrm{sum}
+\\[1ex]
+\text{Terms} & L,M,N & ::= &
+% \expunt                \mid   % \textrm{unit}              \\
+  \expvar{x}             \mid   % \textrm{variable}          \\
+  c~\overline{M}         \mid   % constants
+  \expabs{x}{A}{N}       \mid   % \textrm{abstraction}       \\
+  \expapp{L}{M}          \mid   % \textrm{application}       \\
+  \expshr{x}{M}{N}       \mid   % \textrm{sharing}           \\
+  \expprd{M}{N}          \mid   % \textrm{product}           \\
+  \expfst{L}             \mid   % \textrm{projection-first}  \\
+  \expsnd{L}             \\&&&  % \textrm{projection-second} \\
+  \explft{M}{\tm{B}}     \mid   % \textrm{injection-left}    \\
+  \exprgt{\tm{A}}{N}     \mid   % \textrm{injection-right}   \\
+  \expcas{L}{x}{M}{y}{N}        % \textrm{case}
+\\[1ex]
+\text{Values} & V,W & ::= &
+% \expunt\               \mid
+  \expvar{x}             \mid
+  \expabs{x}{A}{N}       \mid
+  \expprd{V}{W}          \mid
+  \explft{V}{B}          \mid
+  \exprgt{A}{W}
+\end{array}
+\]
+\caption{Types, Terms, and Values}
+\label{fig:term}
+\end{figure*}
+}
+
+\newcommand{\figtyping}{
+\begin{figure*}[h]
+\[\colored
+\begin{array}{@{}ll@{}}
+\fbox{$\env \vdash \typing{M}{A}$}
+\\~\\
+\inference
+{\typing{x}{A} \in \env}
+{\mathbf{Ax}}
+{
+  \env \vdash \typing{x}{A}
+}
+&
+\inference
+{}
+{\typone}
+{
+   \env \vdash \typing{\expunt}{\typone}
+}
+\\~\\
+\inference
+{
+  \typenvcon{x}{A} \vdash \typing{N}{B}
+}
+{{\to}\intro}
+{
+  \env \vdash \typing{\expabs{x}{A}{N}}{\typarr{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typarr{A}{B}}
+& \env \vdash \typing{M}{A}
+}
+{{\to}\elim}
+{
+  \env \vdash \typing{\expapp{L}{M}}{B}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{M}{A}
+  &
+  \typenvcon{x}{A} \vdash \typing{N}{B}
+}
+{\mathbf{let}}
+{
+  \env \vdash \typing{\expshr{x}{M}{N}}{B}
+}
+&
+\inference
+{
+  \env \vdash \typing{M}{A}
+  &
+  \env \vdash \typing{N}{B}
+}
+{{\times}\intro}
+{
+  \env \vdash \typing{\expprd{M}{N}}{\typprd{A}{B}}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}}
+}
+{{\times}\elim_1}
+{
+  \env \vdash \typing{\expfst{L}}{A}
+}
+&
+\inference
+{
+  \env \vdash \typing{L}{\typprd{A}{B}}
+}
+{{\times}\elim_2}
+{
+  \env \vdash \typing{\expsnd{L}}{B}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{M}{A}
+}
+{{+}\intro_1}
+{
+  \env \vdash \typing{\explft{M}{B}}{\typsum{A}{B}}
+}
+&
+\inference
+{
+  \env \vdash \typing{N}{B}
+}
+{{+}\intro_2}
+{
+  \env \vdash \typing{\exprgt{A}{N}}{\typsum{A}{B}}
+}
+\\~\\
+\inference
+{
+  \env \vdash \typing{L}{\typsum{A}{B}}
+&
+  \typenvcon{x}{A} \vdash \typing{M}{C}
+&
+  \typenvcon{y}{B} \vdash \typing{N}{C}
+}
+{{+}\elim}
+{
+  \env \vdash \typing{\expcas{L}{x}{M}{y}{N}}{C}
+}
+\end{array}
+\]
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+}
+
+\newcommand{\fignf}{
+\begin{figure*}[t]
+\[\uncolored
+\begin{array}{l@{\quad}rcl}
+\text{Neutral Forms} & Q & ::= &
+   \expapp{x}{W}   \mid
+   \expapp{c}{W}   \mid
+   \expapp{Q}{W}   \mid
+   \expfst{x}      \mid
+   \expsnd{x}      
+\\[1ex]
+\text{Normal Values} & V,W & ::= &
+% \expunt{}          \mid
+   \expvar{x}        \mid
+   \expabs{x}{A}{N}  \mid
+   \expprd{V}{W}     \mid
+   \explft{V}{B}     \mid 
+   \exprgt{A}{W}
+\\[1ex]
+\text{Normal Forms} & N,M & ::= &
+   Q  \mid  V  \mid \expcas{z}{x}{N}{y}{M} \mid \expshr{x}{Q}{N}
+\\
+\end{array}
+\]
+\caption{Normal Forms}
+\label{fig:nf}
+\end{figure*}
+}
+
+\newcommand{\fignorm}{
+\begin{figure*}[t]
+%% \multicolumn{5}{@{}c@{}}{\txt{Phase 1}}\\[-9pt]
+%% \multicolumn{5}{@{}c@{}}{\rule{120pt}{1pt}}\\[1pt]
+%% (\eta_{\rightarrow})
+%% & L
+%% & \ \rewrite{}{1}{}\ \
+%% & \expabs{x}{A}{\expapp{L}{x}}
+%% & %\cnd{%% \neg\valuep{M},\ and\\\ \ \ \fresh{x}}
+%% \\[0pt]
+%% \multicolumn{5}{@{}l@{}}{\txt{\ \ \ \ where\ \ \ }\env \vdash \typing{L}{\typarr{A}{B}},\ L \neq \expabs{y}{A}{N}\txt{, and }\fresh{x}}
+%% \\[10pt]
+
+Phase 1 (let-insertion)
+\[
+  \begin{array}{lcl}
+   F &\mathbin{::=}&
+    \expapp{M}{\hole}
+  \mid \expprd{\hole}{N}
+  \mid \expprd{V}{\hole}
+  \mid \expfst{\hole}
+  \mid \expsnd{\hole}
+  \mid \explft{\hole}{B}
+  \mid \exprgt{A}{\hole} \\
+ &\mid& \expcas{\hole}{x}{M}{y}{N} \\
+ \end{array}
+\]%
+\[
+\begin{array}[t]{@{}lll@{\quad}l@{}}
+(\txt{let})
+& F[\nv]
+& \ \rewrite{}{1}{}\ \
+& \expshr{x}{\nv}{F[x]}, \quad x \text{ fresh} \\
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 2 (symbolic evaluation)
+\[
+G \mathbin{::=}
+    \expapp{\hole}{V} \mid \expshr{x}{\hole}{N}
+\]
+\[
+\begin{array}[t]{@{\quad}llll@{}}
+(\kappa.{\txt{let}})
+& G[\expshr{x}{\nv}{N}]
+& \ \rewrite{}{2}{}\ \
+& \expshr{x}{\nv}{G[N]}, \\
+&&&\quad x \notin \fv{G}\\
+
+(\kappa.{\txt{case}})
+& G[\expcas{z}{x}{M}{y}{N}] & \ \rewrite{}2{} \\
+\multicolumn{3}{@{}l@{}}
+{\qquad\qquad\qquad\quad \expcas{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
+
+%% \multicolumn{5}{@{}l@{}}{H \mathbin{\ ::=\ } \expshr{x}{M}{\hole}\ |\ \expcas{z}{x}{\hole}{y}{N}\ |\ \expcas{z}{x}{M}{y}{\hole}}\\[1pt]
+
+%% (\kappa_{\lambda})
+%% & H[\expabs{x}{A}{N}]
+%% & \ \rewrite{}{}{}\ \
+%% & \expabs{x}{A}{H[N]}
+%% & \cnd{x \notin \fv{H}} \\[8pt]
+
+
+(\beta.{\rightarrow})
+& \expapp{(\expabs{x}{A}{N})}{V}
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{x}{V} \\
+
+(\beta.{\times_1})
+& \expfst{\expprd{V}{W}}
+& \ \rewrite{}{2}{}\ \
+& V \\
+
+(\beta.{\times_2})
+& \expsnd{\expprd{V}{W}}
+& \ \rewrite{}{2}{}\ \
+& W \\
+
+(\beta.{+_1})
+& \expcas{(\explft{V}{B})}{x}{M}{y}{N}
+& \ \rewrite{}{2}{}\ \
+& \sbs{M}{x}{V} \\
+
+(\beta.{+_2})
+& \expcas{(\exprgt{A}{W})}{x}{M}{y}{N}
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{y}{W} \\
+
+(\beta.{\txt{let}})
+& \expshr{x}{V}{N}
+& \ \rewrite{}{2}{}\ \
+& \sbs{N}{x}{V} \\
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 3 (garbage collection)
+\[
+\begin{array}[t]{@{}llll@{\quad}l@{}}
+
+(\txt{need})
+& \expshr{x}{\nv}{N}
+& \ \rewrite{}{3}{}\ \
+& N %%\sbs{N}{x}{\nv}
+& \cnd{%% \neg\valuep{M},\ and\\\ \ \
+       %%Count(x,N) < 2
+       x \notin \fv{N}}\\
+\end{array}
+\]
+\caption{Normalisation rules}
+\label{fig:norm}
+\end{figure*}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\todo{Removed unit type. Either remove unit type or add empty type.}
+
+This section introduces a collection of reduction rules for
+normalising terms that enforces the subformula property 
+while ensuring sharing is preserved. The rules adapt to
+both call-by-need and call-by-value.
+
+We work with simple types. The only polymorphism in our examples
+corresponds to instantiating constants (such as $\mathit{while}$) at
+different types.
+
+Types, terms, and values are presented in Figure~\ref{fig:term}. We
+let $A$, $B$, $C$ range over types, including base types ($\iota$),
+functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
+We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
+variables.  We let $c$ range over primitive constants, which are
+fully applied (applied to a sequence of terms of length equal to
+the constant's arity).
+We follow the usual convention that terms are equivalent up
+to renaming of bound variables. We write $\fv{N}$ for the set of free
+variables of $N$, and $\sbs{N}{x}{M}$ for substitution of $M$ for $x$
+in $N$.
+%
+%% [SL: not relevant]
+%% Types correspond to propositions and terms to proofs in
+%% minimal propositional logic.
+%
+We let $V$, $W$ range over values, and $\nv$ range over non-values
+(that is, any term that is not a value).
+
+We let $\Gamma$ range over environments, which are sets of pairs of
+variables with types $x:A$. We write $\Gamma \vdash M:A$ to indicate
+that term $M$ has type $A$ under environment $\Gamma$. The typing
+rules are standard.
+
+The grammar of normal forms is given in Figure~\ref{fig:nf}. We re-use
+$L,M,N$ to ranges over terms in normal form, $V,W$ to range over
+values in normal form, and $Q$ to range over neutral forms.
+
+Reduction rules for normalisation are presented in
+Figure~\ref{fig:norm}, broken into three phases. We write $M
+\mapsto_i N$ to indicate that $M$ reduces to $N$ in phase $i$. We let
+$F$ and $G$ range over two different forms of evaluation frame used in
+Phases~2 and~3 respectively. We write $\fv{F}$ for the set of free
+variables of $F$, and similarly for $G$.
+The reduction relation is closed under compatible closure.
+
+\figterm
+\fignf
+\fignorm
+
+The normalisation procedure consists of exhaustively applying
+the reductions of Phase~1 until no more apply, then similarly for
+Phase~2, and finally for Phase~3. Phase~1 performs let-insertion,
+naming subterms that are not values.
+%% along the lines of a translation to A-normal form
+%% \citep{a-normal-form} or reductions (let.1) and (let.2) in Moggi's
+%% metalanguage for monads \citep{moggi}.
+Phase~2 performs standard $\beta$ and commuting reductions, and is the
+only phase that is crucial obtaining normal forms that satisfy the
+subformula property. Phase~3 ``garbage collects'' unused terms, as in
+the call-by-need lambda calculus \citep{call-by-need}. Phase~3 may be
+omitted if the intended semantics of the target language is
+call-by-value rather than call-by-need.
+
+Every term has a normal form.
+\begin{proposition}[Strong normalisation]
+Each of the reduction relations $\rewrite{}{i}{}$ is strongly
+normalising: all $\rewrite{}{i}{}$ reduction sequences on well-typed
+terms are finite.
+\end{proposition}
+The only non-trivial proof is for $\rewrite{}{2}{}$, which can be
+proved via a standard reducibility argument
+(e.g. \cite{Lindley07}). If the target language includes general
+recursion, normalisation should treat fixpoint as an uninterpreted
+constant (or free variable).
+
+The grammar of Figure~\ref{fig:nf} characterises normal forms
+precisely.
+\begin{proposition}[Normal Form Syntax]
+\label{prop_normal}
+An expression $N$ matches the syntax of normal forms in
+Figure~\ref{fig:nf} if and only if it is in normal form with regard to
+the reduction rules of Figure~\ref{fig:norm}.
+\end{proposition}
+
+The \emph{subformulas} of a type are the type itself and its
+components; for instance, the subformulas of $A \to B$ are $A \to B$
+itself and the subformulas of $A$ and $B$. The \emph{proper
+  subformulas} of a type are all its subformulas other than the type
+itself.  Terms in normal form satisfy the subformula property.
+
+\begin{proposition}[Subformula property]
+\label{prop_subformula}
+If $\Gamma \vdash M:A$ and the normal form of $M$ is $N$ by the
+reduction rules of Figure~\ref{fig:norm}, then $\Gamma \vdash N:A$ and
+every subterm of $N$ has a type that is either a subformula of $A$ or
+a subformula of a type in $\Gamma$.  Further, every subterm other than
+$N$ itself and free variables of $N$ has a type that is a proper
+subformula of $A$ or a proper subformula of a type in $\Gamma$.
+\end{proposition}
+
+
+
+
