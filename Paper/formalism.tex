@@ -259,23 +259,22 @@
 \begin{figure*}[t]
 \[\uncolored
 \begin{array}{l@{\quad}rcl}
-\text{Neutral Forms} & Q & ::= &
-   \expapp{x}{W}   \mid
-   \expapp{c}{W}   \mid
-   \expapp{Q}{W}   \mid
-   \expfst{x}      \mid
-   \expsnd{x}      
+\text{Neutral Forms}
+  & Q & ::= & \expapp{x}{W}
+         \mid \expapp{c}{\overline{W}}
+         \mid \expapp{Q}{W}
+         \mid \expfst{x}
+         \mid \expsnd{x}      
 \\[1ex]
-\text{Normal Values} & V,W & ::= &
-% \expunt{}          \mid
-   \expvar{x}        \mid
-   \expabs{x}{A}{N}  \mid
-   \expprd{V}{W}     \mid
-   \explft{V}{B}     \mid 
-   \exprgt{A}{W}
+\text{Normal Values}
+  & V,W & ::= & \expvar{x}
+           \mid \expabs{x}{A}{N}
+           \mid \expprd{V}{W}
+           \mid \explft{V}{B} 
+           \mid \exprgt{A}{W}
 \\[1ex]
 \text{Normal Forms} & N,M & ::= &
-   Q  \mid  V  \mid \expcas{z}{x}{N}{y}{M} \mid \expshr{x}{Q}{N}
+   Q  \mid  V \mid \expcas{z}{x}{N}{y}{M} \mid \expshr{x}{Q}{N}
 \\
 \end{array}
 \]
@@ -301,14 +300,15 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-    \expapp{M}{\hole}
+       \expapp{c}{(\overline{M},\hole,\overline{N})}
+  \mid \expapp{M}{\hole}
   \mid \expprd{\hole}{N}
-  \mid \expprd{V}{\hole}
+  \mid \expprd{M}{\hole}
   \mid \expfst{\hole}
-  \mid \expsnd{\hole}
-  \mid \explft{\hole}{B}
-  \mid \exprgt{A}{\hole} \\
- &\mid& \expcas{\hole}{x}{M}{y}{N} \\
+  \mid \expsnd{\hole} \\
+ &\mid&\explft{\hole}{B}
+  \mid \exprgt{A}{\hole}
+  \mid \expcas{\hole}{x}{M}{y}{N} \\
  \end{array}
 \]%
 \[
@@ -418,13 +418,12 @@ Types, terms, and values are presented in Figure~\ref{fig:term}. We
 let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
-variables.  We let $c$ range over primitive constants, which are
-fully applied (applied to a sequence of terms of length equal to
-the constant's arity).
-We follow the usual convention that terms are equivalent up
-to renaming of bound variables. We write $\fv{N}$ for the set of free
-variables of $N$, and $\sbs{N}{x}{M}$ for substitution of $M$ for $x$
-in $N$.
+variables.  We let $c$ range over primitive constants, which are fully
+applied (applied to a sequence of terms of length equal to the
+constant's arity).  We follow the usual convention that terms are
+equivalent up to renaming of bound variables. We write $\fv{N}$ for
+the set of free variables of $N$, and $\sbs{N}{x}{M}$ for
+capture-avoiding substitution of $M$ for $x$ in $N$.
 %
 %% [SL: not relevant]
 %% Types correspond to propositions and terms to proofs in
@@ -433,14 +432,14 @@ in $N$.
 We let $V$, $W$ range over values, and $\nv$ range over non-values
 (that is, any term that is not a value).
 
-We let $\Gamma$ range over environments, which are sets of pairs of
-variables with types $x:A$. We write $\Gamma \vdash M:A$ to indicate
-that term $M$ has type $A$ under environment $\Gamma$. The typing
-rules are standard.
+We let $\Gamma$ range over type environments, which are sets of pairs
+of variables with types $x:A$. We write $\Gamma \vdash M:A$ to
+indicate that term $M$ has type $A$ under type environment
+$\Gamma$. The typing rules are standard.
 
-The grammar of normal forms is given in Figure~\ref{fig:nf}. We re-use
-$L,M,N$ to ranges over terms in normal form, $V,W$ to range over
-values in normal form, and $Q$ to range over neutral forms.
+The grammar of normal forms is given in Figure~\ref{fig:nf}. We reuse
+$L,M,N$ to range over terms in normal form and $V,W$ to range over
+values in normal form, and we let $Q$ range over neutral forms.
 
 Reduction rules for normalisation are presented in
 Figure~\ref{fig:norm}, broken into three phases. We write $M
@@ -477,8 +476,8 @@ terms are finite.
 The only non-trivial proof is for $\rewrite{}{2}{}$, which can be
 proved via a standard reducibility argument
 (e.g. \cite{Lindley07}). If the target language includes general
-recursion, normalisation should treat fixpoint as an uninterpreted
-constant (or free variable).
+recursion, normalisation should treat the fixpoint operator as an
+uninterpreted constant.
 
 The grammar of Figure~\ref{fig:nf} characterises normal forms
 precisely.
