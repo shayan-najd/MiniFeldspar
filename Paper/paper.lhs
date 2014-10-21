@@ -418,7 +418,9 @@ flower further for decades to come.
 EP/K034413/1. Shayan Najd is a recipient of the Google Europe
 Fellowship in Programming Technology, and this research is supported
 in part by this Google Fellowship. %% <-- Google's requested format
-Josef Svenningsson is a SICSA Visiting Fellow.
+Josef Svenningsson is a SICSA Visiting Fellow and is funded by a
+HiPEAC collaboration grant and by the Swedish Foundation for Strategic
+Research, under grant RawFP.
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
