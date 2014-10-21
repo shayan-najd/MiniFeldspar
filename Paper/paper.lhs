@@ -49,7 +49,7 @@
 \usepackage{proof}
 \usepackage{xspace}
 \usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
-                      ,pdftitle={QDSLs: Why its nicer to be quoted normally}
+                      ,pdftitle={QDSLs: Why it's nicer to be quoted normally}
                       ,pagebackref=true,pdftex,backref=none]{hyperref}
 \usepackage{tabularx}
 \usepackage{graphicx}
