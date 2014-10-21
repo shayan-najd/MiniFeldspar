@@ -196,13 +196,13 @@ may share the same representation for quoted terms across a range of
 applications; the quoted language is the host language, and does not
 vary with the specific domain.
 
-\item CDSL loses sharing, which must later be recovered be either
+\item CDSL loses sharing, which must later be recovered by either
 common subexpression elimination or applying a technique such as
 observable sharing.  In contrast, QDSL preserves sharing throughout.
 
 \item CDSL yields the term in normalised form in this case, though
 there are other situations where a normaliser is required (see
-Section~\ref{sec:second-example}.  In contrast, QDSL yields an
+Section~\ref{sec:second-example}.)  In contrast, QDSL yields an
 unwieldy term that requires normalisation.  However, just as a single
 representation of QDSL terms suffices across many applications, so
 does a single normaliser---it can be built once and reused many times.
@@ -246,7 +246,7 @@ return  ::  a -> Maybe a
 maybe   ::  b -> (a -> b) -> Maybe a -> b
 \end{spec}
 from the Haskell prelude. Type |Maybe| is declared as a monad, enabling the |do| notation,
-which translates into |(>>=)|.
+which translates into |(>>=)| and |return|.
 The same C code as before should result from instantiating |power''| to |(-6)|.
 
 In this case, the refactored function is arguably clumsier than the original,
@@ -281,7 +281,7 @@ option 	::  (Syn a, Syn b) => b -> (a -> b) -> Opt a -> b
 from the CDSL library. Details of the type |Opt| and the type class |Syn|
 are explained in Section~\ref{sec:option}.
 Type |Opt| is declared as a monad, enabling the |do| notation,
-which translates into |(>>=)|.
+just as for |Maybe| above.
 Invoking |cdsl (power'' (-6))| generates the same C code as
 the previous example.
 
