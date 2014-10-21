@@ -344,8 +344,8 @@ history \citep{Bentley:1986:PPL:6424.315691}.
 
 In this paper we have, like many other DSL writers, used Haskell as it
 has proven to be very suitable for \emph{embedding} domain specific
-languages.  Examples include \citep{reid1999prototyping,
-hudak1997domain, bjesse1998lava}.
+languages \citep{Gill:14:DSLs-and-Synthesis}.  Examples include
+\citet{reid1999prototyping, hudak1997domain, bjesse1998lava}.
 
 In this paper we have specifically built on the technique of combining
 deep and shallow embeddings \citep{SvenningssonA12} and
@@ -366,6 +366,8 @@ bit of impurity in Haskell, referred to as \emph{observable sharing}
 to be able to recover from the loss of sharing. Later, \citet{gill2009type}
 proposed a somewhat safer way of recover sharing, though still ultimately
 relying on impurity.
+
+The underlying idea for QDSLs was established by \citet{CheneyLW13}.
 
 \section{Conclusion}
 \label{sec:conclusion}
