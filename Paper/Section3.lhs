@@ -297,7 +297,7 @@ option_R d f o    =   def o ? (f (val o), d)
 \end{code}
 
 The next obvious step is to define a suitable monad over the type |Opt_R|.
-The natural definitions to use are as follows.
+The natural definitions to use are as follows:
 \begin{code}
 return    ::  a -> Opt_R a
 return x  =   some_R x
@@ -410,7 +410,7 @@ that it provides lightweight fusion. The above definition would not produce
 good C code if it first computed |zipWith (*) u v|, put the result into an
 intermediate vector |w|, and then computed |sumVec w|. Fortunately, it does
 not. Assume |u| is |Vec m g| and |v| is |Vec n h|. Then we can simplify
-|scalarProd u v| as follows.
+|scalarProd u v| as follows:
 \[
 \begin{array}{cl}
          &  |scalarProd u v|  \\
