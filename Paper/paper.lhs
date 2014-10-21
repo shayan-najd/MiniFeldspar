@@ -184,8 +184,8 @@ inference.
 
 Feldspar exploits a combination of deep and shallow embedding, here
 dubbed CDSL.  The technique is clearly described by
-\citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}
-and \citet{SvenningssonS13}. Essentially the same technique is also
+\citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}.
+Essentially the same technique is also
 applied in Obsidian \citep{svensson2011obsidian} and Nikola
 \citep{NIKOLA}.
 
