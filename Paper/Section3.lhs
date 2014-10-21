@@ -56,7 +56,7 @@ operations, the string is the name of the operation
 (used in printing or to generate C) and the function
 argument computes the primitive (used in evaluation).
 Construct |ArrIx| creates a new array from a length and
-oa body that computes the array element
+a body that computes the array element
 for each index, construct |ArrLen| extracts the length from an array, and
 construct |ArrIx| fetches the element at a given index.
 Construct |Variable| is used in printing and in generating C,
@@ -310,8 +310,8 @@ However, this adds type constraint |Undef b|
 to the type of |(>>=)|, which is not permitted.
 This need to add constraints often arises, and has
 been dubbed the constrained-monad problem
-\citet{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
-We solve it with a trick due to \cite{PerssonAS11}.
+\citep{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
+We solve it with a trick due to \citet{PerssonAS11}.
 
 We introduce a second continuation-passing style (cps) type |Opt|,
 defined in terms of the representation type |Opt_R|.  It is
