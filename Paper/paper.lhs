@@ -208,7 +208,7 @@ how to apply the same idea to CDSL.
 %%
 We make the following contributions.
 \begin{itemize}
-  \item We introduces the names CDSL and QDSL, and provide a
+  \item We introduce the names CDSL and QDSL, and provide a
         concise description and comparison of the two techniques.
   \item We highlight the benefits of normalisation and the
         subformula property.
@@ -406,7 +406,7 @@ and lift most of its restrictions. For instance,
 the current prototype is restricted to the |Maybe| monad, while the
 envisioned tool will work with any monad.
 
-Moliere's Monsieur Jordan was bemused to discover he had been
+Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
 speaking prose his whole life. Similarly, many of us have used QDSLs for
 years, if not by that name. DSL via quotation is the heart of Lisp
 macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
