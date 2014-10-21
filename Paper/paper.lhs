@@ -6,6 +6,7 @@
 %format == = "\longeq "
 %format || = "||"
 %format `div` = "\rmdiv"
+%format * = "\times"
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
