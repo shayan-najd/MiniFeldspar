@@ -86,7 +86,7 @@ In CDSL, the body of the code remains almost---but not
 quite!---identical to the original.  Clever encoding tricks,
 explained later, permit declarations, function calls, arithmetic
 operations, and numbers to appear the same whether they are to be
-executed at generation-time or run-time.  However,
+exeuted at generation-time or run-time.  However,
 as explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
