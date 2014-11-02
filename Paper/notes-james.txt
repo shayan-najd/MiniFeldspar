@@ -1,0 +1,30 @@
+I had a quick look over the ESOP submission and had a couple fo comments/questions:
+
+p5. "excecuted"
+
+p7.  I wondered why use Opt (Dp Float) rather than Dp (Maybe Float).  I guess this is addressed later but signosting this later discussion might be helpful.
+
+p9.  "In contrast, all QDSLs can share the representation of the quoted host language, and so can share a normaliser" - true, but suggests that a single normalizer will suffice for all QDSLs in a given language.  I'm not sure this is the case; in particular, the LINQ/SQL normalization rules in our ICFP 2013 paper include some rules you might not want in general  (though probably there is a common core).  It would therefore be interesting to be able to extend the normalization rules on a per-QDSL basis.
+
+p9 and earlier: Also, I think it may be a little misleading to attribute "embedding SQL in F#" to our ICFP 2013 paper.  After all, F# has had LINQ support since about 2006, almost as long as C#, albeit on somewhat different lines than now, and our paper could be more accurately characterized as a formalization and rational reconstruction of LINQ in F#.
+
+p17.  Starting here I started to get a little lost, and wonder if someone less familiar with what you have in mind could get a lot lost.  It may not be a strong point if the three pages of explanation of the QDSL approach is a lot harder to follow than the 8 page CDSL exposition.  Also, understanding the ~3 pages of section 4 seems to require understanding a bit more about what is going on under the hood in sec. 5.
+
+For example:
+- Why does "while"'s type have no Qt? Is it only for use within quasiquotes?  Or is there a typo somewhere?
+
+p.20.  Missing "|" before inl in fig 1
+
+p.21. One of the "2"'s in the second rule of fig. 3 is not subscripted and is probably intended to be.
+
+p22-23.  I found the experimental results hard to interpret. 
+
+- What is the optimization target>? which of the times Hc, Hr, Cc, Cr do we actually care about reducing (possibly at the expense of others)?
+- Why is it not bad news that Hc goes up for QDSL?  
+- What is Hr doing, and why is it always so much smaller than Cr?  Are they doing the same thing or is Hr the Haskell code running to produce the C code that gets compiled?
+- Which part of the QDSL table measures the additional cost of normalization? (I think Hr?)
+- How much data were the benchmarks run on, and how do the times vary if we increase the amount of data?  
+- Do the slight improvements in run time hold up asymptotically 
+- Simply presenting the experimental results and stopping there leaves the reader unsure how to interpret them.  What, if anything, can you conclude?
+
+--James
