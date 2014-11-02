@@ -55,7 +55,7 @@
   \exppair{M}{N}          \mid
   \expfst{L}              \mid
   \expsnd{L}              \\&&&
-  \expinl{M}{\tm{B}}      \mid
+  \mid \expinl{M}{\tm{B}} \mid
   \expinr{\tm{A}}{N}      \mid
   \expcase{L}{x}{M}{y}{N}
 \\[1ex]
@@ -198,7 +198,7 @@
          \mid \expconst{c}{\overline{W}}
          \mid \expapp{Q}{W}
          \mid \expfst{x}
-         \mid \expsnd{x}      
+         \mid \expsnd{x}
 \\[1ex]
 \text{Normal Values}
   & V,W & ::= & \expvar{x}
@@ -257,7 +257,7 @@ G \mathbin{::=}
 &&&\quad x \notin \fv{G}\\
 
 (\kappa.{\mathit{case}})
-& G[\expcase{z}{x}{M}{y}{N}] & \rewrite{}2{} \\
+& G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
 \multicolumn{3}{@{}l@{}}
 {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
 
@@ -318,7 +318,7 @@ Phase 3 (garbage collection)
 %\todo{Removed unit type. Either remove unit type or add empty type.}
 
 This section introduces a collection of reduction rules for
-normalising terms that enforces the subformula property 
+normalising terms that enforces the subformula property
 while ensuring sharing is preserved. The rules adapt to
 both call-by-need and call-by-value.
 
