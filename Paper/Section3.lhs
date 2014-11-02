@@ -426,7 +426,7 @@ guarantee than provided by conventional optimising compilers.
 
 If we define
 \begin{code}
-norm     ::  Vec Float -> Float
+norm     ::  Vec (Dp Float) -> Dp Float
 norm v   =   scalarProd v v
 \end{code}
 invoking |cdsl norm| yields C code that accepts an array.

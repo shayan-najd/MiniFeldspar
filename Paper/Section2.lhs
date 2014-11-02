@@ -95,7 +95,7 @@ run-time, using |M == N| and |if L then M else N| for the former but
 Assuming |x| contains a value of type |Dp Float| denoting an object
 variable |u| of type float, evaluating |power (-6) x| yields following.
 \begin{spec}
-(u .==. 0) ? (0, 1 / (u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1))))
+(u .==. 0) ? (0, 1 / ((u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))))
 \end{spec}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
