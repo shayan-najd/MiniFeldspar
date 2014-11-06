@@ -1,9 +1,13 @@
 %if False
 \begin{code}
-{-# LANGUAGE TemplateHaskell #-}
-import Section3 hiding (return,main)
-import Language.Haskell.TH
-type Qt a = Q (TExp a)
+module Section2 where
+import Prelude
+import QFeldspar.CDSL hiding (Int,div)
+import QFeldspar.QDSL hiding (Int,maybe,div,return,Equality)
+
+(.==.) :: Equality t => Dp t -> Dp t -> Dp Bol
+(.==.) = QFeldspar.CDSL.eql
+
 \end{code}
 %endif
 
@@ -17,9 +21,9 @@ choose that raising zero to a negative power yields zero.
 power :: Int -> Float -> Float
 power n x =
   if n < 0 then
-    if x == 0 then 0 else 1 / power (-n) x
+    if x == 0.0 then 0.0 else 1.0 / power (-n) x
   else if n == 0 then
-    1
+    1.0
   else if even n then
     sqr (power (n `div` 2) x)
   else
@@ -64,9 +68,9 @@ Here is a solution to our problem using CDSL.
 power_Dp :: Int -> Dp Float -> Dp Float
 power_Dp n x =
   if n < 0 then
-    x .==. 0 ? (0,  1 / power_Dp (-n) x)
+    x .==. 0.0 ? (0.0,  1.0 / power_Dp (-n) x)
   else if n == 0 then
-    1
+    1.0
   else if even n then
     sqr_Dp (power_Dp (n `div` 2) x)
   else
@@ -122,13 +126,13 @@ Here is a solution to our problem using QDSL.
 power_Qt :: Int -> Qt (Float -> Float)
 power_Qt n =
   if n < 0 then
-    [|| \x -> if x == 0 then 0 else 1 / $$(power_Qt (-n)) x ||]
+    [|| \x -> if x == 0.0 then 0.0 else 1.0 / ($$(power_Qt (-n)) x) ||]
   else if n == 0 then
-    [|| \x -> 1 ||]
+    [|| \x -> 1.0 ||]
   else if even n then
     [|| \x -> $$sqr_Qt ($$(power_Qt (n `div` 2)) x) ||]
   else
-    [|| \x -> x * $$(power_Qt (n-1)) x ||]
+    [|| \x -> x * ($$(power_Qt (n-1)) x) ||]
 
 sqr_Qt  ::  Qt (Float -> Float)
 sqr_Qt  =   [|| \y -> y * y ||]
@@ -227,16 +231,16 @@ to a suitable default value.
 power' ::  Int -> Float -> Maybe Float
 power' n x =
   if n < 0 then
-    if x == 0 then Nothing else do y <- power' (-n) x; return (1 / y)
+    if x == 0.0 then Nothing else do y <- power' (-n) x; return (1.0 / y)
   else if n == 0 then
-    return 1
+    return 1.0
   else if even n then
     do y <- power' (n `div` 2) x; return (sqr y)
   else
     do y <- power' (n-1) x; return (x * y)
 
 power''      ::  Int -> Float -> Float
-power'' n x  =   maybe 0 (\x -> x) (power' n x)
+power'' n x  =   maybe 0.0 (\y -> y) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses
 \begin{spec}
@@ -260,16 +264,16 @@ Here is the refactored code.
 power_Dp' :: Int -> Dp Float -> Opt (Dp Float)
 power_Dp' n x  =
   if n < 0 then
-    (x .==. 0) ? (none, do y <- power_Dp' (-n) x; return (1 / y))
+    (x .==. 0.0) ? (none, do y <- power_Dp' (-n) x; return (1.0 / y))
   else if n == 0 then
-    return 1
+    return 1.0
   else if even n then
     do y <- power_Dp' (n `div` 2) x; return (sqr_Dp y)
   else
     do y <- power_Dp' (n-1) x; return (x*y)
 
 power_Dp''      ::  Int -> Dp Float -> Dp Float
-power_Dp'' n x  =  option 0 (\y -> y) (power_Dp' n x)
+power_Dp'' n x  =  option 0.0 (\y -> y) (power_Dp' n x)
 \end{code}
 Here |sqr| is as before. The above uses the functions
 \begin{spec}
@@ -337,17 +341,17 @@ Here is the refactored code.
 power_Qt' :: Int -> Qt (Float -> Maybe Float)
 power_Qt' n =
   if n < 0 then
-    [|| \x ->  if x == 0 then Nothing else
-                 do y <- $$(power_Qt' (-n)) x; return (1 / y) ||]
+    [|| \x ->  if x == 0.0 then Nothing else
+                 do y <- $$(power_Qt' (-n)) x; return (1.0 / y) ||]
   else if n == 0 then
-    [|| \x -> return 1 ||]
+    [|| \x -> return 1.0 ||]
   else if even n then
     [|| \x -> do y <- $$(power_Qt' (n `div` 2)) x; return ($$sqr_Qt y) ||]
   else
     [|| \x -> do y <- $$(power_Qt' (n-1)) x; return (x * y) ||]
 
 power_Qt''      ::  Int -> Qt (Float -> Float)
-power_Qt'' n = [|| \ x ->  maybe 0 (\x -> x) ($$(power_Qt' n) x)||]
+power_Qt'' n = [|| \ x ->  maybe 0.0 (\y -> y) ($$(power_Qt' n) x)||]
 \end{code}
 Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are as in the Haskell prelude,
