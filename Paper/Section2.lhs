@@ -3,9 +3,9 @@
 module Section2 where
 import Prelude
 import QFeldspar.CDSL hiding (Int,div)
-import QFeldspar.QDSL hiding (Int,maybe,div,return,Equality)
+import QFeldspar.QDSL hiding (Int,div)
 
-(.==.) :: Equality t => Dp t -> Dp t -> Dp Bol
+(.==.) :: Dp Float -> Dp Float -> Dp Bool
 (.==.) = QFeldspar.CDSL.eql
 
 \end{code}

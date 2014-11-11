@@ -3,11 +3,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 import Prelude hiding (Int,(**))
 import Data.Array
-import QFeldspar.QDSL hiding (scalarProd)
+import QFeldspar.QDSL hiding (scalarProd,toArr,fromArr,for)
 minim :: Data (Int -> Int -> Int)
 minim = QFeldspar.QDSL.min
-(**) :: Int -> Int -> Int
-(**) = (*)
 \end{code}
 %endif
 
@@ -110,7 +108,7 @@ anti-quotation.
 Using our primitives, it is easy to compute the scalar product of two vectors.
 \begin{code}
 scalarProd   ::  Qt (Vec Int -> Vec Int -> Int)
-scalarProd   =   [|| \u v -> $$sumVec ($$zipWithVec (**) u v) ||]
+scalarProd   =   [|| \u v -> $$sumVec ($$zipWithVec (*) u v) ||]
 \end{code}
 With CDSL, evaluation in the host language achieves fusion.
 With QDSL, normalisation in the QDSL processor achieves fusion.
