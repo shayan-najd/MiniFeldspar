@@ -1,7 +1,7 @@
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
-import Prelude hiding (Int,(**))
+import Prelude hiding (Int)
 import Data.Array
 import QFeldspar.QDSL hiding (scalarProd,toArr,fromArr,for)
 minim :: Data (Int -> Int -> Int)
