@@ -5,6 +5,8 @@ import Prelude
 import QFeldspar.CDSL hiding (Int,div)
 import QFeldspar.QDSL hiding (Int,div)
 
+type C = String
+
 (.==.) :: Dp Float -> Dp Float -> Dp Bool
 (.==.) = QFeldspar.CDSL.eql
 
@@ -21,9 +23,9 @@ choose that raising zero to a negative power yields zero.
 power :: Int -> Float -> Float
 power n x =
   if n < 0 then
-    if x == 0.0 then 0.0 else 1.0 / power (-n) x
+    if x == 0 then 0 else 1 / power (-n) x
   else if n == 0 then
-    1.0
+    1
   else if even n then
     sqr (power (n `div` 2) x)
   else
@@ -52,7 +54,7 @@ should result from instantiating |power| to |(-6)|.
 For CDSL, we assume a type |Dp a| to represent a term
 of type |a|, its \emph{deep} representation. Function
 \begin{spec}
-cdsl :: (Dp a -> Dp b) -> C
+cdsl :: (Type a , Type b) => (Dp a -> Dp b) -> C
 \end{spec}
 generates a \texttt{main} function corresponding to its argument,
 where |C| is a type that represents C code.
@@ -68,9 +70,9 @@ Here is a solution to our problem using CDSL.
 power_Dp :: Int -> Dp Float -> Dp Float
 power_Dp n x =
   if n < 0 then
-    x .==. 0.0 ? (0.0,  1.0 / power_Dp (-n) x)
+    x .==. 0 ? (0,  1 / power_Dp (-n) x)
   else if n == 0 then
-    1.0
+    1
   else if even n then
     sqr_Dp (power_Dp (n `div` 2) x)
   else
@@ -79,7 +81,7 @@ power_Dp n x =
 sqr_Dp    ::  Dp Float -> Dp Float
 sqr_Dp y  =   y * y
 \end{code}
-Invoking |cdsl (power (-6))| generates the C code above.
+Invoking |cdsl (power_Dp (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes |Dp Float -> Dp Float|
 in the CDSL solution, meaning that |power n| accepts a representation
@@ -117,7 +119,7 @@ It is easy to generate the final C code from this structure.
 By contrast, for QDSL, we assume a type |Qt a| to represent a
 term of type |a|, its \emph{quoted} representation.  Function
 \begin{spec}
-qdsl :: Qt (a -> b) -> C
+qdsl :: (FO a , Type a , Type b) => Qt (a -> b) -> C
 \end{spec}
 generates a \texttt{main} function corresponding to its
 argument, where |C| is as before.
@@ -126,9 +128,9 @@ Here is a solution to our problem using QDSL.
 power_Qt :: Int -> Qt (Float -> Float)
 power_Qt n =
   if n < 0 then
-    [|| \x -> if x == 0.0 then 0.0 else 1.0 / ($$(power_Qt (-n)) x) ||]
+    [|| \x -> if x == 0 then 0 else 1 / ($$(power_Qt (-n)) x) ||]
   else if n == 0 then
-    [|| \x -> 1.0 ||]
+    [|| \x -> 1 ||]
   else if even n then
     [|| \x -> $$sqr_Qt ($$(power_Qt (n `div` 2)) x) ||]
   else
@@ -140,7 +142,7 @@ sqr_Qt  =   [|| \y -> y * y ||]
 Invoking |qdsl (power (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes |Qt (Float -> Float)|
-in the QDSL solution, meaning that |power n| returns a quotation
+in the QDSL solution, meaning that |power_Qt n| returns a quotation
 of a function that accepts an argument and returns that
 argument raised to the $n$'th power.
 
@@ -231,16 +233,16 @@ to a suitable default value.
 power' ::  Int -> Float -> Maybe Float
 power' n x =
   if n < 0 then
-    if x == 0.0 then Nothing else do y <- power' (-n) x; return (1.0 / y)
+    if x == 0 then Nothing else do y <- power' (-n) x; return (1 / y)
   else if n == 0 then
-    return 1.0
+    return 1
   else if even n then
     do y <- power' (n `div` 2) x; return (sqr y)
   else
     do y <- power' (n-1) x; return (x * y)
 
 power''      ::  Int -> Float -> Float
-power'' n x  =   maybe 0.0 (\y -> y) (power' n x)
+power'' n x  =   maybe 0 (\y -> y) (power' n x)
 \end{code}
 Here |sqr| is as before. The above uses
 \begin{spec}
@@ -264,16 +266,16 @@ Here is the refactored code.
 power_Dp' :: Int -> Dp Float -> Opt (Dp Float)
 power_Dp' n x  =
   if n < 0 then
-    (x .==. 0.0) ? (none, do y <- power_Dp' (-n) x; return (1.0 / y))
+    (x .==. 0) ? (none, do y <- power_Dp' (-n) x; return (1 / y))
   else if n == 0 then
-    return 1.0
+    return 1
   else if even n then
     do y <- power_Dp' (n `div` 2) x; return (sqr_Dp y)
   else
     do y <- power_Dp' (n-1) x; return (x*y)
 
 power_Dp''      ::  Int -> Dp Float -> Dp Float
-power_Dp'' n x  =  option 0.0 (\y -> y) (power_Dp' n x)
+power_Dp'' n x  =  option 0 (\y -> y) (power_Dp' n x)
 \end{code}
 Here |sqr| is as before. The above uses the functions
 \begin{spec}
@@ -341,17 +343,17 @@ Here is the refactored code.
 power_Qt' :: Int -> Qt (Float -> Maybe Float)
 power_Qt' n =
   if n < 0 then
-    [|| \x ->  if x == 0.0 then Nothing else
-                 do y <- $$(power_Qt' (-n)) x; return (1.0 / y) ||]
+    [|| \x ->  if x == 0 then Nothing else
+                 do y <- $$(power_Qt' (-n)) x; return (1 / y) ||]
   else if n == 0 then
-    [|| \x -> return 1.0 ||]
+    [|| \x -> return 1 ||]
   else if even n then
     [|| \x -> do y <- $$(power_Qt' (n `div` 2)) x; return ($$sqr_Qt y) ||]
   else
     [|| \x -> do y <- $$(power_Qt' (n-1)) x; return (x * y) ||]
 
 power_Qt''      ::  Int -> Qt (Float -> Float)
-power_Qt'' n = [|| \ x ->  maybe 0.0 (\y -> y) ($$(power_Qt' n) x)||]
+power_Qt'' n = [|| \ x ->  maybe 0 (\y -> y) ($$(power_Qt' n) x)||]
 \end{code}
 Here |sqr| is as before,
 and |Nothing|, |return|, |(>>=)|, and |maybe| are as in the Haskell prelude,
