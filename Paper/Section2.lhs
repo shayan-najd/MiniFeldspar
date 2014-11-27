@@ -1,11 +1,32 @@
+%options ghci
+%format testDpF   (x) (y) = "\fi" y
+%format testQt    (x) (y) = "\fi" y
+%format testNrmQt (x) (y) = "\fi" y
 %if False
 \begin{code}
+{-# OPTIONS_GHC -fno-warn-unused-matches
+                -fno-warn-missing-signatures
+                -fno-warn-name-shadowing #-}
 module Section2 where
+
 import Prelude
 import QFeldspar.CDSL hiding (Int,div)
 import QFeldspar.QDSL hiding (Int,div)
+import GenerateTest
 
-type C = String
+testDpF :: (Dp a -> Dp b) -> (Dp a -> Dp b) -> Bool
+testDpF = QFeldspar.CDSL.trmEqlF
+
+testQt :: Qt a -> Qt a -> Bool
+testQt = QFeldspar.QDSL.trmEql
+
+testNrmQt :: (Type a , Type b) => Qt (a -> b) -> Qt (a -> b) -> Bool
+testNrmQt x y = testDpF (toDp x) (toDp y)
+
+toDp :: (Type a , Type b) => Qt (a -> b) -> Dp a -> Dp b
+toDp = (simplifyF . translateF)
+
+test = $generateTest
 
 (.==.) :: Dp Float -> Dp Float -> Dp Bool
 (.==.) = QFeldspar.CDSL.eql
@@ -35,7 +56,8 @@ sqr    ::  Float -> Float
 sqr x  =   x * x
 \end{code}
 Our goal is to generate code in the programming language~C.
-For example,
+For example, instantiating |power| to |(-6)| should result in the
+following:
 \begin{lstlisting}
   float main (float u) {
     if (u == 0) {
@@ -47,7 +69,6 @@ For example,
     }
   }
 \end{lstlisting}
-should result from instantiating |power| to |(-6)|.
 
 \subsubsection{CDSL}
 
@@ -83,8 +104,11 @@ sqr_Dp y  =   y * y
 \end{code}
 Invoking |cdsl (power_Dp (-6))| generates the C code above.
 
+%% SN: above is not correct, since cdsl does not preserve the implicit
+%% sharing the C code would have v and w inlined / duplicated
+
 Type |Float -> Float| in the original becomes |Dp Float -> Dp Float|
-in the CDSL solution, meaning that |power n| accepts a representation
+in the CDSL solution, meaning that |power_Dp n| accepts a representation
 of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
@@ -92,17 +116,18 @@ In CDSL, the body of the code remains almost---but not
 quite!---identical to the original.  Clever encoding tricks,
 explained later, permit declarations, function calls, arithmetic
 operations, and numbers to appear the same whether they are to be
-exeuted at generation-time or run-time.  However,
+executed at generation-time or run-time.  However,
 as explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
 |M .==. N| and |L ?  (M, N)| for the latter.
 
-Assuming |x| contains a value of type |Dp Float| denoting an object
-variable |u| of type float, evaluating |power (-6) x| yields following.
-\begin{spec}
-(u .==. 0) ? (0, 1 / ((u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1)))))
-\end{spec}
+Evaluating |power_Dp (-6)| yields the following:
+\begin{code}
+{-"\iffalse"-}
+ex1 = testDpF (power_Dp (-6)) (\ u -> (u .==. 0) ? (0, 1 / ((u * ((u * 1) * (u * 1))) * (u * ((u * 1) * (u * 1))))))
+\end{code}
+
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
 \[
@@ -139,7 +164,7 @@ power_Qt n =
 sqr_Qt  ::  Qt (Float -> Float)
 sqr_Qt  =   [|| \y -> y * y ||]
 \end{code}
-Invoking |qdsl (power (-6))| generates the C code above.
+Invoking |qdsl (power_Qt (-6))| generates the C code above.
 
 Type |Float -> Float| in the original becomes |Qt (Float -> Float)|
 in the QDSL solution, meaning that |power_Qt n| returns a quotation
@@ -150,25 +175,29 @@ In QDSL, the body of the code changes more substantially. The typed
 quasi-quoting mechanism of Template Haskell is used to indicate which
 code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by \( [||||\cdots ||||] \) and unquoting by \( \$\$(\cdots) \).
+indicated by \( [||||\cdots ||||] \) and unquoting by \( \$\$(\cdots)
+\).
 Here, by the mechanism of quoting, without any need for tricks,
 the syntax for code excecuted at both generation-time and run-time is
 identical for all constructs, including comparison and conditionals.
 
-Evaluating |power (-6)| yields the following.
-\begin{spec}
-[|| \x ->  if x == 0 then 0 else
-             1 /  (\x ->  (\y -> y * y)
-                           ((\x -> (x * ((\x ->  (\y -> y * y)
-                                                   ((\x -> (x * 1)) x)) x))) x)) x ||]
-\end{spec}
-Normalising, with variables renamed for readability, yields the following.
-\begin{spec}
-[|| \u ->  if u == 0 then 0 else
+Evaluating |power_Qt (-6)| yields the following:
+\begin{code}
+{-"\iffalse"-}
+ex2 = testQt (power_Qt (-6)) ([|| \x ->  if x == 0 then 0 else
+      1 / (\x ->  (\y -> y * y)
+          ((\x -> (x * ((\x -> (\y -> y * y)
+           ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||])
+\end{code}
+Normalising, with variables renamed for readability, yields code
+equivalent to the following:
+\begin{code}
+{-"\iffalse"-}
+ex3 = testNrmQt (power_Qt (-6)) ([|| \u ->  if u == 0 then 0 else
              let v = u * 1 in
              let w = u * (v * v) in
-             1 / w * w  ||]
-\end{spec}
+             1 / (w * w)  ||])
+\end{code}
 It is easy to generate the final C code from
 the normalised term.
 
@@ -251,12 +280,14 @@ return  ::  a -> Maybe a
 (>>=)   ::  Maybe a -> (a -> Maybe b) -> Maybe b
 maybe   ::  b -> (a -> b) -> Maybe a -> b
 \end{spec}
-from the Haskell prelude. Type |Maybe| is declared as a monad, enabling the |do| notation,
-which translates into |(>>=)| and |return|.
-The same C code as before should result from instantiating |power''| to |(-6)|.
+from the Haskell prelude. Type |Maybe| is declared as a monad,
+enabling the |do| notation, which translates into |(>>=)| and
+|return|.  The same C code as before should result from instantiating
+|power''| to |(-6)|.
 
-In this case, the refactored function is arguably clumsier than the original,
-but clearly it is desirable to support this form of refactoring in general.
+In this case, the refactored function is arguably clumsier than the
+original, but clearly it is desirable to support this form of
+refactoring in general.
 
 \subsubsection{CDSL}
 
@@ -284,18 +315,17 @@ return 	::  a -> Opt a
 (>>=)  	::  Opt a -> (a -> Opt b) -> Opt b
 option 	::  (Syn a, Syn b) => b -> (a -> b) -> Opt a -> b
 \end{spec}
-from the CDSL library. Details of the type |Opt| and the type class |Syn|
-are explained in Section~\ref{sec:option}.
-Type |Opt| is declared as a monad, enabling the |do| notation,
-just as for |Maybe| above.
-Invoking |cdsl (power'' (-6))| generates the same C code as
+from the CDSL library. Details of the type |Opt| and the type class
+|Syn| are explained in Section~\ref{sec:option}.  Type |Opt| is
+declared as a monad, enabling the |do| notation, just as for |Maybe|
+above.  Invoking |cdsl (power'' (-6))| generates the same C code as
 the previous example.
 
-In order to be easily represented in C, type |Opt a| is represented as a pair
-consisting of a boolean and the representation of the type |a|; in the case that
-corresponds to |Nothing|, the boolean is false and a default value of type |a|
-is provided.  The CDSL term generated by evaluating |power (-6) 0| is large and
-unscrutable:
+In order to be easily represented in C, type |Opt a| is represented as
+a pair consisting of a boolean and the representation of the type |a|;
+in the case that corresponds to |Nothing|, the boolean is false and a
+default value of type |a| is provided.  The CDSL term generated by
+evaluating |power (-6) 0| is large and unscrutable:
 \begin{spec}
 (((fst ((x == (0.0)) ? ((((False) ? ((True), (False))), ((False) ?  (undef,
 undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
@@ -306,11 +336,11 @@ undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 undef))), ((True), ((1.0) / ((x * ((x * (1.0)) * (x * (1.0)))) * (x * ((x *
 (1.0)) * (x * (1.0)))))))))), undef)), (0.0)))
 \end{spec}
-Before, evaluating |power| yielded an CDSL term
-essentially in normal form, save for the need to use common subexpression
-elimination or observable sharing to recover shared structure.  However, this is
-not the case here. Rewrite rules including the following need to be repeatedly
-applied.
+Before, evaluating |power| yielded an CDSL term essentially in normal
+form, save for the need to use common subexpression elimination or
+observable sharing to recover shared structure.  However, this is not
+the case here. Rewrite rules including the following need to be
+repeatedly applied.
 \begin{eqnarray*}
 |fst (M, N)| &\leadsto& M \\
 |snd (M, N)| &\leadsto& N \\
@@ -355,11 +385,11 @@ power_Qt' n =
 power_Qt''      ::  Int -> Qt (Float -> Float)
 power_Qt'' n = [|| \ x ->  maybe 0 (\y -> y) ($$(power_Qt' n) x)||]
 \end{code}
-Here |sqr| is as before,
-and |Nothing|, |return|, |(>>=)|, and |maybe| are as in the Haskell prelude,
-and provided for use in quoted terms by the QDSL library.
+Here |sqr| is as before, and |Nothing|, |return|, |(>>=)|, and |maybe|
+are as in the Haskell prelude, and provided for use in quoted terms by
+the QDSL library.
 
-Evaluating |Qt (powerQ'' (-6))| yields a term of similar complexity
+Evaluating |power_Qt'' (-6)| yields a term of similar complexity
 to the term yielded by the CDSL. Normalisation by the rules discussed
 in Section~\ref{sec:subformula} reduces the term to the same form
 as before, which in turn generates the same C as before.

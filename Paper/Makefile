@@ -6,15 +6,16 @@ paper.tex: paper.lhs Section2.lhs Section3.lhs Section4.lhs
 	chmod -w paper.tex
 
 paper.aux: paper.tex table.tex formalism.tex
-	pdflatex paper
+	pdflatex paper > /dev/null
 
 paper.bbl: paper.aux paper.bib
-	bibtex paper
+	bibtex paper > /dev/null
 
 paper.pdf: paper.aux paper.bbl
-	pdflatex paper
+	pdflatex paper > /dev/null
 	pdflatex paper
 
+.PHONY:clean
 clean:
 	rm -f *.out *.aux *.log *.bbl *.blg *.ptb *.brf *~ \
 	paper.tex
