@@ -1,0 +1,174 @@
+===========================================================================
+                            ESOP15 Review #86A
+                     Updated 25 Nov 2014 9:29:36pm EST
+---------------------------------------------------------------------------
+           Paper #86: QDSLs: Why its nicer to be quoted normally
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 1. No familiarity
+
+                      ===== Comments for author =====
+
+Summary:
+---------
+This paper introduces two different ways of engineering domain-specific languages in Haskell. The first method, called CDSL in this paper, encapsulates many existing techniques for implementing DSLs in Haskell, and the paper summarizes its characteristic features. The second method, called QDSL, is not commonly used and relies crucially on normalization. The contribution of the paper is to distinguish between CDSL and QDSL and clarify their distinguishing features. The paper also applies the proposed ideas to implement a domain-specific language called Feldspar using both CDSL and QDSL and argues that QDSL offers similar expressiveness and efficiency as CDSL.
+
+Evaluation:
+-------------
+A nice aspect of this  submission is that it clarifies the salient features of two competing techniques for engineering DSLs in Haskell. This seems like a useful contribution.
+However, my main problem is that the paper is written in a way that is not very accessible to people who have not implemented DSLs in Haskell. While the paper may be appropriate for people who are experts in this area and who have spent a lot of time thinking about how to implement DSLs in Haskell, I am not sure how interesting this topic will be to the general ESOP audience. I would highly recommend that the authors try to make the paper more accessible to a broader audience. One thing that could be really helpful is to explain various terms before you use them (e.g., explain deep embedding vs. shallow embedding, review observable sharing etc.) Another suggestion is to comment on the implementation effor required for implementing Feldspar using both CDSL and QDSL. While it is not straightforward to define "implementation effort", lines of code, for instance, could be a useful proxy. It would also be good to summarize highlights of your experimental evaluation, i.e., what are the main points you want the reader to take away?
+
+===========================================================================
+                            ESOP15 Review #86B
+                     Updated 26 Nov 2014 3:53:41am EST
+---------------------------------------------------------------------------
+           Paper #86: QDSLs: Why its nicer to be quoted normally
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+The paper compares two approaches to implement DSL: 1) QDSL based on quotation and normalisation of quoted terms and 2) CDSL that combines deep and shallow embedding.  The authors argue that QDSLs can "steal" the syntax of the host language, and ensure that the subformula property given a normaliser for each host language. This comparison is studied in the context Haskell and illustrated by a DSL for signal processing named Feldspar, introduced by Svenningsson and Axelsson. 
+
+The paper is clear and explains in detail the benefits and drawbacks of using CDSL and QDSL. In that regard, it should be very useful to the community. However, the contributions are not really new. Instead they put together existing contributions published by the authors and others. For example, the QDSL technique is not new, nor CDSL.  And, the problem of sharing, examined by the authors, has been identified by others, as mentioned in the paper. Also, there is a lack of objective comparison between the two approaches. No conclusions are drawn from Table 1; numbers are given but no analysis is provided.  One would expect that a quantitative comparison would give the reader guidelines as to when to use either of CDSL or QDSL. Note: the absence of runtime execution for the FFT example  should be explained.
+
+As mentioned by the authors the core of the paper is devoted to explain how to combine deep and shallow embedding to produce a library dedicated to CDSL in the context of MiniFeldspar. And, three pages are devoted to QDSL.  The 11 pages spent on this case study are very detailed and useful, but, as is, they do not make a conference contribution.
+
+===========================================================================
+                            ESOP15 Review #86C
+                     Updated 30 Nov 2014 6:45:01am EST
+---------------------------------------------------------------------------
+           Paper #86: QDSLs: Why its nicer to be quoted normally
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+An exposition of an approach to embedding domain-specific languages, demonstrated for Haskell in particular.  The authors introduce terminology to compare their approach to the status quo, which they call CDSLs ("C" for "combined"), where programs of the metalanguage compute syntactic terms of the object language, which has no first-class functions.  The alternative is QDSLs ("Q" for "quoted"), where more computation happens inside quoted object-language terms.  Actually, the line between meta and object languages is blurred.  Quoted terms can contain first-class functions, and normalization is needed to reduce them to the first-orderness required to output, say, C.  That's exactly the target of the paper's case study, a variant of the Feldspar language from past work.  A few benchmarks, implemented in the old and new systems, show competitive performance.
+
+The QDSL idea makes a valuable contribution to an important conversation about how metaprogramming ought to be done.  This paper gives a clear description of a principle for predictability in EDSL implementation: a typed object language should admit the subformula property, through the lense of the Curry-Howard isomorphism: any term should be normalizable to a term that does not involve any types not appearing syntactically within the original term's type.  So, for instance, a term destined for translation to C may be chosen with a final type that only looks C-like.  Even if it is coded in the metalanguage with all sorts of fancy kinds of abstraction, we are guaranteed that it can be reduced to a C-like term.
+
+In my opinion, the main deficiency of the paper is that the contribution over prior work is not very clear.  This document almost reads more like a journal version of (some of) the authors' ICFP 2013 paper on one particular QDSL.  This ESOP's expanded page limit can have its downside, and I think, if nothing else, this paper's presentation could be improved by tightening it up to use less space.  I do agree that some key concepts of the QDSL philosophy are explained more clearly/directly here than in the ICFP 2013 paper, but it is hard for me to extract crisp new technical contributions.
+
+The new Haskell-based implementation of Feldspar is a leading candidate to be considered as a research contribution.  Clearly many particulars of the implementation are different from the F#/LINQ implementation of the ICFP 2013 paper.  What the paper isn't helping me see is what makes these different particulars of fundamental interest, rather than just the inevitable engineering consequences of porting an approach between language families.  The authors don't even seem to be saying that they have designed a single, aesthetically satsifying foundation for QDSLs in Haskell, as the paper's conclusion explains all the changes they intend to make to GHC infrastructure, to realize the kind of framework that the early parts of the paper argue for.
+
+QUESTIONS FOR AUTHOR RESPONSE:
+
+Can you articulate in a few sentences what is the fundamental research-contribution delta of this paper over the ICFP 2013 paper?
+
+You write: "CDSL requires some term forms, such as comparison and conditionals, to differ between the host and embedded languages. In contrast, QDSL enables the host and embedded languages to appear identical."  Is this a fundamental difference?  The QDSL approach requires explicit quote and antiquote syntax, which doesn't seem so different from e.g. a special syntax for "if".  [Admittedly a hard question to answer objectively, so feel free to pass.]
+
+You write: "Hence, an advantages of the CDSL approach—that it generates terms essentially in normal form—turns out to be restricted to a limited set of types, including functions and products, but excluding sums."  Is this grouping of features fundamental, or is it an accident of the particular source and target language here?  E.g., poor support for sums in C?  Addendum after reading more: now it looks like an artifact of building products but not sums into the CDSL type.
+
+You write: "Svenningsson and Axelsson (2012) claim that it is not possible to support undef without changing the deep embedding".  Maybe they had in mind some richer notion that works for any type, or that works parametrically in the type without requiring a type-class dictionary parameter?
+
+END OF QUESTIONS
+
+The title seems to contain an English error of "its" instead of "it's", unless some sort of pun has gone over my head.
+
+Spelling error on page 5: "unnessary"
+
+"unscrutable" to "inscrutable", probably. (Page 7)
+Same page, "an CDSL" should probably use "a".
+
+On page 8: "Evaluating Qt (powerQ (−6))": What's the "Qt" in there?  It must be a Haskell constructor?  Or is this not meant as a contiguous Haskell code fragment?
+
+"the embedding SQL in F#" missing a word (page 9)
+
+Page 10: "oa body"
+
+Page 11, "The first instance of Syn is Dp itself, and is straightforward.": I just want to comment that it isn't as straighforward as it may seem to people who are already used to GHC type families like this one, for those of us who aren't used to them.
+
+Page 17, typo in the definition of "for"?  (i + 1) used as a function?
+
+"is crucial obtaining" missing a word (page 20)
+
+===========================================================================
+                            ESOP15 Review #86D
+                     Updated 3 Dec 2014 2:57:48am EST
+---------------------------------------------------------------------------
+           Paper #86: QDSLs: Why its nicer to be quoted normally
+---------------------------------------------------------------------------
+
+                      Overall merit: 1. Reject -- I will argue for
+                                        rejection
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+Dear Shayan, Sam, Josef, Philip,
+
+the ESOP PC has asked me for an additional review and opinion on your paper, and since we already had an extensive email exchange, there is not much point in trying to keep this review anonymous.
+
+Best Regards,
+- Tiark Rompf
+
+--------
+
+The paper describes and contrasts two approaches to building embedded, compiled, DSLs: First, building a term representation (deep embedding) through a programmatic interface (shallow embedding). The paper calls this approach CDSL. Second, building the term representation through syntactic quotation, and then symbolically transforming / normalizing the term representation. The paper calls this approach QDSL, and tries to argue that QDSL is superior to CDSL.
+
+The paper seems to contain some interesting ideas, but it is not ready to be published in its current form. There are a several issues, and some require additional work that goes beyond what is feasible for a camera ready revision. 
+
+A central claim of the paper is about strong guarantees obtained through the subformula property, namely that the normalization procedure reliably removes certain language constructs (e.g. lambdas, if neither the argument or result type of the program contain function types). There are two key issues:
+
+First, it is not clear if such a form of normalization is practical: in a program of type String -> String, no subexpression could have type Int, even if the program is 'compute length of input string, and convert this number to a string'. This seems hardly desirable. The given normalization algorithm critically depends on unrestricted tail-duplication of conditionals, which may lead to an exponential blow-up in code size.
+
+Second, the normalization rules as given do not consider while loops or a fixpoint combinator, even though while loops are used in the code examples. In the presence of possibly unbounded recursion, unfolding all control flow is not possible, so the subformula property no longer holds in its full generality (considering only argument and result types). Weaker, restricted, properties might still hold, but this is not at all discussed in the paper. A similar point can be made about additional DSL constructs that cannot be 'translated away'.
+
+Moreover, the paper does not do a good job putting its claims in context of related work. QDSL is presented as a novel approach, but clearly symbolic manipulation of quotes terms has a long history (e.g. in the Lisp and Scheme community). The relationship to partial evaluation is also not discussed at all, even though it seems closely related. So in summary I find it hard to pinpoint exactly what is novel.
+
+This lack of context also makes several design aspects unclear. For example, why is 'power' implemented having type Int -> Qt (Float -> Float ), and not Qt (Int -> Float -> Float ) or Qt Int -> Qt Float -> Qt Float? Are there any trade-offs? What are the guidelines for a DSL designer / user?
+
+Finally, claims that QDSL is 'nicer' or superior seem subjective and are not sufficiently backed up by evidence. At the same time, some claims about CDSL are inaccurate (e.g. 'Each CDSL has a different deep embedding, so when normalisation is required, a new normaliser needs to be written for each CDSL').
+
+===========================================================================
+                            ESOP15 Review #86E
+                     Updated 3 Dec 2014 9:30:10am EST
+---------------------------------------------------------------------------
+           Paper #86: QDSLs: Why its nicer to be quoted normally
+---------------------------------------------------------------------------
+
+                      Overall merit: 2. Weak reject
+                 Reviewer expertise: 4. Expert
+
+                      ===== Comments for author =====
+
+The authors demonstrate that the Quoted DSL technique has some advantages over the standard (deep, shallow) DSL embedding techniques in Haskell. The comparison of the two techniques via a common DSL is nice. However, the delta over prior work seems to consist almost exclusively of this comparison, and I don't think this quite meets the bar for ESOP.
+
+The key point of embedding DSLs is to take advantage of the host language's facilities (syntax, type system) while still limiting what the language user can write so as to maintain guarantee that the DSL can be compiled/run. That is, we need to restrict what the DSL user can write to what can actually be implemented! The standard way of doing this is to restrict DSL terms by construction---the deep embedding approach. At the end of the day, the DSL user is actually writing a program that generates some DSL abstract syntax, which, by construction, the DSL author knows how to compile. The normalization approach of Cheney et al [1] provides a beautiful alternative; by taking advantage of the subformula property, normalization provides a guarantee, based solely on a quoted DSL term's type, that it can be compiled. That is, normalization normalizes-away any intermediate host-language terms that have types (like Maybe Int) that don't have corresponding DSL terms. This aspect of normalization could come out more strongly in the introduction, as it is why QDSLs are an alternative to CDSLs. As written, the reader doesn't find out what the subformula property is or why it really matters until much later in the paper. A reader who is unfamiliar with DSLs should be told in the introduction that 1) DSLs restrict what the programmer can write (that's why they're domain-specific), and 2) this normalization trick is a new way to impose restrictions while allowing full reuse of the host language.
+
+Unfortunately, the normalizer that the authors present does not work for all of Haskell, as they admit. This means that the DSL user can write quoted Haskell terms that can't be normalized into a form that can then be translated to valid DSL abstract syntax. This violates the key principle of DSLs: the DSL user should only be able to get valid DSL terms past the type checker. This is a significant weakness of the paper since the authors are making the argument that QDSLs can replaces CDSLs. Sure, if the DSL user manually restricts him or herself to the subset of Haskell for which the normalizer works, then all is well, but the whole point is that type correct terms should be valid DSL terms, and that is simply not the case here.
+
+I am curious why the authors didn't follow a slightly different approach. Instead of relying on typed template Haskell, one could use GHC's quasiquotation mechanism to embed a core functional language for which normalization was complete. The authors could then make the case that this single quasiquoted language could serve (due to normalization) as a suitable object language for many DSLs, leaving to future work the challenege of writing a normalizer for all of Haskell. Quasiquoters are certainly capable of building type-indexed terms, so this approach would seem to have the benefits of the typed template Haskell approach while additionally ensuring that the normalizer worked for the entire quoted language.
+
+In summary, the key problem that I see with this paper is that the particular QDSLs presented here *is not* a substitute for a CDSL because it fails to enforce the key requirement that type-correct embedded DSL programs are valid DSL programs.
+
+* The authors may want to look at Eckhardt et al [2] and compare the language subset approach there with the normalization approach.
+
+* In the final sentence of the first full paragraph, "which dub QDSL" should be "which we dub QDSL".
+
+* One of the claimed contributions is that the rules in Figure 3 "preserve sharing." What precisely does that mean?
+
+* In Section 2.1, that is a funny type for the function main. Perhaps call it something different, like pow_neg_6?
+
+* Also in Section 2.1, most EDSLs will avoid multiplication by the identity. Not a big deal, but curious that the CDSL here does not.
+
+* In Section 3.7, fusion falls out of the fact that a functional representation of arrays is used. This holds for any CDSL.
+
+* In Section 4.1, what is the QDSL definition of while? Is it just a constant in \Gamma whose translation is a priori known?
+
+* Section 5: What about recursion? The language in Figure 1 doesn't seem to have fix.
+
+* Section 6: The details of how these benchmarks were run are completely absent. Are the numbers the result of multiple runs? What is the error in measurements? Is 0.14 seconds meaningfully different from 0.15 seconds (see the timing for CRC), or is the difference just noise? Is "CSE" just CSE, or does the CDSL use Gill's technique to detect sharing? The numbers indicate that CSE has no effect on C runtime except that it is somehow required for the FFT example. Why is that? It makes me wonder whether or not there is just a bug that CSE is covering up.
+
+What is the argument being made in Section 6 with the benchmarks? That the QDSL approach is reasonably fast? That it generates C code that is comparable to that produced by the CDSL approach?
+
+[1] J. Cheney, S. Lindley, and P. Wadler, “A Practical Theory of Language-integrated Query,” in Proceedings of the 18th ACM SIGPLAN International Conference on Functional Programming, New York, NY, USA, 2013, pp. 403–416.
+
+[2] J. Eckhardt, R. Kaiabachev, E. Pašalić, K. Swadi, and W. Taha, “Implicitly heterogeneous multi-stage programming,” New Gen. Comput., vol. 25, no. 3, pp. 305–336, 2007.
+
