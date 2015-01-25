@@ -1,3 +1,7 @@
+Typos spotted by Phil:
+Section 3.5 (near beginning) Option -> Opt
+Section 4.3 (near beginning) Arr -> Vec
+
 ===========================================================================
                             ESOP15 Review #86A
                      Updated 25 Nov 2014 9:29:36pm EST
