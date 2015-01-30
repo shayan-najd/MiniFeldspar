@@ -134,8 +134,14 @@ and we offer three examples of the notion of QDSL.
 
 \section{Introduction}
 
+% "The difficulty lies not so much in developing new ideas as in escaping from old ones."
+% - John Maynard Keynes
+
+% I can't understand why people are frightened of new ideas. I'm frightened of the old ones.
+% - John Cage
+
 \begin{quotation} \flushright
-Everything old is made new again. [TODO: LOOK UP CORRECT QUOTATION]
+Everything old is new again. -- Peter Allen and Carole Sager
 \end{quotation}
 \vspace{2ex}
 
