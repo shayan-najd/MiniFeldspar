@@ -166,6 +166,15 @@ code that operates on flat data.
 \end{itemize}
 Thus, we give modern application to a theorem four-fifths of a century old.
 
+\begin{quotation} \flushright
+Imitation is the sincerest form of flattery. --- Anon [TODO: CHECK SOURCE]
+\end{quotation}
+
+The basic principles of QDSL have already been enunciated 
+by \citet{CheneyLW13}.
+
+*** CONTINUE FROM HERE ***
+
 
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
