@@ -79,53 +79,149 @@
 }
 \makeatother
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{document}
 
-%if False
-\begin{code}
+\title{QDSL: an old new idea for domain specific languages}
 
-\end{code}
-%endif
-
-%% \conferenceinfo{WXYZ '05}{date, City.}
-%% \copyrightyear{2005}
-%% \copyrightdata{[to be supplied]}
-
-%% \titlebanner{banner above paper title}        % These are ignored unless
-%% \preprintfooter{short description of paper}   % 'preprint' option specified.
-
-\title{QDSLs: Why it's nicer to be quoted normally}
-
-\author{Shayan Najd\inst{1}
-  \and Sam Lindley\inst{1}
+\author{Sam Lindley\inst{1}
+  \and Shayan Najd\inst{1}
   \and Josef Svenningsson\inst{2}
   \and Philip Wadler\inst{1}}
 
 \institute{The University of Edinburgh\\
-\email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
-\and
-Chalmers University of Technology\\
-\email{josefs@@chalmers.se}}
+  \email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
+  \and
+  Chalmers University of Technology\\
+  \email{josefs@@chalmers.se}}
 
 \maketitle
 
-\begin{abstract} We describe a technique for engineering
-domain-specific languages based on quotation and normalisation of
-quoted terms, which we dub QDSL. We compare our technique to a
-standard approach combining deep and shallow embedding, which we dub
-CDSL. We draw attention to the importance of normalisation and
-Gentzen's subformula property for QDSLs. We implement our system, and
-measure five benchmarks in QDSL and CDSL implementations of
-Feldspar. \end{abstract}
+\begin{abstract}
+Domain Specific Languages (DSLs) are widely used.
+This paper introduces QDSL (Quoted DSL) 
+to consolidate a collection of concepts emerging as an approach
+to designing DSLs.
+The key concepts are
+\begin{itemize}
+\item Terms of the DSL are quoted, or are assembled using quotation
+      and antiquotation. While EDSLs steal the type system of the
+      embedding language and often closely resemble its syntax,
+      QDSLs steal both the type system and the syntax.
+      Quotation may be either traditional or type-based.
+\item Normalisation guarantees types satisfy Gentzen's subformula property.
+      In particular, this allows one to write higher-order terms while
+      guaranteeing to generate first-order code, to allow nested intermediate
+      terms while generating code that operates on flat data, or to guarantee
+      fusion of iterations over collections in generated code.
+\end{itemize}
+We contrast QDSL with the traditional EDSL (Embedded DSL) approach,
+and we offer three examples of the notion of QDSL.
+\begin{itemize}
+\item We port Feldspar, and EDSL in Haskell, to a QDSL.
+\item P-LINQ, an embedding of SQL in F# described by Cheney et al (2013).
+\item Lightweight Modular Staging (LMS) in Scala, as used in Delite and other systems.
+\end{itemize}
+\end{abstract}
 
+% Fix: first sentence of abstract is dull
+% Fix: add sentence to abstract about reusing an idea
+%      four-fifths of a century old in a new context
 
 
 \section{Introduction}
 
 \begin{quotation} \flushright
+Everything old is made new again. [TODO: LOOK UP CORRECT QUOTATION]
+\end{quotation}
+\vspace{2ex}
+
+Implementing domain-specific languages (DSLs) via quotation is one of
+the oldest ideas in computing, going back at least to macros in Lisp.
+Today, a more fashionable technique is Embdedded DSLs (EDSLs), which
+may use shallow embedding, deep embedding, or a combination of the
+two. Our goal in this paper is to reinvigorate the idea of building
+DSLs via quotation, by introducing a new approach that depends
+crucially on normalising the quoted term, which we dub Quoted DSLs
+(QDSLs).
+
+Our approach exploits the fact that normalised terms satisfy Gentzen's
+subformula property.  The subformula property provides users of the
+DSL with useful guarantees. To give three examples, it allows the user
+to:
+\begin{itemize}
+
+\item write higher-order terms while guaranteeing to generate
+first-order code;
+
+\item write a sequence of loops over arrays while guaranteeing to
+generate code that fuses those loops;
+
+\item write nested intermediate terms while guaranteeing to generate
+code that operates on flat data.
+
+\end{itemize}
+Thus, we give modern application to a theorem four-fifths of a century old.
+
+
+\begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
 \vspace{2ex}
+
+EDSL is great in part because it steals the type system of its host
+language. Arguably, QDSL is greater because it steals the type system,
+the syntax, and the normalisation rules of its host language.
+
+In theory, an EDSL should also steal the syntax of its host language,
+but in practice this is often only
+partially the case. For instance, an EDSL such as Feldspar or Nicola,
+when embedded in Haskell, can use the overloading of Haskell so that
+arithmetic operations in both languages appear identical, but the same
+is not true of comparison or conditionals. In QDSL, of necessity the
+syntax of the host and embedded languages must be identical. For
+instance, this paper presents a QDSL variant of Feldspar, again in
+Haskell, where arithmetic, comparison, and conditionals are all
+represented by quoted terms of the host, hence necessarily identical.
+
+
+
+
+
+
+
+
+
+
+
+
+
+\section{Related work}
+
+[TODO: CITATION FOR MACROS IN LISP.]
+
+[TODO: CITATION FOR SUBFORMULA PROPERTY.]
+
+
+\end{document}
+
+
+
+
+
+
+
+\begin{quotation} \flushright
+Good artists copy, great artists steal. --- Picasso
+\end{quotation}
+\vspace{2ex}
+
+
+
+
 
 Which shall it be, CDSL or QDSL?
 
@@ -428,35 +524,4 @@ Research, under grant RawFP.
 \bibliography{paper}
 
 \end{document}
-\title{QDSL: an old new idea for domain specific languages}
-
-\begin{abstract}
-Domain Specific Languages (DSLs) are widely used.
-This paper introduces QDSL (Quoted DSL) 
-to consolidate a collection of concepts emerging as an approach
-to designing DSLs.
-We contrast QDSL with the traditional EDSL (Embedded DSL) approach.
-The key concepts are
-\begin{itemize}
-\item Terms of the DSL are quoted, or are assembled using quotation
-      and antiquotation. While EDSLs steal the type system of the
-      embedding language and often closely resemble its syntax,
-      QDSLs steal both the type system and the syntax.
-      Quotation may be either traditional or type-based.
-\item Normalisation guarantees types satisfy Gentzen's subformula property.
-      In particular, this allows one to write higher-order terms while
-      guaranteeing to generate first-order code, to allow nested intermediate
-      terms while generating code that operates on flat data, or to guarantee
-      fusion of iterations over collections in generated code.
-\item The subformula property offers control over
-\end{itemize}
-We offer three examples of the notion of QDSL.
-\begin{itemize}
-\item We port Feldspar, and EDSL in Haskell, to a QDSL.
-\item P-LINQ, an embedding of SQL in F# described by Cheney et al (2013).
-\item Lightweight Modular Staging (LMS) in Scala, as used in Delite and other systems.
-\end{itemize}
-\end{abstract}
-
-\section{Introduction}
 
