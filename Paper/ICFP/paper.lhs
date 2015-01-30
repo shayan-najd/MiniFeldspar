@@ -187,19 +187,49 @@ instance, this paper presents a QDSL variant of Feldspar, again in
 Haskell, where arithmetic, comparison, and conditionals are all
 represented by quoted terms of the host, hence necessarily identical.
 
+In theory, an EDSL also steals the normalisation rules of its host
+language, by using evaluation in the host to normalise terms of the
+target. In Section~\ref{sec:overview} we give two examples comparing
+our QDSL and EDSL versions of Feldspar. In the first of these, it is
+indeed the case that the EDSL achieves by evaluation of host terms
+what the QDSL achieves by normalisation of quoted terms.  However, in
+the second, the EDSL must perform some normalisation of the deep
+embedding corresponding to what the QDSL achieves by normalisation of
+quoted terms.
 
 
+TODO: reorganise above to introduce earlier the idea that we compare
+QDSL and EDSL versions of Feldspar
 
+\section{A comparison QDSL and EDSL Feldspar}
+\label{sec:comparison}
 
+\section{The subformula property}
+\label{sec:subformula}
 
+% perhaps merge the following two sections into one
+% or perhaps put QFeldspar design before the subformula property
 
+\section{QFeldspar design}
+\label{sec:design}
 
+\section{QFeldspar evaluation}
+\label{sec:evaluation}
 
+\section{Other examples of QDSLs}
+\label{sec:other}
 
+\subsection{F\# P-LINQ}
+\label{sec:linq}
 
-
+\subsection{Scala LMS}
+\label{sec:lms}
 
 \section{Related work}
+\label{sec:related}
+
+\section{Conclusion}
+\label{sec:conclusion}
 
 [TODO: CITATION FOR MACROS IN LISP.]
 
