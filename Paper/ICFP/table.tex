@@ -1,0 +1,88 @@
+\newcommand{\hct}{Hc}
+\newcommand{\hrt}{Hr}
+\newcommand{\cct}{Cc}
+\newcommand{\crt}{Cr}
+
+\begin{table}[t]
+
+\begin{center}
+\begin{tabular}{c@{}c@{}c}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+& \multicolumn{4}{|@{}c@{}|}{QDSL}
+\\ \hline
+ & \hct & \hrt & \cct & \crt
+\\ \hline
+IPGray & 11.40 & 0.00 & 0.08 & 0.42
+\\ \hline
+IPBW & 11.26 & 0.00 & 0.08 & 0.20
+\\ \hline
+FFT & 11.36 & 0.24 & 0.08 & 5.08
+\\ \hline
+CRC & 11.29 & 0.01 & 0.08 & 0.14
+\\ \hline
+Windowing & 11.19 & 0.01 & 0.08 & 0.31
+\\ \hline
+\end{tabular}
+&
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|@{}c@{}|}{CDSL without CSE}
+\\ \hline
+\hct & \hrt & \cct & \crt
+\\ \hline
+6.22 & 0.00 & 0.08 & 0.45
+\\ \hline
+6.22 & 0.00 & 0.07 & 0.20
+\\ \hline
+6.15 & 0.47 & 0.13 & ---
+\\ \hline
+6.13 & 0.00 & 0.08 & 0.15
+\\ \hline
+6.21 & 0.01 & 0.08 & 0.33
+\\ \hline
+\end{tabular}
+
+&
+
+\begin{tabular}{|c|c|c|c|}
+\hline
+\multicolumn{4}{|@{}c@{}|}{CDSL with CSE}
+\\ \hline
+\hct & \hrt & \cct & \crt
+\\ \hline
+6.55 & 0.00 & 0.07 & 0.45
+\\ \hline
+6.55 & 0.00 & 0.07 & 0.20
+\\ \hline
+6.65 & 0.16 & 0.09 & 6.15
+\\ \hline
+6.49 & 0.00 & 0.08 & 0.15
+\\ \hline
+6.51 & 0.00 & 0.08 & 0.33
+\\ \hline
+\end{tabular}
+
+\end{tabular}
+\end{center}
+
+%%  \begin{tabular}{|l|c|c|c|c|}
+%%  \hline
+%%  & \multicolumn{4}{|@{}c@{}|}{QDSL with CSE}
+%%  \\ \hline
+%%    & \hct & \hrt & \cct & \crt
+%%  \\ \hline
+%%  IPGray & 11.68 & 0.00 & 0.08 & 0.42
+%%  \\ \hline
+%%  FFT & 11.75 & 0.24 & 0.09 & 5.08
+%%  \\ \hline
+%%  Windowing & 11.73 & 0.01 & 0.08 & 0.31
+%%  \\ \hline
+%%  \end{tabular}
+
+\caption{Comparison of CDSL and QDSL MiniFeldspar (all times in seconds)}
+\label{thetable}
+\end{table}
+
+
+
