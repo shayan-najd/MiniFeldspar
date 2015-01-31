@@ -85,7 +85,7 @@
 
 \begin{document}
 
-\title{QDSL: an old new idea for domain specific languages}
+\title{Everything old is new again: Quoted domain specific languages}
 
 \author{Sam Lindley\inst{1}
   \and Shayan Najd\inst{1}
@@ -101,29 +101,56 @@
 \maketitle
 
 \begin{abstract}
+
+Fashions come, go, return. We describes a new
+approach to domain specific languages, called QDSL, that resurrects
+two old ideas: quoted terms for domain specific languages, from
+McCarthy's Lisp of 1960, and the subformula property, from Gentzen's
+natural deduction of 1935.  Quoted terms allow the domain specific
+language to share the syntax and type system of the host
+language. Normalising quoted terms ensures the subformula property,
+which provides strong guarantees, e.g., that one can use higher-order
+or nested code in the source while guaranteeing first-order or flat
+code in the target, or using types guide loop fusion.  We give three
+examples of QDSL: QFeldspar (a variant of Feldsar), P-LINQ for F\#,
+and some uses of Scala LMS; and we provide a comparison between QDSL
+and EDSL (embedded DSL).
+
+\end{abstract}
+
+\begin{abstract}
+
 Domain Specific Languages (DSLs) are widely used.
 This paper introduces QDSL (Quoted DSL) 
 to consolidate a collection of concepts emerging as an approach
 to designing DSLs.
 The key concepts are
+
 \begin{itemize}
+
 \item Terms of the DSL are quoted, or are assembled using quotation
       and antiquotation. While EDSLs steal the type system of the
       embedding language and often closely resemble its syntax,
       QDSLs steal both the type system and the syntax.
       Quotation may be either traditional or type-based.
+
 \item Normalisation guarantees types satisfy Gentzen's subformula property.
       In particular, this allows one to write higher-order terms while
       guaranteeing to generate first-order code, to allow nested intermediate
       terms while generating code that operates on flat data, or to guarantee
       fusion of iterations over collections in generated code.
+
 \end{itemize}
 We contrast QDSL with the traditional EDSL (Embedded DSL) approach,
 and we offer three examples of the notion of QDSL.
 \begin{itemize}
+
 \item We port Feldspar, and EDSL in Haskell, to a QDSL.
+
 \item P-LINQ, an embedding of SQL in F# described by Cheney et al (2013).
+
 \item Lightweight Modular Staging (LMS) in Scala, as used in Delite and other systems.
+
 \end{itemize}
 \end{abstract}
 
