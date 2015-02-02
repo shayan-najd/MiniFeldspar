@@ -1,19 +1,4 @@
-all: icfp-paper.pdf
-
-icfp-paper.tex: icfp-paper.lhs Section2.lhs Section3.lhs Section4.lhs
-	if [ -f "icfp-paper.tex" ]; then chmod +w icfp-paper.tex; fi
-	lhs2TeX -o icfp-paper.tex icfp-paper.lhs
-	chmod -w icfp-paper.tex
-
-icfp-paper.aux: icfp-paper.tex table.tex formalism.tex
-	pdflatex icfp-paper
-
-icfp-paper.bbl: icfp-paper.aux icfp-paper.bib
-	bibtex icfp-paper
-
-icfp-paper.pdf: icfp-paper.aux icfp-paper.bbl
-	pdflatex icfp-paper
-	pdflatex icfp-paper
+all: paper.pdf
 
 paper.tex: paper.lhs Section2.lhs Section3.lhs Section4.lhs
 	if [ -f "paper.tex" ]; then chmod +w paper.tex; fi
@@ -21,13 +6,13 @@ paper.tex: paper.lhs Section2.lhs Section3.lhs Section4.lhs
 	chmod -w paper.tex
 
 paper.aux: paper.tex table.tex formalism.tex
-	pdflatex paper > /dev/null
+	pdflatex paper
 
 paper.bbl: paper.aux paper.bib
-	bibtex paper > /dev/null
+	bibtex paper
 
 paper.pdf: paper.aux paper.bbl
-	pdflatex paper > /dev/null
+	pdflatex paper
 	pdflatex paper
 
 .PHONY:clean

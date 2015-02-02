@@ -48,8 +48,8 @@
 \usepackage{stmaryrd}
 \usepackage{proof}
 \usepackage{xspace}
-\usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
-                      ,pdftitle={QDSLs: Why it's nicer to be quoted normally}
+\usepackage[pdfauthor={Sam Lindley,Shayan Najd,Josef Svenningsson,Philip Wadler}
+                      ,pdftitle={Everything old is new again: Quoted domain specific languages}
                       ,pagebackref=true,pdftex,backref=none]{hyperref}
 \usepackage{tabularx}
 \usepackage{graphicx}
@@ -118,41 +118,41 @@ and EDSL (embedded DSL).
 
 \end{abstract}
 
-\begin{abstract}
-
-Domain Specific Languages (DSLs) are widely used.
-This paper introduces QDSL (Quoted DSL) 
-to consolidate a collection of concepts emerging as an approach
-to designing DSLs.
-The key concepts are
-
-\begin{itemize}
-
-\item Terms of the DSL are quoted, or are assembled using quotation
-      and antiquotation. While EDSLs steal the type system of the
-      embedding language and often closely resemble its syntax,
-      QDSLs steal both the type system and the syntax.
-      Quotation may be either traditional or type-based.
-
-\item Normalisation guarantees types satisfy Gentzen's subformula property.
-      In particular, this allows one to write higher-order terms while
-      guaranteeing to generate first-order code, to allow nested intermediate
-      terms while generating code that operates on flat data, or to guarantee
-      fusion of iterations over collections in generated code.
-
-\end{itemize}
-We contrast QDSL with the traditional EDSL (Embedded DSL) approach,
-and we offer three examples of the notion of QDSL.
-\begin{itemize}
-
-\item We port Feldspar, and EDSL in Haskell, to a QDSL.
-
-\item P-LINQ, an embedding of SQL in F# described by Cheney et al (2013).
-
-\item Lightweight Modular Staging (LMS) in Scala, as used in Delite and other systems.
-
-\end{itemize}
-\end{abstract}
+% \begin{abstract}
+% 
+% Domain Specific Languages (DSLs) are widely used.
+% This paper introduces QDSL (Quoted DSL) 
+% to consolidate a collection of concepts emerging as an approach
+% to designing DSLs.
+% The key concepts are
+% 
+% \begin{itemize}
+% 
+% \item Terms of the DSL are quoted, or are assembled using quotation
+%       and antiquotation. While EDSLs steal the type system of the
+%       embedding language and often closely resemble its syntax,
+%       QDSLs steal both the type system and the syntax.
+%       Quotation may be either traditional or type-based.
+% 
+% \item Normalisation guarantees types satisfy Gentzen's subformula property.
+%       In particular, this allows one to write higher-order terms while
+%       guaranteeing to generate first-order code, to allow nested intermediate
+%       terms while generating code that operates on flat data, or to guarantee
+%       fusion of iterations over collections in generated code.
+% 
+% \end{itemize}
+% We contrast QDSL with the traditional EDSL (Embedded DSL) approach,
+% and we offer three examples of the notion of QDSL.
+% \begin{itemize}
+% 
+% \item We port Feldspar, and EDSL in Haskell, to a QDSL.
+% 
+% \item P-LINQ, an embedding of SQL in F# described by Cheney et al (2013).
+% 
+% \item Lightweight Modular Staging (LMS) in Scala, as used in Delite and other systems.
+% 
+% \end{itemize}
+% \end{abstract}
 
 % Fix: first sentence of abstract is dull
 % Fix: add sentence to abstract about reusing an idea
@@ -160,6 +160,7 @@ and we offer three examples of the notion of QDSL.
 
 
 \section{Introduction}
+\label{sec:introduction}
 
 % "The difficulty lies not so much in developing new ideas as in escaping from old ones."
 % - John Maynard Keynes
@@ -168,7 +169,11 @@ and we offer three examples of the notion of QDSL.
 % - John Cage
 
 \begin{quotation} \flushright
-Everything old is new again. -- Peter Allen and Carole Sager
+Don't throw the past away \\
+You might need it some rainy day \\
+Dreams can come true again \\
+When everything old is new again \\
+-- Peter Allen and Carole Sager
 \end{quotation}
 \vspace{2ex}
 
@@ -181,10 +186,50 @@ DSLs via quotation, by introducing a new approach that depends
 crucially on normalising the quoted term, which we dub Quoted DSLs
 (QDSLs).
 
-Our approach exploits the fact that normalised terms satisfy Gentzen's
-subformula property.  The subformula property provides users of the
-DSL with useful guarantees. To give three examples, it allows the user
-to:
+\begin{quotation} \flushright
+Imitation is the sincerest of flattery. --- Charles Caleb Colton
+\end{quotation}
+\vspace{2ex}
+
+\citet{CheneyLW13} describes a DSL for language-integrated query in F\#
+that translates into SQL. The approach relies on the key features of 
+QDSL---quotation, normalisation of quoted terms, and the subformula property---and
+the paper conjectures that these may be useful in other settings.
+
+Here we test that conjecture by reimplementing the EDSL Feldspar
+\citet{FELDSPAR} as a QDSL. We describe the key features of
+the design, and show that the performance of the two versions is
+comparable. We argue that, from the user's point of view, the QDSL
+approach may sometimes offer a considerable simplification as
+compared to the EDSL approach. To back up that claim, we describe
+the EDSL approach to Feldspar for purposes of comparison.
+The QDSL description occupies TODO:M pages, while
+the EDSL decription requires TODO:N pages.
+
+We also claim that Lightweight Modular in Staging (LMS) as developed
+by Scala has much in common with QDSL: it often uses a type-based form
+of quotation, and some DSLs implemented with LMS exploit normalisation
+of quoted terms using smart constructors, and we suggest that such
+DSLs may benefit from the subformula property.  LMS is a flexible
+library offering a range of approaches to building DSLs, only some of
+which make use of type-based quotation or normalisation via
+smart-constructors; so our claim is that some LMS implementations use
+QDSL techniques, not that QDSL subsumes LMS.
+
+TODO: work out which specific LMS DSLs to cite. Scala-to-SQL is one,
+what are the others?
+
+\begin{quotation}\flushright
+Perhaps we may express the essential properties of such a normal proof
+by saying: it is not roundabout.
+--- Gerhard Gentzen
+\end{quotation}
+\vspace{2ex}
+
+Our approach exploits the fact that normalised terms satisfy the
+subformula property of \citet{Gentzen35}.
+The subformula property provides users of the
+DSL with useful guarantees, such as the following:
 \begin{itemize}
 
 \item write higher-order terms while guaranteeing to generate
@@ -197,17 +242,14 @@ generate code that fuses those loops;
 code that operates on flat data.
 
 \end{itemize}
-Thus, we give modern application to a theorem four-fifths of a century old.
+We thus give modern application to a theorem four-fifths of a century old.
 
-\begin{quotation} \flushright
-Imitation is the sincerest form of flattery. --- Anon [TODO: CHECK SOURCE]
-\end{quotation}
-
-The basic principles of QDSL have already been enunciated 
-by \citet{CheneyLW13}.
-
-*** CONTINUE FROM HERE ***
-
+The subformula property holds only for terms in normal form.  Previous
+work, such as \citet{CheneyLW13} uses a call-by-name normalisation
+algorithm that performs full beta-reduction, which may cause
+computations to be repeated.  Here we present call-by-value and
+call-by-need normalisation algorithms, which guarantee to preserve
+sharing of computations.
 
 \begin{quotation} \flushright
 Good artists copy, great artists steal. --- Picasso
@@ -231,7 +273,7 @@ represented by quoted terms of the host, hence necessarily identical.
 
 In theory, an EDSL also steals the normalisation rules of its host
 language, by using evaluation in the host to normalise terms of the
-target. In Section~\ref{sec:overview} we give two examples comparing
+target. In Section~\ref{sec:qdsl-vs-edsl} we give two examples comparing
 our QDSL and EDSL versions of Feldspar. In the first of these, it is
 indeed the case that the EDSL achieves by evaluation of host terms
 what the QDSL achieves by normalisation of quoted terms.  However, in
@@ -239,27 +281,78 @@ the second, the EDSL must perform some normalisation of the deep
 embedding corresponding to what the QDSL achieves by normalisation of
 quoted terms.
 
+\begin{quotation}
+\flushright
+Try to give all of the information to help others to judge the value
+of your contribution; not just the information that leads to judgment
+in one particular direction or another. --- Richard Feynman
+\end{quotation}
+\vspace{2ex}
 
-TODO: reorganise above to introduce earlier the idea that we compare
-QDSL and EDSL versions of Feldspar
+The subformula property depends on normalisation, but normalisation
+may lead to an exponential blowup in the size of the normalised
+code. In particular, this occurs when there are nested conditional or
+case statements. We explain how the QDSL technique can offer the user
+control over where normalisation does and does not occur, while still
+maintaining the subformula property.
 
-\section{A comparison QDSL and EDSL Feldspar}
-\label{sec:comparison}
+Some researchers contend that an essential property of an
+embedded DSL which generates target code is that every term
+that is type-correct should successfully generate code in
+the target language. Neither the P-LINK of \citet{CheneyLW13}
+nor the QFeldspar of this paper satisfy this property.
+It is possible to ensure the property with additional preprocessing;
+we clarify the tradeoff between ease of
+implementation and ensuring safe compilation to target at
+compile-time rather than run-time.
+
+TODO: some quotation suitable for contributions
+
+The contributions of this paper are:
+\begin{itemize}
+
+\item To suggest the general value of an approach to building DSLs
+based on quotation, normalisation of quoted terms, and the subformula
+property, and to name this approach QDSL. (Section~\ref{sec:introduction}.)
+
+\item To present the design of a QDSL implementation of Feldspar, and
+show its implementation length and performance is comparable to an
+EDSL implementation of Feldspar. (Section~\ref{sec:qfeldspar}.)
+
+\item To explain the role of the subformula property in formulating
+DSLs, and to describe a normalisation algorithm suitable for
+call-by-value or call-by-need, which ensures the subformula property
+while not losing sharing of quoted terms.
+(Section~\ref{sec:subformula}.)
+
+\item To review the F\# implementation of language-integrated query
+\citep{CheneyLW13} and the Scala LMS implementations of query
+and [TODO: what else?], and argue that these are instances of QDSL.
+(Section~\ref{sec:other-qdsls}.)
+
+\item To argue that, from the user's point of view, the QDSL
+implementation of Feldspar is conceptually easier to understand than
+the EDSL implementation of Feldspar, by a detailed comparison of
+the user interface of the two implementations (Section~\ref{sec:qdsl-vs-edsl}.)
+
+\end{itemize}
+Section~\ref{sec:related} describes related work, and
+Section~\ref{sec:conclusion} concludes.
+
+\section{A QDSL variant of Feldspar}
+\label{sec:qfeldspar}
+
+\subsection{Design}
+\label{sec:qfeldspar-design}
+
+\subsection{Implementation}
+\label{seq:qfeldspar-implementation}
 
 \section{The subformula property}
 \label{sec:subformula}
 
-% perhaps merge the following two sections into one
-% or perhaps put QFeldspar design before the subformula property
-
-\section{QFeldspar design}
-\label{sec:design}
-
-\section{QFeldspar evaluation}
-\label{sec:evaluation}
-
 \section{Other examples of QDSLs}
-\label{sec:other}
+\label{sec:other-qdsls}
 
 \subsection{F\# P-LINQ}
 \label{sec:linq}
@@ -267,16 +360,22 @@ QDSL and EDSL versions of Feldspar
 \subsection{Scala LMS}
 \label{sec:lms}
 
+\section{A comparison of QDSL and EDSL}
+\label{sec:qdsl-vs-edsl}
+
+% perhaps merge the following two sections into one
+% or perhaps put QFeldspar design before the subformula property
+
 \section{Related work}
 \label{sec:related}
+
+[TODO: CITATION FOR MACROS IN LISP.]
 
 \section{Conclusion}
 \label{sec:conclusion}
 
-[TODO: CITATION FOR MACROS IN LISP.]
-
-[TODO: CITATION FOR SUBFORMULA PROPERTY.]
-
+\bibliographystyle{plainnat}
+\bibliography{paper}
 
 \end{document}
 
@@ -290,10 +389,6 @@ QDSL and EDSL versions of Feldspar
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
 \vspace{2ex}
-
-
-
-
 
 Which shall it be, CDSL or QDSL?
 

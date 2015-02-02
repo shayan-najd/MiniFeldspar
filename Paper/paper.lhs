@@ -102,10 +102,10 @@
   \and Philip Wadler\inst{1}}
 
 \institute{The University of Edinburgh\\
-\email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
-\and
-Chalmers University of Technology\\
-\email{josefs@@chalmers.se}}
+  \email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
+  \and
+  Chalmers University of Technology\\
+  \email{josefs@@chalmers.se}}
 
 \maketitle
 
