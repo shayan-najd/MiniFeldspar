@@ -306,7 +306,11 @@ we clarify the tradeoff between ease of
 implementation and ensuring safe compilation to target at
 compile-time rather than run-time.
 
-TODO: some quotation suitable for contributions
+\begin{quotation}
+\flushright
+TODO: some quotation suitable for contributions (or summary)
+\end{quotation}
+\vspace{2ex}
 
 The contributions of this paper are:
 \begin{itemize}
@@ -342,14 +346,192 @@ Section~\ref{sec:conclusion} concludes.
 \section{A QDSL variant of Feldspar}
 \label{sec:qfeldspar}
 
+Feldspar is an EDSL for writing signal-processing software, that
+generates code in C \citep{FELDSPAR}. We present a variant,
+QFeldspar, that follows the structure of the previous design closely,
+but using the methods of QDSL rather than EDSL. We make a detailed
+comparison of the QDSL and EDSL designs in Section~\ref{qdsl-vs-edsl}.
+
 \subsection{Design}
 \label{sec:qfeldspar-design}
+
+Our goal is to translate a quoted term to C code, so we also assume a
+type |Cd| that represents code in C. The top-level function of
+QFeldspar has the type:
+\begin{spec}
+qdsl :: (FO a , FO b) => Qt (a -> b) -> Cd
+\end{spec}
+which generates a \texttt{main} function that takes an argument
+of type |a| and returns a result of type |c|. Feldspar is designed
+to generate first-order code; while Feldspar programs often use
+higher-order functions, the generated C code should only use
+first-order data. Hence the argument type |a| and result type |b|
+of the main function must be first-order, which is indicated by
+the type-class restrictions |FO a| and |FO b|.
+
+[TODO: explain the following.]
+\begin{spec}
+instance FO Int
+instance FO Float
+instance FO a => FO (Arr a)
+\end{spec}
+Note that we do not have instances for |Maybe a| or |Vec a|,
+which prohibits creating C code that operates on these types.
+
+[Following adapted from Section 2 of ESOP submission.
+TODO: Replace by an example that demonstrates while loops
+and specialisation.]
+
+Let's begin by considering the ``hello world'' of program generation,
+the power function, raising a float to an arbitrary integer.  We
+assume a type |Qt a| to represent a term of type |a|, its
+\emph{quoted} representation. Since division by zero is undefined, we
+arbitrarily choose that raising zero to a negative power yields zero.
+Here is the power function represented using QDSL:
+\begin{code}
+power :: Int -> Qt (Float -> Float)
+power n =
+  if n < 0 then
+    [|| \x -> if x == 0 then 0 else 1 / ($$(power (-n)) x) ||]
+  else if n == 0 then
+    [|| \x -> 1 ||]
+  else if even n then
+    [|| \x -> $$sqr ($$(power (n `div` 2)) x) ||]
+  else
+    [|| \x -> x * ($$(power (n-1)) x) ||]
+
+sqr  ::  Qt (Float -> Float)
+sqr  =   [|| \y -> y * y ||]
+\end{code}
+Invoking |qdsl (power (-6))| generates the following C code.
+\begin{lstlisting}
+  float main (float u) {
+    if (u == 0) {
+      return 0;
+    } else {
+      float v = u * 1;
+      float w = u * (v * v);
+      return 1 / (w * w);
+    }
+  }
+\end{lstlisting}
+The typed quasi-quoting mechanism of Template Haskell is used to
+indicate which code executes at which time.  Unquoted code executes at
+generation-time while quoted code executes at run-time. Quoting is
+indicated by \( [||||\cdots ||||] \) and unquoting by \( \$\$(\cdots)
+\).
+
+Evaluating |power (-6)| yields the following:
+\begin{spec}
+[|| \x ->  if x == 0 then 0 else
+      1 / (\x ->  (\y -> y * y)
+          ((\x -> (x * ((\x -> (\y -> y * y)
+           ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||]
+\end{spec}
+Normalising using the technique of Section~\ref{sec:subformula},
+with variables renamed for readability, yields the following:
+\begin{spec}
+[|| \u ->  if u == 0 then 0 else
+             let v = u * 1 in
+             let w = u * (v * v) in
+             1 / (w * w)  ||]
+\end{spec}
+It is easy to generate the final C code from
+the normalised term.
+
+\subsection{Subformula property}
+
+[TODO: need an informal summary of the subformula property here,
+to explain how it is used in the rest of this section. The
+formal development comes in Section~\ref{sec:subformula}.]
+
+\subsection{While}
+
+\begin{spec}
+while :: (FO s) => Qt ((s -> Bool) -> (s -> s) -> (s -> s))
+\end{spec}
+
+[TODO: Observe that the |FO s| restriction in the definition of |while| is
+crucial. Without it, the subformula property could not guarantee to eliminate
+types such as |Vec a| or |Maybe a|. The reason we can eliminate these types
+is because they are not legal as instantiations of |s| in the definition above.
+
+Example.
+\begin{code}
+for :: (FO s) => Qt (Int -> s -> (Int -> s -> s) -> s)
+for =  [|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1 , b i x)) (0, x_0)) ||]
+\end{code}
+
+[TODO: Here is Fibonacci, but better to have an example involving specialisation.]
+
+\begin{code}
+fib :: Qt (Int -> Int)
+fib =  [|| \n -> $$for n (\(a,b) -> (b,a+b)) (0,1) |]]
+\end{code}
+                        
+\subsection{Arrays}
+
+Two types, |Arr| for manifest arrays and |Vec| for ``pull arrays'' guaranteed
+to be eliminated by fusion.
+\begin{spec}
+type Arr a  =  Array Int a
+data Vec a  =  Vec Int (Int -> a)
+\end{spec}
+Recall that if |FO a| then |FO (Arr a)|, but not |FO (Vec a)|.
+
+We assume the following primitive operations.
+\begin{spec}
+arr      ::  FO a => Int -> (Int -> a) -> Arr a
+arrLen   ::  FO a => Arr a -> Int
+arrIx    ::  FO a => Arr a -> Int -> a
+\end{spec}
+
+\begin{code}
+toArr        ::  Qt (Vec a -> Arr a)
+toArr        =   [|| \(Vec n g) -> arr n (\ x -> g x) ||]
+
+fromArr      ::  Qt (Arr a -> Vec a)
+fromArr      =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
+\end{code}
+
+\begin{code}
+zipWithVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
+zipWithVec   =   [||  \f (Vec m g) (Vec n h) ->
+                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
+
+sumVec       ::  (FO a, Num a) => Qt (Vec a -> a)
+sumVec       =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]
+
+scalarProd   ::  (FO a, Num a) => Qt (Vec a -> Vec a -> a)
+scalarProd   =   [|| \u v -> $$sumVec ($$zipWithVec (*) u v) ||]
+
+norm         ::  Qt (Arr Float -> Float)
+norm         =   [|| \ v -> let w = fromArr v in $$scalarProd v v ||]
+\end{code}
+
+Invoking |qdsl norm| produces the following C code.
+\begin{lstlisting}
+// [TODO: give translation to C.]
+\end{lstlisting}
 
 \subsection{Implementation}
 \label{seq:qfeldspar-implementation}
 
+[TODO: Section 6 of ESOP submission]
+
 \section{The subformula property}
 \label{sec:subformula}
+
+[TODO: Section 5 of ESOP submission]
+
+[TODO: explain how the FO restriction on |while| works in conjunction
+with the subformula property.]
+
+[TODO: explain how the subformula property interacts with |fix| as
+a constant in the language.]
+
+[TODO: explain how including an uninterpreted constant |id| allows
+us to disable reduction whenever this is desirable.]
 
 \section{Other examples of QDSLs}
 \label{sec:other-qdsls}
@@ -363,16 +545,19 @@ Section~\ref{sec:conclusion} concludes.
 \section{A comparison of QDSL and EDSL}
 \label{sec:qdsl-vs-edsl}
 
-% perhaps merge the following two sections into one
-% or perhaps put QFeldspar design before the subformula property
+[TODO: Sections 2 and 3 of ESOP submission]
 
 \section{Related work}
 \label{sec:related}
 
-[TODO: CITATION FOR MACROS IN LISP.]
+[TODO: Section 7 of ESOP submission]
+
+[TODO: Citations for quotation, macros, early DSLs in Lisp]
 
 \section{Conclusion}
 \label{sec:conclusion}
+
+[TODO: Section 8 of ESOP submission.]
 
 \bibliographystyle{plainnat}
 \bibliography{paper}

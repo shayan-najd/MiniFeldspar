@@ -146,6 +146,11 @@ term of type |a|, its \emph{quoted} representation.  Function
 \begin{spec}
 qdsl :: (FO a , Type a , Type b) => Qt (a -> b) -> C
 \end{spec}
+[TODO: Should be as follows]
+\begin{spec}
+qdsl :: (FO a , FO b) => Qt (a -> b) -> C
+\end{spec}
+
 generates a \texttt{main} function corresponding to its
 argument, where |C| is as before.
 Here is a solution to our problem using QDSL.
