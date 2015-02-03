@@ -378,7 +378,7 @@ instance FO a => FO (Arr a)
 Note that we do not have instances for |Maybe a| or |Vec a|,
 which prohibits creating C code that operates on these types.
 
-[TODO: Following adapted from Section 2 of ESOP submission.
+[TODO: The following is adapted from Section 2 of ESOP submission.
 Might be better to replace |power| by an example that demonstrates
 \texttt{while} loops and specialisation, and leave |power| until
 Section~\ref{sec:qdsl-vs-edsl}.]
