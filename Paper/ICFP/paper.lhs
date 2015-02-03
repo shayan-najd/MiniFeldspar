@@ -378,9 +378,10 @@ instance FO a => FO (Arr a)
 Note that we do not have instances for |Maybe a| or |Vec a|,
 which prohibits creating C code that operates on these types.
 
-[Following adapted from Section 2 of ESOP submission.
-TODO: Replace by an example that demonstrates while loops
-and specialisation.]
+[TODO: Following adapted from Section 2 of ESOP submission.
+Might be better to replace |power| by an example that demonstrates
+\texttt{while} loops and specialisation, and leave |power| until
+Section~\ref{sec:qdsl-vs-edsl}.]
 
 Let's begin by considering the ``hello world'' of program generation,
 the power function, raising a float to an arbitrary integer.  We
