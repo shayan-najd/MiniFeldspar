@@ -102,19 +102,18 @@
 
 \begin{abstract}
 
-Fashions come, go, return. We describes a new
-approach to domain specific languages, called QDSL, that resurrects
-two old ideas: quoted terms for domain specific languages, from
-McCarthy's Lisp of 1960, and the subformula property, from Gentzen's
-natural deduction of 1935.  Quoted terms allow the domain specific
-language to share the syntax and type system of the host
-language. Normalising quoted terms ensures the subformula property,
-which provides strong guarantees, e.g., that one can use higher-order
-or nested code in the source while guaranteeing first-order or flat
-code in the target, or using types guide loop fusion.  We give three
-examples of QDSL: QFeldspar (a variant of Feldsar), P-LINQ for F\#,
-and some uses of Scala LMS; and we provide a comparison between QDSL
-and EDSL (embedded DSL).
+Fashions come, go, return. We describes a new approach to domain
+specific languages, called QDSL, that resurrects two old ideas: quoted
+terms for domain specific languages, from McCarthy's Lisp of 1960, and
+the subformula property, from Gentzen's natural deduction of 1935.
+Quoted terms allow the domain specific language to share the syntax
+and type system of the host language. Normalising quoted terms ensures
+the subformula property, which provides strong guarantees, e.g., that
+one can use higher-order or nested code in the source while
+guaranteeing first-order or flat code in the target, or using types
+guide loop fusion.  We give three examples of QDSL: QFeldspar (a
+variant of Feldsar), P-LINQ for F\#, and some uses of Scala LMS; and
+we provide a comparison between QDSL and EDSL (embedded DSL).
 
 \end{abstract}
 
