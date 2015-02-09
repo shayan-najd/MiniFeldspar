@@ -48,7 +48,7 @@
 \usepackage{stmaryrd}
 \usepackage{proof}
 \usepackage{xspace}
-\usepackage[pdfauthor={Sam Lindley,Shayan Najd,Josef Svenningsson,Philip Wadler}
+\usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
                       ,pdftitle={Everything old is new again: Quoted domain specific languages}
                       ,pagebackref=true,pdftex,backref=none]{hyperref}
 \usepackage{tabularx}
