@@ -1,4 +1,4 @@
-\documentclass{llncs}
+\documentclass{sig-alternate}
 
 %include polycode.fmt
 %include forall.fmt
@@ -71,6 +71,9 @@
 \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
 
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}[theorem]{Proposition}
+
 \makeatletter
 \renewcommand\bibsection%
 {
@@ -87,16 +90,30 @@
 
 \title{Everything old is new again: Quoted domain specific languages}
 
-\author{Sam Lindley\inst{1}
-  \and Shayan Najd\inst{1}
-  \and Josef Svenningsson\inst{2}
-  \and Philip Wadler\inst{1}}
-
-\institute{The University of Edinburgh\\
-  \email{sh.najd@@ed.ac.uk, sam.lindley@@ed.ac.uk, philip.wadler@@ed.ac.uk}
-  \and
-  Chalmers University of Technology\\
-  \email{josefs@@chalmers.se}}
+\numberofauthors{4}
+\author{
+% Author
+\alignauthor
+Shayan Najd\\
+       \affaddr{The University of Edinburgh}\\
+       \email{sh.najd@@ed.ac.uk}
+% Author
+\alignauthor
+Sam Lindley\\
+        \affaddr{The University of Edinburgh}\\
+        \email{sam.lindley@@ed.ac.uk}
+% Author
+\alignauthor
+Josef Svenningsson\\
+       \affaddr{Chalmers University of Technology}\\
+       \email{josefs@@chalmers.se}
+\and
+% Author
+\alignauthor
+Philip Wadler\\
+       \affaddr{The University of Edinburgh}\\
+       \email{philip.wadler@@ed.ac.uk}
+}
 
 \maketitle
 
@@ -117,6 +134,12 @@ we provide a comparison between QDSL and EDSL (embedded DSL).
 
 \end{abstract}
 
+% Todo: find the right categories, terms, and keywords
+\category{H.4}{Information Systems Applications}{Miscellaneous}
+\category{D.2.8}{Software Engineering}{Metrics}[complexity measures, performance measures]
+\terms{Theory}
+\keywords{ACM proceedings, \LaTeX, text tagging}
+
 \section{Introduction}
 \label{sec:introduction}
 
@@ -126,7 +149,7 @@ we provide a comparison between QDSL and EDSL (embedded DSL).
 % I can't understand why people are frightened of new ideas. I'm frightened of the old ones.
 % - John Cage
 
-\begin{quote} 
+\begin{quote}
 Don't throw the past away \\
 You might need it some rainy day \\
 Dreams can come true again \\
@@ -152,7 +175,7 @@ Imitation is the sincerest of flattery.
 \vspace{2ex}
 
 \citet{CheneyLW13} describes a DSL for language-integrated query in F\#
-that translates into SQL. The approach relies on the key features of 
+that translates into SQL. The approach relies on the key features of
 QDSL---quotation, normalisation of quoted terms, and the subformula property---and
 the paper conjectures that these may be useful in other settings.
 
@@ -490,7 +513,7 @@ for =  [|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1 , b i x)) (0
 fib :: Qt (Int -> Int)
 fib =  [|| \n -> $$for n (\(a,b) -> (b,a+b)) (0,1) |]]
 \end{code}
-                        
+
 
 \subsection{Arrays}
 
@@ -1319,4 +1342,3 @@ Research, under grant RawFP.
 \bibliography{paper}
 
 \end{document}
-
