@@ -134,11 +134,12 @@ we provide a comparison between QDSL and EDSL (embedded DSL).
 
 \end{abstract}
 
-% Todo: find the right categories, terms, and keywords
-\category{H.4}{Information Systems Applications}{Miscellaneous}
-\category{D.2.8}{Software Engineering}{Metrics}[complexity measures, performance measures]
-\terms{Theory}
-\keywords{ACM proceedings, \LaTeX, text tagging}
+\category{D.1.1}{Applicative (Functional) Programming}{}
+\category{D.3.1}{Formal Definitions and Theory}{}
+\category{D.3.2}{Language Classifications}{Applicative (functional) languages}
+
+% \terms{Theory}
+\keywords{lambda calculus; domain-specific language; DSL; embedded languages; EDSL; quotation; normalisation}
 
 \section{Introduction}
 \label{sec:introduction}
@@ -1011,7 +1012,8 @@ us to disable reduction whenever this is desirable.]
 \section{A comparison of QDSL and EDSL}
 \label{sec:qdsl-vs-edsl}
 
-[TODO: Sections 2 and 3 of ESOP submission]
+%include Section2.lhs
+%include Section3.lhs
 
 \section{Related work}
 \label{sec:related}
