@@ -82,13 +82,14 @@
 }
 \makeatother
 
-
+\newcommand{\flushr}{\protect\\{}\mbox{~}\hfill}%{\flushright\vspace{-2ex}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
-\title{Everything old is new again: Quoted domain specific languages}
+\title{Everything old is new again:\\
+       Quoted Domain Specific Languages}
 
 \numberofauthors{4}
 \author{
@@ -112,7 +113,7 @@ Josef Svenningsson\\
 \alignauthor
 Philip Wadler\\
        \affaddr{The University of Edinburgh}\\
-       \email{philip.wadler@@ed.ac.uk}
+       \email{wadler@@inf.ed.ac.uk}
 }
 
 \maketitle
@@ -144,7 +145,7 @@ we provide a comparison between QDSL and EDSL (embedded DSL).
 \section{Introduction}
 \label{sec:introduction}
 
-% "The difficulty lies not so much in developing new ideas as in escaping from old ones."
+% The difficulty lies not so much in developing new ideas as in escaping from old ones.
 % - John Maynard Keynes
 
 % I can't understand why people are frightened of new ideas. I'm frightened of the old ones.
@@ -155,7 +156,7 @@ Don't throw the past away \\
 You might need it some rainy day \\
 Dreams can come true again \\
 When everything old is new again
-\flushright -- Peter Allen and Carole Sager
+\flushr -- Peter Allen and Carole Sager
 \end{quote}
 \vspace{2ex}
 
@@ -171,7 +172,7 @@ crucially on normalising the quoted term, which we dub Quoted DSLs
 \vspace{2ex}
 \begin{quote}
 Imitation is the sincerest of flattery.
-\flushright --- Charles Caleb Colton
+\flushr --- Charles Caleb Colton
 \end{quote}
 \vspace{2ex}
 
@@ -206,7 +207,7 @@ what are the others?
 \begin{quote}
 Perhaps we may express the essential properties of such a normal proof
 by saying: it is not roundabout.
-\flushright --- Gerhard Gentzen
+\flushr --- Gerhard Gentzen
 \end{quote}
 \vspace{2ex}
 
@@ -237,7 +238,7 @@ sharing of computations.
 
 \begin{quote}
 Good artists copy, great artists steal.
-\flushright --- Picasso
+\flushr --- Picasso
 \end{quote}
 \vspace{2ex}
 
@@ -270,8 +271,7 @@ quoted terms.
 Try to give all of the information to help others to judge the value
 of your contribution; not just the information that leads to judgment
 in one particular direction or another.
-\flushright
---- Richard Feynman
+\flushr --- Richard Feynman
 \end{quote}
 \vspace{2ex}
 
@@ -293,7 +293,6 @@ implementation and ensuring safe compilation to target at
 compile-time rather than run-time.
 
 \begin{quote}
-\flushright
 TODO: some quotation suitable for contributions (or summary)
 \end{quote}
 \vspace{2ex}
@@ -338,18 +337,21 @@ QFeldspar, that follows the structure of the previous design closely,
 but using the methods of QDSL rather than EDSL. We make a detailed
 comparison of the QDSL and EDSL designs in Section~\ref{sec:qdsl-vs-edsl}.
 
-\subsection{Design}
-\label{sec:qfeldspar-design}
+% \subsection{Design}
+% \label{sec:qfeldspar-design}
+
+\subsection{An introductory example}
+\label{sec:power}
 
 We are particularly interested in DSLs that perform \emph{staged}
 computation, where at code-generation time we use host code to
 generate target code that is to be executed at run-time.
 
 In QFeldspar, our goal is to translate a quoted term to C code, so we
-also assume a type |Cd| that represents code in C. The top-level
+also assume a type |C| that represents code in C. The top-level
 function of QFeldspar has the type:
 \begin{spec}
-qdsl :: (FO a , FO b) => Qt (a -> b) -> Cd
+qdsl :: (FO a , FO b) => Qt (a -> b) -> C
 \end{spec}
 which generates a \texttt{main} function that takes an argument
 of type |a| and returns a result of type |b|.
@@ -367,8 +369,8 @@ instance (FO a, FO b) => FO (a,b)
 instance (FO a) => FO (Arr a)
 \end{spec}
 It is easy to add triples and larger tuples.
-Here type @Arr a@ is the type of arrays with indexed by integers
-with components of type @a@, with indexes beginning at zero.
+Here type |Arr a| is the type of arrays with indexed by integers
+with components of type |a|, with indexes beginning at zero.
 
 Let's begin by considering the ``hello world'' of program generation,
 the power function, raising a float to an arbitrary integer.  We
@@ -380,7 +382,8 @@ Here is the power function represented using QDSL:
 power :: Int -> Qt (Float -> Float)
 power n =
   if n < 0 then
-    [|| \x -> if x == 0 then 0 else 1 / ($$(power (-n)) x) ||]
+    [|| \x -> if x == 0  then 0
+                         else 1 / ($$(power (-n)) x) ||]
   else if n == 0 then
     [|| \x -> 1 ||]
   else if even n then
@@ -447,7 +450,7 @@ impossible or introduce additional runtime overhead?  The answer is
 Gentzen's subformula property.
 
 
-\subsection{Subformula property}
+\subsection{The subformula property}
 
 Gentzen's subformula property guarantees that any proof can be
 normalised so that the only formulas that appear within it are
@@ -459,9 +462,9 @@ normalised so that the type of each of its subterms is a subtype of
 either the type of one of its free variables (corresponding to
 hypotheses) or the term itself (corresponding to the conclusion).
 Here the subtypes of a type are the type itself and the subtypes of
-its parts, where the parts of @a -> b@ are @a@ and @b@, the parts of
-@(a,b)@ are @a@ and @b@, and the only part of @Arr a@ is @a@, and that
-types @int@ and @float@ have no parts.
+its parts, where the parts of |a -> b| are |a| and |b|, the parts of
+|(a,b)| are |a| and |b|, and the only part of |Arr a| is |a|, and that
+types |int| and |float| have no parts.
 
 Further, it is easy to sharpen Gentzen's proof to guarantee a a proper
 subformula property: any term can be normalised so that the type of
@@ -473,40 +476,139 @@ and the proper subtypes of a type are all subtypes save for the type
 itself.
 
 In the example of the previous subsection, the sharpened subformula
-property guarantees that after normalisation a term of type @float ->
-float@ will only have proper subterms of type @float@, which is indeed
+property guarantees that after normalisation a term of type |float ->
+float| will only have proper subterms of type |float|, which is indeed
 true for the normalised term.
 
-[TODO: The above analysis is not correct. We need something stronger
-to guarantee that @while@, which has subtypes that are functions,
-does not actually generate values of higher-type. This is the problem
-that Shayan raised earlier.]
+There is a minor problem. One of the free variables of our quoted
+term is
+\begin{spec}
+(*) :: float -> float -> float
+\end{spec}
+which has |float -> float| as a subtype. This is alieviated by a
+standard trick: assign an arity to each free variable, and treat a
+free variable applied to fewer arguments than its arity as a value.
+We discuss the details in Section~\ref{sec:TODO}.
 
 
 \subsection{Maybe}
 
-[TODO: Move example from Section 2 of ESOP submission.]
+In the previous code, we arbitrarily chose that raising zero to a
+negative power yields zero. Say that we wish to exploit the |Maybe| type
+to refactor the code, separating identifying the exceptional case
+(negative exponent of zero) from choosing a value for this case (zero).
+We decompose |power| into two functions |power'| and |power''|, where the first
+returns |Nothing| in the exceptional case, and the second maps |Nothing|
+to a suitable default value.
 
-[TODO: Note that we do not have instances for |Maybe a|,
-which prohibits creating C code that operates on these types.]
+Here is the refactored code.
+\begin{code}
+power' :: Int -> Qt (Float -> Maybe Float)
+power' n =
+  if n < 0 then
+    [|| \x ->  if x == 0  then Nothing
+                          else do  y <- $$(power' (-n)) x
+                                   return (1 / y) ||]
+  else if n == 0 then
+    [|| \x -> return 1 ||]
+  else if even n then
+    [|| \x -> do  y <- $$(power' (n `div` 2)) x
+                  return ($$sqr y) ||]
+  else
+    [|| \x -> do  y <- $$(power' (n-1)) x
+                  return (x * y) ||]
+
+power''      ::  Int -> Qt (Float -> Float)
+power'' n = [|| \ x ->  maybe 0 (\y -> y) ($$(power' n) x)||]
+\end{code}
+Here |sqr| is as before. Occurrences of |do| are
+expanded to applications of |(>>=)|, as usual, and |Nothing|,
+|return|, |(>>=)|, and |maybe| are treated specially by the
+normaliser, as described below. Evaluation and normalisation of
+|power (-6)| and |power'' (-6)| yield identical terms
+(up to renaming), and hence applying |qdsl| to these yields
+identical C code.
+
+The subformula property is key: because the final type of the result
+does not involve |Maybe| it is certain that normalisation will remove
+all its occurrences.  In order for the subformula property to apply,
+we cannot take |return|, |(>>=)|, and |maybe| as free variables;
+instead, we treat them as known definitions to be eliminated by the
+normaliser.  The |Maybe| type is a part of the standard prelude.
+\begin{spec}
+data Maybe a  =   Nothing | Just a
+
+return        ::  a -> Maybe a
+return        =   Just
+
+(>>=)         ::  Maybe a -> (a -> Maybe b) -> Maybe b
+m >>= k       =   case m of
+                    Nothing  -> Nothing
+                    Just x   -> k x
+
+maybe         ::  b -> (a -> b) -> Maybe a -> b
+maybe x g m   =   case m of
+                    Nothing  -> x
+                    Just y   -> g y
+\end{spec}
+The |Maybe| type is essentially a sum type, and normalisation for
+these is as described in Section~\ref{sec:subformula}.
+
+We have chosen not to make an |FO| instance for |Maybe|, which
+prohibits its use as an argument or result of a top-level function
+passed to |qdsl|. An alternative choice is possible, as we will see
+when we consider arrays, in Section~\ref{sec:arrays} below.
 
 
 \subsection{While}
 
+Code that is intended to compile to a @while@ loop in C is indicated
+in QFeldspar by application of the primitive |while|.
 \begin{spec}
-while :: (FO s) => Qt ((s -> Bool) -> (s -> s) -> (s -> s))
+while :: (FO s) => Qt ((s -> Bool) -> (s -> s) -> s -> s)
 \end{spec}
+Rather than using side-effects, the |while| primitive takes three
+arguments: a predicate over the current state, of type |s ->
+Bool|; a function from current state to new state, of type |s -> s|;
+and an initial state of type |s|; and it returns a final state of type
+|s|.
+
+[TODO: Why don't we need to worry about intermediate values
+of type |s -> Bool| or type |s -> s|?]
+
+As explained in Section~\ref{sec:power}, primitives of the language to
+be compiled, such as |(*)|, are treated as free variables with regard
+to the subformula property. 
+
+
 
 [TODO: Observe that the |FO s| restriction in the definition of |while| is
 crucial. Without it, the subformula property could not guarantee to eliminate
 types such as |Vec a| or |Maybe a|. The reason we can eliminate these types
 is because they are not legal as instantiations of |s| in the definition above.
 
-Example.
+We have now developed sufficient machinery to define a |for| loop
+in terms of a |while| loop.
+
 \begin{code}
 for :: (FO s) => Qt (Int -> s -> (Int -> s -> s) -> s)
-for =  [|| \n x_0 b -> snd (while (\(i,x) -> i < n) (\(i,x) -> (i+1 , b i x)) (0, x_0)) ||]
+for =  [|| \n s_0 b -> snd (while  (\(i,s) -> i < n)
+                                   (\(i,s) -> (i+1 , b i s))
+                                   (0, s_0)) ||]
 \end{code}
+
+The state of the |while| loop is a pair consisting of a counter and
+the state of the |for| loop. The body |b| of the |for| loop is a function
+that expects both the counter and the state of the |for| loop.
+The counter is discarded when the loop is complete, and the final state
+of the |for| loop returned.
+
+Thanks to our machinery, the above definition uses only ordinary Haskell
+pairs. The condition and body of the |while| loop pattern match on the
+state using ordinary pair syntax, and the initial state is constructed
+as a standard Haskell pair.
+
+
 
 [TODO: Here is Fibonacci, but better to have an example involving specialisation.]
 
@@ -1038,7 +1140,7 @@ us to disable reduction whenever this is desirable.]
 
 
 
-\begin{quotation} \flushright
+\begin{quotation}
 Good artists copy, great artists steal. --- Picasso
 \end{quotation}
 \vspace{2ex}
