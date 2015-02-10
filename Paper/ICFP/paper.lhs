@@ -328,6 +328,36 @@ the user interface of the two implementations (Section~\ref{sec:qdsl-vs-edsl}.)
 Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
+% \section{A QDSL variant of Feldspar}
+% \label{sec:qfeldspar}
+
+% \section{The subformula property}
+% \label{sec:subformula}
+
+% \section{Other examples of QDSLs}
+% \label{sec:other-qdsls}
+
+% \subsection{F\# P-LINQ}
+% \label{sec:linq}
+
+% \subsection{Scala LMS}
+% \label{sec:lms}
+
+% \section{A comparison of QDSL and EDSL}
+% \label{sec:qdsl-vs-edsl}
+
+% \section{Related work}
+% \label{sec:related}
+
+% \section{Conclusion}
+% \label{sec:conclusion}
+
+% \bibliographystyle{plainnat}
+% \bibliography{paper}
+
+% \end{document}
+
+
 \section{A QDSL variant of Feldspar}
 \label{sec:qfeldspar}
 
@@ -1127,10 +1157,11 @@ us to disable reduction whenever this is desirable.]
 \section{Conclusion}
 \label{sec:conclusion}
 
-[TODO: Section 8 of ESOP submission.]
+m[TODO: Section 8 of ESOP submission.]
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
+
 
 \end{document}
 
