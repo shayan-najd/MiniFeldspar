@@ -1,4 +1,4 @@
-\documentclass{sig-alternate}
+\documentclass[authoryear]{sigplanconf}
 
 %include polycode.fmt
 %include forall.fmt
@@ -34,14 +34,13 @@
 % US Letter page size
 %\pdfpagewidth=8.5in
 %\pdfpageheight=11in
-
 % The following \documentclass options may be useful:
 %
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
-\usepackage[round]{natbib}
+%%\usepackage[round]{natbib}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -88,33 +87,24 @@
 
 \begin{document}
 
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{ICFP '05}{2015, Vancouver, British Columbia, Canada}
+\copyrightyear{2015}
+
+%% [TODO:] what are the following?
+\copyrightdata{978-1-4503-1054-3/05/11}
+\doi{nnnnnnn.nnnnnnn}
+
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
-\numberofauthors{4}
-\author{
-% Author
-\alignauthor
-Shayan Najd\\
-       \affaddr{The University of Edinburgh}\\
-       \email{sh.najd@@ed.ac.uk}
-% Author
-\alignauthor
-Sam Lindley\\
-        \affaddr{The University of Edinburgh}\\
-        \email{sam.lindley@@ed.ac.uk}
-% Author
-\alignauthor
-Josef Svenningsson\\
-       \affaddr{Chalmers University of Technology}\\
-       \email{josefs@@chalmers.se}
-\and
-% Author
-\alignauthor
-Philip Wadler\\
-       \affaddr{The University of Edinburgh}\\
-       \email{wadler@@inf.ed.ac.uk}
-}
+\authorinfo{Shayan Najd}{The University of Edinburgh}{sh.najd@@ed.ac.uk}
+\authorinfo{Sam Lindley}{The University of Edinburgh}{sam.lindley@@ed.ac.uk}
+\authorinfo{Josef Svenningsson}{Chalmers University of Technology}{josefs@@chalmers.se}
+\authorinfo{Philip Wadler}{The University of Edinburgh}{wadler@@inf.ed.ac.uk}
 
 \maketitle
 
@@ -608,7 +598,7 @@ of type |s -> Bool| or type |s -> s|?]
 
 As explained in Section~\ref{sec:power}, primitives of the language to
 be compiled, such as |(*)|, are treated as free variables with regard
-to the subformula property. 
+to the subformula property.
 
 
 
@@ -1465,7 +1455,8 @@ by naming the concept and drawing attention to the central benefits of
 normalisation and the subformula propety, we may help the concept to
 flower further for decades to come.
 
-\paragraph*{Acknowledgement} This work was funded by EPSRC Grant
+\acks
+This work was funded by EPSRC Grant
 EP/K034413/1. Shayan Najd is a recipient of the Google Europe
 Fellowship in Programming Technology, and this research is supported
 in part by this Google Fellowship. %% <-- Google's requested format
