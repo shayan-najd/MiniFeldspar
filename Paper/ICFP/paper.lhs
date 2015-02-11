@@ -30,17 +30,22 @@
 %format power_Qt'' = power''
 %format sqr_Qt = sqr
 %format ^ = " "
+%format ... = "\cdots"
+%format A_1
+%format A_k
+%format Arr_Fu
 
 % US Letter page size
 %\pdfpagewidth=8.5in
 %\pdfpageheight=11in
+
 % The following \documentclass options may be useful:
 %
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
-%%\usepackage[round]{natbib}
+%\usepackage[round]{natbib}
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
@@ -85,33 +90,58 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{document}
-
-\special{papersize=8.5in,11in}
-\setlength{\pdfpageheight}{\paperheight}
-\setlength{\pdfpagewidth}{\paperwidth}
-
-\conferenceinfo{ICFP '05}{2015, Vancouver, British Columbia, Canada}
+\conferenceinfo{ICFP 2015}{August 31--September 2, 2015, Vancouver, Canada.}
 \copyrightyear{2015}
+\copyrightdata{...}
+\doi{...}
 
-%% [TODO:] what are the following?
-\copyrightdata{978-1-4503-1054-3/05/11}
-\doi{nnnnnnn.nnnnnnn}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
 
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
-\authorinfo{Shayan Najd}{The University of Edinburgh}{sh.najd@@ed.ac.uk}
-\authorinfo{Sam Lindley}{The University of Edinburgh}{sam.lindley@@ed.ac.uk}
-\authorinfo{Josef Svenningsson}{Chalmers University of Technology}{josefs@@chalmers.se}
-\authorinfo{Philip Wadler}{The University of Edinburgh}{wadler@@inf.ed.ac.uk}
+\authorinfo{Shayan Najd}
+           {The University of Edinburgh}
+           {sh.najd@@ed.ac.uk}
+\authorinfo{Sam Lindley}
+           {The University of Edinburgh}
+           {sam.lindley@@ed.ac.uk}
+\authorinfo{Josef Svenningsson}
+           {Chalmers University of Technology}
+           {josefs@@chalmers.se}
+\authorinfo{Philip Wadler}
+           {The University of Edinburgh}
+           {wadler@@inf.ed.ac.uk}
+
+% \numberofauthors{4}
+% \author{
+% \alignauthor
+% Shayan Najd\\
+%        \affaddr{The University of Edinburgh}\\
+%        \email{sh.najd@@ed.ac.uk}
+% \alignauthor
+% Sam Lindley\\
+%         \affaddr{The University of Edinburgh}\\
+%         \email{sam.lindley@@ed.ac.uk}
+% \alignauthor
+% Josef Svenningsson\\
+%        \affaddr{Chalmers University of Technology}\\
+%        \email{josefs@@chalmers.se}
+% \and
+% \alignauthor
+% Philip Wadler\\
+%        \affaddr{The University of Edinburgh}\\
+%        \email{wadler@@inf.ed.ac.uk}
+% }
 
 \maketitle
 
 \begin{abstract}
 
 Fashions come, go, return. We describes a new approach to domain
-specific languages, called QDSL, that resurrects two old ideas: quoted
+specific languages (DSLs), called Quoted DSLs (QDSLs), that resurrects two old ideas: quoted
 terms for domain specific languages, from McCarthy's Lisp of 1960, and
 the subformula property, from Gentzen's natural deduction of 1935.
 Quoted terms allow the domain specific language to share the syntax
@@ -119,9 +149,10 @@ and type system of the host language. Normalising quoted terms ensures
 the subformula property, which provides strong guarantees, e.g., that
 one can use higher-order or nested code in the source while
 guaranteeing first-order or flat code in the target, or using types
-guide loop fusion.  We give three examples of QDSL: QFeldspar (a
-variant of Feldsar), P-LINQ for F\#, and some uses of Scala LMS; and
-we provide a comparison between QDSL and EDSL (embedded DSL).
+to guide loop fusion.  We give three examples of QDSL: QFeldspar (a
+variant of Feldsar), P-LINQ for F\#, and some uses of Scala LMS.
+We also provide a comparison between QDSLs and
+traditional Embedded DSL (EDSLs).
 
 \end{abstract}
 
@@ -130,7 +161,11 @@ we provide a comparison between QDSL and EDSL (embedded DSL).
 \category{D.3.2}{Language Classifications}{Applicative (functional) languages}
 
 % \terms{Theory}
-\keywords{lambda calculus; domain-specific language; DSL; embedded languages; EDSL; quotation; normalisation}
+
+\keywords
+domain-specific language, DSL, EDSL, QDSL,
+embedded language,
+quotation, normalisation, subformula property
 
 \section{Introduction}
 \label{sec:introduction}
@@ -166,10 +201,13 @@ Imitation is the sincerest of flattery.
 \end{quote}
 \vspace{2ex}
 
-\citet{CheneyLW13} describes a DSL for language-integrated query in F\#
-that translates into SQL. The approach relies on the key features of
-QDSL---quotation, normalisation of quoted terms, and the subformula property---and
-the paper conjectures that these may be useful in other settings.
+\citet{CheneyLW13} describes a DSL for language-integrated query in
+F\# that translates into SQL. The approach relies on the key features
+of QDSL---quotation, normalisation of quoted terms, and the subformula
+property---and the paper conjectures that these may be useful in other
+settings.  We are particularly interested in DSLs that perform staged
+computation, where at generation-time we use host code to
+compute target code that is to be executed at run-time.
 
 Here we test that conjecture by reimplementing the EDSL Feldspar
 \citet{FELDSPAR} as a QDSL. We describe the key features of
@@ -328,10 +366,10 @@ Section~\ref{sec:conclusion} concludes.
 % \label{sec:other-qdsls}
 
 % \subsection{F\# P-LINQ}
-% \label{sec:linq}
+% \label{subsec:linq}
 
 % \subsection{Scala LMS}
-% \label{sec:lms}
+% \label{subsec:lms}
 
 % \section{A comparison of QDSL and EDSL}
 % \label{sec:qdsl-vs-edsl}
@@ -358,39 +396,36 @@ but using the methods of QDSL rather than EDSL. We make a detailed
 comparison of the QDSL and EDSL designs in Section~\ref{sec:qdsl-vs-edsl}.
 
 % \subsection{Design}
-% \label{sec:qfeldspar-design}
+% \label{subsec:qfeldspar-design}
 
-\subsection{An introductory example}
-\label{sec:power}
-
-We are particularly interested in DSLs that perform \emph{staged}
-computation, where at code-generation time we use host code to
-generate target code that is to be executed at run-time.
+\subsection{The top level}
+\label{subsec:top}
 
 In QFeldspar, our goal is to translate a quoted term to C code, so we
 also assume a type |C| that represents code in C. The top-level
 function of QFeldspar has the type:
 \begin{spec}
-qdsl :: (FO a , FO b) => Qt (a -> b) -> C
+qdsl :: (Rep a , Rep b) => Qt (a -> b) -> C
 \end{spec}
 which generates a \texttt{main} function that takes an argument
 of type |a| and returns a result of type |b|.
 
-While Feldspar programs often use higher-order functions, the
-generated C code should only use first-order data. Hence the argument
-type |a| and result type |b| of the main function must be first-order,
-which is indicated by the type-class restrictions |FO a| and |FO b|.
-First order types include integers, floats, pairs where the components
-are both first-order, and arrays where the components are first-order.
+Not all types representable in Haskell are easily representable
+in the target language, C. For instance, we do not wish our target
+C code to manipulate higher-order functions.  The argument
+type |a| and result type |b| of the main function must be representable,
+which is indicated by the type-class restrictions |Rep a| and |Rep b|.
+Representable types include integers, floats, and pairs where the components
+are both representable.
 \begin{spec}
-instance FO Int
-instance FO Float
-instance (FO a, FO b) => FO (a,b)
-instance (FO a) => FO (Arr a)
+instance Rep Int
+instance Rep Float
+instance (Rep a, Rep b) => Rep (a,b)
 \end{spec}
 It is easy to add triples and larger tuples.
-Here type |Arr a| is the type of arrays with indexed by integers
-with components of type |a|, with indexes beginning at zero.
+
+\subsection{An introductory example}
+\label{subsec:power}
 
 Let's begin by considering the ``hello world'' of program generation,
 the power function, raising a float to an arbitrary integer.  We
@@ -417,8 +452,7 @@ sqr  =   [|| \y -> y * y ||]
 The typed quasi-quoting mechanism of Template Haskell is used to
 indicate which code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by \( [||||\cdots ||||] \) and unquoting by \( \$\$(\cdots)
-\).
+indicated by |[||...||]| and unquoting by |$$(...)|.
 
 Evaluating |power (-6)| yields the following:
 \begin{spec}
@@ -457,7 +491,7 @@ Depending on your point of view, quotation in this form of QDSL is
 either desirable, because it makes manifest the staging, or
 undesirable because it is too noisy. We return to this point in
 Section~\ref{sec:TODO}.  QDSL enables us to ``steal'' the entire
-syntax of the host language for the DSL.  The EDSL approach can use
+syntax of the host language for our DSL.  The EDSL approach can use
 the same syntax for arithmetic operators, but must use a different
 syntax for equality tests and conditionals, as we will see in
 Section~\ref{sec:qdsl-vs-edsl}.
@@ -471,10 +505,11 @@ Gentzen's subformula property.
 
 
 \subsection{The subformula property}
+\label{subsec:subformula}
 
 Gentzen's subformula property guarantees that any proof can be
 normalised so that the only formulas that appear within it are
-subformulas of either one of the hypotheses or the conclusion of the
+subformulas of one of the hypotheses or of the conclusion of the
 proof.  Viewed through the lens of Propositions as Types
 \citep{wadler-2015}, also known as the Curry-Howard Isomorphism,
 Gentzen's subformula property guarantees that any term can be
@@ -486,7 +521,7 @@ its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and the only part of |Arr a| is |a|, and that
 types |int| and |float| have no parts.
 
-Further, it is easy to sharpen Gentzen's proof to guarantee a a proper
+Further, it is easy to sharpen Gentzen's proof to guarantee a sharpened
 subformula property: any term can be normalised so that the type of
 each of its proper subterms is a proper subtype of either the type of
 one of its free variables (corresponding to hypotheses) or the term
@@ -500,18 +535,19 @@ property guarantees that after normalisation a term of type |float ->
 float| will only have proper subterms of type |float|, which is indeed
 true for the normalised term.
 
-There is a minor problem. One of the free variables of our quoted
-term is
-\begin{spec}
-(*) :: float -> float -> float
-\end{spec}
-which has |float -> float| as a subtype. This is alieviated by a
-standard trick: assign an arity to each free variable, and treat a
-free variable applied to fewer arguments than its arity as a value.
-We discuss the details in Section~\ref{sec:TODO}.
-
+(Careful readers will have noticed a small difficulty.  One of the
+free variables of our quoted term is multiplication over floats.  In
+Haskell, |m*n| abbreviates |(((*) m) n)|, which has |((*) m)| as a
+subterm, and the type of |(*)| is |(float -> (float -> float))|, which has
+|(float -> float)| as a subtype. We alleviate the difficulty by a
+standard trick: each free variable is assigned an arity and must
+always be fully applied. Taking |(*)| to have arity 2 requires we
+always write |m*n| in our code. Then we may, as natural, regard |m|
+and |n| as the only subterms of |m*n|, and |float| as the only subtype
+of the type of |(*)|. Details appear in Section~\ref{sec:subformula}.)
 
 \subsection{Maybe}
+\label{subsec:maybe}
 
 In the previous code, we arbitrarily chose that raising zero to a
 negative power yields zero. Say that we wish to exploit the |Maybe| type
@@ -520,6 +556,24 @@ to refactor the code, separating identifying the exceptional case
 We decompose |power| into two functions |power'| and |power''|, where the first
 returns |Nothing| in the exceptional case, and the second maps |Nothing|
 to a suitable default value.
+
+The |Maybe| type is a part of the standard prelude.
+\begin{spec}
+data Maybe a  =   Nothing | Just a
+
+return        ::  a -> Maybe a
+return        =   Just
+
+(>>=)         ::  Maybe a -> (a -> Maybe b) -> Maybe b
+m >>= k       =   case m of
+                    Nothing  -> Nothing
+                    Just x   -> k x
+
+maybe         ::  b -> (a -> b) -> Maybe a -> b
+maybe x g m   =   case m of
+                    Nothing  -> x
+                    Just y   -> g y
+\end{spec}
 
 Here is the refactored code.
 \begin{code}
@@ -541,153 +595,219 @@ power' n =
 power''      ::  Int -> Qt (Float -> Float)
 power'' n = [|| \ x ->  maybe 0 (\y -> y) ($$(power' n) x)||]
 \end{code}
-Here |sqr| is as before. Occurrences of |do| are
-expanded to applications of |(>>=)|, as usual, and |Nothing|,
-|return|, |(>>=)|, and |maybe| are treated specially by the
-normaliser, as described below. Evaluation and normalisation of
+Here |sqr| is as before. Evaluation and normalisation of
 |power (-6)| and |power'' (-6)| yield identical terms
 (up to renaming), and hence applying |qdsl| to these yields
 identical C code.
 
 The subformula property is key: because the final type of the result
 does not involve |Maybe| it is certain that normalisation will remove
-all its occurrences.  In order for the subformula property to apply,
-we cannot take |return|, |(>>=)|, and |maybe| as free variables;
-instead, we treat them as known definitions to be eliminated by the
-normaliser.  The |Maybe| type is a part of the standard prelude.
-\begin{spec}
-data Maybe a  =   Nothing | Just a
-
-return        ::  a -> Maybe a
-return        =   Just
-
-(>>=)         ::  Maybe a -> (a -> Maybe b) -> Maybe b
-m >>= k       =   case m of
-                    Nothing  -> Nothing
-                    Just x   -> k x
-
-maybe         ::  b -> (a -> b) -> Maybe a -> b
-maybe x g m   =   case m of
-                    Nothing  -> x
-                    Just y   -> g y
-\end{spec}
+all its occurrences.  
+Occurrences of |do| notation are
+expanded to applications of |(>>=)|, as usual.
+Rather thank taking |return|, |(>>=)|, and |maybe| as free variables
+(whose types have subtypes involving |Maybe|),
+we treat them as known definitions to be eliminated by the
+normaliser.  
 The |Maybe| type is essentially a sum type, and normalisation for
 these is as described in Section~\ref{sec:subformula}.
 
-We have chosen not to make an |FO| instance for |Maybe|, which
-prohibits its use as an argument or result of a top-level function
+We have chosen not to make |Maybe| a representable type, which
+prohibits its use as argument or result of the top-level function
 passed to |qdsl|. An alternative choice is possible, as we will see
-when we consider arrays, in Section~\ref{sec:arrays} below.
+when we consider arrays, in Section~\ref{subsec:arrays} below.
 
 
 \subsection{While}
+\label{subsec:while}
 
 Code that is intended to compile to a @while@ loop in C is indicated
-in QFeldspar by application of the primitive |while|.
+in QFeldspar by application of |while|.
 \begin{spec}
-while :: (FO s) => Qt ((s -> Bool) -> (s -> s) -> s -> s)
+while :: (Rep s) => Qt ((s -> Bool) -> (s -> s) -> s -> s)
 \end{spec}
-Rather than using side-effects, the |while| primitive takes three
-arguments: a predicate over the current state, of type |s ->
-Bool|; a function from current state to new state, of type |s -> s|;
-and an initial state of type |s|; and it returns a final state of type
-|s|.
+Rather than using side-effects, |while| takes three
+arguments: a predicate over the current state, of type |s -> Bool|; a
+function from current state to new state, of type |s -> s|; and an
+initial state of type |s|; and it returns a final state of type |s|.
+Since we intend to compile the while loop to C, the type
+of the state is constrained to representable types.
 
-[TODO: Why don't we need to worry about intermediate values
-of type |s -> Bool| or type |s -> s|?]
-
-As explained in Section~\ref{sec:power}, primitives of the language to
-be compiled, such as |(*)|, are treated as free variables with regard
-to the subformula property.
-
-
-
-[TODO: Observe that the |FO s| restriction in the definition of |while| is
-crucial. Without it, the subformula property could not guarantee to eliminate
-types such as |Vec a| or |Maybe a|. The reason we can eliminate these types
-is because they are not legal as instantiations of |s| in the definition above.
-
-We have now developed sufficient machinery to define a |for| loop
-in terms of a |while| loop.
-
+We can define a |for| loop in terms of a |while| loop.
 \begin{code}
-for :: (FO s) => Qt (Int -> s -> (Int -> s -> s) -> s)
+for :: (Rep s) => Qt (Int -> s -> (Int -> s -> s) -> s)
 for =  [|| \n s_0 b -> snd (while  (\(i,s) -> i < n)
                                    (\(i,s) -> (i+1 , b i s))
                                    (0, s_0)) ||]
 \end{code}
-
 The state of the |while| loop is a pair consisting of a counter and
 the state of the |for| loop. The body |b| of the |for| loop is a function
 that expects both the counter and the state of the |for| loop.
 The counter is discarded when the loop is complete, and the final state
 of the |for| loop returned.
 
-Thanks to our machinery, the above definition uses only ordinary Haskell
-pairs. The condition and body of the |while| loop pattern match on the
-state using ordinary pair syntax, and the initial state is constructed
-as a standard Haskell pair.
-
-
-
-[TODO: Here is Fibonacci, but better to have an example involving specialisation.]
-
+As an example, we can define Fibonacci using a |for| loop.
 \begin{code}
 fib :: Qt (Int -> Int)
 fib =  [|| \n -> $$for n (\(a,b) -> (b,a+b)) (0,1) |]]
 \end{code}
 
+Again, the subformula property plays a key role.
+As explained in Section~\ref{subsec:subformula}, primitives of the
+language to be compiled, such as |(*)| and |while|, are treated as
+free variables of a given arity.
+As will be explained in Section~\ref{subsec:rank},
+we can ensure that after normalisation every occurence of |while|
+has the form
+\begin{spec}
+while (\s -> ...) (\s -> ...) (...)
+\end{spec}
+where the first ellipses has type |Bool|,
+and both occurrences of |s| and the second and third ellipses
+all have the same type. 
+
+Unsurprisingly, and in accord with the subformula property, for each
+occurrence of |while| in the normalised code will contain subterms
+with the type of its state. The restriction of state to representable
+types increases the utility of the subformula property. For instance,
+since we have chosen that |Maybe| is not a representable type, we can
+ensure that any top-level function without |Maybe| in its type will
+normalise to code not containing |Maybe| in the type of any subterm.
+An alternative choice is possible, as we will see in the next section.
+
+Complete normalisation of terms is sometimes impossible or
+undesirable.  The extent of normalisation is controlled by which terms
+are taken as free variables (such as |while|) and which are defined
+(such as |for|). QFeldspar always uses |while| loops in preference
+to recursion, but in a different DSL where recursion was used it
+would not be possible to normalise all terms. However, a similar
+solution to the one given here can be adopted, by taking
+|fix :: (a -> a) -> a| as a free variable, similar to |while|.
+
 
 \subsection{Arrays}
+\label{subsec:arrays}
 
-[TODO: Note that we do not have instances for |Vec a|,
-which prohibits creating C code that operates on these types.]
+A key feature of Feldspar is its distinction between two types of
+arrays, manifest arrays |Arr| which may appear at run-time, and
+``pull arrays'' |Vec| which are eliminated by fusion at generation-time.
+Again, we exploit the subformula property to ensure
+no subterms of type |Vec| remain in the final program.
 
-Two types, |Arr| for manifest arrays and |Vec| for ``pull arrays'' guaranteed
-to be eliminated by fusion.
+The type |Arr| of manifest arrays is simply Haskell's array type,
+specialised to arrays with integer indices and zero-based indexing.
+The type |Vec| of pull arrays is defined in terms of existing types,
+as a pair consisting of the length of the array and a function
+that given an index returns the array element at that index.
 \begin{spec}
 type Arr a  =  Array Int a
 data Vec a  =  Vec Int (Int -> a)
 \end{spec}
-Recall that if |FO a| then |FO (Arr a)|, but not |FO (Vec a)|.
-
-We assume the following primitive operations.
+Values of type |Arr| are representable, assuming that the
+element type is representable, while values of type |Vec|
+are not representable.
 \begin{spec}
-arr      ::  FO a => Int -> (Int -> a) -> Arr a
-arrLen   ::  FO a => Arr a -> Int
-arrIx    ::  FO a => Arr a -> Int -> a
+instance (Rep a) => Rep (Arr a)
 \end{spec}
 
+For arrays, we assume the following primitive operations.
+\begin{spec}
+makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
+lenArr   ::  (Rep a) => Arr a -> Int
+ixArr    ::  (Rep a) => Arr a -> Int -> a
+\end{spec}
+The first populates a manifest array of the given
+size using the given indexing function, the second
+returns the length of the array, and the third returns
+the array element at the given index.
+
+We define functions to convert between the two representations in the
+obvious way.
 \begin{code}
 toArr        ::  Qt (Vec a -> Arr a)
-toArr        =   [|| \(Vec n g) -> arr n (\ x -> g x) ||]
+toArr        =   [|| \(Vec n g) -> makeArr n (\ x -> g x) ||]
 
-fromArr      ::  Qt (Arr a -> Vec a)
-fromArr      =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
+toVec        ::  Qt (Arr a -> Vec a)
+toVec        =   [|| \a -> Vec (lenArr a) (\i -> ixArr a i) ||]
 \end{code}
 
+It is straightforward to define operations on vectors,
+including combining corresponding elements of two vectors,
+summing the elements of a vector, dot product of two vectors,
+and norm of a vector.
 \begin{code}
-zipWithVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
-zipWithVec   =   [||  \f (Vec m g) (Vec n h) ->
-                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
+zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
+zipVec   =   [||  \f (Vec m g) (Vec n h) ->
+                        Vec (m `min` n) (\i -> f (g i) (h i)) ||]
 
-sumVec       ::  (FO a, Num a) => Qt (Vec a -> a)
-sumVec       =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]
+sumVec   ::  (Rep a, Num a) => Qt (Vec a -> a)
+sumVec   =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]
 
-scalarProd   ::  (FO a, Num a) => Qt (Vec a -> Vec a -> a)
-scalarProd   =   [|| \u v -> $$sumVec ($$zipWithVec (*) u v) ||]
+dotVec   ::  (Rep a, Num a) => Qt (Vec a -> Vec a -> a)
+dotVec   =   [|| \u v -> $$sumVec ($$zipVec (*) u v) ||]
 
-norm         ::  Qt (Arr Float -> Float)
-norm         =   [|| \ v -> let w = fromArr v in $$scalarProd v v ||]
+normVec  ::  Qt (Vec Float -> Float)
+normVec  =   [|| \v -> sqrt ($$scalarProd v v ||]
 \end{code}
+The second of these uses the |for| loop defined in
+Section~\ref{subsec:while}, the third is defined using
+the first two, and the fourth is defined using the third.
+Recall that our sharpened subformula property required
+that |(*)| be fully applied, so before normalisation
+|(*)| is expanded to |\x y -> x*y|.
 
-Invoking |qdsl norm| produces the following C code.
+Our final function cannot accept |Vec| as input, since
+the |Vec| type is not representable, but it can accept
+|Arr| as input. Invoking |qdsl (normVec . toVec)|
+produces the following C code.
 \begin{lstlisting}
-// [TODO: give translation to C.]
+float main(float[] a) {
+  float x = 0;
+  int i = 0;
+  while (i < lenArr a) {
+    x = x + a[i] * a[i];
+    i = i+1;
+  }
+  return sqrt(x);
+}  
 \end{lstlisting}
+[TODO: Shayan to check that above is correct.]
+
+Types and the subformula property help us to guarantee fusion.
+The subformula property guarantees that all occurrences
+of |Vec| must be eliminated, while occurrences of |Arr| will remain.
+There are some situations where fusion is not beneficial, notably
+when an intermediate vector is accessed many times fusion will cause
+the elements to be recomputed.  An alternative is to materialise the
+vector in memory with the following function.
+\begin{code}
+memorise  ::  Syn a => Qt (Vec a -> Vec a)
+memorise  =   [|| toVec . toArr ||]
+\end{code}
+For example, if
+\begin{spec}
+blur :: Syn a => Vec a -> Vec a
+\end{spec}
+averages adjacent elements of a vector, then one may choose to
+compute either
+\begin{center}
+|[||$$blur . $$blur||]| ~~~or~~~ |[||$$blur . $$memorise . $$blur||]|
+\end{center}
+with different trade-offs between recomputation and memory usage.
+Strong guarantees for fusion in combination with |memorize| gives
+the programmer a simple interface which provides powerful optimisation
+combined with fine control over memory usage.
+
+[TODO: The subformula property guarantees that all occurrences
+of |Vec| will vanish from the final program. The same guarantee
+applies regardless of whether |Vec| is defined as ``pull arrays''
+or ``push arrays''. Does this mean the difference is irrelevant
+for QFeldspar?]
 
 \subsection{Implementation}
-\label{seq:qfeldspar-implementation}
+\label{subsec:implementation}
+
+*** CONTINUE FROM HERE ***
 
 [TODO: Section 6 of ESOP submission]
 
@@ -1113,7 +1233,7 @@ $N$ itself and free variables of $N$ has a type that is a proper
 subformula of $A$ or a proper subformula of a type in $\Gamma$.
 \end{proposition}
 
-[TODO: explain how the FO restriction on |while| works in conjunction
+[TODO: explain how the Rep restriction on |while| works in conjunction
 with the subformula property.]
 
 [TODO: explain how the subformula property interacts with |fix| as
@@ -1147,7 +1267,7 @@ us to disable reduction whenever this is desirable.]
 \section{Conclusion}
 \label{sec:conclusion}
 
-m[TODO: Section 8 of ESOP submission.]
+[TODO: Section 8 of ESOP submission.]
 
 \bibliographystyle{plainnat}
 \bibliography{paper}
@@ -1156,315 +1276,3 @@ m[TODO: Section 8 of ESOP submission.]
 \end{document}
 
 
-
-
-
-
-
-\begin{quotation}
-Good artists copy, great artists steal. --- Picasso
-\end{quotation}
-\vspace{2ex}
-
-Which shall it be, CDSL or QDSL?
-
-Say you wish to use a domain-specific language embedded in a host
-language to generate code in a target language.  One widely-used
-technique combines deep and shallow embedding, which we dub
-CDSL (Combined Domain Specific Language).  Here we introduce a second
-technique based on quotation and normalisation of quoted terms, which
-dub QDSL (Quoted Domain Specific Language).
-
-CDSL is great in part because it steals the type system of its host
-language. Arguably, QDSL is greater because it steals the type system,
-the concrete syntax, and the abstract syntax of its host language.
-
-CDSL sometimes, but not always, avoids the need for normalisation.
-QDSL depends crucially on normalisation. Each CDSL has a
-different deep embedding, so when normalisation is required, a new
-normaliser needs to be written for each CDSL. In contrast, all QDSLs for a
-host language share the same deep embedding---namely, the abstact
-syntax of the host language---so they can share a single normaliser.
-
-Both CDSL and QDSL steal types from the host language. Sometimes, it
-proves convenient to steal a type from the host even when we expect it
-never to appear in target. The most common example is when we exploit
-higher-order types in the host even when the target supports only
-first-order types.  But other examples are plentiful; here we provide
-an example of using the |Maybe| type of the host even though we don't
-expect to provide that type in the target. We show how these
-situations are neatly handled by an application of Gentzen's
-subformula property, exploiting a result from logic in 1935 to advance
-computing eight decades later.
-
-\begin{quotation}\flushright
-Perhaps we may express the essential properties of such a normal proof
-by saying: it is not roundabout.
---- Gerhard Gentzen
-\end{quotation}
-\vspace{2ex}
-
-The QDSL technique (though not the name) was first proposed
-by \citet{CheneyLW13}, who used it to integrate SQL queries into F\#.
-They conjectured that the technique applies more widely, and here we
-test that conjecture by applying QDSL to Feldspar, a DSL for signal
-processing in Haskell that generates C \citep{FELDSPAR}. Our technique
-depends on GHC Haskell typed quasi-quotations \citep{mainland-quoted,metahaskell}.
-
-One key aspect of QDSL---normalisation
-of quoted terms---appears only in \citet{CheneyLW13} and here.
-However, another aspect of QDSL---viewing domain-specific
-languages as quoted terms---is widely used in other systems, including
-Lisp macros, F\# and C\# LINQ \citep{fsharplinq, csharplinq}, and
-Scala Lightweight Modular Staging (LMS) \citep{scalalms}. In F\# LINQ
-quotation and anti-quotation are explicit, as here, while in C\# LINQ
-and Scala LMS quotation and anti-quotation are controlled by type
-inference.
-
-Feldspar exploits a combination of deep and shallow embedding, here
-dubbed CDSL.  The technique is clearly described by
-\citet{SvenningssonA12}, and further refined by \citet{PerssonAS11}.
-Essentially the same technique is also
-applied in Obsidian \citep{svensson2011obsidian} and Nikola
-\citep{NIKOLA}.
-
-In a landmark paper, \citet{gentzen35} introduced the two
-formulations of logic most widely used today, natural deduction and
-sequent calculus.
-% in both intuitionistic and classical variants.
-% (The same paper introduced $\forall$ for universal quantification.)
-Gentzen's main technical result was to establish the \emph{subformula}
-property: any proof may be put in a normal form
-where all formulas it contains are subformulas of its
-hypotheses or conclusion. \citet{CheneyLW13} applied this result to
-ensure queries with higher-order components always simplify to
-first-order queries, easily translated to SQL.  Similarly here, our
-QDSL source may refer to higher-order concepts or data types such as
-|Maybe|, while we ensure that these do not appear in the generated
-code.  The idea is not limited to QDSL, and the conclusion sketches
-how to apply the same idea to CDSL.
-
-%%
-We make the following contributions.
-\begin{itemize}
-  \item We introduce the names CDSL and QDSL, and provide a
-        concise description and comparison of the two techniques.
-  \item We highlight the benefits of normalisation and the
-        subformula property.
-  \item We introduce a collection of reduction rules for
-        normalising terms that enforces the subformula property
-        while ensuring sharing is preserved. The rules adapt to
-        both call-by-need and call-by-value.
-  \item We empirically evaluate CDSL and QDSL implementations of Feldspar
-        on five benchmarks.
-\end{itemize}
-%%
-%
-%The paper is organised as follows.
-Section~\ref{sec:overview} introduces and compares the
-CDSL and QDSL approaches.
-Section~\ref{sec:cdsl} reviews how CDSL
-works in detail, in the context of Feldspar.
-Section~\ref{sec:qdsl} describes how QDSL
-works in detail, reworking the examples of Section~\ref{sec:cdsl}.
-Section~\ref{sec:subformula} describes our normalisation algorithm.
-Section~\ref{sec:evaluation} describes our implementation and
-empirical evaluation.
-Section~\ref{sec:related} summarises related work.
-Section~\ref{sec:conclusion} concludes.
-
-% \todo{Explain termination of normaliser and fix}
-
-\section{Overview}
-\label{sec:overview}
-
-%include Section2.lhs
-
-\section{MiniFeldspar as a CDSL}
-\label{sec:cdsl}
-
-%include Section3.lhs
-
-\section{MiniFeldspar as a QDSL}
-\label{sec:qdsl}
-
-%include Section4.lhs
-
-\section{The subformula property}
-\label{sec:subformula}
-
-\input{formalism}
-
-\section{Implementation and evaluation}
-\label{sec:evaluation}
-
-The transformer from |Qt| to |Dp| performs the following steps.
-\begin{itemize}
-\item It expands identifiers connected with the types |(,)|, |Maybe|
-  and |Vec|.
-%%    \begin{itemize}
-%%    \item For |(,)|, identifiers |fst| and |snd|.
-%%    \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
-%%    \item For |Vec|, there are no relevant identifiers.
-%%    \end{itemize}
-\item It normalises the term to ensure the subformula property.
-  Normalisation includes the special-purpose rules for |Maybe| and |Vec| given in
-  Section~\ref{sec:qdsl} and the general-purpose rules of Section~\ref{sec:subformula}.
-\item It traverses the term, converting |Qt| to |Dp|.
-  It checks that only permitted primitives appear in |Qt|, and translates
-  these to their corresponding representation in |Dp|. Permitted primitives include:
-  |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
-  |while|, |arr|, |arrLen|, and |arrIx|.
-%%    \begin{itemize}
-%%    \item |(==)| and |(<)|, treated as operations on integers.
-%%    \item |(+)|, |(*)|, and other operations on integer and float.
-%%    \item |while|, |arr|, |arrLen|, |arrIx|, which translate to
-%%      |While|, |Arr|, |ArrLen|, and |ArrIx|.
-%%    \end{itemize}
-\end{itemize}
-
-An unfortunate feature of typed quasiquotation in GHC is that the
-implementation discards all type information when creating the
-representation of a term.  Type |Qt a| is equivalent to
-|TH.Q (TH.TExp a)|, where |TH| denotes the library for Template Haskell,
-|TH.Q| is the quotation monad of Template Haskell (used to look up
-identifiers and generate fresh names), and |TH.TExp a| is the parse
-tree for an expression that returns a value of type |a|. In the
-latter, |a| is a phantom variable; type |TH.TExp a| is just a wrapper for
-|TH.Exp|, the (untyped) parse tree of an expression in Template
-Haskell. Hence, the translator from |Qt a| to |Dp a| is forced to
-re-infer all the type information for the subterms of the term of type
-|Qt a|.  This is also why we translate the |Maybe| monad as a special
-case, rather than supporting overloading for monad operations.
-
-%%  As we noted in the introduction, rather than build a special-purpose tool for
-%%  each QDSL, it should be possible to design a single tool for each host language.
-%%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,
-%%  including support for type inference and overloading.
-
-\input{table}
-
-We measured the behaviour of five benchmark programs.
-\begin{center}
-\begin{tabular}{l@@{~}||@@{~}l}
-IPGray     & Image Processing (Grayscale)  \\
-IPBW       & Image Processing (Black and White) \\
-FFT        & Fast Fourier Transform \\
-CRC        & Cyclic Redundancy Check \\
-Windowing  & Average array in a sliding window \\
-\end{tabular}
-\end{center}
-Table~\ref{thetable} lists the results. Columns \hct\ and \hrt\
-list compile-time and run-time in Haskell, and \cct\ and \crt\
-list compile-time and run-time in C.
-Runs for CDSL are shown both with and without common subexpression elimination (CSE),
-which is supported by a simple form of observable sharing. QDSL does not require CSE,
-since the normalisation algorithm preserves sharing. One benchmark, FFT, exhausts
-memory without CSE. All benchmarks produce essentially the same C for both QDSL
-and CDSL, which run in essentially the same time. The one exception is FFT, where
-class |Syn| appears to introduce spurious conversions that increase the
-runtime.
-
-Measurements were done on a PC with a quad-core Intel i7-2640M CPU
-running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
-GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
-
-
-%\section{The design of Haskell DSL}
-%\label{sec:tool}
-
-
-\section{Related work}
-\label{sec:related}
-
-Domain specific languages are becoming increasingly popular as a way
-to deal with software complexity. Yet, they have a long and rich
-history \citep{Bentley:1986:PPL:6424.315691}.
-
-In this paper we have, like many other DSL writers, used Haskell as it
-has proven to be very suitable for \emph{embedding} domain specific
-languages \citep{Gill:14:DSLs-and-Synthesis}.  Examples include
-\citet{reid1999prototyping, hudak1997domain, bjesse1998lava}.
-
-In this paper we have specifically built on the technique of combining
-deep and shallow embeddings \citep{SvenningssonA12} and
-contrasted it with our new QDSL technique. Languages which have used
-this technique include Feldspar \citep{FELDSPAR}, Obsidian
-\citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra
-\citep{giorgidze2011embedding} and Meta-Repa \citep{ankner2013edsl}.
-
-The vector type used in this paper is one of several types which
-enjoy fusion in the CDSL framework. Other examples include push
-arrays \citep{claessen2012expressive} and sequential arrays
-and streams as used in Feldspar \citep{feldspar-github}.
-
-The loss of sharing when implementing embedded DSLs was identified by
-\citet{o1993generating} in the context of embedded circuit descriptions.
-\citet{claessen1999observable} proposed to introduce a little
-bit of impurity in Haskell, referred to as \emph{observable sharing}
-to be able to recover from the loss of sharing. Later, \citet{gill2009type}
-proposed a somewhat safer way of recover sharing, though still ultimately
-relying on impurity.
-
-The underlying idea for QDSLs was established by \citet{CheneyLW13}.
-
-\section{Conclusion}
-\label{sec:conclusion}
-
-We have compared CDSLs and QDSLs, arguing that QDSLs offer competing
-expressiveness and efficiency. CDSLs often (but not always) mimic the
-syntax of the host language, and often (but not always) perform
-normalisation in the host languages, while QDSLs (always) steal the
-syntax of the host language, and (always) ensure the subformula property,
-at the cost of requiring a normaliser, one per host language.
-
-The subformula property may have applications in DSLs other that
-QDSLs. For instance, after Section~\ref{sec:option} of this paper was
-drafted, it occurred to us that a different approach to options in
-CDSL would be to extend type |Dp| with constructs for type |Maybe|.
-So long as type |Maybe| does not appear in the input or output of the
-program, a normaliser that ensures the subformula property could
-guarantee that C code for such constructs need never be generated.
-
-As we noted in the introduction, rather than build a special-purpose tool for
-each QDSL, it should be possible to design a single tool for each host language.
-Our next step is to design Haskell QDSL, with the following features.
-\begin{itemize}
-\item Full-strength type inference for the terms returned from typed
-  quasi-quotations, restoring type information currently discarded by GHC.
-\item Based on the above, full support for type classes and overloading
-  within quasi-quotation.
-\item The user may choose either an ADT or GADT representation of the
-  term returned by typed quasi-quotation, whichever is more convenient.
-\item A normaliser to ensure the subformula property, which works with any
-  datatype declared in Haskell.
-\item The user may supply a type environment indicating which constants
-  (or free variables) may appear in typed quasi-quotations.
-\end{itemize}
-Such a tool could easily subsume the special-purpose translator from
-|Qt| to |Dp| described at the beginning of Section~\ref{sec:evaluation},
-and lift most of its restrictions. For instance,
-the current prototype is restricted to the |Maybe| monad, while the
-envisioned tool will work with any monad.
-
-Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
-speaking prose his whole life. Similarly, many of us have used QDSLs for
-years, if not by that name. DSL via quotation is the heart of Lisp
-macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
-by naming the concept and drawing attention to the central benefits of
-normalisation and the subformula propety, we may help the concept to
-flower further for decades to come.
-
-\acks
-This work was funded by EPSRC Grant
-EP/K034413/1. Shayan Najd is a recipient of the Google Europe
-Fellowship in Programming Technology, and this research is supported
-in part by this Google Fellowship. %% <-- Google's requested format
-Josef Svenningsson is a SICSA Visiting Fellow and is funded by a
-HiPEAC collaboration grant and by the Swedish Foundation for Strategic
-Research, under grant RawFP.
-
-\bibliographystyle{plainnat}
-\bibliography{paper}
-
-\end{document}
