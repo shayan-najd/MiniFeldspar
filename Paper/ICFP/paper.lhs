@@ -201,7 +201,7 @@ Imitation is the sincerest of flattery.
 \end{quote}
 \vspace{2ex}
 
-\citet{CheneyLW13} describes a DSL for language-integrated query in
+\citet{cheney:linq} describes a DSL for language-integrated query in
 F\# that translates into SQL. The approach relies on the key features
 of QDSL---quotation, normalisation of quoted terms, and the subformula
 property---and the paper conjectures that these may be useful in other
@@ -258,7 +258,7 @@ code that operates on flat data.
 We thus give modern application to a theorem four-fifths of a century old.
 
 The subformula property holds only for terms in normal form.  Previous
-work, such as \citet{CheneyLW13} uses a call-by-name normalisation
+work, such as \citet{cheney:linq} uses a call-by-name normalisation
 algorithm that performs full beta-reduction, which may cause
 computations to be repeated.  Here we present call-by-value and
 call-by-need normalisation algorithms, which guarantee to preserve
@@ -313,7 +313,7 @@ maintaining the subformula property.
 Some researchers contend that an essential property of an
 embedded DSL which generates target code is that every term
 that is type-correct should successfully generate code in
-the target language. Neither the P-LINK of \citet{CheneyLW13}
+the target language. Neither the P-LINK of \citet{cheney:linq}
 nor the QFeldspar of this paper satisfy this property.
 It is possible to ensure the property with additional preprocessing;
 we clarify the tradeoff between ease of
@@ -343,7 +343,7 @@ while not losing sharing of quoted terms.
 (Section~\ref{sec:subformula}.)
 
 \item To review the F\# implementation of language-integrated query
-\citep{CheneyLW13} and the Scala LMS implementations of query
+\citep{cheney:linq} and the Scala LMS implementations of query
 and [TODO: what else?], and argue that these are instances of QDSL.
 (Section~\ref{sec:other-qdsls}.)
 
@@ -676,13 +676,14 @@ normalise to code not containing |Maybe| in the type of any subterm.
 An alternative choice is possible, as we will see in the next section.
 
 Complete normalisation of terms is sometimes impossible or
-undesirable.  The extent of normalisation is controlled by which terms
-are taken as free variables (such as |while|) and which are defined
-(such as |for|). QFeldspar always uses |while| loops in preference
-to recursion, but in a different DSL where recursion was used it
-would not be possible to normalise all terms. However, a similar
-solution to the one given here can be adopted, by taking
-|fix :: (a -> a) -> a| as a free variable, similar to |while|.
+undesirable.  The extent of normalisation is controlled by
+introducing uninterpreted constants, such as |while|.
+In a context with recursion, 
+we take |fix :: (a -> a) -> a| as an uninterpreted constant.
+In a context where we wish to avoid unfolding a reduction |L M|,
+we take |id :: a -> a| as an uninterpreted constant,
+and replace |L M| by |id L M|.
+
 
 
 \subsection{Arrays}
@@ -807,9 +808,79 @@ for QFeldspar?]
 \subsection{Implementation}
 \label{subsec:implementation}
 
-*** CONTINUE FROM HERE ***
+\input{table}
 
-[TODO: Section 6 of ESOP submission]
+The original Feldspar generates values of an algebraic type
+(called |Exp a| in \citet{svenningsson:combining}), with constructs
+that represent |while| and manifest arrays similar to those
+above. A backend then compiles values of type |Exp a| to C code.
+QFeldspar provides a transformer from |Qt a| to |Exp a|, and
+shares the Feldspar backend.
+
+The transformer from |Qt| to |Exp| performs the following steps.
+\begin{itemize}
+\item It expands identifiers connected with the types |(,)|, |Maybe|
+  and |Vec|.
+    \begin{itemize}
+    \item For |(,)|, identifiers |fst| and |snd|.
+    \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
+    \item For |Vec|, there are no relevant identifiers.
+    \end{itemize}
+\item It normalises the term to ensure the subformula property,
+  using the rules of Section~\ref{sec:subformula}.
+  The normaliser does not support all Haskell data types,
+  but does include special-purpose rules for |Maybe| and |Vec|.
+\item It traverses the term, converting |Qt| to |Exp|.
+  It checks that only permitted primitives appear in |Qt|, and translates
+  these to their corresponding representation in |Exp|. Permitted primitives include:
+  |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
+  |while|, |makeArr|, |lenArr|, and |ixArr|.
+\end{itemize}
+
+An unfortunate feature of typed quasiquotation in GHC is that the
+implementation discards all type information when creating the
+representation of a term.  Type |Qt a| is equivalent to |TH.Q (TH.TExp
+a)|, where |TH| denotes the library for Template Haskell, |TH.Q| is
+the quotation monad of Template Haskell (used to look up identifiers
+and generate fresh names), and |TH.TExp a| is the parse tree for a
+quoted expression returning a value of type |a|. Type |TH.TExp a| is
+just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
+in Template Haskell, where |a| is a phantom type variable. Hence, the
+translator from |Qt a| to |Exp a| is forced to re-infer all the type
+information for the subterms of the term of type |Qt a|.  This is why
+we translate the |Maybe| monad as a special case, rather than
+supporting overloading for monad operations.  [TODO: say something
+about how overloading for arithmetic is handled.]
+
+%%  As we noted in the introduction, rather than build a special-purpose tool for
+%%  each QDSL, it should be possible to design a single tool for each host language.
+%%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,
+%%  including support for type inference and overloading.
+
+We measured the behaviour of five benchmark programs.
+\begin{center}
+\begin{tabular}{l@@{~}||@@{~}l}
+IPGray     & Image Processing (Grayscale)  \\
+IPBW       & Image Processing (Black and White) \\
+FFT        & Fast Fourier Transform \\
+CRC        & Cyclic Redundancy Check \\
+Windowing  & Average array in a sliding window \\
+\end{tabular}
+\end{center}
+Figure~\ref{fig:thetable} lists the results. Columns \hct\ and \hrt\
+list compile-time and run-time in Haskell, and \cct\ and \crt\
+list compile-time and run-time in C.
+Runs for CDSL are shown both with and without common subexpression elimination (CSE),
+which is supported by a simple form of observable sharing. QDSL does not require CSE,
+since the normalisation algorithm preserves sharing. One benchmark, FFT, exhausts
+memory without CSE. All benchmarks produce essentially the same C for both QDSL
+and CDSL, which run in essentially the same time. The one exception is FFT, where
+Feldspar appears to introduce spurious conversions that increase the
+runtime.
+
+Measurements were done on a PC with a quad-core Intel i7-2640M CPU
+running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
+GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -825,18 +896,21 @@ for QFeldspar?]
 %% Expressions
 \newcommand{\key}{\mathbf}
 
+\newcommand{\app}{\;}
+
 \newcommand{\expvar}[1]{#1}
 \newcommand{\expconst}[2]{#1~#2}
 \newcommand{\expunit}{()}
 \newcommand{\expabs}[3]{\lambda#1.#3}
-\newcommand{\expapp}[2]{#1~#2}
+\newcommand{\expapp}[2]{#1 \app #2}
 \newcommand{\explet}[3]{\key{let}\ #1=#2\ \key{in}\ #3}
 \newcommand{\exppair}[2]{(#1, #2)}
 \newcommand{\expfst}[1]{\key{fst}~#1}
 \newcommand{\expsnd}[1]{\key{snd}~#1}
 \newcommand{\expinl}[2]{\key{inl}~#1}
 \newcommand{\expinr}[2]{\key{inr}~#2}
-\newcommand{\expcase}[5]{\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.#3; \key{inr}\ #4.#5\}}
+\newcommand{\expcase}[5]
+  {\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.\,#3;\; \key{inr}\ #4.\,#5\}}
 
 %% Meta language stuff
 \newcommand{\subst}[3]{#1[#2:=#3]}
@@ -862,17 +936,17 @@ for QFeldspar?]
   \coproduct{A}{B}
 \\[1ex]
 \text{Terms} & L,M,N & ::= &
-% \expunit                \mid
-  \expvar{x}              \mid
-  \expconst{c}{M}         \mid
-  \expabs{x}{A}{N}        \mid
-  \expapp{L}{M}           \mid
-  \explet{x}{M}{N}        \mid
-  \exppair{M}{N}          \mid
-  \expfst{L}              \mid
-  \expsnd{L}              \\&&&
-  \mid \expinl{M}{\tm{B}} \mid
-  \expinr{\tm{A}}{N}      \mid
+% \expunit                	\mid
+  \expvar{x}              	\mid
+  \expconst{c}{\overline{M}}	\mid
+  \expabs{x}{A}{N}              \mid
+  \expapp{L}{M}                 \mid
+  \explet{x}{M}{N}              \mid
+  \exppair{M}{N}                \mid
+  \expfst{L}                   	\mid
+  \expsnd{L}                    \mid \\&&&
+  \expinl{M}{\tm{B}}		\mid
+  \expinr{\tm{A}}{N}           	\mid
   \expcase{L}{x}{M}{y}{N}
 \\[1ex]
 \text{Values} & V,W & ::= &
@@ -1023,8 +1097,11 @@ for QFeldspar?]
            \mid \expinl{V}{B}
            \mid \expinr{A}{W}
 \\[1ex]
-\text{Normal Forms} & N,M & ::= &
-   Q  \mid  V \mid \expcase{z}{x}{N}{y}{M} \mid \explet{x}{Q}{N}
+\text{Normal Forms}
+  & N,M & ::= & Q
+          \mid  V
+          \mid \expcase{z}{x}{N}{y}{M}
+          \mid \explet{x}{Q}{N}
 \\
 \end{array}
 \]
@@ -1039,15 +1116,15 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-       \expconst{c}{(\overline{M},\hole,\overline{N})}
-  \mid \expapp{M}{\hole}
-  \mid \exppair{\hole}{N}
-  \mid \exppair{M}{\hole}
-  \mid \expfst{\hole}
-  \mid \expsnd{\hole} \\
- &\mid&\expinl{\hole}{B}
-  \mid \expinr{A}{\hole}
-  \mid \expcase{\hole}{x}{M}{y}{N} \\
+       \expconst{c}{(\overline{V},\hole,\overline{M})} \mid 
+       \expapp{M}{\hole}                               \mid 
+       \exppair{\hole}{N}                              \mid 
+       \exppair{M}{\hole}                              \mid 
+       \expfst{\hole}                                  \mid 
+       \expsnd{\hole}                                  \mid % \\ &&
+       \expinl{\hole}{B}                               \mid 
+       \expinr{A}{\hole}                               \mid 
+       \expcase{\hole}{x}{M}{y}{N} \\
  \end{array}
 \]%
 \[
@@ -1065,17 +1142,23 @@ G \mathbin{::=}
     \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
 \]
 \[
-\begin{array}[t]{@@{\quad}llll@@{}}
+\begin{array}{lllll}
 (\kappa.{\mathit{let}})
 & G[\explet{x}{\nv}{N}]
 & \rewrite{2}
-& \explet{x}{\nv}{G[N]}, \\
-&&&\quad x \notin \fv{G}\\
+& \explet{x}{\nv}{G[N]},
+& x \notin \fv{G} \\
 
 (\kappa.{\mathit{case}})
-& G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
-\multicolumn{3}{@@{}l@@{}}
-{\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
+& G[\expcase{z}{x}{M}{y}{N}]
+& \rewrite{2}
+& \expcase{z}{x}{G[M]}{y}{G[N]},
+& x,y \notin \fv{G} \\
+
+% (\kappa.{\mathit{case}})
+% & G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
+% \multicolumn{3}{@@{}l@@{}}
+% {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
 
 (\beta.{\rightarrow})
 & \expapp{(\expabs{x}{A}{N})}{V}
@@ -1131,8 +1214,6 @@ Phase 3 (garbage collection)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%\todo{Removed unit type. Either remove unit type or add empty type.}
-
 This section introduces a collection of reduction rules for
 normalising terms that enforces the subformula property
 while ensuring sharing is preserved. The rules adapt to
@@ -1146,9 +1227,9 @@ Types, terms, and values are presented in Figure~\ref{fig:term}. We
 let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
-variables.  We let $c$ range over primitive constants, which are fully
-applied (applied to a sequence of terms of length equal to the
-constant's arity).  We follow the usual convention that terms are
+variables.  We let $c$ range over constants, which are fully
+applied.  
+We follow the usual convention that terms are
 equivalent up to renaming of bound variables. We write $\fv{N}$ for
 the set of free variables of $N$, and $\subst{N}{x}{M}$ for
 capture-avoiding substitution of $M$ for $x$ in $N$.
@@ -1157,8 +1238,8 @@ capture-avoiding substitution of $M$ for $x$ in $N$.
 %% Types correspond to propositions and terms to proofs in
 %% minimal propositional logic.
 %
-We let $V$, $W$ range over values, and $\nv$ range over non-values
-(that is, any term that is not a value).
+We let $V$, $W$ range over values, and $\nv$ range over
+terms that are not values.
 
 We let $\Gamma$ range over type environments, which are sets of pairs
 of variables with types $x:A$. We write $\Gamma \vdash M:A$ to
@@ -1217,30 +1298,56 @@ Figure~\ref{fig:nf} if and only if it is in normal form with regard to
 the reduction rules of Figure~\ref{fig:norm}.
 \end{proposition}
 
+[TODO: Give proof hint.]
+
+[TODO: The statement is incorrect. |let x = u v in y z| matches the
+grammar, but is not in normal form with regard to $\rewrite{3}$.]
+
+[TODO: Can we delete Proposition~\ref{prop_normal}?]
+
+*** CONTINUE FROM HERE ***
+
 The \emph{subformulas} of a type are the type itself and its
-components; for instance, the subformulas of $A \to B$ are $A \to B$
-itself and the subformulas of $A$ and $B$. The \emph{proper
-  subformulas} of a type are all its subformulas other than the type
-itself.  Terms in normal form satisfy the subformula property.
+components. For instance, the subformulas of $A \to B$ are itself and
+the subformulas of $A$ and $B$. The \emph{proper subformulas} of a
+type are all its subformulas other than the type itself.
+
+The \emph{subterms} of term are the term itself and its components.
+For instance, the subterms of $\expabs{x}{N}$ are itself and the
+subterms of $N$ and the subterms of $\expapp{L}{M}$ are itself and the
+subterms of $L$ and $M$.
+
+Constants are always fully applied; they are introduced as a
+separate consturct to avoid consideration of irrelevant subformulas
+and subterms.
+The type of a constant $c$ of arity $k$ is written
+\[
+c : A_1 \to \cdots A_k \to B
+\]
+and its subtypes are itself and $A_1$, \ldots, $A_k$, and $B$
+(but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
+An application of a constant $c$ of arity $k$ is written
+\[
+c M_1 \cdots M_k
+\]
+and its subterms are itself and $M_1$, \ldots, $M_k$
+(but not $c M_1 \cdots M_j$ for $j < k$).
+Free variables are equivalent to constants of arity zero.
+
+Terms in normal form satisfy the subformula property.
 
 \begin{proposition}[Subformula property]
 \label{prop_subformula}
 If $\Gamma \vdash M:A$ and the normal form of $M$ is $N$ by the
 reduction rules of Figure~\ref{fig:norm}, then $\Gamma \vdash N:A$ and
-every subterm of $N$ has a type that is either a subformula of $A$ or
-a subformula of a type in $\Gamma$.  Further, every subterm other than
-$N$ itself and free variables of $N$ has a type that is a proper
-subformula of $A$ or a proper subformula of a type in $\Gamma$.
+every subterm of $N$ has a type that is either a subformula of $A$,
+a subformula of a type in $\Gamma$, or a subformula of the type
+of a constant in $N$.  Further, every subterm other than
+$N$ itself and the variables in $\Gamma$ has a type that is
+either a proper subformula of $A$,
+a proper subformula of a type in $\Gamma$,
+or a proper subformula of the type of a constant in $N$.
 \end{proposition}
-
-[TODO: explain how the Rep restriction on |while| works in conjunction
-with the subformula property.]
-
-[TODO: explain how the subformula property interacts with |fix| as
-a constant in the language.]
-
-[TODO: explain how including an uninterpreted constant |id| allows
-us to disable reduction whenever this is desirable.]
 
 \section{Other examples of QDSLs}
 \label{sec:other-qdsls}
