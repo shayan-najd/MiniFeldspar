@@ -1116,7 +1116,7 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-       \expconst{c}{(\overline{V},\hole,\overline{M})} \mid 
+       \expconst{c}{(\overline{M},\hole,\overline{N})} \mid 
        \expapp{M}{\hole}                               \mid 
        \exppair{\hole}{N}                              \mid 
        \exppair{M}{\hole}                              \mid 
@@ -1277,6 +1277,18 @@ the call-by-need lambda calculus \citep{call-by-need}. Phase~3 may be
 omitted if the intended semantics of the target language is
 call-by-value rather than call-by-need.
 
+[TODO: Given that normalisation should preserve the termination
+properties of terms, shouldn't we instead have the following?
+\[
+F ::=  \expconst{c}{(\overline{V},\hole,\overline{M})} \mid 
+       \expapp{\hole}{M}                               \mid
+       \expapp{V}{\hole}                               \mid 
+       \exppair{\hole}{M}                              \mid 
+       \exppair{V}{\hole}                              \mid 
+       \cdots
+\]
+]
+
 Every term has a normal form.
 \begin{proposition}[Strong normalisation]
 Each of the reduction relations $\rewrite{i}$ is strongly
@@ -1288,6 +1300,11 @@ via a standard reducibility argument (see, for example,
 \cite{Lindley07}). If the target language includes general recursion,
 normalisation should treat the fixpoint operator as an uninterpreted
 constant.
+
+[TODO: Explain that the reason for separating out three phases is
+mainly to ease proof of strong normalisation. We should note that the
+phases can be interleaved without changing the result, though
+proving strong normalisation may be more difficult.]
 
 The grammar of Figure~\ref{fig:nf} characterises normal forms
 precisely.
