@@ -90,6 +90,339 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+%% Types
+\newcommand{\zero}{\mathbf{0}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\arrow}[2]{#1\rightarrow#2}
+\newcommand{\product}[2]{#1\times#2}
+\newcommand{\coproduct}[2]{#1+#2}
+\newcommand{\rec}[2]{\mu#1.#2}
+
+%% Expressions
+\newcommand{\key}{\mathbf}
+
+\newcommand{\app}{\;}
+
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expconst}[2]{#1~#2}
+\newcommand{\expunit}{()}
+\newcommand{\expabs}[3]{\lambda#1.#3}
+\newcommand{\expapp}[2]{#1 \app #2}
+\newcommand{\explet}[3]{\key{let}\ #1=#2\ \key{in}\ #3}
+\newcommand{\exppair}[2]{(#1, #2)}
+\newcommand{\expfst}[1]{\key{fst}~#1}
+\newcommand{\expsnd}[1]{\key{snd}~#1}
+\newcommand{\expinl}[2]{\key{inl}~#1}
+\newcommand{\expinr}[2]{\key{inr}~#2}
+\newcommand{\expcase}[5]
+  {\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.\,#3;\; \key{inr}\ #4.\,#5\}}
+
+%% Meta language stuff
+\newcommand{\subst}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{\mathit{FV}(#1)}
+\newcommand{\rewrite}[1]{\mathbin{\mapsto_{#1}}}
+\newcommand{\hole}{[~]}
+\newcommand{\nv}{P}
+
+%% Typing
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+
+\newcommand{\figterm}{
+\begin{figure*}[t]
+\[
+\begin{array}{l@@{\quad}rcl}
+\text{Types} & A,B,C & ::=&
+% \one
+  \iota           \mid
+  \arrow{A}{B}    \mid
+  \product{A}{B}  \mid
+  \coproduct{A}{B}
+\\[1ex]
+\text{Terms} & L,M,N & ::= &
+% \expunit                	\mid
+  \expvar{x}              	\mid
+  \expconst{c}{\overline{M}}	\mid
+  \expabs{x}{A}{N}              \mid
+  \expapp{L}{M}                 \mid
+  \explet{x}{M}{N}              \mid
+  \exppair{M}{N}                \mid
+  \expfst{L}                   	\mid
+  \expsnd{L}                    \mid \\&&&
+  \expinl{M}{\tm{B}}		\mid
+  \expinr{\tm{A}}{N}           	\mid
+  \expcase{L}{x}{M}{y}{N}
+\\[1ex]
+\text{Values} & V,W & ::= &
+% \expunit         \mid
+  \expvar{x}       \mid
+  \expabs{x}{A}{N} \mid
+  \exppair{V}{W}   \mid
+  \expinl{V}{B}    \mid
+  \expinr{A}{W}
+\end{array}
+\]
+\caption{Types, Terms, and Values}
+\label{fig:term}
+\end{figure*}
+}
+
+\newcommand{\figtyping}{
+\begin{figure*}[h]
+\[
+\begin{array}{@@{}ll@@{}}
+\fbox{$\Gamma \vdash M:A$}
+\\~\\
+\inference
+{x:A \in \Gamma}
+{\mathbf{Ax}}
+{
+  \Gamma \vdash x:A
+}
+&
+\inference
+{}
+{\one}
+{
+   \Gamma \vdash \expunit:\one
+}
+\\~\\
+\inference
+{
+  \Gamma, x:A \vdash N:B
+}
+{{\to}\intro}
+{
+  \Gamma \vdash \expabs{x}{A}{N}:\arrow{A}{B}
+}
+&
+\inference
+{
+  \Gamma \vdash L:\arrow{A}{B}
+& \Gamma \vdash M:A
+}
+{{\to}\elim}
+{
+  \Gamma \vdash \expapp{L}{M}:B
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash M:A
+  &
+  \Gamma, x:A \vdash N:B
+}
+{\mathbf{let}}
+{
+  \Gamma \vdash \explet{x}{M}{N}:B
+}
+&
+\inference
+{
+  \Gamma \vdash M:A
+  &
+  \Gamma \vdash N:B
+}
+{{\times}\intro}
+{
+  \Gamma \vdash \exppair{M}{N}:\product{A}{B}
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash L:\product{A}{B}
+}
+{{\times}\elim_1}
+{
+  \Gamma \vdash \expfst{L}:A
+}
+&
+\inference
+{
+  \Gamma \vdash L:\product{A}{B}
+}
+{{\times}\elim_2}
+{
+  \Gamma \vdash \expsnd{L}:B
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash M:A
+}
+{{+}\intro_1}
+{
+  \Gamma \vdash \expinl{M}{B}:\coproduct{A}{B}
+}
+&
+\inference
+{
+  \Gamma \vdash N:B
+}
+{{+}\intro_2}
+{
+  \Gamma \vdash \expinr{A}{N}:\coproduct{A}{B}
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash L:\coproduct{A}{B}
+&
+  \Gamma, x:A \vdash M:C
+&
+  \Gamma, y:B \vdash N:C
+}
+{{+}\elim}
+{
+  \Gamma \vdash \expcase{L}{x}{M}{y}{N}:C
+}
+\end{array}
+\]
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+}
+
+\newcommand{\fignf}{
+\begin{figure*}[t]
+\[
+\begin{array}{l@@{\quad}rcl}
+\text{Neutral Forms}
+  & Q & ::= & \expapp{x}{W}
+         \mid \expconst{c}{\overline{W}}
+         \mid \expapp{Q}{W}
+         \mid \expfst{x}
+         \mid \expsnd{x}
+\\[1ex]
+\text{Normal Values}
+  & V,W & ::= & \expvar{x}
+           \mid \expabs{x}{A}{N}
+           \mid \exppair{V}{W}
+           \mid \expinl{V}{B}
+           \mid \expinr{A}{W}
+\\[1ex]
+\text{Normal Forms}
+  & N,M & ::= & Q
+          \mid  V
+          \mid \expcase{z}{x}{N}{y}{M}
+          \mid \explet{x}{Q}{N}
+\\
+\end{array}
+\]
+\caption{Normal Forms}
+\label{fig:nf}
+\end{figure*}
+}
+
+\newcommand{\fignorm}{
+\begin{figure*}[t]
+Phase 1 (let-insertion)
+\[
+  \begin{array}{lcl}
+   F &\mathbin{::=}&
+       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid 
+       \expapp{\hole}{M}                                \mid
+       \expapp{V}{\hole}                                \mid 
+       \exppair{\hole}{M}                               \mid 
+       \exppair{V}{\hole}                               \mid 
+       \expfst{\hole}                                   \mid 
+       \expsnd{\hole}                                   \mid % \\ &&
+       \expinl{\hole}{B}                                \mid 
+       \expinr{A}{\hole}                                \mid 
+       \expcase{\hole}{x}{M}{y}{N} \\
+ \end{array}
+\]%
+\[
+\begin{array}{lllll}
+(\mathit{let})
+& F[\nv]
+& \rewrite{1}
+& \explet{x}{\nv}{F[x]},
+& x \text{ fresh}
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 2 (symbolic evaluation)
+\[
+G \mathbin{::=}
+    \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
+\]
+\[
+\begin{array}{lllll}
+(\kappa.{\mathit{let}})
+& G[\explet{x}{\nv}{N}]
+& \rewrite{2}
+& \explet{x}{\nv}{G[N]},
+& x \notin \fv{G} \\
+
+(\kappa.{\mathit{case}})
+& G[\expcase{z}{x}{M}{y}{N}]
+& \rewrite{2}
+& \expcase{z}{x}{G[M]}{y}{G[N]},
+& x,y \notin \fv{G} \\
+
+% (\kappa.{\mathit{case}})
+% & G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
+% \multicolumn{3}{@@{}l@@{}}
+% {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
+
+(\beta.{\rightarrow})
+& \expapp{(\expabs{x}{A}{N})}{V}
+& \rewrite{2}
+& \subst{N}{x}{V} \\
+
+(\beta.{\times_1})
+& \expfst{\exppair{V}{W}}
+& \rewrite{2}
+& V \\
+
+(\beta.{\times_2})
+& \expsnd{\exppair{V}{W}}
+& \rewrite{2}
+& W \\
+
+(\beta.{+_1})
+& \expcase{(\expinl{V}{B})}{x}{M}{y}{N}
+& \rewrite{2}
+& \subst{M}{x}{V} \\
+
+(\beta.{+_2})
+& \expcase{(\expinr{A}{W})}{x}{M}{y}{N}
+& \rewrite{2}
+& \subst{N}{y}{W} \\
+
+(\beta.{\mathit{let}})
+& \explet{x}{V}{N}
+& \rewrite{2}
+& \subst{N}{x}{V} \\
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 3 (garbage collection)
+\[
+\begin{array}[t]{@@{}llll@@{\quad}l@@{}}
+
+(\mathit{need})
+& \explet{x}{\nv}{N}
+& \rewrite{3}
+& N,
+& x \notin \fv{N}\\
+%% & \subst{N}{x}{\nv},
+%% & Count(x,N) < 2 \\
+\end{array}
+\]
+\caption{Normalisation rules}
+\label{fig:norm}
+\end{figure*}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \conferenceinfo{ICFP 2015}{August 31--September 2, 2015, Vancouver, Canada.}
 \copyrightyear{2015}
 \copyrightdata{...}
@@ -141,18 +474,17 @@
 \begin{abstract}
 
 Fashions come, go, return. We describes a new approach to domain
-specific languages (DSLs), called Quoted DSLs (QDSLs), that resurrects two old ideas: quoted
-terms for domain specific languages, from McCarthy's Lisp of 1960, and
-the subformula property, from Gentzen's natural deduction of 1935.
-Quoted terms allow the domain specific language to share the syntax
-and type system of the host language. Normalising quoted terms ensures
-the subformula property, which provides strong guarantees, e.g., that
-one can use higher-order or nested code in the source while
-guaranteeing first-order or flat code in the target, or using types
-to guide loop fusion.  We give three examples of QDSL: QFeldspar (a
-variant of Feldsar), P-LINQ for F\#, and some uses of Scala LMS.
-We also provide a comparison between QDSLs and
-traditional Embedded DSL (EDSLs).
+specific languages (DSLs), called Quoted DSLs (QDSLs), that resurrects
+two old ideas: quotation, from McCarthy's Lisp of 1960, and the
+subformula property, from Gentzen's natural deduction of 1935.  Quoted
+terms allow the domain specific language to share the syntax and type
+system of the host language. Normalising quoted terms ensures the
+subformula property, which provides strong guarantees, e.g., that one
+can use higher-order or nested code in the source while guaranteeing
+first-order or flat code in the target, or using types to guide
+fusion.  We give three examples of QDSLs: QFeldspar (a variant of
+Feldsar), P-LINQ for F\#, and some uses of Scala LMS.  We also provide
+a comparison between QDSLs and traditional Embedded DSL (EDSLs).
 
 \end{abstract}
 
@@ -186,13 +518,14 @@ When everything old is new again
 \vspace{2ex}
 
 Implementing domain-specific languages (DSLs) via quotation is one of
-the oldest ideas in computing, going back at least to macros in Lisp.
-Today, a more fashionable technique is Embdedded DSLs (EDSLs), which
-may use shallow embedding, deep embedding, or a combination of the
-two. Our goal in this paper is to reinvigorate the idea of building
-DSLs via quotation, by introducing a new approach that depends
-crucially on normalising the quoted term, which we dub Quoted DSLs
-(QDSLs).
+the oldest ideas in computing, going back at least to McCarthy's Lisp,
+which was introduce in 1960 and had macros as early as 1963.  Today, a
+more fashionable technique is Embdedded DSLs (EDSLs), which may use
+shallow embedding, deep embedding, or a combination of the two. Our
+goal in this paper is to reinvigorate the idea of building DSLs via
+quotation, by introducing a new approach which we dub Quoted DSLs
+(QDSLs).  A key feature of QDSLs is the use of normalisation to ensure
+the subformula property, first proposed by Gentzen in 1935.
 
 \vspace{2ex}
 \begin{quote}
@@ -214,7 +547,7 @@ Here we test that conjecture by reimplementing the EDSL Feldspar
 the design, and show that the performance of the two versions is
 comparable. We argue that, from the user's point of view, the QDSL
 approach may sometimes offer a considerable simplification as
-compared to the EDSL approach. To back up that claim, we describe
+compared to the EDSL approach. To back that claim, we describe
 the EDSL approach to Feldspar for purposes of comparison.
 The QDSL description occupies TODO:M pages, while
 the EDSL decription requires TODO:N pages.
@@ -222,15 +555,16 @@ the EDSL decription requires TODO:N pages.
 We also claim that Lightweight Modular in Staging (LMS) as developed
 by Scala has much in common with QDSL: it often uses a type-based form
 of quotation, and some DSLs implemented with LMS exploit normalisation
-of quoted terms using smart constructors, and we suggest that such
-DSLs may benefit from the subformula property.  LMS is a flexible
+of quoted terms using smart constructors. LMS is a flexible
 library offering a range of approaches to building DSLs, only some of
 which make use of type-based quotation or normalisation via
 smart-constructors; so our claim is that some LMS implementations use
-QDSL techniques, not that QDSL subsumes LMS.
+QDSL techniques, not that QDSL subsumes LMS. We suggest that LMS
+implementations of DSLs that use normalisation 
+may benefit from the subformula property.  
 
-TODO: work out which specific LMS DSLs to cite. Scala-to-SQL is one,
-what are the others?
+[TODO: work out which specific LMS DSLs to cite. Scala-to-SQL is one,
+what are the others?]
 
 \begin{quote}
 Perhaps we may express the essential properties of such a normal proof
@@ -240,29 +574,42 @@ by saying: it is not roundabout.
 \vspace{2ex}
 
 Our approach exploits the fact that normalised terms satisfy the
-subformula property of \citet{Gentzen35}.
+subformula property, first introduced in the context
+of natural deduction by \citet{Gentzen-1935},
+improved by \citet{Prawitz-1965}, and applicable
+to lambda calculus via the principle of Propositions as Types.
+
 The subformula property provides users of the
 DSL with useful guarantees, such as the following:
 \begin{itemize}
 
-\item write higher-order terms while guaranteeing to generate
-first-order code;
+\item they may write higher-order terms
+while guaranteeing to generate first-order code;
 
-\item write a sequence of loops over arrays while guaranteeing to
-generate code that fuses those loops;
+\item they may write a sequence of loops over arrays
+while guaranteeing to generate code that fuses those loops;
 
-\item write nested intermediate terms while guaranteeing to generate
-code that operates on flat data.
+\item they may write intermediate terms of nested type
+while guaranteeing to generate code that operates on flat data.
 
 \end{itemize}
 We thus give modern application to a theorem four-fifths of a century old.
+
+The subformula property is akin to a generalised conservativity result.
+For instance, the third bullet point above corresponds to a standard
+conservativity result for databases, namely that nested queries are
+no more expressive than flat queries. [TODO: reference for conservativity
+result.]
 
 The subformula property holds only for terms in normal form.  Previous
 work, such as \citet{cheney:linq} uses a call-by-name normalisation
 algorithm that performs full beta-reduction, which may cause
 computations to be repeated.  Here we present call-by-value and
 call-by-need normalisation algorithms, which guarantee to preserve
-sharing of computations.
+sharing of computations. We also present a sharpened version of
+the subformula property, which we apply to characterise
+the circumstances under which a QDSL may guarantee
+to generate first-order code.
 
 \begin{quote}
 Good artists copy, great artists steal.
@@ -275,25 +622,25 @@ language. Arguably, QDSL is greater because it steals the type system,
 the syntax, and the normalisation rules of its host language.
 
 In theory, an EDSL should also steal the syntax of its host language,
-but in practice this is often only
-partially the case. For instance, an EDSL such as Feldspar or Nicola,
-when embedded in Haskell, can use the overloading of Haskell so that
+but in practice the theft is often only partial.
+For instance, an EDSL such as Feldspar or Nicola,
+when embedded in Haskell, can exploit the overloading of Haskell so that
 arithmetic operations in both languages appear identical, but the same
 is not true of comparison or conditionals. In QDSL, of necessity the
 syntax of the host and embedded languages must be identical. For
 instance, this paper presents a QDSL variant of Feldspar, again in
 Haskell, where arithmetic, comparison, and conditionals are all
-represented by quoted terms of the host, hence necessarily identical.
+represented by quoted terms, and hence identical to the host.
 
 In theory, an EDSL also steals the normalisation rules of its host
 language, by using evaluation in the host to normalise terms of the
-target. In Section~\ref{sec:qdsl-vs-edsl} we give two examples comparing
-our QDSL and EDSL versions of Feldspar. In the first of these, it is
-indeed the case that the EDSL achieves by evaluation of host terms
-what the QDSL achieves by normalisation of quoted terms.  However, in
-the second, the EDSL must perform some normalisation of the deep
-embedding corresponding to what the QDSL achieves by normalisation of
-quoted terms.
+target. In Section~\ref{sec:qdsl-vs-edsl} we give several examples
+comparing our QDSL and EDSL versions of Feldspar. In the first of
+these, it is indeed the case that the EDSL achieves by evaluation of
+host terms what the QDSL achieves by normalisation of quoted terms.
+However, in other cases, the EDSL must perform normalisation of the
+deep embedding corresponding to what the QDSL achieves by
+normalisation of quoted terms.
 
 \begin{quote}
 Try to give all of the information to help others to judge the value
@@ -310,15 +657,14 @@ case statements. We explain how the QDSL technique can offer the user
 control over where normalisation does and does not occur, while still
 maintaining the subformula property.
 
-Some researchers contend that an essential property of an
-embedded DSL which generates target code is that every term
-that is type-correct should successfully generate code in
-the target language. Neither the P-LINK of \citet{cheney:linq}
-nor the QFeldspar of this paper satisfy this property.
-It is possible to ensure the property with additional preprocessing;
-we clarify the tradeoff between ease of
-implementation and ensuring safe compilation to target at
-compile-time rather than run-time.
+Some researchers contend that an essential property of an embedded DSL
+which generates target code is that every term that is type-correct
+should successfully generate code in the target language. Neither the
+P-LINK of \citet{cheney:linq} nor the QFeldspar of this paper satisfy
+this property.  It is possible to ensure the property with additional
+preprocessing; we clarify the tradeoff between ease of implementation
+and ensuring safe compilation to target at compile-time rather than
+run-time.
 
 \begin{quote}
 TODO: some quotation suitable for contributions (or summary)
@@ -328,13 +674,13 @@ TODO: some quotation suitable for contributions (or summary)
 The contributions of this paper are:
 \begin{itemize}
 
-\item To suggest the general value of an approach to building DSLs
-based on quotation, normalisation of quoted terms, and the subformula
-property, and to name this approach QDSL. (Section~\ref{sec:introduction}.)
+\item To introduce QDSLs as an approach to building DSLs based
+on quotation, normalisation of quoted terms, and the subformula property
+by presenting the design of a QDSL variant of Feldspar. (Section~\ref{sec:qfeldspar}.)
 
-\item To present the design of a QDSL implementation of Feldspar, and
-show its implementation length and performance is comparable to an
-EDSL implementation of Feldspar. (Section~\ref{sec:qfeldspar}.)
+\item To compare QDSL and EDSL implementations of Feldspar,
+and show that they are of comparable length and offer comparable performace.
+(Section~\ref{sec:implmentation}.)
 
 \item To explain the role of the subformula property in formulating
 DSLs, and to describe a normalisation algorithm suitable for
@@ -348,9 +694,9 @@ and [TODO: what else?], and argue that these are instances of QDSL.
 (Section~\ref{sec:other-qdsls}.)
 
 \item To argue that, from the user's point of view, the QDSL
-implementation of Feldspar is conceptually easier to understand than
-the EDSL implementation of Feldspar, by a detailed comparison of
-the user interface of the two implementations (Section~\ref{sec:qdsl-vs-edsl}.)
+variant of Feldspar is conceptually easier to understand than
+the EDSL variant of Feldspar, by a detailed comparison of
+the two (Section~\ref{sec:qdsl-vs-edsl}.)
 
 \end{itemize}
 Section~\ref{sec:related} describes related work, and
@@ -361,6 +707,9 @@ Section~\ref{sec:conclusion} concludes.
 
 % \section{The subformula property}
 % \label{sec:subformula}
+
+% \section{Implementation}
+% \label{sec:implementation}
 
 % \section{Other examples of QDSLs}
 % \label{sec:other-qdsls}
@@ -675,15 +1024,14 @@ ensure that any top-level function without |Maybe| in its type will
 normalise to code not containing |Maybe| in the type of any subterm.
 An alternative choice is possible, as we will see in the next section.
 
-Complete normalisation of terms is sometimes impossible or
-undesirable.  The extent of normalisation is controlled by
-introducing uninterpreted constants, such as |while|.
-In a context with recursion, 
-we take |fix :: (a -> a) -> a| as an uninterpreted constant.
-In a context where we wish to avoid unfolding a reduction |L M|,
-we take |id :: a -> a| as an uninterpreted constant,
-and replace |L M| by |id L M|.
-
+The subformula property depends on normalisation of terms,
+but complete normalisation is not always possible or desirable.
+The extent of normalisation may be controlled by introducing
+uninterpreted constants, such as |while|.  In a context with
+recursion, we take |fix :: (a -> a) -> a| as an uninterpreted
+constant.  In a context where we wish to avoid unfolding a reduction
+|L M|, we take |id :: a -> a| as an uninterpreted constant, and
+replace |L M| by |id L M|.
 
 
 \subsection{Arrays}
@@ -805,13 +1153,13 @@ applies regardless of whether |Vec| is defined as ``pull arrays''
 or ``push arrays''. Does this mean the difference is irrelevant
 for QFeldspar?]
 
-\subsection{Implementation}
-\label{subsec:implementation}
+\section{Implementation}
+\label{sec:implementation}
 
 \input{table}
 
 The original Feldspar generates values of an algebraic type
-(called |Exp a| in \citet{svenningsson:combining}), with constructs
+(called |Dp a| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
 that represent |while| and manifest arrays similar to those
 above. A backend then compiles values of type |Exp a| to C code.
 QFeldspar provides a transformer from |Qt a| to |Exp a|, and
@@ -819,20 +1167,18 @@ shares the Feldspar backend.
 
 The transformer from |Qt| to |Exp| performs the following steps.
 \begin{itemize}
-\item It expands identifiers connected with the types |(,)|, |Maybe|
-  and |Vec|.
-    \begin{itemize}
-    \item For |(,)|, identifiers |fst| and |snd|.
-    \item For |Maybe|, identifiers |return|, |(>>=)|, and |maybe|.
-    \item For |Vec|, there are no relevant identifiers.
-    \end{itemize}
+\item In any context where a constant $c$ is not fully applied,
+  it replaces $c$ with $\expabs{\overline{x}}{c \app \overline{x}}$.
+  It replaces identifiers connected to the type |Maybe|, such as
+  |return|, |(>>=)|, and |maybe|, by their definitions.
 \item It normalises the term to ensure the subformula property,
   using the rules of Section~\ref{sec:subformula}.
   The normaliser does not support all Haskell data types,
-  but does include special-purpose rules for |Maybe| and |Vec|.
-\item It traverses the term, converting |Qt| to |Exp|.
-  It checks that only permitted primitives appear in |Qt|, and translates
-  these to their corresponding representation in |Exp|. Permitted primitives include:
+  but does support tuples, and the types |Maybe| and |Vec|.
+\item It traverses the term, converting |Qt| to |Dp|.
+  It checks that only permitted primitives appear in |Qt|,
+  and translates these to their corresponding representation
+  in |Dp|. Permitted primitives include:
   |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
   |while|, |makeArr|, |lenArr|, and |ixArr|.
 \end{itemize}
@@ -846,7 +1192,7 @@ and generate fresh names), and |TH.TExp a| is the parse tree for a
 quoted expression returning a value of type |a|. Type |TH.TExp a| is
 just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
 in Template Haskell, where |a| is a phantom type variable. Hence, the
-translator from |Qt a| to |Exp a| is forced to re-infer all the type
+translator from |Qt a| to |Dp a| is forced to re-infer all the type
 information for the subterms of the term of type |Qt a|.  This is why
 we translate the |Maybe| monad as a special case, rather than
 supporting overloading for monad operations.  [TODO: say something
@@ -882,337 +1228,9 @@ Measurements were done on a PC with a quad-core Intel i7-2640M CPU
 running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
 GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
 
+
 \section{The subformula property}
 \label{sec:subformula}
-
-%% Types
-\newcommand{\zero}{\mathbf{0}}
-\newcommand{\one}{\mathbf{1}}
-\newcommand{\arrow}[2]{#1\rightarrow#2}
-\newcommand{\product}[2]{#1\times#2}
-\newcommand{\coproduct}[2]{#1+#2}
-\newcommand{\rec}[2]{\mu#1.#2}
-
-%% Expressions
-\newcommand{\key}{\mathbf}
-
-\newcommand{\app}{\;}
-
-\newcommand{\expvar}[1]{#1}
-\newcommand{\expconst}[2]{#1~#2}
-\newcommand{\expunit}{()}
-\newcommand{\expabs}[3]{\lambda#1.#3}
-\newcommand{\expapp}[2]{#1 \app #2}
-\newcommand{\explet}[3]{\key{let}\ #1=#2\ \key{in}\ #3}
-\newcommand{\exppair}[2]{(#1, #2)}
-\newcommand{\expfst}[1]{\key{fst}~#1}
-\newcommand{\expsnd}[1]{\key{snd}~#1}
-\newcommand{\expinl}[2]{\key{inl}~#1}
-\newcommand{\expinr}[2]{\key{inr}~#2}
-\newcommand{\expcase}[5]
-  {\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.\,#3;\; \key{inr}\ #4.\,#5\}}
-
-%% Meta language stuff
-\newcommand{\subst}[3]{#1[#2:=#3]}
-\newcommand{\fv}[1]{\mathit{FV}(#1)}
-\newcommand{\rewrite}[1]{\mathbin{\mapsto_{#1}}}
-\newcommand{\hole}{[~]}
-\newcommand{\nv}{P}
-
-%% Typing
-\newcommand{\intro}{\mathcal{I}}
-\newcommand{\elim}{\mathcal{E}}
-\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
-
-\newcommand{\figterm}{
-\begin{figure*}[t]
-\[
-\begin{array}{l@@{\quad}rcl}
-\text{Types} & A,B,C & ::=&
-% \one
-  \iota           \mid
-  \arrow{A}{B}    \mid
-  \product{A}{B}  \mid
-  \coproduct{A}{B}
-\\[1ex]
-\text{Terms} & L,M,N & ::= &
-% \expunit                	\mid
-  \expvar{x}              	\mid
-  \expconst{c}{\overline{M}}	\mid
-  \expabs{x}{A}{N}              \mid
-  \expapp{L}{M}                 \mid
-  \explet{x}{M}{N}              \mid
-  \exppair{M}{N}                \mid
-  \expfst{L}                   	\mid
-  \expsnd{L}                    \mid \\&&&
-  \expinl{M}{\tm{B}}		\mid
-  \expinr{\tm{A}}{N}           	\mid
-  \expcase{L}{x}{M}{y}{N}
-\\[1ex]
-\text{Values} & V,W & ::= &
-% \expunit         \mid
-  \expvar{x}       \mid
-  \expabs{x}{A}{N} \mid
-  \exppair{V}{W}   \mid
-  \expinl{V}{B}    \mid
-  \expinr{A}{W}
-\end{array}
-\]
-\caption{Types, Terms, and Values}
-\label{fig:term}
-\end{figure*}
-}
-
-\newcommand{\figtyping}{
-\begin{figure*}[h]
-\[
-\begin{array}{@@{}ll@@{}}
-\fbox{$\Gamma \vdash M:A$}
-\\~\\
-\inference
-{x:A \in \Gamma}
-{\mathbf{Ax}}
-{
-  \Gamma \vdash x:A
-}
-&
-\inference
-{}
-{\one}
-{
-   \Gamma \vdash \expunit:\one
-}
-\\~\\
-\inference
-{
-  \Gamma, x:A \vdash N:B
-}
-{{\to}\intro}
-{
-  \Gamma \vdash \expabs{x}{A}{N}:\arrow{A}{B}
-}
-&
-\inference
-{
-  \Gamma \vdash L:\arrow{A}{B}
-& \Gamma \vdash M:A
-}
-{{\to}\elim}
-{
-  \Gamma \vdash \expapp{L}{M}:B
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash M:A
-  &
-  \Gamma, x:A \vdash N:B
-}
-{\mathbf{let}}
-{
-  \Gamma \vdash \explet{x}{M}{N}:B
-}
-&
-\inference
-{
-  \Gamma \vdash M:A
-  &
-  \Gamma \vdash N:B
-}
-{{\times}\intro}
-{
-  \Gamma \vdash \exppair{M}{N}:\product{A}{B}
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash L:\product{A}{B}
-}
-{{\times}\elim_1}
-{
-  \Gamma \vdash \expfst{L}:A
-}
-&
-\inference
-{
-  \Gamma \vdash L:\product{A}{B}
-}
-{{\times}\elim_2}
-{
-  \Gamma \vdash \expsnd{L}:B
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash M:A
-}
-{{+}\intro_1}
-{
-  \Gamma \vdash \expinl{M}{B}:\coproduct{A}{B}
-}
-&
-\inference
-{
-  \Gamma \vdash N:B
-}
-{{+}\intro_2}
-{
-  \Gamma \vdash \expinr{A}{N}:\coproduct{A}{B}
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash L:\coproduct{A}{B}
-&
-  \Gamma, x:A \vdash M:C
-&
-  \Gamma, y:B \vdash N:C
-}
-{{+}\elim}
-{
-  \Gamma \vdash \expcase{L}{x}{M}{y}{N}:C
-}
-\end{array}
-\]
-\caption{Typing Rules}
-\label{fig:typing}
-\end{figure*}
-}
-
-\newcommand{\fignf}{
-\begin{figure*}[t]
-\[
-\begin{array}{l@@{\quad}rcl}
-\text{Neutral Forms}
-  & Q & ::= & \expapp{x}{W}
-         \mid \expconst{c}{\overline{W}}
-         \mid \expapp{Q}{W}
-         \mid \expfst{x}
-         \mid \expsnd{x}
-\\[1ex]
-\text{Normal Values}
-  & V,W & ::= & \expvar{x}
-           \mid \expabs{x}{A}{N}
-           \mid \exppair{V}{W}
-           \mid \expinl{V}{B}
-           \mid \expinr{A}{W}
-\\[1ex]
-\text{Normal Forms}
-  & N,M & ::= & Q
-          \mid  V
-          \mid \expcase{z}{x}{N}{y}{M}
-          \mid \explet{x}{Q}{N}
-\\
-\end{array}
-\]
-\caption{Normal Forms}
-\label{fig:nf}
-\end{figure*}
-}
-
-\newcommand{\fignorm}{
-\begin{figure*}[t]
-Phase 1 (let-insertion)
-\[
-  \begin{array}{lcl}
-   F &\mathbin{::=}&
-       \expconst{c}{(\overline{M},\hole,\overline{N})} \mid 
-       \expapp{M}{\hole}                               \mid 
-       \exppair{\hole}{N}                              \mid 
-       \exppair{M}{\hole}                              \mid 
-       \expfst{\hole}                                  \mid 
-       \expsnd{\hole}                                  \mid % \\ &&
-       \expinl{\hole}{B}                               \mid 
-       \expinr{A}{\hole}                               \mid 
-       \expcase{\hole}{x}{M}{y}{N} \\
- \end{array}
-\]%
-\[
-(\mathit{let})
-~~F[\nv]
-~\rewrite{1}~
-\explet{x}{\nv}{F[x]}, \quad x \text{ fresh}
-\]
-
-\vspace{2ex}
-
-Phase 2 (symbolic evaluation)
-\[
-G \mathbin{::=}
-    \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
-\]
-\[
-\begin{array}{lllll}
-(\kappa.{\mathit{let}})
-& G[\explet{x}{\nv}{N}]
-& \rewrite{2}
-& \explet{x}{\nv}{G[N]},
-& x \notin \fv{G} \\
-
-(\kappa.{\mathit{case}})
-& G[\expcase{z}{x}{M}{y}{N}]
-& \rewrite{2}
-& \expcase{z}{x}{G[M]}{y}{G[N]},
-& x,y \notin \fv{G} \\
-
-% (\kappa.{\mathit{case}})
-% & G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
-% \multicolumn{3}{@@{}l@@{}}
-% {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
-
-(\beta.{\rightarrow})
-& \expapp{(\expabs{x}{A}{N})}{V}
-& \rewrite{2}
-& \subst{N}{x}{V} \\
-
-(\beta.{\times_1})
-& \expfst{\exppair{V}{W}}
-& \rewrite{2}
-& V \\
-
-(\beta.{\times_2})
-& \expsnd{\exppair{V}{W}}
-& \rewrite{2}
-& W \\
-
-(\beta.{+_1})
-& \expcase{(\expinl{V}{B})}{x}{M}{y}{N}
-& \rewrite{2}
-& \subst{M}{x}{V} \\
-
-(\beta.{+_2})
-& \expcase{(\expinr{A}{W})}{x}{M}{y}{N}
-& \rewrite{2}
-& \subst{N}{y}{W} \\
-
-(\beta.{\mathit{let}})
-& \explet{x}{V}{N}
-& \rewrite{2}
-& \subst{N}{x}{V} \\
-\end{array}
-\]
-
-\vspace{2ex}
-
-Phase 3 (garbage collection)
-\[
-\begin{array}[t]{@@{}llll@@{\quad}l@@{}}
-
-(\mathit{need})
-& \explet{x}{\nv}{N}
-& \rewrite{3}
-& N,
-& x \notin \fv{N}\\
-%% & \subst{N}{x}{\nv},
-%% & Count(x,N) < 2 \\
-\end{array}
-\]
-\caption{Normalisation rules}
-\label{fig:norm}
-\end{figure*}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 This section introduces a collection of reduction rules for
 normalising terms that enforces the subformula property
@@ -1223,75 +1241,70 @@ We work with simple types. The only polymorphism in our examples
 corresponds to instantiating constants (such as $\mathit{while}$) at
 different types.
 
-Types, terms, and values are presented in Figure~\ref{fig:term}. We
-let $A$, $B$, $C$ range over types, including base types ($\iota$),
+Types, terms, and values are presented in Figure~\ref{fig:term}.
+Let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
-We let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
-variables.  We let $c$ range over constants, which are fully
-applied.  
-We follow the usual convention that terms are
-equivalent up to renaming of bound variables. We write $\fv{N}$ for
-the set of free variables of $N$, and $\subst{N}{x}{M}$ for
+Let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
+variables.  Let $c$ range over constants, which are fully
+applied according to their arity, as discussed below.  
+As usual, terms are taken as
+equivalent up to renaming of bound variables. Write $\fv{M}$ for
+the set of free variables of $M$, and $\subst{N}{x}{M}$ for
 capture-avoiding substitution of $M$ for $x$ in $N$.
 %
 %% [SL: not relevant]
 %% Types correspond to propositions and terms to proofs in
 %% minimal propositional logic.
 %
-We let $V$, $W$ range over values, and $\nv$ range over
+Let $V$, $W$ range over values, and $\nv$ range over
 terms that are not values.
 
-We let $\Gamma$ range over type environments, which are sets of pairs
-of variables with types $x:A$. We write $\Gamma \vdash M:A$ to
+Let $\Gamma$ range over type environments, which are sets of pairs
+of variables with types $x:A$. Write $\Gamma \vdash M:A$ to
 indicate that term $M$ has type $A$ under type environment
-$\Gamma$. The typing rules are standard.
+$\Gamma$. Typing rules are standard.
 
-The grammar of normal forms is given in Figure~\ref{fig:nf}. We reuse
-$L,M,N$ to range over terms in normal form and $V,W$ to range over
-values in normal form, and we let $Q$ range over neutral forms.
+% The grammar of normal forms is given in Figure~\ref{fig:nf}. We reuse
+% $L,M,N$ to range over terms in normal form and $V,W$ to range over
+% values in normal form, and we let $Q$ range over neutral forms.
 
-Reduction rules for normalisation are presented in
-Figure~\ref{fig:norm}, broken into three phases. We write $M
-\mapsto_i N$ to indicate that $M$ reduces to $N$ in phase $i$. We let
-$F$ and $G$ range over two different forms of evaluation frame used in
-Phases~2 and~3 respectively. We write $\fv{F}$ for the set of free
-variables of $F$, and similarly for $G$.
-The reduction relation is closed under compatible closure.
+Reduction rules for normalisation are presented in Figure~\ref{fig:norm}.
+The rules are confluent, so order of application is irrelevant to the
+final answer, but we break them into three phases to ease the proof
+of strong normalisation. It is easy to confirm that all
+of the reduction rules preserve sharing and preserve order of evaluation.
+
+Write $M \mapsto_i N$ to indicate that $M$ reduces to $N$ in phase
+$i$. Only Phases~1 and 2 are required to normalise terms, but if the
+semantics is call-by-need then Phase~3 may also be applied.
+Let $F$ and $G$ range over two different forms of evaluation
+frame used in Phases~1 and~2 respectively. We write $\fv{F}$ for the
+set of free variables of $F$, and similarly for $G$.  The reduction
+relation is closed under compatible closure.
 
 \figterm
-\fignf
-\fignorm
 %\figtyping
+% \fignf
+\fignorm
 
 The normalisation procedure consists of exhaustively applying
 the reductions of Phase~1 until no more apply, then similarly for
-Phase~2, and finally for Phase~3. Phase~1 performs let-insertion,
-naming subterms that are not values.
-%% along the lines of a translation to A-normal form
-%% \citep{a-normal-form} or reductions (let.1) and (let.2) in Moggi's
-%% metalanguage for monads \citep{moggi}.
+Phase~2, and finally for Phase~3.
+Phase~1 performs let-insertion,
+naming subterms that are not values,
+along the lines of a translation to A-normal form
+\citep{a-normal-form} or reductions (let.1) and (let.2) in Moggi's
+metalanguage for monads \citep{moggi}.
 Phase~2 performs standard $\beta$ and commuting reductions, and is the
 only phase that is crucial for obtaining normal forms that satisfy the
-subformula property. Phase~3 ``garbage collects'' unused terms, as in
-the call-by-need lambda calculus \citep{call-by-need}. Phase~3 may be
+subformula property. Phase~3 ``garbage collects'' unused terms as in
+the call-by-need lambda calculus \citep{call-by-need}. Phase~3 should be
 omitted if the intended semantics of the target language is
 call-by-value rather than call-by-need.
 
-[TODO: Given that normalisation should preserve the termination
-properties of terms, shouldn't we instead have the following?
-\[
-F ::=  \expconst{c}{(\overline{V},\hole,\overline{M})} \mid 
-       \expapp{\hole}{M}                               \mid
-       \expapp{V}{\hole}                               \mid 
-       \exppair{\hole}{M}                              \mid 
-       \exppair{V}{\hole}                              \mid 
-       \cdots
-\]
-]
-
 Every term has a normal form.
 \begin{proposition}[Strong normalisation]
-Each of the reduction relations $\rewrite{i}$ is strongly
+Each of the reduction relations $\rewrite{i}$ is confluent and strongly
 normalising: all $\rewrite{i}$ reduction sequences on well-typed
 terms are finite.
 \end{proposition}
@@ -1301,28 +1314,14 @@ via a standard reducibility argument (see, for example,
 normalisation should treat the fixpoint operator as an uninterpreted
 constant.
 
-[TODO: Explain that the reason for separating out three phases is
-mainly to ease proof of strong normalisation. We should note that the
-phases can be interleaved without changing the result, though
-proving strong normalisation may be more difficult.]
-
-The grammar of Figure~\ref{fig:nf} characterises normal forms
-precisely.
-\begin{proposition}[Normal form syntax]
-\label{prop_normal}
-An expression $N$ matches the syntax of normal forms in
-Figure~\ref{fig:nf} if and only if it is in normal form with regard to
-the reduction rules of Figure~\ref{fig:norm}.
-\end{proposition}
-
-[TODO: Give proof hint.]
-
-[TODO: The statement is incorrect. |let x = u v in y z| matches the
-grammar, but is not in normal form with regard to $\rewrite{3}$.]
-
-[TODO: Can we delete Proposition~\ref{prop_normal}?]
-
-*** CONTINUE FROM HERE ***
+% The grammar of Figure~\ref{fig:nf} characterises normal forms
+% precisely.
+% \begin{proposition}[Normal form syntax]
+% \label{prop_normal}
+% An expression $N$ matches the syntax of normal forms in
+% Figure~\ref{fig:nf} if and only if it is in normal form with regard to
+% the reduction rules of Figure~\ref{fig:norm}.
+% \end{proposition}
 
 The \emph{subformulas} of a type are the type itself and its
 components. For instance, the subformulas of $A \to B$ are itself and
@@ -1355,16 +1354,89 @@ Terms in normal form satisfy the subformula property.
 
 \begin{proposition}[Subformula property]
 \label{prop_subformula}
-If $\Gamma \vdash M:A$ and the normal form of $M$ is $N$ by the
-reduction rules of Figure~\ref{fig:norm}, then $\Gamma \vdash N:A$ and
-every subterm of $N$ has a type that is either a subformula of $A$,
+If $\Gamma \vdash M:A$ and $M$ is in normal form,
+then every subterm of $M$ has a type that is either a subformula of $A$,
 a subformula of a type in $\Gamma$, or a subformula of the type
-of a constant in $N$.  Further, every subterm other than
-$N$ itself and the variables in $\Gamma$ has a type that is
-either a proper subformula of $A$,
-a proper subformula of a type in $\Gamma$,
-or a proper subformula of the type of a constant in $N$.
+of a constant in $M$.
 \end{proposition}
+The proof follows the lines of \citet{prawitz}.
+The differences are that we have introduced fully applied constants
+(to enable the sharpened subformula property, below), and that our
+reduction rules introduce |let|, in order to ensure sharing is preserved.
+
+Normalisation may lead to an exponential increase in the size
+of a term, for instance when there are nested |case| expressions. This
+was not a problem for the examples we considered in
+Section~\ref{sec:implementation}, but may be a problem in some
+contexts. Normalisation may be controlled by introduction of
+uninterpreted constants (see next paragraph), but further work is
+needed to understand the contexts in which complete normalisation is
+desirable and the contexts in which it is problematic.
+
+As we noted in Section~\ref{subsec:while}, the subformula property
+depends on complete normalisation of terms, but complete normalisation
+is not always possible possible or desirable. The extent of
+normalisation may be controlled by introducing uninterpreted
+constants, such as |while|.  In a context with general recursion, we take
+|fix :: (a -> a) -> a| as an uninterpreted constant.  In a context where we
+wish to avoid unfolding a reduction |L M|, we take |id :: a -> a| as
+an uninterpreted constant, and replace |L M| by |id L M|.
+
+Examination of the proof in \citet{prawitz} shows that in fact
+normalisation achieves a sharper property.
+\begin{proposition}[Sharpened subformula property]
+If $\Gamma \vdash M:A$ and $M$ is in normal form, then every proper
+subterm of $M$ that is not a free variable or a subterm of a constant
+application has a type that is a proper subformula of $A$ or a proper
+subformula of a type in $\Gamma$.
+\end{proposition}
+
+The sharpened subformula property says nothing about the type of
+subterms of constant applications, but this is immediately apparent by
+recursive application of the sharpended subformula property.  Given a
+subterm that is a constant application $c \app \overline{M}$, where
+$c$ has type $\overline{A} \to B$, then the subterm itself has type
+$B$, each subterm $M_i$ has type $A_i$, and every proper subterm of
+$M_i$ that is not a variable or a subterm of a constant application
+has a type that is a proper subformula of $A_i$ or a proper subformula
+of the type of one of its free variables.
+
+In Section~\ref{sec:qfeldspar}, an important property is that every
+top-level term passed to |qdsl| is suitable for translation to C after
+normalisation.  Here we are interested in C as a \emph{first-order}
+language. The exact property required is somewhat subtle. One might at
+first guess the required property is that every subterm is
+representable, in the sense introduced in
+Section~\ref{subsec:toplevel}, but this is not quite right. The
+top-level term is a function from a representable type to a
+representable type. And the constant |while| expects subterms of type
+|s -> Bool| and |s -> s|, where the state |s| is representable.
+Fortunately, the exact property required is not hard to formulate in a
+general way, and is easy to ensure by applying the sharpened
+subformula property.
+
+We introduce a variant of the usual notion of \emph{rank} of a type,
+with respect to a notion of representability.  A term of type |A -> B|
+has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
+rank of |B|, while a term of representable type has rank $0$.
+
+The property we need to ensure ease of translation to C
+(or any other first-order language) is as follows.
+
+\begin{proposition}[Rank and representability]
+Consider a term $M$ of rank $1$, where every free variable of $M$ has
+rank $0$ and every constant in $M$ has rank at most $2$.  Then $M$
+normalises to a form where every subterm either is of representable
+type or is of the form $\expabs{\overline{x}}{N}$ where each of the
+bound variables $x_i$ and the body $N$ has representable type.
+\end{proposition}
+
+The property follows immediately by observing that any term $L$
+with type of rank $1$ can be rewritten in the form
+$\expabs{\overline{x}}{L \app \overline{x}}$ where each bound variable
+and the body has representable type, and then normalising and applying
+the sharpened subformula property.
+
 
 \section{Other examples of QDSLs}
 \label{sec:other-qdsls}
