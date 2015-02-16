@@ -1,3 +1,6 @@
+% "A good idea is much better than a new one" -- Gerard Berry (CACM, Dec 2014)
+
+
 % Things left to do
 
 % Additional description of principles behind normalisation:
