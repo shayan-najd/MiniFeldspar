@@ -1,4 +1,5 @@
-% "A good idea is much better than a new one" -- Gerard Berry (CACM, Dec 2014)
+% "A good idea can be much better than a new one"
+%   -- Gerard Berry (CACM, Dec 2014)
 
 
 % Things left to do
