@@ -1,3 +1,26 @@
+% Things left to do
+
+% Additional description of principles behind normalisation:
+%   When introduction meets elimination
+%   Commuting rules for elimination
+% See what Prawitz has to say about this
+
+% add citations for lisp 1960 and lisp macros to related work
+
+% cite Davies and Pfenning and two-level lambda calculus in related work
+
+
+% Partly done: should I do more?
+
+% More discussion of Cheney-et-al-2013
+% especially in regard to subformula property.
+
+% More discussion of type-based quotation
+
+% Make more clear that main contribution
+% is the application of subformula property to DSLs.
+
+
 \documentclass[authoryear]{sigplanconf}
 
 %include polycode.fmt
@@ -473,18 +496,18 @@ Phase 3 (garbage collection)
 
 \begin{abstract}
 
-Fashions come, go, return. We describes a new approach to domain
+Fashions come, go, return.  We describe a new approach to domain
 specific languages (DSLs), called Quoted DSLs (QDSLs), that resurrects
 two old ideas: quotation, from McCarthy's Lisp of 1960, and the
 subformula property, from Gentzen's natural deduction of 1935.  Quoted
 terms allow the domain specific language to share the syntax and type
-system of the host language. Normalising quoted terms ensures the
-subformula property, which provides strong guarantees, e.g., that one
-can use higher-order or nested code in the source while guaranteeing
-first-order or flat code in the target, or using types to guide
-fusion.  We give three examples of QDSLs: QFeldspar (a variant of
-Feldsar), P-LINQ for F\#, and some uses of Scala LMS.  We also provide
-a comparison between QDSLs and traditional Embedded DSL (EDSLs).
+system of the host language.  Normalising quoted terms ensures the
+subformula property, which guarantees that one can use higher-order
+code in the source while guaranteeing first-order code in the target
+and enables using types to guide fusion.  We test our ideas by
+re-implementing Feldspar, which was originally implemented as an
+Embedded DSL (EDSL), as a QDSL; and we compare the QDSL and EDSL
+variants.
 
 \end{abstract}
 
@@ -515,12 +538,11 @@ Dreams can come true again \\
 When everything old is new again \\
 \flushr -- Peter Allen and Carole Sager
 \end{quote}
-\vspace{2ex}
 
 Implementing domain-specific languages (DSLs) via quotation is one of
 the oldest ideas in computing, going back at least to McCarthy's Lisp,
-which was introduce in 1960 and had macros as early as 1963.  Today, a
-more fashionable technique is Embdedded DSLs (EDSLs), which may use
+which was introduced in 1960 and had macros as early as 1963.  Today,
+a more fashionable technique is Embdedded DSLs (EDSLs), which may use
 shallow embedding, deep embedding, or a combination of the two. Our
 goal in this paper is to reinvigorate the idea of building DSLs via
 quotation, by introducing a new approach which we dub Quoted DSLs
@@ -532,7 +554,6 @@ the subformula property, first proposed by Gentzen in 1935.
 Imitation is the sincerest of flattery. \\
 \flushr --- Charles Caleb Colton
 \end{quote}
-\vspace{2ex}
 
 \citet{cheney:linq} describes a DSL for language-integrated query in
 F\# that translates into SQL. The approach relies on the key features
@@ -542,42 +563,58 @@ settings.  We are particularly interested in DSLs that perform staged
 computation, where at generation-time we use host code to
 compute target code that is to be executed at run-time.
 
-Here we test that conjecture by reimplementing the EDSL Feldspar
+Generality starts at two. Here we test the conjecture of
+\citet{cheney:linq} by reimplementing the EDSL Feldspar
 \citet{FELDSPAR} as a QDSL. We describe the key features of
 the design, and show that the performance of the two versions is
-comparable. We argue that, from the user's point of view, the QDSL
+comparable. We compare the QDSL and EDSL variants of Feldspar,
+and argue that, from the user's point of view, the QDSL
 approach may sometimes offer a considerable simplification as
-compared to the EDSL approach. To back that claim, we describe
-the EDSL approach to Feldspar for purposes of comparison.
-The QDSL description occupies TODO:M pages, while
-the EDSL decription requires TODO:N pages.
+compared to the EDSL approach.
 
-We also claim that Lightweight Modular in Staging (LMS) as developed
-by Scala has much in common with QDSL: it often uses a type-based form
-of quotation, and some DSLs implemented with LMS exploit normalisation
-of quoted terms using smart constructors. LMS is a flexible
-library offering a range of approaches to building DSLs, only some of
-which make use of type-based quotation or normalisation via
-smart-constructors; so our claim is that some LMS implementations use
-QDSL techniques, not that QDSL subsumes LMS. We suggest that LMS
-implementations of DSLs that use normalisation 
-may benefit from the subformula property.  
+\citet{Davies-Pfenning-1996,Davies-Pfenning-2001} also suggest
+quotation as a foundation for staged computation, and note
+a propositions-as-types connection between quotation and
+a modal logic; our type |Qt a| corresponds to their
+type $\bigcirc a$. They also mention in passing the utility of
+normalising quoted terms, although they do not mention the
+subformula property.
 
-[TODO: work out which specific LMS DSLs to cite. Scala-to-SQL is one,
-what are the others?]
+The .NET Language-Integrated Query (LINQ) framework as used in C\# and
+F\#, and the Lightweight Modular Staging (LMS) framework as used in
+Scala, exhibit considerable overlap with the techniques described
+here.  Notably, they use quotation to represent staged DSL programs,
+and they make use to a greater or lesser extent of normalisation.  In
+F\# LINQ quotation is indicated in the normal way (by writing quoted
+programs inside special symbols), while in C\# LINQ and Scala LMS
+quotation is indicated by type inference (quoted terms are given a
+special type).
 
+In short, some researchers and developers are already exploiting this
+technique. We propose QDSL as a name to capture the commonalities
+among these approaches, and we observe the utility of the subformula
+property in this context.
+
+\vspace{2ex}
 \begin{quote}
 Perhaps we may express the essential properties of such a normal proof
 by saying: it is not roundabout. \\
 \flushr --- Gerhard Gentzen
 \end{quote}
-\vspace{2ex}
 
 Our approach exploits the fact that normalised terms satisfy the
 subformula property, first introduced in the context
 of natural deduction by \citet{Gentzen-1935},
 improved by \citet{Prawitz-1965}, and applicable
-to lambda calculus via the principle of Propositions as Types.
+to lambda calculus via the principle of Propositions as Types
+\citep{Howard-1980,Wadler-2015}.
+The subformula property states that every proof can be put
+into a normal form, where the only propositions that appear
+in the proof are subformulas of the hypotheses and conclusion
+of the proof.  The subformulas of a formula are its subparts;
+for instance, the subformulas of |A -> B| are the formula
+itself and the subformulas of |A| and |B|.  In our application,
+we will regard formulas as types.
 
 The subformula property provides users of the
 DSL with useful guarantees, such as the following:
@@ -593,15 +630,39 @@ while guaranteeing to generate code that fuses those loops;
 while guaranteeing to generate code that operates on flat data.
 
 \end{itemize}
-We thus give modern application to a theorem four-fifths of a century old.
+The first two of these are used in this paper, while the
+third is central to \citet{cheney:linq}.
+% We thus give modern application to a theorem four-fifths of a century old.
 
-The subformula property is often akin to conservativity.  A
-conservativity result expresses that adding a feature to a system of
+The subformula property is closely related to conservativity.
+A conservativity result expresses that adding a feature to a system of
 logic, or to a programming language, does not make it more expressive.
-For instance, the third bullet point above corresponds to a standard
+Consider intuitionistic logic with conjunction; conservativity
+states that adding implication to this logic proves no additional theorems
+that mention conjunction alone (that is, where implication does not appear
+in the statement of the theorem). Such a conservativity
+result is an immediate consequence of the subformula property;
+since the hypotheses and conjuction of the proof only mention conjunction,
+any proof, even if it uses implication, can be put into a normal form
+that only mentions conjunction.
+
+Viewed through the lens of Proposition as Types, the conservativity
+result of implication over conjuction applies to well-typed terms
+built with function abstraction and application, and construction and
+destruction of pairs.  It says that if the types of the free variables
+of the term and the type of the term itself only mention pairs, then
+the term normalises to a form that only mentions pairs; any
+internal use of functions will be eliminated during normalisation.
+Such a result generalises to the first bullet point above;
+see Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
+
+As another example, the third bullet point above corresponds to a standard
 conservativity result for databases, namely that nested queries are no
-more expressive than flat queries. [TODO: reference for conservativity
-result.]
+more expressive than flat queries \citep{Wong-1993}.  This conservativity
+result, as implied by the subformula property, is used central to
+\citep{cheney:linq} to show that queries that use intermediate nesting
+can be translated to SQL, which only queries flat tables and does not
+support nesting of data.
 
 The subformula property holds only for terms in normal form.  Previous
 work, such as \citet{cheney:linq} uses a call-by-name normalisation
@@ -613,10 +674,10 @@ the subformula property, which we apply to characterise
 the circumstances under which a QDSL may guarantee
 to generate first-order code.
 
+\vspace{2ex}
 \begin{quote}
 Good artists copy, great artists steal. \flushr --- Picasso
 \end{quote}
-\vspace{2ex}
 
 EDSL is great in part because it steals the type system of its host
 language. Arguably, QDSL is greater because it steals the type system,
@@ -643,13 +704,13 @@ However, in other cases, the EDSL must perform normalisation of the
 deep embedding corresponding to what the QDSL achieves by
 normalisation of quoted terms.
 
+\vspace{2ex}
 \begin{quote}
 Try to give all of the information to help others to judge the value
 of your contribution; not just the information that leads to judgment
 in one particular direction or another. \\
 \flushr --- Richard Feynman
 \end{quote}
-\vspace{2ex}
 
 The subformula property depends on normalisation, but normalisation
 may lead to an exponential blowup in the size of the normalised
@@ -667,10 +728,10 @@ preprocessing; we clarify the tradeoff between ease of implementation
 and ensuring safe compilation to target at compile-time rather than
 run-time.
 
+\vspace{2ex}
 \begin{quote}
 This is the short and the long of it. \flushr --- Shakespeare
 \end{quote}
-\vspace{2ex}
 
 The contributions of this paper are:
 \begin{itemize}
@@ -841,8 +902,7 @@ is easy to provide the name as an additional parameter if required.
 
 Depending on your point of view, quotation in this form of QDSL is
 either desirable, because it makes manifest the staging, or
-undesirable because it is too noisy. We return to this point in
-Section~\ref{sec:TODO}.  QDSL enables us to ``steal'' the entire
+undesirable because it is too noisy.   QDSL enables us to ``steal'' the entire
 syntax of the host language for our DSL.  The EDSL approach can use
 the same syntax for arithmetic operators, but must use a different
 syntax for equality tests and conditionals, as we will see in
@@ -863,7 +923,7 @@ Gentzen's subformula property guarantees that any proof can be
 normalised so that the only formulas that appear within it are
 subformulas of one of the hypotheses or of the conclusion of the
 proof.  Viewed through the lens of Propositions as Types
-\citep{wadler-2015}, also known as the Curry-Howard Isomorphism,
+\citep{Howard-1980,Wadler-2015}, also known as the Curry-Howard Isomorphism,
 Gentzen's subformula property guarantees that any term can be
 normalised so that the type of each of its subterms is a subtype of
 either the type of one of its free variables (corresponding to
@@ -1286,7 +1346,7 @@ reductions of Phase~1 until no more apply, then similarly for Phase~2,
 and finally for Phase~3.  Phase~1 performs let-insertion, naming
 subterms that are not values, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
-in Moggi's metalanguage for monads \citep{moggi}.  Phase~2 performs
+in Moggi's metalanguage for monads \citep{Moggi-1991}.  Phase~2 performs
 standard $\beta$ and commuting reductions, and is the only phase that
 is crucial for obtaining normal forms that satisfy the subformula
 property. Phase~3 ``garbage collects'' unused terms as in the
@@ -1351,7 +1411,7 @@ then every subterm of $M$ has a type that is either a subformula of $A$,
 a subformula of a type in $\Gamma$, or a subformula of the type
 of a constant in $M$.
 \end{proposition}
-The proof follows the lines of \citet{prawitz}.
+The proof follows the lines of \citet{Prawitz-1965}.
 The differences are that we have introduced fully applied constants
 (to enable the sharpened subformula property, below), and that our
 reduction rules introduce |let|, in order to ensure sharing is preserved.
@@ -1374,7 +1434,7 @@ constants, such as |while|.  In a context with general recursion, we take
 wish to avoid unfolding a reduction |L M|, we take |id :: a -> a| as
 an uninterpreted constant, and replace |L M| by |id L M|.
 
-Examination of the proof in \citet{prawitz} shows that in fact
+Examination of the proof in \citet{Prawitz-1965} shows that in fact
 normalisation achieves a sharper property.
 \begin{proposition}[Sharpened subformula property]
 If $\Gamma \vdash M:A$ and $M$ is in normal form, then every proper
@@ -1399,7 +1459,7 @@ normalisation.  Here we are interested in C as a \emph{first-order}
 language. The exact property required is somewhat subtle. One might at
 first guess the required property is that every subterm is
 representable, in the sense introduced in
-Section~\ref{subsec:toplevel}, but this is not quite right. The
+Section~\ref{subsec:top}, but this is not quite right. The
 top-level term is a function from a representable type to a
 representable type. And the constant |while| expects subterms of type
 |s -> Bool| and |s -> s|, where the state |s| is representable.
@@ -1416,6 +1476,7 @@ The property we need to ensure ease of translation to C
 (or any other first-order language) is as follows.
 
 \begin{proposition}[Rank and representability]
+\label{prop:rank}
 Consider a term $M$ of rank $1$, where every free variable of $M$ has
 rank $0$ and every constant in $M$ has rank at most $2$.  Then $M$
 normalises to a form where every subterm either is of representable
@@ -1454,7 +1515,7 @@ The top-level function of EFeldspar has the type:
 qdsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
 \end{spec}
 Here |Dp a| is the deep representation of a term of type |a|.
-The deep representation is described in detail in Section~\ref{subsec:e-deep}
+The deep representation is described in detail in Section~\ref{subsec:deep}
 below, and is chosen to be easy to translate to C.
 As before, type |C| represents code in C,
 and type class |Rep| restricts to representable types.
@@ -1654,7 +1715,7 @@ Here are further points of comparison between the two approaches.
 
 \item Both CDSL and QDSL can exploit notational conveniences in the
 host language. The example here exploits Haskell |do| notation; the
-embedding of SQL in F\# by \citet{CheneyLW13} expoits F\# sequence
+embedding of SQL in F\# by \citet{cheney:linq} expoits F\# sequence
 notation. For EDSL, exploiting |do| notation just requires
 instantiating |return| and |(>>=)| correctly. For QDSL, it is
 also necessary for the normaliser to recognise and expand
@@ -1671,6 +1732,7 @@ quoted host language, and so can share a normaliser.
 
 
 \subsection{The deep embedding}
+\label{subsec:deep}
 
 We now review the usual approach to embedding a DSL into
 a host language by combining deep and shallow embedding.
@@ -1911,7 +1973,7 @@ power of their own technique!)
 \subsection{Embedding option}
 \label{subsec:opt}
 
-We now explain in detail the |Opt| type seen in Section~\ref{sec:second-example}.
+We now explain in detail the |Opt| type seen in Section~\ref{subsec:maybe}.
 
 The deep-and-shallow technique cleverly represents deep embeddding
 |Dp (a,b)| by shallow embedding |(Dp a, Dp b)|.  Hence, it is tempting to
@@ -2122,7 +2184,7 @@ operational reasoning on the behaviour of the type |Vec|.
 
 Domain specific languages are becoming increasingly popular as a way
 to deal with software complexity. Yet, they have a long and rich
-history \citep{Bentley:1986:PPL:6424.315691}.
+history \citep{Bentley-1986}.
 
 In this paper we have, like many other DSL writers, used Haskell as it
 has proven to be very suitable for \emph{embedding} domain specific
@@ -2130,7 +2192,7 @@ languages \citep{Gill:14:DSLs-and-Synthesis}.  Examples include
 \citet{reid1999prototyping, hudak1997domain, bjesse1998lava}.
 
 In this paper we have specifically built on the technique of combining
-deep and shallow embeddings \citep{SvenningssonA12} and
+deep and shallow embeddings \citep{svenningsson:combining} and
 contrasted it with our new QDSL technique. Languages which have used
 this technique include Feldspar \citep{FELDSPAR}, Obsidian
 \citep{svensson2011obsidian}, Nikola \citep{NIKOLA}, Hydra
@@ -2149,9 +2211,16 @@ to be able to recover from the loss of sharing. Later, \citet{gill2009type}
 proposed a somewhat safer way of recover sharing, though still ultimately
 relying on impurity.
 
-The underlying idea for QDSLs was established by \citet{CheneyLW13}.
+A proposition-as-types principle for quotation as a modal
+logic was proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.
+As they note in that paper, their technique has close connections
+to two-level languages \citep{Nielson-2005}.
 
-[TODO: Citations for quotation, macros, early DSLs in Lisp]
+An early use of quotation in programming is Lisp \citep{McCarthy-1960},
+and perhaps the first application of quotation to domain-specific
+languages is Lisp macros \citep{Hart-1963}.
+
+The underlying idea for QDSLs was established by \citet{cheney:linq}.
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -2164,7 +2233,7 @@ syntax of the host language, and (always) ensure the subformula property,
 at the cost of requiring a normaliser, one per host language.
 
 The subformula property may have applications in DSLs other that
-QDSLs. For instance, after Section~\ref{sec:option} of this paper was
+QDSLs. For instance, after Section~\ref{subsec:opt} of this paper was
 drafted, it occurred to us that a different approach to options in
 EDSL would be to extend type |Dp| with constructs for type |Maybe|.
 So long as type |Maybe| does not appear in the input or output of the

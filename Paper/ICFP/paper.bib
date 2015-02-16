@@ -1,3 +1,56 @@
+@string{concur="CONCUR"}                  
+@string{cpp="Certified Programs and Proofs (CPP)"}
+@string{csl="Computer Science Logic (CSL)"}
+@string{dls="Dynamic Languages Symposium (DLS)"}
+@string{ecoop="European Conference on Object-Oriented Programming (ECOOP)"}
+@string{esop="European Symposium on Programming (ESOP)"}
+@string{eurosys="European Conference on Computer Systems (EuroSys)"}
+@string{flops="Functional and Logic Programming (FLOPS)"}
+@string{fossacs="Foundations of Software Science and Computation (FoSSaCS)"}
+@string{fpca="Functional Programming Languages and Computer Architecture (FPCA)"}
+@string{hlcl="High-Level Concurrent Languages (HLCL)"}
+@string{icalp="International Colloquium on Automata, Languages and Programming (ICALP)"}
+@string{ice="Interaction and Concurrency Experience (ICE)"}
+@string{icfp="International Conference on Functional Programming (ICFP)"}
+@string{ifip="International Federation for Information Processing World Computer Congress (IFIP)"}
+@string{ilps="International Logic Programming Symposium (ILPS)"}
+@string{lics="Logic in Computer Science (LICS)"}
+@string{mfcs="Mathematical Foundations of Computer Science (MFCS)"}                  
+@string{oopsla="Object-Oriented Programming: Systems, Languages, and Applications (OOPSLA)"}
+@string{parle="Parallel Architectures and Languages Europe (PARLE)"}
+@string{pldi="Programming Language Design and Implementation (PLDI)"}
+@string{plpv="Programming Languages meets Program Verification (PLPV)"}
+@string{pods="Principles of Database Systems (PODS)"}
+@string{popl="Principles of Programming Languages (POPL)"}
+@string{ppdp="Principles and Practice of Declarative Programming (PPDP)"}
+@string{scheme="Scheme and Functional Programming Workshop (Scheme)"}
+@string{stop="Workshop on Script-to-Program Evolution (STOP)"}
+@string{tfp="Trends in Functional Programming (TFP)"}
+@string{tlca="Typed Lambda Calculi and Applications (TLCA)"}
+@string{tldi="Types in Language Design and Implementation (TLDI)"}
+
+@string{acta="Acta Informatica"}
+@string{compsurv="Computing Surveys"}                  
+@string{entcs="Electronic Notes in Theoretical Computer Science"}
+@string{hosc="Higher-Order and Symbolic Computation"}
+@string{iandc="Information and Computation"}
+@string{jacm="Journal of the ACM"}                  
+@string{jfp="Journal of Functional Programming"}
+@string{jsl="Journal of Symbolic Logic"}                  
+@string{lispsc="Lisp and Symbolic Computation"}                  
+@string{lncs="Lecture Notes in Computer Science"}
+@string{mscs="Mathematical Structures in Computer Science"}                  
+@string{tcs="Theoretical Computer Science"}
+@string{toplas="Transactions on Programming Languages and Systems"}
+
+@inproceedings{a-normal-form,
+  title={The essence of compiling with continuations},
+  author={Cormac Flanagan and Amr Sabryand Bruce F Duba and Matthias Felleisen},
+  booktitle=pldi,
+  pages={237--247},
+  year={1993},
+  organization={ACM}
+}
 @inproceedings{fsharplinq,
   title={Leveraging {.NET} meta-programming components from {F\#}: integrated queries and interoperable heterogeneous execution},
   author={Syme, Don},
@@ -179,22 +232,21 @@ year={2010},
   year={1997}
 }
 
-
-@article{Bentley:1986:PPL:6424.315691,
+@article{Bentley-1986,
  author = {Bentley, J.},
  title = {Programming pearls: little languages},
- journal = {Commun. ACM},
-//issue_date = {Aug. 1986},
+ journal = cacm,
  volume = {29},
  number = {8},
-//month = aug,
  year = {1986},
-//issn = {0001-0782},
  pages = {711--721},
- numpages = {11},
- acmid = {315691},
  publisher = {ACM},
- address = {New York, NY, USA},
+//issue_date = {Aug. 1986},
+//month = aug,
+//issn = {0001-0782},
+//numpages = {11},
+//acmid = {315691},
+//address = {New York, NY, USA},
 }
 
 @incollection{claessen1999observable,
@@ -236,6 +288,7 @@ year={2010},
 @Misc{feldspar-github,
   title = 	 {Feldspar Github repository},
   author = {Feldspar},
+  year = 2015,                   
   note  = {https://github.com/Feldspar/feldspar-language}
 }
 
@@ -250,20 +303,95 @@ year={2010},
 @inproceedings{metahaskell,
   title={Explicitly heterogeneous metaprogramming with {M}eta{H}askell},
   author={Mainland, G.},
-  booktitle={ICFP},
-  year={2012},
+  booktitle=icfp,
+  year={2012}
 }
-@book{prawitz,
+@book{Prawitz-1965,
   author    = {Dag Prawitz},
   title     = {Natural Deduction: A Proof-Theoretical Study},
   publisher = {Almqvist and Wiksell},
   address   = {Stockholm},                 
   year      = {1965}
 }
-@techreport{hart:macros,
+@techreport{Hart-1963,
   author      = {Timothy P. Hart},
   title       = {{MACRO} Definitions for {LISP}},
   institution = {MIT},
   number      = {AIM-057},
   year        = {1963}
 }
+@article{McCarthy-1960,
+  title={Recursive functions of symbolic expressions and their computation by machine, Part I},  author={McCarthy, John},
+  journal=cacm,
+  volume={3},
+  number={4},
+  pages={184--195},
+  year={1960},
+  publisher={ACM}
+}
+
+@article{Davies-Pfenning-2001,
+  author      = {Rowan Davies and Frank Pfenning},
+  title       = {A modal analysis of staged computation},
+  journal     = jacm,
+  volume      = {48},
+  number      = {3},
+  pages       = {555--604},
+  year        = {2001}
+}
+@inproceedings{Davies-Pfenning-1996,
+  author      = {Rowan Davies and Frank Pfenning},
+  title       = {A modal analysis of staged computation},
+  booktitle   = popl,
+  editor      = {Guy Steele, Jr.},
+  address     = {St. Petersburg Beach, Florida},
+  organization= {ACM},
+  pages       = {258--270},
+  year        = {1996}
+}
+@inproceedings{Wong-1993,
+  title       = {Normal forms and conservative properties for query languages
+                 over collection types},
+  author      = {Limsoon Wong},
+  booktitle   = pods,
+  pages       = {26--36},
+  year        ={1993},
+  organization={ACM}
+}
+@incollection{Howard-1980,
+  author    = {W. A. Howard},
+  title     = {The formulae-as-types notion of construction},
+  booktitle = {To H.~B.~Curry:
+               Essays on Combinatory Logic, Lambda Calculus, and Formalism},
+  editors   = {J. P. Seldin and J. R. Hindley},
+  year      = {1980},
+  pages     = {479--491},
+  publisher = {Academic Press},
+  note      = {The original version was circulated privately in 1969.}
+}
+@article{Wadler-2015,
+  author      = {Philip Wadler},
+  title       = {Propositions as Types},
+  journal     = cacm,
+  year        = {2015},
+  note        = {To appear.}
+}
+@article{Moggi-1991,
+  title={Notions of computation and monads},
+  author={Moggi, Eugenio},
+  journal=iandc,
+  volume={93},
+  number={1},
+  pages={55--92},
+  year={1991},
+  publisher={Elsevier}
+}
+@book{Nielson-2005,
+  title={Two-level functional languages},
+  author={Nielson, Flemming and Nielson, Hanne Riis},
+  volume={34},
+  year={2005},
+  publisher={Cambridge university press}
+}
+
+
