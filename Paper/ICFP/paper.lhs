@@ -1,6 +1,9 @@
 % TO DO
 
-% SHAYAN: If you edit the paper, mark any changes clearly!
+% Shayan, I especially need the following from you. Either send in
+% e-mail or edit the paper. If you edit the paper, mark changes with
+% *** SHAYAN ***
+% before and after.
 
 % Shayan: Add a short explanation of the type class Type. In order for
 % the code in the paper to be correct, I suspect that we need to explain
