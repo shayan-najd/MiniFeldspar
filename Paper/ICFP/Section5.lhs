@@ -1,3 +1,36 @@
+%if False
+\begin{code}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+import Prelude hiding (sqrt,min)
+import Data.Array
+type Arr a = Array Int a
+
+min         ::  Ord a => Dp a ->  Dp a -> Dp a
+min m n     =   (m .<. n) ? (m, n)
+
+instance Fractional (Dp Float) where
+  a / b          =  Prim2 "(/)" a b
+
+sqrt :: (Syn a, Num a) => a -> Dp Float
+sqrt e = Prim1 "Sqrt" (toDp e)
+
+instance Num (Dp Float) where
+  a + b  =  Prim2 "(+)" a b
+  a - b  =  Prim2 "(-)" a b
+  a * b  =  Prim2 "(*)" a b
+  fromInteger a = LitF (fromInteger a)
+
+
+\end{code}
+%endif
+
+%format returnn = return
+%format (>>==)  = >>=
+
 This section reviews the combination of deep and shallow embeddings
 required to implement Feldspar as an EDSL, and considers the trade-offs
 between the QDSL and EDSL approaches.
@@ -508,12 +541,12 @@ option_R d f o  =   def o ? (f (val o), d)
 The next obvious step is to define a suitable monad over the type |Opt_R|.
 The natural definitions to use are as follows:
 \begin{code}
-return    ::  a -> Opt_R a
-return x  =   some_R x
+returnn    ::  a -> Opt_R a
+returnn x  =   some_R x
 
-(>>=)     ::  (Undef b) => Opt_R a -> (a -> Opt_R b) -> Opt_R b
-o >>= g   =   Opt_R  (def o ? (def (g (val o)), false))
-                     (def o ? (val (g (val o)), undef))
+(>>==)     ::  (Undef b) => Opt_R a -> (a -> Opt_R b) -> Opt_R b
+o >>== g   =   Opt_R  (def o ? (def (g (val o)), false))
+                      (def o ? (val (g (val o)), undef))
 \end{code}
 However, this adds type constraint |Undef b|
 to the type of |(>>=)|, which is not permitted.
@@ -606,7 +639,7 @@ sumVec (Vec n g)
 dotVec      ::  (Syn a, Num a) => Vec a -> Vec a -> a
 dotVec u v  =   sumVec (zipVec (*) u v)
 
-normVec     ::  Vec Float -> Dp Float
+normVec     ::  (Syn a, Num a) => Vec a -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
 
@@ -644,7 +677,7 @@ As with QDSL, there are some situations where fusion is not beneficial.
 We may materialise a vector as an array with the following function.
 \begin{code}
 memorise :: Syn a => Vec a -> Vec a
-memorise (Vec n g) =
+memorise (Vec n g)
   = Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
 The above definition depends on common subexpression elimination
