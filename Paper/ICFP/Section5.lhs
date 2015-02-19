@@ -24,12 +24,11 @@ instance Num (Dp Float) where
   a * b  =  Prim2 "(*)" a b
   fromInteger a = LitF (fromInteger a)
 
-
 \end{code}
 %endif
 
 %format returnn = return
-%format (>>==)  = >>=
+%format >>==  = "\bind"
 
 This section reviews the combination of deep and shallow embeddings
 required to implement Feldspar as an EDSL, and considers the trade-offs
