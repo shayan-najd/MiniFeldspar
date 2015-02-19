@@ -1,3 +1,19 @@
+%if False
+\begin{code}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE ConstraintKinds #-}
+
+import Prelude hiding (Int,min)
+import QFeldspar.QDSL hiding (div,for)
+type Arr a = Ary a
+makeArr = arr
+ixArr   = arrIx
+lenArr  = arrLen
+type Rep a = FO a
+type Syn a = FO a
+\end{code}
+%endif
+
 Feldspar is an EDSL for writing signal-processing software, that
 generates code in C \citep{FELDSPAR}. We present a variant,
 QDSL~Feldspar, that follows the structure of the previous design closely,
@@ -257,7 +273,7 @@ of the |for| loop returned.
 As an example, we can define Fibonacci using a |for| loop.
 \begin{code}
 fib :: Qt (Int -> Int)
-fib =  [|| \n -> fst ($$for n (\(a,b) -> (b,a+b)) (0,1)) |]]
+fib =  [|| \n -> fst ($$for n (0,1) (\i (a,b) -> (b,a+b))) ||]
 \end{code}
 
 Again, the subformula property plays a key role.
@@ -337,7 +353,7 @@ and norm of a vector.
 \begin{code}
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
-                        Vec (m `min` n) (\i -> f (g i) (h i)) ||]
+                        Vec ($$min m n) (\i -> f (g i) (h i)) ||]
 
 sumVec   ::  (Rep a, Num a) => Qt (Vec a -> a)
 sumVec   =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]
@@ -346,7 +362,7 @@ dotVec   ::  (Rep a, Num a) => Qt (Vec a -> Vec a -> a)
 dotVec   =   [|| \u v -> $$sumVec ($$zipVec (*) u v) ||]
 
 normVec  ::  Qt (Vec Float -> Float)
-normVec  =   [|| \v -> sqrt ($$scalarProd v v) ||]
+normVec  =   [|| \v -> sqrt ($$dotVec v v) ||]
 \end{code}
 The second of these uses the |for| loop defined in
 Section~\ref{subsec:while}, the third is defined using
@@ -380,7 +396,7 @@ the elements to be recomputed.  An alternative is to materialise the
 vector as an array with the following function.
 \begin{code}
 memorise  ::  Syn a => Qt (Vec a -> Vec a)
-memorise  =   [|| toVec . fromVec ||]
+memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 \end{code}
 For example, if
 \begin{spec}
