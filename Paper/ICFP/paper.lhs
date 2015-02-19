@@ -98,8 +98,8 @@
 %\newcommand{\todo}[1]{}
 
 \newcommand{\longeq}{=\!=}
-\newcommand{\openq}{[||||\,}
-\newcommand{\closeq}{\,||||]}
+% \newcommand{\openq}{[||||\,}
+% \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -348,15 +348,15 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid 
+       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid
        \expapp{\hole}{M}                                \mid
-       \expapp{V}{\hole}                                \mid 
-       \exppair{\hole}{M}                               \mid 
-       \exppair{V}{\hole}                               \mid 
-       \expfst{\hole}                                   \mid 
+       \expapp{V}{\hole}                                \mid
+       \exppair{\hole}{M}                               \mid
+       \exppair{V}{\hole}                               \mid
+       \expfst{\hole}                                   \mid
        \expsnd{\hole}                                   \mid % \\ &&
-       \expinl{\hole}{B}                                \mid 
-       \expinr{A}{\hole}                                \mid 
+       \expinl{\hole}{B}                                \mid
+       \expinr{A}{\hole}                                \mid
        \expcase{\hole}{x}{M}{y}{N} \\
  \end{array}
 \]%
@@ -756,7 +756,7 @@ characterise when higher-order terms normalise to first-order form
 % (Section~\ref{sec:other-qdsls}.)
 
 \item To compare the QDSL variant of Feldspar
-with the deep and shallow embedding approach 
+with the deep and shallow embedding approach
 used in the EDSL variant of Feldspar.
 (Section~\ref{sec:qdsl-vs-edsl}.)
 
@@ -1012,13 +1012,13 @@ identical C code.
 
 The subformula property is key: because the final type of the result
 does not involve |Maybe| it is certain that normalisation will remove
-all its occurrences.  
+all its occurrences.
 Occurrences of |do| notation are
 expanded to applications of |(>>=)|, as usual.
 Rather than taking |return|, |(>>=)|, and |maybe| as free variables
 (whose types have subformulas involving |Maybe|),
 we treat them as known definitions to be eliminated by the
-normaliser.  
+normaliser.
 The |Maybe| type is essentially a sum type, and normalisation for
 these is as described in Section~\ref{sec:subformula}.
 
@@ -1074,7 +1074,7 @@ while (\s -> ...) (\s -> ...) (...)
 \end{spec}
 where the first ellipses has type |Bool|,
 and both occurrences of the bound variable |s|
-and the second and third ellipses all have the same type. 
+and the second and third ellipses all have the same type.
 
 Unsurprisingly, and in accord with the subformula property, each
 occurrence of |while| in the normalised code will contain subterms
@@ -1170,7 +1170,7 @@ float main(float[] a) {
     i = i+1;
   }
   return sqrt(x);
-}  
+}
 \end{lstlisting}
 
 Types and the subformula property help us to guarantee fusion.
@@ -1297,7 +1297,7 @@ Let $A$, $B$, $C$ range over types, including base types ($\iota$),
 functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 Let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
 variables.  Let $c$ range over constants, which are fully
-applied according to their arity, as discussed below.  
+applied according to their arity, as discussed below.
 As usual, terms are taken as
 equivalent up to renaming of bound variables. Write $\fv{M}$ for
 the set of free variables of $M$, and $\subst{N}{x}{M}$ for
@@ -1423,7 +1423,7 @@ Section~\ref{sec:implementation}, but may be a problem in some
 contexts. Normalisation may be controlled by introduction of
 uninterpreted constants (see Section~\ref{subsec:subformula}),
 but further work is needed to understand the contexts in which
-complete normalisation is 
+complete normalisation is
 desirable and the contexts in which it is problematic.
 
 Examination of the proof in \citet{Prawitz-1965} shows that in fact
@@ -1584,7 +1584,7 @@ although these may follow a fairly standard pattern.
 \item QDSL yields an unwieldy term that requires normalisation.  In
 contrast, EDSL yields the term in normalised form in this case, though
 there are other situations where a normaliser is required (see
-Section~\ref{subsec:e-maybe}). 
+Section~\ref{subsec:e-maybe}).
 
 \item QDSL requires traversing the quoted term to ensure it only
 mentions permitted identifiers. In contrast, EDSL guarantees that if a
@@ -1777,7 +1777,7 @@ Construct |Variable| represents a variable.
 % \begin{code}
 % (<*>)                 ::  (a -> b) -> a -> b
 % f <*> x               =   seq x (f x)
-% 
+%
 % eval                  ::  Dp a -> a
 % eval (LitI i)         =   i
 % eval (LitF x)         =   x
@@ -1794,10 +1794,10 @@ Construct |Variable| represents a variable.
 % eval (ArrLen a)       =   u-l+1  where (l,u) = bounds (eval a)
 % eval (ArrIx a i)      =   eval a ! eval i
 % eval (Value v)        =   v
-% 
+%
 % evalFun               ::  (Dp a -> Dp b) -> a -> b
 % evalFun f x           =   (eval . f . Value) <*> x
-% 
+%
 % evalWhile             ::  (a -> Bool) -> (a -> a) -> a -> a
 % evalWhile c b i       =   if c i then evalWhile c b <*> b i else i
 % \end{code}
@@ -2262,5 +2262,3 @@ Lindley and Wadler were funded by EPSRC Grant EP/K034413/1.
 
 
 \end{document}
-
-
