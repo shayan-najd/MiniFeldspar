@@ -459,6 +459,12 @@ Phase 3 (garbage collection)
 
 \begin{document}
 
+%if False
+\begin{code}
+
+\end{code}
+%endif
+
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
