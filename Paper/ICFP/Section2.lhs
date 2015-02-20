@@ -1,18 +1,29 @@
+%format testQt    (x) (y) = "\fi" y
+%format testNrmQt (x) (y) = "\fi" y
+%format arrLen = lenArr
+%format arrIx  = ixArr
+%format arr    = makeArr
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGe TypeSynonymInstances #-}
 
 import Prelude hiding (Int,min)
-import QFeldspar.QDSL hiding (div,for)
-type Arr a = Ary a
-makeArr = arr
-ixArr   = arrIx
-lenArr  = arrLen
-type Rep a = FO a
-type Syn a = FO a
+import qualified Prelude as P
+
+import Data.Array(Array)
+
+import QFeldspar.QDSL hiding (div,while,for,qdsl)
+import qualified QFeldspar.QDSL as QDSL
+
+type C = String
+
+class (Type a , FO a) => Rep a
 \end{code}
 %endif
+%format P.Int = Int
 
 Feldspar is an EDSL for writing signal-processing software, that
 generates code in C \citep{FELDSPAR}. We present a variant,
@@ -28,14 +39,20 @@ comparison of the QDSL and EDSL designs in Section~\ref{sec:qdsl-vs-edsl}.
 
 In QDSL~Feldspar, our goal is to translate a quoted term to C code.
 The top-level function has the type:
-\begin{spec}
+\begin{code}
 qdsl :: (Rep a , Rep b) => Qt (a -> b) -> C
-\end{spec}
+\end{code}
+%if False
+\begin{code}
+qdsl = QDSL.qdsl
+\end{code}
+%endif
 Here |Qt a| represents a Haskell term of type |a|, its
 \emph{quoted} representation, and type |C| represents code in C.
 The top-level function expects a quoted term representing
 a function from type |a| to type |b|, and returns C code
-that represents this function (a @main@ routine).
+that represents this function.
+% (a @main@ routine) ***Shayan***: it produces a C function, not a main routine
 
 Not all types representable in Haskell are easily representable
 in the target language, C. For instance, we do not wish our target
@@ -44,11 +61,11 @@ type |a| and result type |b| of the main function must be representable,
 which is indicated by the type-class restrictions |Rep a| and |Rep b|.
 Representable types include integers, floats, and pairs where the components
 are both representable.
-\begin{spec}
+\begin{code}
 instance Rep Int
 instance Rep Float
 instance (Rep a, Rep b) => Rep (a,b)
-\end{spec}
+\end{code}
 It is easy to add triples and larger tuples.
 
 \subsection{A first example}
@@ -60,7 +77,7 @@ Since division by zero is undefined, we
 arbitrarily choose that raising zero to a negative power yields zero.
 Here is the power function represented using QDSL:
 \begin{code}
-power :: Int -> Qt (Float -> Float)
+power :: P.Int -> Qt (Float -> Float)
 power n =
   if n < 0 then
     [|| \x -> if x == 0  then  0
@@ -81,26 +98,28 @@ generation-time while quoted code executes at run-time. Quoting is
 indicated by |[||...||]| and unquoting by |$$(...)|.
 
 Evaluating |power (-6)| yields the following:
-\begin{spec}
-[||  \x ->  if x == 0 then 0 else
-       1 / (\x ->  (\y -> y * y)
-         ((\x -> (x * ((\x -> (\y -> y * y)
-           ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||]
-\end{spec}
+\begin{code}
+{-"\iffalse"-}
+ex1 = testQt (power (-6)) ([|| \x ->  if x == 0 then 0 else
+      1 / (\x ->  (\y -> y * y)
+          ((\x -> (x * ((\x -> (\y -> y * y)
+           ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||])
+\end{code}
 Normalising using the technique of Section~\ref{sec:subformula},
 with variables renamed for readability, yields the following:
-\begin{spec}
-[|| \u ->  if u == 0 then 0 else
+\begin{code}
+{-"\iffalse"-}
+ex2 = testNrmQt (power (-6)) ([|| \u ->  if u == 0 then 0 else
              let v = u * 1 in
              let w = u * (v * v) in
-             1 / (w * w)  ||]
-\end{spec}
+             1 / (w * w)  ||])
+\end{code}
 With the exception of the top-level term, all of the overhead of
 lambda abstraction and function application has been removed; we
 explain below why this is guaranteed by the subformula property.
 From the normalised term it is easy to generate the final C code:
 \begin{lstlisting}
-  float main (float u) {
+  float prog (float u) {
     if (u == 0) {
       return 0;
     } else {
@@ -110,24 +129,52 @@ From the normalised term it is easy to generate the final C code:
     }
   }
 \end{lstlisting}
-By default, we always generate a routine called \texttt{main}; it
-is easy to provide the name as an additional parameter if required.
+
+% ***Shayan***:
+%               after macro expansion, and alpha renaming variables,
+%               we currently get the following:
+% float func (float u)
+% {
+%   float w;
+%   float v;
+%   float r;
+%   if ((u == 0.0f))
+%   {
+%     r = 0.0f;
+%   }
+%   else
+%   {
+%     v = (u * 1.0f);
+%     w = (u * (v * v));
+%     r = (1.0f / (w * w));
+%   }
+%   return r;
+% }
+
+By default, we always generate a routine called \texttt{prog};
+% ***Shayan***: The name 'main' is kind of special in C.
+%               I used the name 'prog', but feel free to change it to
+%               something except 'main'.
+it is easy to provide the name as an additional parameter if required.
 
 Depending on your point of view, quotation in this form of QDSL is
 either desirable, because it makes manifest the staging, or
-undesirable because it is too noisy.   QDSL enables us to ``steal'' the entire
-syntax of the host language for our DSL.  The EDSL approach can use
-the same syntax for arithmetic operators, but must use a different
+undesirable because it is too noisy.  QDSL enables us to ``steal'' the
+entire syntax of the host language for our DSL.  The EDSL approach can
+use the same syntax for arithmetic operators, but must use a different
 syntax for equality tests and conditionals, as we explain in
 Section~\ref{sec:qdsl-vs-edsl}.
+% ***Shayan***: We should mention some of these restrictions for EDSLs
+%               are language specific.
 
 Within the quotation brackets there appear lambda abstractions and
 function applications, while our intention is to generate first-order
 code. How can the QDSL~Feldspar user be certain that such function
 applications do not render transformation to first-order code
-impossible or introduce additional runtime overhead?  The answer is
-the subformula property.
-
+impossible or introduce additional runtime overhead?
+% ***Shayan***: Above sentence should be rephrased. It is too long,
+%               and hard to read
+The answer is the subformula property.
 
 \subsection{The subformula property}
 \label{subsec:subformula}
@@ -137,7 +184,7 @@ normalised so that the only formulas that appear within it are
 subformulas of one of the hypotheses or of the conclusion of the
 proof.  Viewed through the lens of Propositions as Types
 \citep{Howard-1980,Wadler-2015}, also known as the Curry-Howard
-Isomorphism, Gentzen's subformula property guarantees that any term
+isomorphism, Gentzen's subformula property guarantees that any term
 can be normalised so that the type of each of its subterms is a
 subtype of either the type of one of its free variables (corresponding
 to hypotheses) or the term itself (corresponding to the conclusion).
@@ -145,6 +192,11 @@ Here the subtypes of a type are the type itself and the subtypes of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and that types |Int| and |Float| have no
 parts.
+% ***Shayan***: Above and below sentences should be reformulated to
+%               avoid the ambigious term 'subtype'. I suggest the
+%               term 'subexpression'. Sometimes the term subformula
+%               is used inconsistently.
+
 
 % the only part of |Arr a| is |a|
 
@@ -200,7 +252,7 @@ return  ::  a -> Maybe a
 
 Here is the refactored code.
 \begin{code}
-power' :: Int -> Qt (Float -> Maybe Float)
+power' :: P.Int -> Qt (Float -> Maybe Float)
 power' n =
   if n < 0 then
     [|| \x ->  if x == 0  then  Nothing
@@ -215,10 +267,17 @@ power' n =
     [|| \x -> do  y <- $$(power' (n-1)) x
                   return (x*y) ||]
 
-power'' ::  Int -> Qt (Float -> Float)
+power'' ::  P.Int -> Qt (Float -> Float)
 power'' n =
   [|| \ x ->  maybe 0 (\y -> y) ($$(power' n) x)||]
 \end{code}
+
+%if False
+\begin{code}
+ex3 = testNrmQt (power (-6)) (power'' (-6))
+ex4 = qdsl (power (-6)) == qdsl (power'' (-6))
+\end{code}
+%endif
 Here |sqr| is as before. Evaluation and normalisation of
 |power (-6)| and |power'' (-6)| yield identical terms
 (up to renaming), and hence applying |qdsl| to these yields
@@ -241,21 +300,28 @@ these is as described in Section~\ref{sec:subformula}.
 % passed to |qdsl|. An alternative choice is possible, as we will see
 % when we consider arrays, in Section~\ref{subsec:arrays} below.
 
-
 \subsection{While}
 \label{subsec:while}
 
 Code that is intended to compile to a @while@ loop in C is indicated
 in QDSL~Feldspar by application of |while|.
-\begin{spec}
-while :: (Rep s) => Qt ((s -> Bool) -> (s -> s) -> s -> s)
-\end{spec}
+\begin{code}
+while :: (Rep s) => (s -> Bool) -> (s -> s) -> s -> s
+\end{code}
+%if False
+\begin{code}
+while  = QDSL.while
+\end{code}
+%endif
 Rather than using side-effects, |while| takes three
 arguments: a predicate over the current state, of type |s -> Bool|; a
 function from current state to new state, of type |s -> s|; and an
 initial state of type |s|; and it returns a final state of type |s|.
 Since we intend to compile the while loop to C, the type
 of the state is constrained to representable types.
+% ***Shayan***: Maybe we should add a sentance mentioning that while is
+%               a built-in constant; that's why we use it without '$$'.
+%               The function 'qdsl' is aware of built-in constructs.
 
 We can define a |for| loop in terms of a |while| loop.
 \begin{code}
@@ -299,7 +365,6 @@ ensure that any top-level function without |Maybe| in its type will
 normalise to code not containing |Maybe| in the type of any subterm.
 An alternative choice is possible, as we will see in the next section.
 
-
 \subsection{Arrays}
 \label{subsec:arrays}
 
@@ -314,16 +379,18 @@ specialised to arrays with integer indices and zero-based indexing.
 The type |Vec| of pull arrays is defined in terms of existing types,
 as a pair consisting of the length of the array and a function
 that given an index returns the array element at that index.
-\begin{spec}
+\begin{code}
 type Arr a  =  Array Int a
+\end{code}
+\begin{spec}
 data Vec a  =  Vec Int (Int -> a)
 \end{spec}
 Values of type |Arr| are representable, assuming that the
 element type is representable, while values of type |Vec|
 are not representable.
-\begin{spec}
+\begin{code}
 instance (Rep a) => Rep (Arr a)
-\end{spec}
+\end{code}
 
 For arrays, we assume the following primitive operations.
 \begin{spec}
@@ -331,6 +398,9 @@ makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
 lenArr   ::  (Rep a) => Arr a -> Int
 ixArr    ::  (Rep a) => Arr a -> Int -> a
 \end{spec}
+% ***Shayan***: Not sure if we need 'Rep' constraint on these.
+%               Needs checking.
+
 The first populates a manifest array of the given
 size using the given indexing function, the second
 returns the length of the array, and the third returns
@@ -339,11 +409,11 @@ the array element at the given index.
 We define functions to convert between the two representations in the
 obvious way.
 \begin{code}
-toVec        ::  Qt (Arr a -> Vec a)
-toVec        =   [|| \a -> Vec (lenArr a) (\i -> ixArr a i) ||]
+toVec        ::  Rep a => Qt (Arr a -> Vec a)
+toVec        =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
 
-fromVec      ::  Qt (Vec a -> Arr a)
-fromVec      =   [|| \(Vec n g) -> makeArr n (\ x -> g x) ||]
+fromVec      ::  Rep a => Qt (Vec a -> Arr a)
+fromVec      =   [|| \(Vec n g) -> arr n (\ x -> g x) ||]
 \end{code}
 
 It is straightforward to define operations on vectors,
@@ -373,10 +443,10 @@ that |(*)| be fully applied, so before normalisation
 
 Our final function cannot accept |Vec| as input, since
 the |Vec| type is not representable, but it can accept
-|Arr| as input. Invoking |qdsl (normVec . toVec)|
+|Arr| as input. Invoking |qdsl [|||| \v -> $$normVec ($$toVec v) ||||]|
 produces the following C code.
 \begin{lstlisting}
-float main(float[] a) {
+float prog (float[] a) {
   float x = 0;
   int i = 0;
   while (i < lenArr a) {
@@ -395,7 +465,7 @@ when an intermediate vector is accessed many times fusion will cause
 the elements to be recomputed.  An alternative is to materialise the
 vector as an array with the following function.
 \begin{code}
-memorise  ::  Syn a => Qt (Vec a -> Vec a)
+memorise  ::  Rep a => Qt (Vec a -> Vec a)
 memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 \end{code}
 For example, if
