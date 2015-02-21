@@ -21,6 +21,9 @@ import qualified QFeldspar.QDSL as QDSL
 type C = String
 
 class (Type a , FO a) => Rep a
+
+test :: Bool
+test = ex1 && ex2 && ex3 && ex4
 \end{code}
 %endif
 %format P.Int = Int
@@ -420,6 +423,8 @@ It is straightforward to define operations on vectors,
 including combining corresponding elements of two vectors,
 summing the elements of a vector, dot product of two vectors,
 and norm of a vector.
+
+%format sqrtFltHsk = sqrt
 \begin{code}
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
@@ -432,7 +437,7 @@ dotVec   ::  (Rep a, Num a) => Qt (Vec a -> Vec a -> a)
 dotVec   =   [|| \u v -> $$sumVec ($$zipVec (*) u v) ||]
 
 normVec  ::  Qt (Vec Float -> Float)
-normVec  =   [|| \v -> sqrt ($$dotVec v v) ||]
+normVec  =   [|| \v -> sqrtFltHsk ($$dotVec v v) ||]
 \end{code}
 The second of these uses the |for| loop defined in
 Section~\ref{subsec:while}, the third is defined using
@@ -456,6 +461,8 @@ float prog (float[] a) {
   return sqrt(x);
 }
 \end{lstlisting}
+% ***Shayan***: We currently get a different C code,
+%               and I sent you an email about it.
 
 Types and the subformula property help us to guarantee fusion.
 The subformula property guarantees that all occurrences
@@ -464,10 +471,17 @@ There are some situations where fusion is not beneficial, notably
 when an intermediate vector is accessed many times fusion will cause
 the elements to be recomputed.  An alternative is to materialise the
 vector as an array with the following function.
-\begin{code}
+\begin{spec}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
-\end{code}
+\end{spec}
+% memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
+% ***Shayan***: I took the body out, as it is not correct.
+%               In QDSLs, thanks to eta contractions,
+%               "toVec . fromVec" reduces to "id".
+%               I have tested it with QFeldspar:
+% ghci> qdsl ([|| \ a -> $$fromVec ($$memorise ($$toVec a)) ||]
+%                :: Qt (Arr Int -> Arr Int))
+% "AryInt prog (AryInt v0)\n{\n  return v0;\n}"
 For example, if
 \begin{spec}
 blur :: Rep a => Qt (Vec a -> Vec a)
@@ -478,7 +492,7 @@ compute either
 |[||$$blur . $$blur||]| ~~~or~~~ |[||$$blur . $$memorise . $$blur||]|
 \end{center}
 with different trade-offs between recomputation and memory usage.
-Strong guarantees for fusion in combination with |memorize| gives
+Strong guarantees for fusion in combination with |memorise| gives
 the programmer a simple interface which provides powerful optimisation
 combined with fine control over memory usage.
 
