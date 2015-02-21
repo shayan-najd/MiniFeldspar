@@ -78,7 +78,7 @@ Let's begin by considering the ``hello world'' of program generation,
 the power function, raising a float to a given integer.
 Since division by zero is undefined, we
 arbitrarily choose that raising zero to a negative power yields zero.
-Here is the power function represented using QDSL:
+Here is 1the power function represented using QDSL:
 \begin{code}
 power :: P.Int -> Qt (Float -> Float)
 power n =
@@ -209,11 +209,11 @@ type of each of its proper subterms is a proper subtype of either the
 type of one of its free variables (corresponding to hypotheses) or the
 term itself (corresponding to the conclusion).  Here the proper
 subterms of a term are all subterms save for free variables and the
-term itself, and the proper subformulas of a type are all subformulas save
-for the type itself.  In the example of the previous subsection, the
-sharpened subformula property guarantees that after normalisation a
-term of type |float -> float| will only have proper subterms of type
-|float|, which is indeed true for the normalised term.
+term itself, and the proper subformulas of a type are all subformulas
+save for the type itself.  In the example of the previous subsection,
+the sharpened subformula property guarantees that after normalisation
+a closed term of type |float -> float| will only have proper subterms
+of type |float|, which is indeed true for the normalised term.
 
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
@@ -288,15 +288,13 @@ identical C code.
 
 The subformula property is key: because the final type of the result
 does not involve |Maybe| it is certain that normalisation will remove
-all its occurrences.
-Occurrences of |do| notation are
-expanded to applications of |(>>=)|, as usual.
-Rather than taking |return|, |(>>=)|, and |maybe| as free variables
-(whose types have subformulas involving |Maybe|),
-we treat them as known definitions to be eliminated by the
-normaliser.
-The |Maybe| type is essentially a sum type, and normalisation for
-these is as described in Section~\ref{sec:subformula}.
+all its occurrences.  Occurrences of |do| notation are expanded to
+applications of |(>>=)|, as usual.  Rather than taking |return|,
+|(>>=)|, and |maybe| as free variables (whose types have subformulas
+involving |Maybe|), we treat them as known definitions to be
+eliminated by the normaliser.  The |Maybe| type is a sum type, and
+normalisation for sums is as described in
+Section~\ref{sec:subformula}.
 
 % We have chosen not to make |Maybe| a representable type, which
 % prohibits its use as argument or result of the top-level function
@@ -416,7 +414,7 @@ toVec        ::  Rep a => Qt (Arr a -> Vec a)
 toVec        =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
 
 fromVec      ::  Rep a => Qt (Vec a -> Arr a)
-fromVec      =   [|| \(Vec n g) -> arr n (\ x -> g x) ||]
+fromVec      =   [|| \(Vec n g) -> arr n g ||]
 \end{code}
 
 It is straightforward to define operations on vectors,
@@ -464,13 +462,13 @@ float prog (float[] a) {
 % ***Shayan***: We currently get a different C code,
 %               and I sent you an email about it.
 
-Types and the subformula property help us to guarantee fusion.
-The subformula property guarantees that all occurrences
-of |Vec| must be eliminated, while occurrences of |Arr| will remain.
-There are some situations where fusion is not beneficial, notably
-when an intermediate vector is accessed many times fusion will cause
-the elements to be recomputed.  An alternative is to materialise the
-vector as an array with the following function.
+Types and the subformula property help us to guarantee fusion.  The
+subformula property guarantees that all occurrences of |Vec| must be
+eliminated, while occurrences of |Arr| will remain. There are some
+situations where fusion is not beneficial, notably when an
+intermediate vector is accessed many times, in which case fusion will
+cause the elements to be recomputed. An alternative is to materialise
+the vector as an array with the following function.
 \begin{spec}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
 \end{spec}
@@ -492,8 +490,8 @@ compute either
 |[||$$blur . $$blur||]| ~~~or~~~ |[||$$blur . $$memorise . $$blur||]|
 \end{center}
 with different trade-offs between recomputation and memory usage.
-Strong guarantees for fusion in combination with |memorise| gives
-the programmer a simple interface which provides powerful optimisation
+Strong guarantees for fusion in combination with |memorise| give the
+programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
 
 We have described the application of the subformula to array

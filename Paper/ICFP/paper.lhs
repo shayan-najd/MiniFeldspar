@@ -564,7 +564,7 @@ Imitation is the sincerest of flattery. \\
 \flushr --- Charles Caleb Colton
 \end{quote}
 
-\citet{cheney:linq} describes a DSL for language-integrated query in
+\citet{cheney:linq} describe a DSL for language-integrated query in
 F\# that translates into SQL.  Their technique depends on quotation,
 normalisation of quoted terms, and the subformula property---an
 approach which we here dub QDSL.  They conjecture that other DSLs might
@@ -641,7 +641,7 @@ while guaranteeing to generate code that operates on flat data.
 
 \end{itemize}
 The first two of these are used in this paper, while the
-third is central to \citet{cheney:linq}.
+third is central to \citep{cheney:linq}.
 % We thus give modern application to a theorem four-fifths of a century old.
 
 The subformula property is closely related to conservativity.  A
@@ -659,16 +659,16 @@ uses functions, can be put in a normal form that only uses pairs. Such
 a result is related to the first bullet point above; see
 Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
 
-As another example, the third bullet point above corresponds to a standard
-conservativity result for databases, namely that nested queries are no
-more expressive than flat queries \citep{Wong-1993}.  This conservativity
-result, as implied by the subformula property, is used central to
-\citep{cheney:linq} to show that queries that use intermediate nesting
-can be translated to SQL, which only queries flat tables and does not
-support nesting of data.
+As another example, the third bullet point above corresponds to a
+standard conservativity result for databases, namely that nested
+queries are no more expressive than flat queries \citep{Wong-1993}.
+This conservativity result, as implied by the subformula property, is
+used by \citet{cheney:linq} to show that queries that use intermediate
+nesting can be translated to SQL, which only queries flat tables and
+does not support nesting of data.
 
 The subformula property holds only for terms in normal form.  Previous
-work, such as \citet{cheney:linq} uses a call-by-name normalisation
+work, such as \citep{cheney:linq} uses a call-by-name normalisation
 algorithm that performs full $\beta$-reduction, which may cause
 computations to be repeated.  Here we present call-by-value and
 call-by-need normalisation algorithms, which guarantee to preserve
@@ -825,10 +825,10 @@ The transformer from |Qt| to |Dp| performs the following steps.
   it replaces $c$ with $\expabs{\overline{x}}{}{c \app \overline{x}}$.
   It replaces identifiers connected to the type |Maybe|, such as
   |return|, |(>>=)|, and |maybe|, by their definitions.
-\item It normalises the term to ensure the subformula property,
-  using the rules of Section~\ref{sec:subformula}.
-  The normaliser does not support all Haskell data types,
-  but does support tuples, and the types |Maybe| and |Vec|.
+\item It normalises the term to ensure the subformula property, using
+  the rules of Section~\ref{sec:subformula}. The normaliser does not
+  yet support all Haskell data types, but does support tuples, and the
+  types |Maybe| and |Vec|.
 % \item Overloading \\
 %   \todo{Say something about how overloading for arithmetic is handled.}
 \item It traverses the term, converting |Qt| to |Dp|.
@@ -850,8 +850,8 @@ just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
 in Template Haskell, where |a| is a phantom type variable. Hence, the
 translator from |Qt a| to |Dp a| is forced to re-infer all the type
 information for the subterms of the term of type |Qt a|.  This is why
-we translate the |Maybe| monad as a special case, rather than
-supporting overloading for monad operations.
+we currently translate the |Maybe| monad as a special case, rather
+than supporting overloading for monad operations in general.
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
 %%  each QDSL, it should be possible to design a single tool for each host language.
@@ -868,16 +868,17 @@ CRC        & Cyclic Redundancy Check \\
 Windowing  & Average array in a sliding window \\
 \end{tabular}
 \end{center}
-Figure~\ref{fig:thetable} lists the results. Columns \hct\ and \hrt\
-list compile-time and run-time in Haskell, and \cct\ and \crt\
-list compile-time and run-time in C.
-Runs for EDSL are shown both with and without common subexpression elimination (CSE),
-which is supported by a simple form of observable sharing. QDSL does not require CSE,
-since the normalisation algorithm preserves sharing. One benchmark, FFT, exhausts
-memory without CSE. All benchmarks produce essentially the same C for both QDSL
-and EDSL, which run in essentially the same time. The one exception is FFT, where
-Feldspar appears to introduce spurious conversions that increase the
-runtime.
+Figure~\ref{fig:thetable} lists the results. Columns \hct\ and
+\hrt\ list compile-time and run-time in Haskell, and \cct\ and
+\crt\ list compile-time and run-time in C. Runs for EDSL are shown
+both with and without common subexpression elimination (CSE), which is
+supported by a simple form of observable
+sharing~\citep{claessen1999observable, gill2009type}. QDSL does not
+require CSE, since the normalisation algorithm preserves sharing. One
+benchmark, FFT, exhausts memory without CSE. All benchmarks produce
+essentially the same C for both QDSL and EDSL, which run in
+essentially the same time. The one exception is FFT, where Feldspar
+appears to introduce spurious conversions that increase the runtime.
 
 Measurements were done on a quad-core Intel i7-2640M CPU
 running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
@@ -996,8 +997,11 @@ The type of a constant $c$ of arity $k$ is written
 \[
 c : A_1 \to \cdots A_k \to B
 \]
-and its subtypes are itself and $A_1$, \ldots, $A_k$, and $B$
-(but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
+%% [SL: no need to talk about the subtypes of c as it is not a subterm
+%% unless fully applied]
+%%
+%% and its subtypes are itself and $A_1$, \ldots, $A_k$, and $B$
+%% (but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
 An application of a constant $c$ of arity $k$ is written
 \[
 c \app M_1 \app \cdots \app M_k
@@ -1041,7 +1045,7 @@ subformula of a type in $\Gamma$.
 
 The sharpened subformula property says nothing about the type of
 subterms of constant applications, but this is immediately apparent by
-recursive application of the sharpended subformula property.  Given a
+recursive application of the sharpened subformula property.  Given a
 subterm that is a constant application $c \app \overline{M}$, where
 $c$ has type $\overline{A} \to B$, then the subterm itself has type
 $B$, each subterm $M_i$ has type $A_i$, and every proper subterm of
@@ -1119,8 +1123,8 @@ to Haskell that permit observable sharing.
 
 A proposition-as-types principle for quotation as a modal logic was
 proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
-they note in that paper, their technique has close connections to
-two-level languages \citep{Nielson-2005}.
+they note, their technique has close connections to two-level
+languages \citep{Nielson-2005}.
 
 Other approaches to DSL that make use of quotation include
 C\# and F\# versions of LINQ under .NET
@@ -1128,6 +1132,13 @@ C\# and F\# versions of LINQ under .NET
 Modular Staging \citep{scalalms}.
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
+
+\todo{Mention the work on normalisation with effects: Cooper (DBLP
+  2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
+  Wadler (PEPM 2014)}
+
+\todo{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
+  2014)}
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -1188,7 +1199,7 @@ Fellowship. %% <-- Google's requested format
 Svenningsson is a SICSA Visiting Fellow and is funded by a HiPEAC
 collaboration grant and by the Swedish Foundation for Strategic
 Research, under grant RawFP.
-Lindley and Wadler were funded by EPSRC Grant EP/K034413/1.
+Lindley and Wadler are funded by EPSRC Grant EP/K034413/1.
 
 \bibliographystyle{plainnat}
 \bibliography{paper}

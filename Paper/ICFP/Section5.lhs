@@ -135,7 +135,7 @@ mentions permitted identifiers. In contrast, EDSL guarantees that if a
 term has the right type it will translate to the target.  If the
 requirement to eyeball code to ensure only permitted identifiers are
 used is considered too onerous, it should be easy to build a
-preprocessor that checks this property. In Haskell, it is easy to
+preprocessor that checks this property. In Haskell, it is possible to
 incorporate such a preprocessor using MetaHaskell \cite{metahaskell}.
 
 \item Since QDSLs may share the same quoted terms across a range of
@@ -554,12 +554,12 @@ been dubbed the constrained-monad problem
 \citep{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
 We solve it with a trick due to \citet{PerssonAS11}.
 
-We introduce a second continuation-passing style (cps) type |Opt|,
+We introduce a second continuation-passing style (CPS) type |Opt|,
 defined in terms of the representation type |Opt_R|.  It is
-straightforward to define |Monad| and |Syn| instances for the cps
-type, operations to lift the representation type to cps and to lower
-cps to the representation type, and to lift |some|, |none|, and
-|option| from the representation type to the cps type.
+straightforward to define |Monad| and |Syn| instances for the CPS
+type, operations to lift the representation type to CPS and to lower
+CPS to the representation type, and to lift |some|, |none|, and
+|option| from the representation type to the CPS type.
 The |lift| operation is closely related to the |(>>=)| operation
 we could not define above; it is properly typed,
 thanks to the type constraint on |b| in the definition of |Opt a|.
@@ -656,7 +656,7 @@ not. Assume |u| is |Vec m g| and |v| is |Vec n h|. Then we can simplify
 |dotVec u v| as follows:
 \[
 \begin{array}{cl}
-         &  |toVec u v|  \\
+         &  |dotVec u v|  \\
 \leadsto &  |sumVec (zipVec (*) u v)|  \\
 \leadsto &  |sumVec (zipVec (*) (Vec m g) (Vec n h)|  \\
 \leadsto &  |sumVec (Vec (m `min` n) (\i -> g i * h i)|  \\
@@ -693,9 +693,9 @@ compute either
 \end{center}
 with different trade-offs between recomputation and memory usage.
 
-EDSL silently converts between representation, while QDSL forces
-all conversions to be written out; following the pattern that EDSL
-is more compact, while QDSL is more explicit.  For QDSL it is the
-subformula property which guarantees that all intermediate uses of
-|Vec| are eliminated, while for EDSL this is established by
-operational reasoning on the behaviour of the type |Vec|.
+EDSL silently converts between representations, while QDSL forces all
+conversions to be written out; following the pattern that EDSL is more
+compact, while QDSL is more explicit.  For QDSL it is the subformula
+property which guarantees that all intermediate uses of |Vec| are
+eliminated, while for EDSL this is established by operational
+reasoning on the behaviour of the type |Vec|.
