@@ -763,28 +763,27 @@ The contributions of this paper are:
 
 \item To introduce QDSLs as an approach to building DSLs based
 on quotation, normalisation of quoted terms, and the subformula property
-by presenting the design of a QDSL variant of Feldspar. (Section~\ref{sec:qfeldspar}.)
+by presenting the design of a QDSL variant of Feldspar (Section~\ref{sec:qfeldspar}).
 
-\item To compare QDSL and EDSL implementations of Feldspar,
-and show that they offer comparable performace.
-(Section~\ref{sec:implementation}.)
+\item To compare QDSL and EDSL implementations of Feldspar, and show
+  that they offer comparable performance
+  (Section~\ref{sec:implementation}).
 
 \item To explain the role of the subformula property in formulating
-DSLs, to describe a normalisation algorithm suitable for call-by-value
-or call-by-need that does not lose sharing, and to formulate a
-sharpened version of the subformula property and apply it to
-characterise when higher-order terms normalise to first-order form
-(Section~\ref{sec:subformula}.)
+  DSLs, to describe a normalisation algorithm suitable for
+  call-by-value or call-by-need that does not lose sharing, and to
+  formulate a sharpened version of the subformula property and apply
+  it to characterise when higher-order terms normalise to first-order
+  form (Section~\ref{sec:subformula}).
 
 % \item To review the F\# implementation of language-integrated query
 % \citep{cheney:linq} and the Scala LMS implementations of query
 % and [TODO: what else?], and argue that these are instances of QDSL.
 % (Section~\ref{sec:other-qdsls}.)
 
-\item To compare the QDSL variant of Feldspar
-with the deep and shallow embedding approach
-used in the EDSL variant of Feldspar.
-(Section~\ref{sec:qdsl-vs-edsl}.)
+\item To compare the QDSL variant of Feldspar with the deep and
+  shallow embedding approach used in the EDSL variant of Feldspar
+  (Section~\ref{sec:qdsl-vs-edsl}).
 
 \end{itemize}
 Section~\ref{sec:related} describes related work, and
@@ -822,6 +821,7 @@ Section~\ref{sec:conclusion} concludes.
 
 % \end{document}
 
+\sam{``cabal install qfeldspar'' goes here?}
 
 \section{Feldspar as a QDSL}
 \label{sec:qfeldspar}
@@ -1209,6 +1209,8 @@ Such a tool could easily subsume the special-purpose translator from
 and lift most of its restrictions. For instance,
 the current prototype is restricted to the |Maybe| monad, while the
 envisioned tool will work with any monad.
+
+\sam{Say something about adding support for observable sharing hacks?}
 
 Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
 speaking prose his whole life. Similarly, many of us have used QDSLs for
