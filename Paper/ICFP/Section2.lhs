@@ -135,7 +135,7 @@ From the normalised term it is easy to generate the final C code:
 
 \sam{The above is illegal C. The main function must have return type
   int. We should use some other name for the function we generate.}
-
+\shayan{see latex, at this point}
 % ***Shayan***:
 %               after macro expansion, and alpha renaming variables,
 %               we currently get the following:
@@ -158,9 +158,8 @@ From the normalised term it is easy to generate the final C code:
 % }
 
 By default, we always generate a routine called \texttt{prog};
-% ***Shayan***: The name 'main' is kind of special in C.
-%               I used the name 'prog', but feel free to change it to
-%               something except 'main'.
+\\ \shayan{The name main is kind of special in C. I used the name
+prog, but feel free to change it to something except main.}
 it is easy to provide the name as an additional parameter if required.
 
 Depending on your point of view, quotation in this form of QDSL is
@@ -170,16 +169,16 @@ entire syntax of the host language for our DSL.  The EDSL approach can
 use the same syntax for arithmetic operators, but must use a different
 syntax for equality tests and conditionals, as we explain in
 Section~\ref{sec:qdsl-vs-edsl}.
-% ***Shayan***: We should mention some of these restrictions for EDSLs
-%               are language specific.
+\\ \shayan{We should mention some of such overloading restrictions for
+EDSLs are language specific.}
 
 Within the quotation brackets there appear lambda abstractions and
 function applications, while our intention is to generate first-order
 code. How can the QDSL~Feldspar user be certain that such function
 applications do not render transformation to first-order code
 impossible or introduce additional runtime overhead?
-% ***Shayan***: Above sentence should be rephrased. It is too long,
-%               and hard to read
+\shayan{Above sentence should be rephrased. It is too long,
+        and hard to read.}
 The answer is the subformula property.
 
 \subsection{The subformula property}
@@ -198,11 +197,10 @@ Here the subtypes of a type are the type itself and the subtypes of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and that types |Int| and |Float| have no
 parts.
-% ***Shayan***: Above and below sentences should be reformulated to
-%               avoid the ambigious term 'subtype'. I suggest the
-%               term 'subexpression'. Sometimes the term subformula
-%               is used inconsistently.
-
+\shayan{ Above and below sentences should be reformulated to avoid the
+ambigious term ``subtype''. I suggest the term
+``subexpression''. Sometimes the term subformula is used
+inconsistently.}
 
 % the only part of |Arr a| is |a|
 
@@ -323,9 +321,9 @@ function from current state to new state, of type |s -> s|; and an
 initial state of type |s|; and it returns a final state of type |s|.
 Since we intend to compile the while loop to C, the type
 of the state is constrained to representable types.
-% ***Shayan***: Maybe we should add a sentance mentioning that while is
-%               a built-in constant; that's why we use it without '$$'.
-%               The function 'qdsl' is aware of built-in constructs.
+\\ \shayan{Maybe we should add a sentance mentioning that while is a
+built-in constant; that is why we use it without dollar signs. The
+function qdsl is aware of built-in constructs.}
 
 We can define a |for| loop in terms of a |while| loop.
 \begin{code}
@@ -402,8 +400,7 @@ makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
 lenArr   ::  (Rep a) => Arr a -> Int
 ixArr    ::  (Rep a) => Arr a -> Int -> a
 \end{spec}
-% ***Shayan***: Not sure if we need 'Rep' constraint on these.
-%               Needs checking.
+\shayan{Not sure if we need ``Rep'' constraint on these.}
 
 The first populates a manifest array of the given
 size using the given indexing function, the second
@@ -465,8 +462,7 @@ float prog (float[] a) {
   return sqrt(x);
 }
 \end{lstlisting}
-% ***Shayan***: We currently get a different C code,
-%               and I sent you an email about it.
+\shayan{We currently get a different C code, and I sent you an email about it.}
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
@@ -478,6 +474,7 @@ the vector as an array with the following function.
 \begin{spec}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
 \end{spec}
+\shayan{see latex, at this point}
 % memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 % ***Shayan***: I took the body out, as it is not correct.
 %               In QDSLs, thanks to eta contractions,

@@ -342,7 +342,7 @@ but in practice the theft is often only partial.  For instance, an
 EDSL such as Feldspar or Nicola, when embedded in Haskell, can exploit
 the overloading of Haskell so that arithmetic operations in both
 languages appear identical, but the same is not true of comparison or
-conditionals.
+conditionals.\\
 \sam{Comparisons and conditionals can be overloaded with the
 RebindableSyntax language option.}
 \shayan{RebindableSyntax does not overload conditionals (nor
