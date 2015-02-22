@@ -78,7 +78,7 @@ Let's begin by considering the ``hello world'' of program generation,
 the power function, raising a float to a given integer.
 Since division by zero is undefined, we
 arbitrarily choose that raising zero to a negative power yields zero.
-Here is 1the power function represented using QDSL:
+Here is an optimised power function represented using QDSL:
 \begin{code}
 power :: P.Int -> Qt (Float -> Float)
 power n =
@@ -132,6 +132,9 @@ From the normalised term it is easy to generate the final C code:
     }
   }
 \end{lstlisting}
+
+\sam{The above is illegal C. The main function must have return type
+  int. We should use some other name for the function we generate.}
 
 % ***Shayan***:
 %               after macro expansion, and alpha renaming variables,
@@ -443,6 +446,9 @@ the first two, and the fourth is defined using the third.
 Recall that our sharpened subformula property required
 that |(*)| be fully applied, so before normalisation
 |(*)| is expanded to |\x y -> x*y|.
+
+\sam{We haven't yet mentioned anything about constants being fully
+  applied in the sharpened subformula property.}
 
 Our final function cannot accept |Vec| as input, since
 the |Vec| type is not representable, but it can accept

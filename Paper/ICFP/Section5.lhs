@@ -153,6 +153,12 @@ approaches.
 
 \end{itemize}
 
+\sam{A point not discussed here is code reuse between host and
+  embedded languages. Links allows exactly the same code to be written
+  once and used both in host and embedded code. QDSLs in Haskell do
+  not (currently). F\# supports an attribute which can be used to
+  reflect an arbitrary module as a quoted AST. What about other EDSL
+  approaches?}
 
 \subsection{A second example}
 \label{subsec:e-maybe}
@@ -295,6 +301,8 @@ The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
 \citet{hoas}.
+
+\sam{Technically this isn't true HOAS because it allows exotic terms.}
 
 The deep embedding has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives, arrays,
@@ -553,6 +561,9 @@ The need to add such constraints often arises, and has
 been dubbed the constrained-monad problem
 \citep{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
 We solve it with a trick due to \citet{PerssonAS11}.
+
+\sam{I think Jeremy Yallop may have also covered this kind of issue
+  somewhere in his thesis.}
 
 We introduce a second continuation-passing style (CPS) type |Opt|,
 defined in terms of the representation type |Opt_R|.  It is

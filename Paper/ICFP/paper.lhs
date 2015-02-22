@@ -95,6 +95,9 @@
 \newcommand{\todo}[1]
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
+\newcommand{\sam}[1]
+  {{\noindent\small\color{red}
+   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{sam:} #1}}}}
 %\newcommand{\todo}[1]{}
 
 \newcommand{\longeq}{=\!=}
@@ -190,6 +193,9 @@
   \expinr{A}{W}
 \end{array}
 \]
+
+\sam{Perhaps $P$ should appear here?}
+
 \caption{Types, Terms, and Values}
 \label{fig:term}
 \end{figure*}
@@ -386,9 +392,9 @@ G \mathbin{::=}
 & x \notin \fv{G} \\
 
 (\kappa.{\mathit{case}})
-& G[\expcase{z}{x}{M}{y}{N}]
+& G[\expcase{V}{x}{M}{y}{N}]
 & \rewrite{2}
-& \expcase{z}{x}{G[M]}{y}{G[N]},
+& \expcase{V}{x}{G[M]}{y}{G[N]},
 & x,y \notin \fv{G} \\
 
 % (\kappa.{\mathit{case}})
@@ -443,7 +449,14 @@ Phase 3 (garbage collection)
 %% & Count(x,N) < 2 \\
 \end{array}
 \]
-\caption{Normalisation rules}
+
+\sam{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
+  redundant in $G$. Shayan's original presentation includes
+  $\expapp{M}{\hole}$ in $F$ but not $\expapp{\hole}{M}$ or
+  $\expapp{V}{\hole}$. This was an in order to avoid naming every
+  intermediate partial application.}
+
+\caption{Normalisation Rules}
 \label{fig:norm}
 \end{figure*}
 }
@@ -691,11 +704,13 @@ but in practice the theft is often only partial.
 For instance, an EDSL such as Feldspar or Nicola,
 when embedded in Haskell, can exploit the overloading of Haskell so that
 arithmetic operations in both languages appear identical, but the same
-is not true of comparison or conditionals. In QDSL, of necessity the
-syntax of the host and embedded languages must be identical. For
-instance, this paper presents a QDSL variant of Feldspar, again in
-Haskell, where arithmetic, comparison, and conditionals are all
-represented by quoted terms, and hence identical to the host.
+is not true of comparison or conditionals.
+\sam{Comparisons and conditionals can be overloaded with the RebindableSyntax language option.}
+In QDSL, of necessity the syntax of the host and embedded languages
+must be identical. For instance, this paper presents a QDSL variant of
+Feldspar, again in Haskell, where arithmetic, comparison, and
+conditionals are all represented by quoted terms, and hence identical
+to the host.
 
 In theory, an EDSL also steals the normalisation rules of its host
 language, by using evaluation in the host to normalise terms of the
@@ -717,7 +732,9 @@ in one particular direction or another. \\
 
 The subformula property depends on normalisation, but normalisation
 may lead to an exponential blowup in the size of the normalised
-code. In particular, this occurs when there are nested conditional or
+code.
+\sam{The blow-up can be much worse than exponential...}
+In particular, this occurs when there are nested conditional or
 case statements. We explain how the QDSL technique can offer the user
 control over where normalisation does and does not occur, while still
 maintaining the subformula property. Future work is required to
@@ -732,6 +749,9 @@ P-LINK of \citet{cheney:linq} nor the QDSL Feldspar of this paper
 satisfy this property, since the user is required to eyeball quoted code
 to ensure it mentions only permitted operators. If this is thought too
 onerous, it is possible to ensure the property with additional preprocessing.
+
+\sam{I find ``QDSL Feldspar'' a bit of a mouthful. Why not
+  ``QFeldspar'' (and ``QHaskell'' and ``EFeldspar'')?}
 
 \vspace{2ex}
 \begin{quote}
@@ -1090,6 +1110,9 @@ $\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
+\sam{Is it worth saying something here about in future generalising to
+  higher-order target languages?}
+
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
 %include Section5.lhs
@@ -1139,6 +1162,9 @@ for F\# LINQ by \citet{cheney:linq}.
 
 \todo{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
   2014)}
+
+\todo{We should say a little more about what novel features LMS brings
+  to the table that are not available / harder to achieve in Haskell.}
 
 \section{Conclusion}
 \label{sec:conclusion}
