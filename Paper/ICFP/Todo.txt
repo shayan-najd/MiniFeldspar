@@ -1,0 +1,37 @@
+% TO DO
+
+% Shayan, I especially need the following from you. Either send in
+% e-mail or edit the paper. If you edit the paper, mark changes with
+% *** SHAYAN ***
+% before and after.
+
+% Shayan: Add a short explanation of the type class Type. In order for
+% the code in the paper to be correct, I suspect that we need to explain
+% how Type relates to Ref.
+
+% Shayan: Check that all the C code in the paper is indeed generated
+% by the code given in the paper. Particularly, check this for Section
+% 2.6, where the C code is new.
+
+% Shayan: A short explanation of how overloading works in the QDSL
+% Feldspar implementation.
+
+
+% Possible additional things to do?
+
+% Possibly, introduce class Type and explain how it relates
+% to Rep?  If done, may need to move some explanation of Arr
+% from 2.6 to 2.1.
+
+% Possibly, eliminate non-CSE results from Figure 1?
+
+
+% Partly done: should I do more?
+
+% More discussion of Cheney-et-al-2013
+% especially in regard to subformula property.
+
+% More discussion of type-based quotation
+
+% Make more clear that main contribution
+% is the application of subformula property to DSLs.

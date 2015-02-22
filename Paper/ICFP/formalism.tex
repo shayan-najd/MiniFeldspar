@@ -1,0 +1,340 @@
+%% Types
+\newcommand{\zero}{\mathbf{0}}
+\newcommand{\one}{\mathbf{1}}
+\newcommand{\arrow}[2]{#1\rightarrow#2}
+\newcommand{\product}[2]{#1\times#2}
+\newcommand{\coproduct}[2]{#1+#2}
+\newcommand{\rec}[2]{\mu#1.#2}
+
+%% Expressions
+\newcommand{\key}{\mathbf}
+
+\newcommand{\app}{\;}
+
+\newcommand{\expvar}[1]{#1}
+\newcommand{\expconst}[2]{#1~#2}
+\newcommand{\expunit}{()}
+\newcommand{\expabs}[3]{\lambda#1.\,#3}
+\newcommand{\expapp}[2]{#1 \app #2}
+\newcommand{\explet}[3]{\key{let}\ #1=#2\ \key{in}\ #3}
+\newcommand{\exppair}[2]{(#1, #2)}
+\newcommand{\expfst}[1]{\key{fst}~#1}
+\newcommand{\expsnd}[1]{\key{snd}~#1}
+\newcommand{\expinl}[2]{\key{inl}~#1}
+\newcommand{\expinr}[2]{\key{inr}~#2}
+\newcommand{\expcase}[5]
+  {\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.\,#3;\; \key{inr}\ #4.\,#5\}}
+
+%% Meta language stuff
+\newcommand{\subst}[3]{#1[#2:=#3]}
+\newcommand{\fv}[1]{\mathit{FV}(#1)}
+\newcommand{\rewrite}[1]{\mathbin{\mapsto_{#1}}}
+\newcommand{\hole}{[~]}
+\newcommand{\nv}{P}
+
+%% Typing
+\newcommand{\intro}{\mathcal{I}}
+\newcommand{\elim}{\mathcal{E}}
+\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
+
+\newcommand{\figterm}{
+\begin{figure*}[t]
+\[
+\begin{array}{l@@{\quad}rcl}
+\text{Types} & A,B,C & ::=&
+% \one
+  \iota           \mid
+  \arrow{A}{B}    \mid
+  \product{A}{B}  \mid
+  \coproduct{A}{B}
+\\[1ex]
+\text{Terms} & L,M,N & ::= &
+% \expunit                	\mid
+  \expvar{x}              	\mid
+  \expconst{c}{\overline{M}}	\mid
+  \expabs{x}{A}{N}              \mid
+  \expapp{L}{M}                 \mid
+  \explet{x}{M}{N}              \mid
+  \exppair{M}{N}                \mid
+  \expfst{L}                   	\mid
+  \expsnd{L}                    \mid \\&&&
+  \expinl{M}{\tm{B}}		\mid
+  \expinr{\tm{A}}{N}           	\mid
+  \expcase{L}{x}{M}{y}{N}
+\\[1ex]
+\text{Values} & V,W & ::= &
+% \expunit         \mid
+  \expvar{x}       \mid
+  \expabs{x}{A}{N} \mid
+  \exppair{V}{W}   \mid
+  \expinl{V}{B}    \mid
+  \expinr{A}{W}
+\end{array}
+\]
+
+\sam{Perhaps $P$ should appear here?}
+
+\caption{Types, Terms, and Values}
+\label{fig:term}
+\end{figure*}
+}
+
+\newcommand{\figtyping}{
+\begin{figure*}[h]
+\[
+\begin{array}{@@{}ll@@{}}
+\fbox{$\Gamma \vdash M:A$}
+\\~\\
+\inference
+{x:A \in \Gamma}
+{\mathbf{Ax}}
+{
+  \Gamma \vdash x:A
+}
+&
+\inference
+{}
+{\one}
+{
+   \Gamma \vdash \expunit:\one
+}
+\\~\\
+\inference
+{
+  \Gamma, x:A \vdash N:B
+}
+{{\to}\intro}
+{
+  \Gamma \vdash \expabs{x}{A}{N}:\arrow{A}{B}
+}
+&
+\inference
+{
+  \Gamma \vdash L:\arrow{A}{B}
+& \Gamma \vdash M:A
+}
+{{\to}\elim}
+{
+  \Gamma \vdash \expapp{L}{M}:B
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash M:A
+  &
+  \Gamma, x:A \vdash N:B
+}
+{\mathbf{let}}
+{
+  \Gamma \vdash \explet{x}{M}{N}:B
+}
+&
+\inference
+{
+  \Gamma \vdash M:A
+  &
+  \Gamma \vdash N:B
+}
+{{\times}\intro}
+{
+  \Gamma \vdash \exppair{M}{N}:\product{A}{B}
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash L:\product{A}{B}
+}
+{{\times}\elim_1}
+{
+  \Gamma \vdash \expfst{L}:A
+}
+&
+\inference
+{
+  \Gamma \vdash L:\product{A}{B}
+}
+{{\times}\elim_2}
+{
+  \Gamma \vdash \expsnd{L}:B
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash M:A
+}
+{{+}\intro_1}
+{
+  \Gamma \vdash \expinl{M}{B}:\coproduct{A}{B}
+}
+&
+\inference
+{
+  \Gamma \vdash N:B
+}
+{{+}\intro_2}
+{
+  \Gamma \vdash \expinr{A}{N}:\coproduct{A}{B}
+}
+\\~\\
+\inference
+{
+  \Gamma \vdash L:\coproduct{A}{B}
+&
+  \Gamma, x:A \vdash M:C
+&
+  \Gamma, y:B \vdash N:C
+}
+{{+}\elim}
+{
+  \Gamma \vdash \expcase{L}{x}{M}{y}{N}:C
+}
+\end{array}
+\]
+\caption{Typing Rules}
+\label{fig:typing}
+\end{figure*}
+}
+
+\newcommand{\fignf}{
+\begin{figure*}[t]
+\[
+\begin{array}{l@@{\quad}rcl}
+\text{Neutral Forms}
+  & Q & ::= & \expapp{x}{W}
+         \mid \expconst{c}{\overline{W}}
+         \mid \expapp{Q}{W}
+         \mid \expfst{x}
+         \mid \expsnd{x}
+\\[1ex]
+\text{Normal Values}
+  & V,W & ::= & \expvar{x}
+           \mid \expabs{x}{A}{N}
+           \mid \exppair{V}{W}
+           \mid \expinl{V}{B}
+           \mid \expinr{A}{W}
+\\[1ex]
+\text{Normal Forms}
+  & N,M & ::= & Q
+          \mid  V
+          \mid \expcase{z}{x}{N}{y}{M}
+          \mid \explet{x}{Q}{N}
+\\
+\end{array}
+\]
+\caption{Normal Forms}
+\label{fig:nf}
+\end{figure*}
+}
+
+\newcommand{\fignorm}{
+\begin{figure*}[t]
+Phase 1 (let-insertion)
+\[
+  \begin{array}{lcl}
+   F &\mathbin{::=}&
+       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid
+       \expapp{\hole}{M}                                \mid
+       \expapp{V}{\hole}                                \mid
+       \exppair{\hole}{M}                               \mid
+       \exppair{V}{\hole}                               \mid
+       \expfst{\hole}                                   \mid
+       \expsnd{\hole}                                   \mid % \\ &&
+       \expinl{\hole}{B}                                \mid
+       \expinr{A}{\hole}                                \mid
+       \expcase{\hole}{x}{M}{y}{N} \\
+ \end{array}
+\]%
+\[
+\begin{array}{lllll}
+(\mathit{let})
+& F[\nv]
+& \rewrite{1}
+& \explet{x}{\nv}{F[x]},
+& x \text{ fresh}
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 2 (symbolic evaluation)
+\[
+G \mathbin{::=}
+    \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
+\]
+\[
+\begin{array}{lllll}
+(\kappa.{\mathit{let}})
+& G[\explet{x}{\nv}{N}]
+& \rewrite{2}
+& \explet{x}{\nv}{G[N]},
+& x \notin \fv{G} \\
+
+(\kappa.{\mathit{case}})
+& G[\expcase{V}{x}{M}{y}{N}]
+& \rewrite{2}
+& \expcase{V}{x}{G[M]}{y}{G[N]},
+& x,y \notin \fv{G} \\
+
+% (\kappa.{\mathit{case}})
+% & G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
+% \multicolumn{3}{@@{}l@@{}}
+% {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
+
+(\beta.{\rightarrow})
+& \expapp{(\expabs{x}{A}{N})}{V}
+& \rewrite{2}
+& \subst{N}{x}{V} \\
+
+(\beta.{\times_1})
+& \expfst{\exppair{V}{W}}
+& \rewrite{2}
+& V \\
+
+(\beta.{\times_2})
+& \expsnd{\exppair{V}{W}}
+& \rewrite{2}
+& W \\
+
+(\beta.{+_1})
+& \expcase{(\expinl{V}{B})}{x}{M}{y}{N}
+& \rewrite{2}
+& \subst{M}{x}{V} \\
+
+(\beta.{+_2})
+& \expcase{(\expinr{A}{W})}{x}{M}{y}{N}
+& \rewrite{2}
+& \subst{N}{y}{W} \\
+
+(\beta.{\mathit{let}})
+& \explet{x}{V}{N}
+& \rewrite{2}
+& \subst{N}{x}{V} \\
+\end{array}
+\]
+
+\vspace{2ex}
+
+Phase 3 (garbage collection)
+\[
+\begin{array}[t]{@@{}llll@@{\quad}l@@{}}
+
+(\mathit{need})
+& \explet{x}{\nv}{N}
+& \rewrite{3}
+& N,
+& x \notin \fv{N}\\
+%% & \subst{N}{x}{\nv},
+%% & Count(x,N) < 2 \\
+\end{array}
+\]
+
+\sam{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
+  redundant in $G$. Shayan's original presentation includes
+  $\expapp{M}{\hole}$ in $F$ but not $\expapp{\hole}{M}$ or
+  $\expapp{V}{\hole}$. This was an in order to avoid naming every
+  intermediate partial application.}
+
+\caption{Normalisation Rules}
+\label{fig:norm}
+\end{figure*}
+}

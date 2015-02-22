@@ -5,7 +5,7 @@ paper.tex: paper.lhs Section2.lhs Section5.lhs
 	lhs2TeX -o paper.tex paper.lhs
 	chmod -w paper.tex
 
-paper.aux: paper.tex table.tex
+paper.aux: paper.tex table.tex formalism.tex
 	pdflatex paper
 
 paper.bbl: paper.aux paper.bib

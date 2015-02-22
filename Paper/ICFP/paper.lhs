@@ -1,47 +1,14 @@
-% TO DO
+\documentclass[authoryear,9pt]{sigplanconf}
 
-% Shayan, I especially need the following from you. Either send in
-% e-mail or edit the paper. If you edit the paper, mark changes with
-% *** SHAYAN ***
-% before and after.
-
-% Shayan: Add a short explanation of the type class Type. In order for
-% the code in the paper to be correct, I suspect that we need to explain
-% how Type relates to Ref.
-
-% Shayan: Check that all the C code in the paper is indeed generated
-% by the code given in the paper. Particularly, check this for Section
-% 2.6, where the C code is new.
-
-% Shayan: A short explanation of how overloading works in the QDSL
-% Feldspar implementation.
-
-
-% Possible additional things to do?
-
-% Possibly, introduce class Type and explain how it relates
-% to Rep?  If done, may need to move some explanation of Arr
-% from 2.6 to 2.1.
-
-% Possibly, eliminate non-CSE results from Figure 1?
-
-
-% Partly done: should I do more?
-
-% More discussion of Cheney-et-al-2013
-% especially in regard to subformula property.
-
-% More discussion of type-based quotation
-
-% Make more clear that main contribution
-% is the application of subformula property to DSLs.
-
-
-\documentclass[authoryear]{sigplanconf}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lhs2TeX package imports
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %include polycode.fmt
 %include forall.fmt
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% lhs2TeX macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %format == = "\longeq "
 %format || = "||"
 %format `div` = "\rmdiv"
@@ -60,49 +27,53 @@
 %format A_1
 %format A_k
 
-% US Letter page size
-%\pdfpagewidth=8.5in
-%\pdfpageheight=11in
-
-% The following \documentclass options may be useful:
-%
-% 10pt          To set in 10-point type instead of 9-point.
-% 11pt          To set in 11-point type instead of 9-point.
-% authoryear    To obtain author/year citation style instead of numeric.
-
-%\usepackage[round]{natbib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% latex package imports
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \usepackage{amsmath}
 \usepackage{amsfonts}
 \usepackage{amssymb}
 \usepackage{stmaryrd}
 \usepackage{proof}
 \usepackage{xspace}
-\usepackage[pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler}
-                      ,pdftitle={Everything old is new again: Quoted domain specific languages}
-                      ,pagebackref=true,pdftex,backref=none]{hyperref}
+\usepackage[
+  pdfauthor={Shayan Najd,Sam Lindley,Josef Svenningsson,Philip Wadler},
+  pdftitle={Everything old is new again:
+            Quoted Domain Specific Languages},
+  pagebackref=true,pdftex,backref=none]{hyperref}
 \usepackage{tabularx}
 \usepackage{graphicx}
 \usepackage{url}
 \usepackage{color}
 \usepackage[usenames,dvipsnames,svgnames,table]{xcolor}
 \usepackage{listings}
-\lstset{language=C,identifierstyle=\ttfamily,keywordstyle=\bfseries\ttfamily}
+\lstset{language=C,identifierstyle=\ttfamily
+       ,keywordstyle=\bfseries\ttfamily}
 %%\usepackage{colortbl}
 %%\usepackage{amsthm}
+%%\usepackage[round]{natbib}
 
-%%% macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% latex macros
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand{\todo}[1]
   {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{TODO:} #1}}}}
+   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+                    {\textbf{TODO:} #1}}}}
 \newcommand{\sam}[1]
   {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}{\textbf{sam:} #1}}}}
+   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+                    {\textbf{sam:} #1}}}}
+\newcommand{\shayan}[1]
+  {{\noindent\small\color{red}
+   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+                    {\textbf{shayan:} #1}}}}
 %\newcommand{\todo}[1]{}
+%\newcommand{\sam}[1]{}
+%\newcommand{\shayan}[1]{}
 
 \newcommand{\longeq}{=\!=}
-% \newcommand{\openq}{[||||\,}
-% \newcommand{\closeq}{\,||||]}
 \newcommand{\rmdiv}{\mathbin{\textrm{div}}}
 
 \newtheorem{theorem}{Theorem}[section]
@@ -118,360 +89,22 @@
 
 \newcommand{\flushr}{{}\mbox{~}\hfill}%{\flushright\vspace{-2ex}}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% importing macros related to the formalism
+%include formalism.tex
 
-%% Types
-\newcommand{\zero}{\mathbf{0}}
-\newcommand{\one}{\mathbf{1}}
-\newcommand{\arrow}[2]{#1\rightarrow#2}
-\newcommand{\product}[2]{#1\times#2}
-\newcommand{\coproduct}[2]{#1+#2}
-\newcommand{\rec}[2]{\mu#1.#2}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Expressions
-\newcommand{\key}{\mathbf}
-
-\newcommand{\app}{\;}
-
-\newcommand{\expvar}[1]{#1}
-\newcommand{\expconst}[2]{#1~#2}
-\newcommand{\expunit}{()}
-\newcommand{\expabs}[3]{\lambda#1.\,#3}
-\newcommand{\expapp}[2]{#1 \app #2}
-\newcommand{\explet}[3]{\key{let}\ #1=#2\ \key{in}\ #3}
-\newcommand{\exppair}[2]{(#1, #2)}
-\newcommand{\expfst}[1]{\key{fst}~#1}
-\newcommand{\expsnd}[1]{\key{snd}~#1}
-\newcommand{\expinl}[2]{\key{inl}~#1}
-\newcommand{\expinr}[2]{\key{inr}~#2}
-\newcommand{\expcase}[5]
-  {\key{case}\ #1\ \key{of}\ \{\key{inl}\ #2.\,#3;\; \key{inr}\ #4.\,#5\}}
-
-%% Meta language stuff
-\newcommand{\subst}[3]{#1[#2:=#3]}
-\newcommand{\fv}[1]{\mathit{FV}(#1)}
-\newcommand{\rewrite}[1]{\mathbin{\mapsto_{#1}}}
-\newcommand{\hole}{[~]}
-\newcommand{\nv}{P}
-
-%% Typing
-\newcommand{\intro}{\mathcal{I}}
-\newcommand{\elim}{\mathcal{E}}
-\newcommand{\inference}[3]{\infer[\mathsf{#2}]{#3}{#1}}
-
-\newcommand{\figterm}{
-\begin{figure*}[t]
-\[
-\begin{array}{l@@{\quad}rcl}
-\text{Types} & A,B,C & ::=&
-% \one
-  \iota           \mid
-  \arrow{A}{B}    \mid
-  \product{A}{B}  \mid
-  \coproduct{A}{B}
-\\[1ex]
-\text{Terms} & L,M,N & ::= &
-% \expunit                	\mid
-  \expvar{x}              	\mid
-  \expconst{c}{\overline{M}}	\mid
-  \expabs{x}{A}{N}              \mid
-  \expapp{L}{M}                 \mid
-  \explet{x}{M}{N}              \mid
-  \exppair{M}{N}                \mid
-  \expfst{L}                   	\mid
-  \expsnd{L}                    \mid \\&&&
-  \expinl{M}{\tm{B}}		\mid
-  \expinr{\tm{A}}{N}           	\mid
-  \expcase{L}{x}{M}{y}{N}
-\\[1ex]
-\text{Values} & V,W & ::= &
-% \expunit         \mid
-  \expvar{x}       \mid
-  \expabs{x}{A}{N} \mid
-  \exppair{V}{W}   \mid
-  \expinl{V}{B}    \mid
-  \expinr{A}{W}
-\end{array}
-\]
-
-\sam{Perhaps $P$ should appear here?}
-
-\caption{Types, Terms, and Values}
-\label{fig:term}
-\end{figure*}
-}
-
-\newcommand{\figtyping}{
-\begin{figure*}[h]
-\[
-\begin{array}{@@{}ll@@{}}
-\fbox{$\Gamma \vdash M:A$}
-\\~\\
-\inference
-{x:A \in \Gamma}
-{\mathbf{Ax}}
-{
-  \Gamma \vdash x:A
-}
-&
-\inference
-{}
-{\one}
-{
-   \Gamma \vdash \expunit:\one
-}
-\\~\\
-\inference
-{
-  \Gamma, x:A \vdash N:B
-}
-{{\to}\intro}
-{
-  \Gamma \vdash \expabs{x}{A}{N}:\arrow{A}{B}
-}
-&
-\inference
-{
-  \Gamma \vdash L:\arrow{A}{B}
-& \Gamma \vdash M:A
-}
-{{\to}\elim}
-{
-  \Gamma \vdash \expapp{L}{M}:B
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash M:A
-  &
-  \Gamma, x:A \vdash N:B
-}
-{\mathbf{let}}
-{
-  \Gamma \vdash \explet{x}{M}{N}:B
-}
-&
-\inference
-{
-  \Gamma \vdash M:A
-  &
-  \Gamma \vdash N:B
-}
-{{\times}\intro}
-{
-  \Gamma \vdash \exppair{M}{N}:\product{A}{B}
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash L:\product{A}{B}
-}
-{{\times}\elim_1}
-{
-  \Gamma \vdash \expfst{L}:A
-}
-&
-\inference
-{
-  \Gamma \vdash L:\product{A}{B}
-}
-{{\times}\elim_2}
-{
-  \Gamma \vdash \expsnd{L}:B
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash M:A
-}
-{{+}\intro_1}
-{
-  \Gamma \vdash \expinl{M}{B}:\coproduct{A}{B}
-}
-&
-\inference
-{
-  \Gamma \vdash N:B
-}
-{{+}\intro_2}
-{
-  \Gamma \vdash \expinr{A}{N}:\coproduct{A}{B}
-}
-\\~\\
-\inference
-{
-  \Gamma \vdash L:\coproduct{A}{B}
-&
-  \Gamma, x:A \vdash M:C
-&
-  \Gamma, y:B \vdash N:C
-}
-{{+}\elim}
-{
-  \Gamma \vdash \expcase{L}{x}{M}{y}{N}:C
-}
-\end{array}
-\]
-\caption{Typing Rules}
-\label{fig:typing}
-\end{figure*}
-}
-
-\newcommand{\fignf}{
-\begin{figure*}[t]
-\[
-\begin{array}{l@@{\quad}rcl}
-\text{Neutral Forms}
-  & Q & ::= & \expapp{x}{W}
-         \mid \expconst{c}{\overline{W}}
-         \mid \expapp{Q}{W}
-         \mid \expfst{x}
-         \mid \expsnd{x}
-\\[1ex]
-\text{Normal Values}
-  & V,W & ::= & \expvar{x}
-           \mid \expabs{x}{A}{N}
-           \mid \exppair{V}{W}
-           \mid \expinl{V}{B}
-           \mid \expinr{A}{W}
-\\[1ex]
-\text{Normal Forms}
-  & N,M & ::= & Q
-          \mid  V
-          \mid \expcase{z}{x}{N}{y}{M}
-          \mid \explet{x}{Q}{N}
-\\
-\end{array}
-\]
-\caption{Normal Forms}
-\label{fig:nf}
-\end{figure*}
-}
-
-\newcommand{\fignorm}{
-\begin{figure*}[t]
-Phase 1 (let-insertion)
-\[
-  \begin{array}{lcl}
-   F &\mathbin{::=}&
-       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid
-       \expapp{\hole}{M}                                \mid
-       \expapp{V}{\hole}                                \mid
-       \exppair{\hole}{M}                               \mid
-       \exppair{V}{\hole}                               \mid
-       \expfst{\hole}                                   \mid
-       \expsnd{\hole}                                   \mid % \\ &&
-       \expinl{\hole}{B}                                \mid
-       \expinr{A}{\hole}                                \mid
-       \expcase{\hole}{x}{M}{y}{N} \\
- \end{array}
-\]%
-\[
-\begin{array}{lllll}
-(\mathit{let})
-& F[\nv]
-& \rewrite{1}
-& \explet{x}{\nv}{F[x]},
-& x \text{ fresh}
-\end{array}
-\]
-
-\vspace{2ex}
-
-Phase 2 (symbolic evaluation)
-\[
-G \mathbin{::=}
-    \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
-\]
-\[
-\begin{array}{lllll}
-(\kappa.{\mathit{let}})
-& G[\explet{x}{\nv}{N}]
-& \rewrite{2}
-& \explet{x}{\nv}{G[N]},
-& x \notin \fv{G} \\
-
-(\kappa.{\mathit{case}})
-& G[\expcase{V}{x}{M}{y}{N}]
-& \rewrite{2}
-& \expcase{V}{x}{G[M]}{y}{G[N]},
-& x,y \notin \fv{G} \\
-
-% (\kappa.{\mathit{case}})
-% & G[\expcase{z}{x}{M}{y}{N}] & \rewrite{2}\\
-% \multicolumn{3}{@@{}l@@{}}
-% {\qquad\qquad\qquad\quad \expcase{z}{x}{G[M]}{y}{G[N]},} & \quad x,y \notin \fv{G} \\[1ex]
-
-(\beta.{\rightarrow})
-& \expapp{(\expabs{x}{A}{N})}{V}
-& \rewrite{2}
-& \subst{N}{x}{V} \\
-
-(\beta.{\times_1})
-& \expfst{\exppair{V}{W}}
-& \rewrite{2}
-& V \\
-
-(\beta.{\times_2})
-& \expsnd{\exppair{V}{W}}
-& \rewrite{2}
-& W \\
-
-(\beta.{+_1})
-& \expcase{(\expinl{V}{B})}{x}{M}{y}{N}
-& \rewrite{2}
-& \subst{M}{x}{V} \\
-
-(\beta.{+_2})
-& \expcase{(\expinr{A}{W})}{x}{M}{y}{N}
-& \rewrite{2}
-& \subst{N}{y}{W} \\
-
-(\beta.{\mathit{let}})
-& \explet{x}{V}{N}
-& \rewrite{2}
-& \subst{N}{x}{V} \\
-\end{array}
-\]
-
-\vspace{2ex}
-
-Phase 3 (garbage collection)
-\[
-\begin{array}[t]{@@{}llll@@{\quad}l@@{}}
-
-(\mathit{need})
-& \explet{x}{\nv}{N}
-& \rewrite{3}
-& N,
-& x \notin \fv{N}\\
-%% & \subst{N}{x}{\nv},
-%% & Count(x,N) < 2 \\
-\end{array}
-\]
-
-\sam{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
-  redundant in $G$. Shayan's original presentation includes
-  $\expapp{M}{\hole}$ in $F$ but not $\expapp{\hole}{M}$ or
-  $\expapp{V}{\hole}$. This was an in order to avoid naming every
-  intermediate partial application.}
-
-\caption{Normalisation Rules}
-\label{fig:norm}
-\end{figure*}
-}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\conferenceinfo{ICFP 2015}{August 31--September 2, 2015, Vancouver, Canada.}
+\conferenceinfo{ICFP 2015}
+               {August 31--September 2, 2015, Vancouver, Canada.}
 \copyrightyear{2015}
 \copyrightdata{...}
 \doi{...}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
+% to make paper.lhs runnable
 %if False
 \begin{code}
 
@@ -522,11 +155,11 @@ Phase 3 (garbage collection)
 We describe a new approach to domain specific languages (DSLs), called
 Quoted DSLs (QDSLs), that resurrects two old ideas: quotation, from
 McCarthy's Lisp of 1960, and the subformula property, from Gentzen's
-natural deduction of 1935.  Quoted terms allow the DSL
-to share the syntax and type system of the host language.
-Normalising quoted terms ensures the subformula property, which
-guarantees that one can use higher-order or nested types in the source while
-guaranteeing first-order or flat types in the target, and enables using types to
+natural deduction of 1935.  Quoted terms allow the DSL to share the
+syntax and type system of the host language.  Normalising quoted terms
+ensures the subformula property, which guarantees that one can use
+higher-order or nested types in the source while guaranteeing
+first-order or flat types in the target, and enables using types to
 guide fusion.  We test our ideas by re-implementing Feldspar, which
 was originally implemented as an Embedded DSL (EDSL), as a QDSL; and
 we compare the QDSL and EDSL variants.
@@ -535,7 +168,8 @@ we compare the QDSL and EDSL variants.
 
 \category{D.1.1}{Applicative (Functional) Programming}{}
 \category{D.3.1}{Formal Definitions and Theory}{}
-\category{D.3.2}{Language Classifications}{Applicative (functional) languages}
+\category{D.3.2}{Language Classifications}
+                {Applicative (functional) languages}
 
 % \terms{Theory}
 
@@ -596,7 +230,9 @@ assess the tradeoffs between the two approaches.
 quotation as a foundation for staged computation, and note
 a propositions-as-types connection between quotation and
 a modal logic; our type |Qt a| corresponds to their
-type $\bigcirc a$. They also mention in passing the utility of
+type $\bigcirc a$.
+\shayan{Shouldn't this be box type rather than circle?}
+They also mention in passing the utility of
 normalising quoted terms, although they do not mention the
 subformula property.
 
@@ -630,14 +266,14 @@ and improved by \citet{Prawitz-1965}.
 The subformulas of a formula are its subparts;
 for instance, the subformulas of |A -> B| are the formula
 itself and the subformulas of |A| and |B|.
-The subformula property states that every proof can be put
-into a normal form where the only propositions that appear
-in the proof are subformulas of the hypotheses and conclusion
-of the proof. Applying the principle of Propositions as Types
-\citep{Howard-1980,Wadler-2015}, the subformula property states that every
-lambda term can be put into a normal form where the only
-types that appear in the term are subformulas of the
-types of the free variables and the type of the term itself.
+The subformula property states that every proof can be put into a
+normal form where the only propositions that appear in the proof are
+subformulas of the hypotheses and conclusion of the proof. Applying
+the principle of Propositions as Types
+\citep{Howard-1980,Wadler-2015}, the subformula property states that
+every lambda term can be put into a normal form where the only types
+that appear in the term are subformulas of the types of the free
+variables and the type of the term itself.
 
 The subformula property provides users of the
 DSL with useful guarantees, such as the following:
@@ -662,7 +298,9 @@ conservativity result expresses that adding a feature to a system of
 logic, or to a programming language, does not make it more expressive.
 Consider intuitionistic logic with conjunction; conservativity states
 that adding implication to this logic proves no additional theorems
-that can be stated in the original logic. Such a conservativity result
+that can be stated in the original logic.
+\shayan{Any reference?}
+ Such a conservativity result
 is an immediate consequence of the subformula property; since the
 hypotheses and conjuction of the proof only mention conjunction, any
 proof, even if it uses implication, can be put into a normal form that
@@ -700,12 +338,25 @@ language. Arguably, QDSL is greater because it steals the type system,
 the syntax, and the normalisation rules of its host language.
 
 In theory, an EDSL should also steal the syntax of its host language,
-but in practice the theft is often only partial.
-For instance, an EDSL such as Feldspar or Nicola,
-when embedded in Haskell, can exploit the overloading of Haskell so that
-arithmetic operations in both languages appear identical, but the same
-is not true of comparison or conditionals.
-\sam{Comparisons and conditionals can be overloaded with the RebindableSyntax language option.}
+but in practice the theft is often only partial.  For instance, an
+EDSL such as Feldspar or Nicola, when embedded in Haskell, can exploit
+the overloading of Haskell so that arithmetic operations in both
+languages appear identical, but the same is not true of comparison or
+conditionals.
+\sam{Comparisons and conditionals can be overloaded with the
+RebindableSyntax language option.}
+\shayan{RebindableSyntax does not overload conditionals (nor
+comparisons), it overrides them. That is, conditional with
+RebindableSyntax can only have either a type proper for host language,
+or for an embedded language; once conditionals are overriden using
+RebindableSyntax to be used in an EDSL, they cannot be used in the
+host language (in the same module). Hence, one cannot use them to
+write the power function (if expression is used at both levels).  It
+is important that we mention this observation here. There are
+fundamental limitations to what overriding mechanism can achieve in
+Haskell (and even in LMS).}
+\shayan{comparison operator is just a name, which can be overriden
+using module system}
 In QDSL, of necessity the syntax of the host and embedded languages
 must be identical. For instance, this paper presents a QDSL variant of
 Feldspar, again in Haskell, where arithmetic, comparison, and
@@ -746,9 +397,10 @@ Some researchers contend that an essential property of an embedded DSL
 which generates target code is that every term that is type-correct
 should successfully generate code in the target language. Neither the
 P-LINK of \citet{cheney:linq} nor the QDSL Feldspar of this paper
-satisfy this property, since the user is required to eyeball quoted code
-to ensure it mentions only permitted operators. If this is thought too
-onerous, it is possible to ensure the property with additional preprocessing.
+satisfy this property, since the user is required to eyeball quoted
+code to ensure it mentions only permitted operators. If this is
+thought too onerous, it is possible to ensure the property with
+additional preprocessing.
 
 \sam{I find ``QDSL Feldspar'' a bit of a mouthful. Why not
   ``QFeldspar'' (and ``QHaskell'' and ``EFeldspar'')?}
@@ -761,9 +413,10 @@ This is the short and the long of it. \flushr --- Shakespeare
 The contributions of this paper are:
 \begin{itemize}
 
-\item To introduce QDSLs as an approach to building DSLs based
-on quotation, normalisation of quoted terms, and the subformula property
-by presenting the design of a QDSL variant of Feldspar (Section~\ref{sec:qfeldspar}).
+\item To introduce QDSLs as an approach to building DSLs based on
+  quotation, normalisation of quoted terms, and the subformula property
+  by presenting the design of a QDSL variant of Feldspar
+  (Section~\ref{sec:qfeldspar}).
 
 \item To compare QDSL and EDSL implementations of Feldspar, and show
   that they offer comparable performance
@@ -849,8 +502,6 @@ The transformer from |Qt| to |Dp| performs the following steps.
   the rules of Section~\ref{sec:subformula}. The normaliser does not
   yet support all Haskell data types, but does support tuples, and the
   types |Maybe| and |Vec|.
-% \item Overloading \\
-%   \todo{Say something about how overloading for arithmetic is handled.}
 \item It traverses the term, converting |Qt| to |Dp|.
   It checks that only permitted primitives appear in |Qt|,
   and translates these to their corresponding representation
@@ -872,6 +523,13 @@ translator from |Qt a| to |Dp a| is forced to re-infer all the type
 information for the subterms of the term of type |Qt a|.  This is why
 we currently translate the |Maybe| monad as a special case, rather
 than supporting overloading for monad operations in general.
+Moreover, overloaded arithmatic operations are treated as fully
+polymorphic operations, at first; their their type constraints are
+ignored. Just before normalisation, their inferred types are used to
+translate them to their corresponding monomorphic primitives.
+\shayan{I have added above two lines about how QFeldspar treats
+overloaded arithmatic operations.}
+
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
 %%  each QDSL, it should be possible to design a single tool for each host language.
