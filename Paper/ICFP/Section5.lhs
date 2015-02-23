@@ -35,10 +35,12 @@ required to implement Feldspar as an EDSL, and considers the trade-offs
 between the QDSL and EDSL approaches.
 Much of this section reprises \citet{svenningsson:combining}.
 
+\josef{This is the first time we use the name "EFeldspar". I suppose it should be introduced earlier.}
 The top-level function of EFeldspar has the type:
 \begin{spec}
 qdsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
 \end{spec}
+\josef{Should it be |edsl| rather than |qdsl| above?}
 Here |Dp a| is the deep representation of a term of type |a|.
 The deep representation is described in detail in Section~\ref{subsec:deep}
 below, and is chosen to be easy to translate to C.

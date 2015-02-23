@@ -223,7 +223,7 @@ constants.  In a context with recursion, we take |fix :: (a -> a) ->
 a| as an uninterpreted constant.  In a context where we wish to avoid
 unfolding a reduction |L M|, we take |id :: a -> a| as an
 uninterpreted constant, and replace |L M| by |id L M|.
-
+\josef{We haven't introduced the meta variables |L| and |M| yet, let alone the syntax of terms. Will the reader be able to understand what we mean by the sentence above?}
 % (Careful readers will have noticed a small difficulty.  One of the
 % free variables of our quoted term is multiplication over floats.  In
 % Haskell, |m*n| abbreviates |(((*) m) n)|, which has |((*) m)| as a
@@ -496,6 +496,7 @@ with different trade-offs between recomputation and memory usage.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
+\josef{We never give the definition of blur. I think we should.}
 
 We have described the application of the subformula to array
 fusion as based on ``pull arrays'' \citep{svenningsson:combining},

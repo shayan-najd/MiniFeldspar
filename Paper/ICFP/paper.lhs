@@ -69,6 +69,10 @@
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
                     {\textbf{shayan:} #1}}}}
+\newcommand{\josef}[1]
+  {{\noindent\small\color{red}
+   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+                    {\textbf{Josef:} #1}}}}
 %\newcommand{\todo}[1]{}
 %\newcommand{\sam}[1]{}
 %\newcommand{\shayan}[1]{}
@@ -562,6 +566,7 @@ Measurements were done on a quad-core Intel i7-2640M CPU
 running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
 GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
 
+\josef{I'm a little worried that Feldspar is looking worse than necessary in the FFT example. The right way to write FFT is by mixing pull- and push arrays and that definition will give good performance in Feldspar.}
 
 \section{The subformula property}
 \label{sec:subformula}
