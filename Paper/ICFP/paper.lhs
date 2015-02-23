@@ -527,12 +527,12 @@ translator from |Qt a| to |Dp a| is forced to re-infer all the type
 information for the subterms of the term of type |Qt a|.  This is why
 we currently translate the |Maybe| monad as a special case, rather
 than supporting overloading for monad operations in general.
-Moreover, overloaded arithmatic operations are treated as fully
+Moreover, overloaded arithmetic operations are treated as fully
 polymorphic operations, at first; their their type constraints are
 ignored. Just before normalisation, their inferred types are used to
 translate them to their corresponding monomorphic primitives.
 \shayan{I have added above two lines about how QFeldspar treats
-overloaded arithmatic operations.}
+overloaded arithmetic operations.}
 
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
