@@ -191,16 +191,13 @@ proof.  Viewed through the lens of Propositions as Types
 \citep{Howard-1980,Wadler-2015}, also known as the Curry-Howard
 isomorphism, Gentzen's subformula property guarantees that any term
 can be normalised so that the type of each of its subterms is a
-subtype of either the type of one of its free variables (corresponding
+subformula of either the type of one of its free variables (corresponding
 to hypotheses) or the term itself (corresponding to the conclusion).
-Here the subtypes of a type are the type itself and the subtypes of
+Here the subformulas of a type are the type itself and the subformulas of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and that types |Int| and |Float| have no
 parts.
-\shayan{ Above and below sentences should be reformulated to avoid the
-ambigious term ``subtype''. I suggest the term
-``subexpression''. Sometimes the term subformula is used
-inconsistently.}
+(See Proposition~\ref{prop:subformula} in Section~\ref{sec:subformula}.)
 
 % the only part of |Arr a| is |a|
 
@@ -215,6 +212,7 @@ save for the type itself.  In the example of the previous subsection,
 the sharpened subformula property guarantees that after normalisation
 a closed term of type |float -> float| will only have proper subterms
 of type |float|, which is indeed true for the normalised term.
+(See Proposition~\ref{prop:sharpened} in Section~\ref{sec:subformula}.)
 
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
@@ -347,7 +345,7 @@ fib =  [|| \n -> fst ($$for n (0,1) (\i (a,b) -> (b,a+b))) ||]
 Again, the subformula property plays a key role.
 As explained in Section~\ref{subsec:subformula}, primitives of the
 language to be compiled, such as |(*)| and |while|, are treated as
-free variables of a given arity.
+free variables or constants of a given arity.
 As described in Section~\ref{sec:subformula},
 we can ensure that after normalisation every occurence of |while|
 has the form
@@ -356,7 +354,8 @@ while (\s -> ...) (\s -> ...) (...)
 \end{spec}
 where the first ellipses has type |Bool|,
 and both occurrences of the bound variable |s|
-and the second and third ellipses all have the same type.
+and the second and third ellipses all have the same type,
+that of the state of the while loop.
 
 Unsurprisingly, and in accord with the subformula property, each
 occurrence of |while| in the normalised code will contain subterms
@@ -365,6 +364,8 @@ types increases the utility of the subformula property. For instance,
 since we have chosen that |Maybe| is not a representable type, we can
 ensure that any top-level function without |Maybe| in its type will
 normalise to code not containing |Maybe| in the type of any subterm.
+In particular, |Maybe| cannot appear in the state of a |while| loop,
+which is restricted to representable types.
 An alternative choice is possible, as we will see in the next section.
 
 \subsection{Arrays}
@@ -440,9 +441,9 @@ normVec  =   [|| \v -> sqrtFltHsk ($$dotVec v v) ||]
 The second of these uses the |for| loop defined in
 Section~\ref{subsec:while}, the third is defined using
 the first two, and the fourth is defined using the third.
-Recall that our sharpened subformula property required
-that |(*)| be fully applied, so before normalisation
-|(*)| is expanded to |\x y -> x*y|.
+% Recall that our sharpened subformula property required
+% that |(*)| be fully applied, so before normalisation
+% |(*)| is expanded to |\x y -> x*y|.
 
 \sam{We haven't yet mentioned anything about constants being fully
   applied in the sharpened subformula property.}
@@ -490,7 +491,7 @@ blur :: Rep a => Qt (Vec a -> Vec a)
 averages adjacent elements of a vector, then one may choose to
 compute either
 \begin{center}
-|[||$$blur . $$blur||]| ~~~or~~~ |[||$$blur . $$memorise . $$blur||]|
+|[||||$$blur . $$blur||||]| ~~~or~~~ |[||||$$blur . $$memorise . $$blur||||]|
 \end{center}
 with different trade-offs between recomputation and memory usage.
 Strong guarantees for fusion in combination with |memorise| give the

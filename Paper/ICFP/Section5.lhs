@@ -115,7 +115,7 @@ languages.
 
 \item QDSL requires syntax to separate quoted and unquoted terms. In
 contrast, EDSL permits the host and embedded languages to intermingle
-seamlessly. Depending on you point of view, explicit quotation syntax
+seamlessly. Depending on your point of view, explicit quotation syntax
 may be considered as an unnessary distraction or as drawing a useful
 distinction between generation-time and run-time.  If one takes the
 former view, the type-based approach to quotation found in C\# and
@@ -142,12 +142,17 @@ incorporate such a preprocessor using MetaHaskell \cite{metahaskell}.
 
 \item Since QDSLs may share the same quoted terms across a range of
 applications, the cost of building a normaliser or a preprocessor
-might be amortised.  In the conclusion, we consider the design of a
-tool for building QDSLs that may perform both these functions.
+might be amortised across multiple QDSLs for a single language.  In
+the conclusion, we consider the design of a tool for building QDSLs
+that uses a shared normaliser and preprocessor.
 
 \item QDSL preserves sharing. In contrast, EDSL loses sharing, which
 must later be recovered either by common subexpression elimination or
-by applying a technique such as observable sharing.
+by applying a technique such as observable sharing
+\citep{claessen1999observable, gill2009type}.  EDSL with common
+subexpression elimination may discover common subexpressions that are
+distinct in QDSL; while EDSL with observable sharing yields
+results comparable to sharing-preserving QDSL.
 
 \item Once the deep embedding or the normalised quoted term is
 produced, generating the domain-specific code is similar for both
@@ -247,7 +252,7 @@ from which the same C code is generated.
 % Here |L|,|M|,|N|,|P|,|Q| range over |Dp| terms, and
 % |M[L:=P]| stands for |M| with each occurence of |L| replaced by |P|.
 
-Hence, an advantages of the EDSL approach---that it generates
+Hence, an advantage of the EDSL approach---that it generates
 terms essentially in normal form---turns out to be restricted
 to a limited set of types, including functions and products,
 but excluding sums. If one wishes to deal with sum types,
@@ -316,7 +321,7 @@ Constructs |Pair|, |Fst|, and |Snd| build pairs and
 extract the first and second component.
 Constructs |Prim1| and |Prim2| represent primitive
 operations, the string is the name of the operation.
-Construct |ArrIx| creates a new array from a length and
+Construct |Arr| creates a new array from a length and
 a body that computes the array element
 for each index, construct |ArrLen| extracts the length from an array, and
 construct |ArrIx| fetches the element at a given index.
@@ -634,7 +639,7 @@ constructs a high-level representation of the array and the latter an
 actual array.
 It is straightforward to make |Vec| an instance of |Functor|.
 
-It is straightforward to define operations on vectors,
+It is easy to define operations on vectors,
 including combining corresponding elements of two vectors,
 summing the elements of a vector, dot product of two vectors,
 and norm of a vector.

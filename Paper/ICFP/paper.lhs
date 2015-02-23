@@ -57,18 +57,18 @@
 %%% latex macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\todo}[1]
+\newcommand{\phil}[1]
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{TODO:} #1}}}}
+                    {\textbf{Phil:} #1}}}}
 \newcommand{\sam}[1]
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{sam:} #1}}}}
+                    {\textbf{Sam:} #1}}}}
 \newcommand{\shayan}[1]
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{shayan:} #1}}}}
+                    {\textbf{Shayan:} #1}}}}
 \newcommand{\josef}[1]
   {{\noindent\small\color{red}
    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
@@ -235,7 +235,9 @@ quotation as a foundation for staged computation, and note
 a propositions-as-types connection between quotation and
 a modal logic; our type |Qt a| corresponds to their
 type $\bigcirc a$.
-\shayan{Shouldn't this be box type rather than circle?}
+% \shayan{Shouldn't this be box type rather than circle?
+% PLW: Circle is correct. You should check the original
+% paper before raising a query of this kind. }
 They also mention in passing the utility of
 normalising quoted terms, although they do not mention the
 subformula property.
@@ -289,12 +291,14 @@ while guaranteeing to generate first-order code;
 \item they may write a sequence of loops over arrays
 while guaranteeing to generate code that fuses those loops;
 
-\item they may write intermediate terms of nested type
+\item they may write intermediate terms with nested collections
 while guaranteeing to generate code that operates on flat data.
 
 \end{itemize}
-The first two of these are used in this paper, while the
-third is central to \citep{cheney:linq}.
+The first two of these are used in this paper, and are key
+to generating C; while the
+first and third are used in \citep{cheney:linq}
+and are central to generating SQL.
 % We thus give modern application to a theorem four-fifths of a century old.
 
 The subformula property is closely related to conservativity.  A
@@ -303,8 +307,9 @@ logic, or to a programming language, does not make it more expressive.
 Consider intuitionistic logic with conjunction; conservativity states
 that adding implication to this logic proves no additional theorems
 that can be stated in the original logic.
-\shayan{Any reference?}
- Such a conservativity result
+% \shayan{Any reference?
+% PLW: Feel free to find a reference and add it. }
+Such a conservativity result
 is an immediate consequence of the subformula property; since the
 hypotheses and conjuction of the proof only mention conjunction, any
 proof, even if it uses implication, can be put into a normal form that
@@ -316,7 +321,7 @@ Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
 
 As another example, the third bullet point above corresponds to a
 standard conservativity result for databases, namely that nested
-queries are no more expressive than flat queries \citep{Wong-1993}.
+queries are no more expressive than flat queries \citep{Wong-1993,Wong-1996}.
 This conservativity result, as implied by the subformula property, is
 used by \citet{cheney:linq} to show that queries that use intermediate
 nesting can be translated to SQL, which only queries flat tables and
@@ -343,7 +348,8 @@ the syntax, and the normalisation rules of its host language.
 
 In theory, an EDSL should also steal the syntax of its host language,
 but in practice the theft is often only partial.  For instance, an
-EDSL such as Feldspar or Nicola, when embedded in Haskell, can exploit
+EDSL such as Feldspar \citep{FELDSPAR} or Nikola \citep{NIKOLA},
+when embedded in Haskell, can exploit
 the overloading of Haskell so that arithmetic operations in both
 languages appear identical, but the same is not true of comparison or
 conditionals.\\
@@ -361,8 +367,8 @@ fundamental limitations to what overriding mechanism can achieve in
 Haskell (and even in LMS).}
 \shayan{comparison operator is just a name, which can be overriden
 using module system}
-In QDSL, of necessity the syntax of the host and embedded languages
-must be identical. For instance, this paper presents a QDSL variant of
+In QDSL, the syntax of the host and embedded languages
+is identical. For instance, this paper presents a QDSL variant of
 Feldspar, again in Haskell, where arithmetic, comparison, and
 conditionals are all represented by quoted terms, and hence identical
 to the host.
@@ -400,7 +406,7 @@ in most DSLs; possibly a combination of both will prove fruitful.
 Some researchers contend that an essential property of an embedded DSL
 which generates target code is that every term that is type-correct
 should successfully generate code in the target language. Neither the
-P-LINK of \citet{cheney:linq} nor the QDSL Feldspar of this paper
+P-LINQ of \citet{cheney:linq} nor the QDSL Feldspar of this paper
 satisfy this property, since the user is required to eyeball quoted
 code to ensure it mentions only permitted operators. If this is
 thought too onerous, it is possible to ensure the property with
@@ -422,8 +428,8 @@ The contributions of this paper are:
   by presenting the design of a QDSL variant of Feldspar
   (Section~\ref{sec:qfeldspar}).
 
-\item To compare QDSL and EDSL implementations of Feldspar, and show
-  that they offer comparable performance
+\item To measure QDSL and EDSL implementations of Feldspar,
+  and show they offer comparable performance
   (Section~\ref{sec:implementation}).
 
 \item To explain the role of the subformula property in formulating
@@ -439,12 +445,18 @@ The contributions of this paper are:
 % (Section~\ref{sec:other-qdsls}.)
 
 \item To compare the QDSL variant of Feldspar with the deep and
-  shallow embedding approach used in the EDSL variant of Feldspar
+  shallow embedding approach used in the EDSL variant of Feldspar,
+  and show they offer tradeoffs with regard to ease of use
   (Section~\ref{sec:qdsl-vs-edsl}).
 
 \end{itemize}
 Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
+
+\phil{Perhaps add something about Template Haskell
+and Meta Haskell as alternative approaches?}
+
+\phil{Perhaps add something about closed vs.\ open quotation?}
 
 % \section{A QDSL variant of Feldspar}
 % \label{sec:qfeldspar}
@@ -552,21 +564,37 @@ Windowing  & Average array in a sliding window \\
 \end{center}
 Figure~\ref{fig:thetable} lists the results. Columns \hct\ and
 \hrt\ list compile-time and run-time in Haskell, and \cct\ and
-\crt\ list compile-time and run-time in C. Runs for EDSL are shown
-both with and without common subexpression elimination (CSE), which is
-supported by a simple form of observable
-sharing~\citep{claessen1999observable, gill2009type}. QDSL does not
-require CSE, since the normalisation algorithm preserves sharing. One
-benchmark, FFT, exhausts memory without CSE. All benchmarks produce
-essentially the same C for both QDSL and EDSL, which run in
-essentially the same time. The one exception is FFT, where Feldspar
-appears to introduce spurious conversions that increase the runtime.
-
+\crt\ list compile-time and run-time in C.
 Measurements were done on a quad-core Intel i7-2640M CPU
 running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
 GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
+Runs for EDSL are shown
+both with and without common subexpression elimination (CSE), which is
+supported by a simple form of observable
+sharing \citep{claessen1999observable, gill2009type}. QDSL does not
+require CSE, since the normalisation algorithm preserves sharing.
 
-\josef{I'm a little worried that Feldspar is looking worse than necessary in the FFT example. The right way to write FFT is by mixing pull- and push arrays and that definition will give good performance in Feldspar.}
+One benchmark, FFT, exhausts memory without CSE. All benchmarks
+produce essentially the same C for both QDSL and EDSL, which run in
+essentially the same time.  The Haskell compile time for QDSL is about
+twice that for EDSL, but all other times are comparable.  The one
+exception is FFT, where Feldspar appears to introduce spurious
+conversions that increase the runtime.
+
+\phil{The first line of the above paragraph can be removed after
+we simplify the table to eliminate the column for EDSL Feldspar
+with CSE. The last line of the above paragraph can be removed
+after Shayan generates new numbers with the new simplifier,
+under which FFT is also comparable for both versions.}
+
+\phil{Shayan: Why is the Haskell compile time for QDSL twice as long?
+If we expect it is an inefficient implementation of typed quotation,
+is there evidence to that effect?}
+
+\josef{I'm a little worried that Feldspar is looking worse than
+necessary in the FFT example. The right way to write FFT is by mixing
+pull- and push arrays and that definition will give good performance
+in Feldspar.}
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -656,7 +684,7 @@ constant.
 % The grammar of Figure~\ref{fig:nf} characterises normal forms
 % precisely.
 % \begin{proposition}[Normal form syntax]
-% \label{prop_normal}
+% \label{prop:normal}
 % An expression $N$ matches the syntax of normal forms in
 % Figure~\ref{fig:nf} if and only if it is in normal form with regard to
 % the reduction rules of Figure~\ref{fig:norm}.
@@ -696,7 +724,7 @@ Free variables are equivalent to constants of arity zero.
 Terms in normal form satisfy the subformula property.
 
 \begin{proposition}[Subformula property]
-\label{prop_subformula}
+\label{prop:subformula}
 If $\Gamma \vdash M:A$ and $M$ is in normal form,
 then every subterm of $M$ has a type that is either a subformula of $A$,
 a subformula of a type in $\Gamma$, or a subformula of the type
@@ -720,14 +748,16 @@ desirable and the contexts in which it is problematic.
 Examination of the proof in \citet{Prawitz-1965} shows that in fact
 normalisation achieves a sharper property.
 \begin{proposition}[Sharpened subformula property]
+\label{prop:sharpened}
 If $\Gamma \vdash M:A$ and $M$ is in normal form, then every proper
 subterm of $M$ that is not a free variable or a subterm of a constant
 application has a type that is a proper subformula of $A$ or a proper
 subformula of a type in $\Gamma$.
 \end{proposition}
+So far as we know, we are the first to formulate the sharpened version.
 
-The sharpened subformula property says nothing about the type of
-subterms of constant applications, but this is immediately apparent by
+The sharpened subformula property says nothing about the types of
+subterms of constant applications, but such types are immediately apparent by
 recursive application of the sharpened subformula property.  Given a
 subterm that is a constant application $c \app \overline{M}$, where
 $c$ has type $\overline{A} \to B$, then the subterm itself has type
@@ -789,7 +819,7 @@ and perhaps the first application of quotation to domain-specific
 languages is Lisp macros \citep{Hart-1963}.
 
 This paper uses Haskell, which has been widely used for EDSLs
-\citet{hudak1997domain, reid1999prototyping, bjesse1998lava,
+\citep{hudak1997domain, bjesse1998lava, reid1999prototyping, 
 Gill:14:DSLs-and-Synthesis}.  We constrast QDSL with an EDSL technique
 that combines deep and shallow embedding, as described by
 \citet{svenningsson:combining}, and as used in several Haskell EDSLs
@@ -819,15 +849,17 @@ Modular Staging \citep{scalalms}.
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
 
-\todo{Mention the work on normalisation with effects: Cooper (DBLP
+\sam{Mention the work on normalisation with effects: Cooper (DBLP
   2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
-  Wadler (PEPM 2014)}
+  Wadler (PEPM 2014). PLW: Sam, please do.}
 
-\todo{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
-  2014)}
+\sam{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
+  2014). PLW: Sam, please do.}
 
-\todo{We should say a little more about what novel features LMS brings
-  to the table that are not available / harder to achieve in Haskell.}
+\sam{We should say a little more about what novel features LMS brings
+  to the table that are not available / harder to achieve in Haskell.
+  PLW: Sam, please do.}
+
 
 \section{Conclusion}
 \label{sec:conclusion}
@@ -842,7 +874,7 @@ expressiveness and efficiency. EDSLs often (but not always) mimic the
 syntax of the host language, and often (but not always) perform
 normalisation in the host languages, while QDSLs (always) steal the
 syntax of the host language, and (always) ensure the subformula property,
-at the cost of requiring a normaliser, one per host language.
+at the cost of requiring a normaliser.
 
 The subformula property may have applications in DSLs other that
 QDSLs. For instance, after Section~\ref{subsec:opt} of this paper was
@@ -854,7 +886,7 @@ guarantee that C code for such constructs need never be generated.
 
 As we noted in the introduction, rather than build a special-purpose tool for
 each QDSL, it should be possible to design a single tool for each host language.
-Our next step is to design Haskell QDSL, with the following features.
+Our next step is to design a tool, Haskell QDSL, with the following features.
 \begin{itemize}
 \item Type inference for the terms returned from typed
   quasi-quotations, restoring type information currently discarded by GHC.

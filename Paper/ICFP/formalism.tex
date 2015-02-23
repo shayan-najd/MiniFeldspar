@@ -49,7 +49,6 @@
   \coproduct{A}{B}
 \\[1ex]
 \text{Terms} & L,M,N & ::= &
-% \expunit                	\mid
   \expvar{x}              	\mid
   \expconst{c}{\overline{M}}	\mid
   \expabs{x}{A}{N}              \mid
@@ -63,18 +62,27 @@
   \expcase{L}{x}{M}{y}{N}
 \\[1ex]
 \text{Values} & V,W & ::= &
-% \expunit         \mid
   \expvar{x}       \mid
   \expabs{x}{A}{N} \mid
   \exppair{V}{W}   \mid
   \expinl{V}{B}    \mid
   \expinr{A}{W}
+\\[1ex]
+\text{Non-Values} & P & ::= &
+  \expconst{c}{\overline{M}}	\mid
+  \expapp{L}{M}                 \mid
+  \explet{x}{M}{N}              \mid
+  \exppair{P}{N}                \mid
+  \exppair{V}{P}                \mid
+  \expfst{L}                   	\mid
+  \expsnd{L}                    \mid \\&&&
+  \expinl{P}{\tm{B}}		\mid
+  \expinr{\tm{A}}{P}           	\mid
+  \expcase{L}{x}{M}{y}{N}
 \end{array}
 \]
 
-\sam{Perhaps $P$ should appear here?}
-
-\caption{Types, Terms, and Values}
+\caption{Types and Terms}
 \label{fig:term}
 \end{figure*}
 }

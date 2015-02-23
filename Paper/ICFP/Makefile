@@ -1,6 +1,6 @@
 all: paper.pdf
 
-paper.tex: paper.lhs Section2.lhs Section5.lhs
+paper.tex: paper.lhs Section2.lhs Section5.lhs formalism.tex table.tex
 	if [ -f "paper.tex" ]; then chmod +w paper.tex; fi
 	lhs2TeX -o paper.tex paper.lhs
 	chmod -w paper.tex
