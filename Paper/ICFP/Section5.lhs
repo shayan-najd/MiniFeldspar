@@ -472,6 +472,10 @@ a .<. b = Prim2 "(<)" (toDp a) (toDp b)
 Overloading cannot apply here, because Haskell requires
 |(==)| return a result of type |Bool|, while |(.==.)| returns
 a result of type |Dp Bool|, and similarly for |(.<.)|.
+\shayan{We need to mention the argument that overriding do actually
+apply. But, the problem with overriding is that once a syntactic
+entity is fixed to be used i one stage, it cannot be reused in other
+stage.}
 
 
 \subsection{Embedding pairs}
@@ -552,7 +556,8 @@ is also zero.
 |undef| without changing the deep embedding, but here we have defined |undef|
 entirely as a shallow embedding.  (It appears they underestimated the
 power of their own technique!)
-
+\shayan{Though I heard you all say otherwise, but I still find above
+provocative (for the reader / reviewer).}
 
 \subsection{Embedding option}
 \label{subsec:opt}
@@ -700,6 +705,9 @@ normVec     ::  (Syn a, Num a) => Vec a -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
 
+\shayan{Note that I had to hide the name "sqrt" (and "min") imported
+by Prelude, to avoid name clashes.}
+
 The vector representation makes it easy to define any functions when
 each vector element is computed independently, including |drop|,
 |take|, |reverse|, vector concatentation, and the like, but is less
@@ -737,6 +745,11 @@ memorise :: Syn a => Vec a -> Vec a
 memorise (Vec n g)
   = Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
+
+\shayan{I think in the presence of eta contractions, most uses of above
+reduces to identity. One should add a constructor to Dp to achieve
+memorisation. For now, you may just take out the body.}
+
 The above definition depends on common subexpression elimination
 to ensure |Arr n (toDp . g)| is computed once, rather than once
 for each element of the resulting vector.
