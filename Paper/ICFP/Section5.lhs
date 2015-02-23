@@ -31,14 +31,14 @@ instance Num (Dp Float) where
 %format >>==  = "\bind"
 
 This section reviews the combination of deep and shallow embeddings
-required to implement Feldspar as an EDSL, and considers the trade-offs
-between the QDSL and EDSL approaches.
-Much of this section reprises \citet{svenningsson:combining}.
+required to implement Feldspar as an EDSL (EFeldspar), and considers
+the trade-offs between the QDSL and EDSL approaches.  Much of this
+section reprises \citet{svenningsson:combining}.
 
 \josef{This is the first time we use the name "EFeldspar". I suppose it should be introduced earlier.}
 The top-level function of EFeldspar has the type:
 \begin{spec}
-qdsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
+edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
 \end{spec}
 \josef{Should it be |edsl| rather than |qdsl| above?}
 Here |Dp a| is the deep representation of a term of type |a|.
@@ -73,12 +73,12 @@ in the EDSL variant, meaning that |power n| accepts a representation
 of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
-In EDSL, no quotation is required, and the code looks almost---but not quite!---like
-an unstaged version of power, but with different types.  Clever encoding tricks,
-explained later, permit declarations, function calls, arithmetic
-operations, and numbers to appear the same whether they are to be
-executed at generation-time or run-time.  However,
-as explained later, comparison and conditionals appear differently
+In EDSL, no quotation is required, and the code looks almost---but not
+quite!---like an unstaged version of power, but with different types.
+Clever encoding tricks, explained later, permit declarations, function
+calls, arithmetic operations, and numbers to appear the same whether
+they are to be executed at generation-time or run-time.  However, as
+explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
 |M .==. N| and |L ?  (M, N)| for the latter.
@@ -91,6 +91,8 @@ Evaluating |power (-6)| yields the following:
 \end{spec}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
+\shayan{Above does not read well. I think observable sharing is not a
+technique by itself}
 \[
 \begin{array}{c@@{~~}||@@{~~}l}
 |v| & |(u * 1)|  \\
@@ -116,10 +118,16 @@ languages.
 \item QDSL requires syntax to separate quoted and unquoted terms. In
 contrast, EDSL permits the host and embedded languages to intermingle
 seamlessly. Depending on your point of view, explicit quotation syntax
-may be considered as an unnessary distraction or as drawing a useful
+may be considered as an unnecessary distraction or as drawing a useful
 distinction between generation-time and run-time.  If one takes the
 former view, the type-based approach to quotation found in C\# and
 Scala might be preferred.
+\shayan{That is, if the host language has proper overloading
+machinery.  For example, Haskell doesn't hence type-based approach is
+not possible sometimes. Moreover, we (at least I, Josef, and Dimitrios
+from MSR) conjecture there is a theoretical limit to what overloading
+can achieve, e.g. consider overloading the implicit fixpoint operator
+in a recursive definition.}
 
 \item QDSL may share the same representation for quoted terms across a
 range of applications; the quoted language is the host language, and
@@ -137,8 +145,9 @@ mentions permitted identifiers. In contrast, EDSL guarantees that if a
 term has the right type it will translate to the target.  If the
 requirement to eyeball code to ensure only permitted identifiers are
 used is considered too onerous, it should be easy to build a
-preprocessor that checks this property. In Haskell, it is possible to
-incorporate such a preprocessor using MetaHaskell \cite{metahaskell}.
+preprocessor that checks this property. For example, in Haskell, it is
+possible to incorporate such a preprocessor using MetaHaskell
+\cite{metahaskell}.
 
 \item Since QDSLs may share the same quoted terms across a range of
 applications, the cost of building a normaliser or a preprocessor
@@ -153,6 +162,12 @@ by applying a technique such as observable sharing
 subexpression elimination may discover common subexpressions that are
 distinct in QDSL; while EDSL with observable sharing yields
 results comparable to sharing-preserving QDSL.
+\shayan{I think observable sharing is not a technique by itself.
+I searched a bit, but could not find a proper phrase to replace it.}
+\shayan{EDSL that does intensional analysis, like LMS, may preserve
+sharing as we do. In fact, LMS has a layer transforming the input AST
+to A-normal form, corresponding to our let insertion. Alas, EFeldspar,
+and the combined technique loses sharing.}
 
 \item Once the deep embedding or the normalised quoted term is
 produced, generating the domain-specific code is similar for both
@@ -255,7 +270,22 @@ from which the same C code is generated.
 Hence, an advantage of the EDSL approach---that it generates
 terms essentially in normal form---turns out to be restricted
 to a limited set of types, including functions and products,
-but excluding sums. If one wishes to deal with sum types,
+but excluding sums.
+\shayan{There are multiple problems with above sentence:
+(a) There are EFeldspar terms with product type that are not
+    fully normalised when generated (e.g. refer to the complex
+    numbers example that I wrote).
+(b) Why "generating terms essentially in normal form" is attributed
+    to EDSLs? As far as I know, nowhere in the combining deep and
+    shallow embedding paper this was claimed.
+(c) How do we know that there are no counter-examples even for
+function types (i.e. generated terms of function type that are not in
+normal form)?
+
+I suggest removing "including functions and products,
+but excluding sums", and fixing the following correspondingly.}
+
+If one wishes to deal with sum types,
 separate normalisation is required. This is one reason
 why we do not consider normalisation as required by QDSL
 to be particularly onerous.
@@ -271,12 +301,19 @@ instantiating |return| and |(>>=)| correctly. For QDSL, it is
 also necessary for the normaliser to recognise and expand
 |do| notation and to substitute appropriate instances of
 |return| and |(>>=)|.
+\shayan{I don't see expansion as normaliser's job; overloading
+resolution happens in the translator. Though, I suppose it depends on
+what we mean by normaliser.}
 
 \item As this example shows, sometimes both QDSL and EDSL may require
 normalisation.  As mentioned previously, for QDSLs the cost of
 building a normaliser might be amortised across several applications.
 In constrast, each EDSL usually has a distinct deep representation and
 so requires a distinct normaliser.
+
+\shayan{We should mention that deep represenations can use
+compositional datatypes (e.g. Axelsson's Syntactic, or Scala's open
+datatypes), and reuse a single normaliser.}
 
 \end{itemize}
 
@@ -304,6 +341,9 @@ data Dp a where
   ArrIx     ::  Dp (Arr a) -> Dp Int -> Dp a
   Variable  ::  String -> Dp a
 \end{code}
+\shayan{One should add Rep constraint to the existential types. Types
+are required for compiling terms to C.}
+
 The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
