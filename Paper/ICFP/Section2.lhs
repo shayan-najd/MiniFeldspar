@@ -24,6 +24,8 @@ class (Type a , FO a) => Rep a
 
 test :: Bool
 test = ex1 && ex2 && ex3 && ex4
+
+unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
 %endif
 %format P.Int = Int
@@ -497,10 +499,13 @@ memorise  ::  Rep a => Qt (Vec a -> Vec a)
 %                :: Qt (Arr Int -> Arr Int))
 % "AryInt prog (AryInt v0)\n{\n  return v0;\n}"
 For example, if
-\begin{spec}
-blur :: Rep a => Qt (Vec a -> Vec a)
-\end{spec}
-averages adjacent elements of a vector, then one may choose to
+\begin{code}
+blur :: Qt (Vec Float -> Vec Float)
+blur = [|| \a -> $$zipVec  (\x y -> sqrtFltHsk (x*y))
+                           ($$append ($$unit 0) a)
+                           ($$append a ($$unit 0)) ||]
+\end{code}
+computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
 \begin{center}
 |[||||$$blur . $$blur||||]| ~~~or~~~ |[||||$$blur . $$memorise . $$blur||||]|
@@ -509,8 +514,6 @@ with different trade-offs between recomputation and memory usage.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
-\\
-\todo{Josef}{Please provide definition of blur.}
 
 We have described the application of the subformula to array
 fusion as based on ``pull arrays'' \citep{svenningsson:combining},

@@ -69,6 +69,7 @@
 \usepackage{listings}
 \lstset{language=C,identifierstyle=\ttfamily
        ,keywordstyle=\bfseries\ttfamily}
+\usepackage{caption}
 %%\usepackage{colortbl}
 %%\usepackage{amsthm}
 %%\usepackage[round]{natbib}

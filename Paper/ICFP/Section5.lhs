@@ -703,8 +703,11 @@ for each element of the resulting vector.
 If
 \begin{spec}
 blur :: Syn a => Vec a -> Vec a
+blur v = zipVec  (\x y -> sqrt (x*y))
+                 (append a (unit 0))
+                 (append (unit 0) a)
 \end{spec}
-averages adjacent elements of a vector, then one may choose to
+computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
 \begin{center}
 |blur . blur| ~~~or~~~ |blur . memorise . blur|
