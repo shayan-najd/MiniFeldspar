@@ -1,8 +1,7 @@
-\newcommand{\hct}{\:Compile\:}
-\newcommand{\hrt}{\:Run\:}
-\newcommand{\cct}{\:Compile\:}
-\newcommand{\crt}{\:Run\:}
+\newcommand{\ct}{\:Compile\:}
+\newcommand{\rt}{\:Run\:}
 
+\begin{figure}
 \begin{center}
 \begin{tabular}{|@{\:}l@{\:}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|}
 \hline
@@ -10,7 +9,7 @@
  & \multicolumn{2}{|@{\:}c@{\:}}{EDSL (Haskell)}
  & \multicolumn{2}{|@{\:}c@{\:}|}{Generated Code (C)}
 \\ \hline
- & \hct & \hrt & \hct & \hrt & \cct & \crt
+ & \ct & \rt & \ct & \rt & \ct & \rt
 \\ \hline
 IPGray & 16.36 & 0.03 & 15.10 & 0.01 & 0.06 & 0.39
 \\ \hline
@@ -23,6 +22,11 @@ CRC    & 16.14 & 0.05 & 15.13 & 0.01 & 0.06 & 0.12
 Window & 16.22 & 0.08 & 15.06 & 0.01 & 0.06 & 0.25
 \\ \hline
 \end{tabular}
-\captionof{figure}{Comparison of QDSL and EDSL MiniFeldspar (times in seconds)}
-\label{fig:thetable}
 \end{center}
+Times in seconds; minimum time of ten runs. \\
+Quad-core Intel i7-2640M CPU, 2.80 GHz, 3.7 GiB RAM.\\
+GHC 7.8.3; GCC 4.8.2; Ubuntu 14.04 (64-bit).
+\caption{Comparison of QDSL and EDSL Feldspar}
+\label{fig:thetable}
+\end{figure}
+

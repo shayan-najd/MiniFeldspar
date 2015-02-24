@@ -69,7 +69,7 @@
 \usepackage{listings}
 \lstset{language=C,identifierstyle=\ttfamily
        ,keywordstyle=\bfseries\ttfamily}
-\usepackage{caption}
+%%\usepackage{caption}
 %%\usepackage{colortbl}
 %%\usepackage{amsthm}
 %%\usepackage[round]{natbib}
@@ -99,7 +99,7 @@
 %    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
 %                     {\textbf{Josef:} #1}}}}
 
-\newcommand{\todo}[1]{}
+\newcommand{\todo}[2]{}
 %\newcommand{\sam}[1]{}
 %\newcommand{\shayan}[1]{}
 
@@ -321,10 +321,10 @@ while guaranteeing to generate code that fuses those loops;
 while guaranteeing to generate code that operates on flat data.
 
 \end{itemize}
-The first two of these are used in this paper, and are key
+The first and second are used in this paper, and are key
 to generating C; while the
-first and third are used in \citep{cheney:linq}
-and are central to generating SQL.
+first and third are used by \citet{cheney:linq}
+and are key to generating SQL.
 % We thus give modern application to a theorem four-fifths of a century old.
 
 The subformula property is closely related to conservativity.  A
@@ -354,10 +354,10 @@ nesting can be translated to SQL, which only queries flat tables and
 does not support nesting of data.
 
 The subformula property holds only for terms in normal form.  Previous
-work, such as \citep{cheney:linq} uses a call-by-name normalisation
-algorithm that performs full $\beta$-reduction, which may cause
+work, such as \citep{cheney:linq} uses call-by-name normalisation
+algorithm that may cause
 computations to be repeated.  Here we present call-by-value and
-call-by-need normalisation algorithms, which guarantee to preserve
+call-by-need normalisation algorithms that guarantee to preserve
 sharing of computations. We also present a sharpened version of
 the subformula property, which we apply to characterise
 the circumstances under which a QDSL may guarantee
@@ -400,15 +400,14 @@ Feldspar, again in Haskell, where arithmetic, comparison, and
 conditionals are all represented by quoted terms, and hence identical
 to the host.
 
-In theory, an EDSL also steals the normalisation rules of its host
-language, by using evaluation in the host to normalise terms of the
-target. In Section~\ref{sec:qdsl-vs-edsl} we give several examples
-comparing our QDSL and EDSL versions of Feldspar. In the first of
-these, it is indeed the case that the EDSL achieves by evaluation of
-host terms what the QDSL achieves by normalisation of quoted terms.
-However, in other cases, the EDSL must perform normalisation of the
-deep embedding corresponding to what the QDSL achieves by
-normalisation of quoted terms.
+An EDSL may also steal the normalisation rules of its host language,
+using evaluation in the host to normalise terms of the
+target. Section~\ref{sec:qdsl-vs-edsl}
+compares QDSL and EDSL variants of Feldspar. In the first example, it
+is indeed the case that the EDSL achieves by evaluation of host terms
+what the QDSL achieves by normalisation of quoted terms.  However, in
+other cases, the EDSL must perform normalisation of the deep embedding
+corresponding to how the QDSL normalises quoted terms.
 
 \vspace{2ex}
 \begin{quote}
@@ -419,20 +418,21 @@ in one particular direction or another. \\
 \end{quote}
 
 The subformula property depends on normalisation, but normalisation
-may lead to an exponential or worse blowup in the size of the normalised
-code when there are nested conditional or
-case statements. 
-We explain how the QDSL technique can offer the user
-control over where normalisation does and does not occur, while still
+may lead to exponential blowup in the size of the normalised
+code when there are nested conditionals;
+and hyperexponential blowup in recondite cases involving higher-order functions.
+We explain how uninterpreted constants allow the user to
+control where normalisation does and does not occur, while still
 maintaining the subformula property. Future work is required to
-consider the trade-offs between full normalisation as required for
-the subformula property and special-purpsose normalisation as used
-in most DSLs; possibly a combination of both will prove fruitful.
+consider trade-offs between full normalisation as required for
+the subformula property and special-purpose normalisation as used
+in many DSLs; possibly a combination of both will prove fruitful.
 
-Some researchers contend that an essential property of an embedded DSL
-which generates target code is that every term that is type-correct
-should successfully generate code in the target language. Neither the
-P-LINQ of \citet{cheney:linq} nor the QDSL Feldspar of this paper
+Some researchers contend an essential property of a DSL
+which generates target code is that every type-correct term
+should successfully generate code in the target language. EDSL Feldspar
+satisfies this property; but neither 
+P-LINQ of \citet{cheney:linq} nor QDSL Feldspar
 satisfy this property, since the user is required to eyeball quoted
 code to ensure it mentions only permitted operators. If this is
 thought too onerous, it is possible to ensure the property with
@@ -455,9 +455,8 @@ The contributions of this paper are:
   and show they offer comparable performance
   (Section~\ref{sec:implementation}).
 
-\item To explain the role of the subformula property in formulating
-  DSLs, to describe a normalisation algorithm suitable for
-  call-by-value or call-by-need that does not lose sharing, and to
+\item To present normalisation algorithms for
+  call-by-value and call-by-need that preserve sharing, and to
   formulate a sharpened version of the subformula property and apply
   it to characterise when higher-order terms normalise to first-order
   form (Section~\ref{sec:subformula}).
@@ -482,10 +481,9 @@ Section~\ref{sec:conclusion} concludes.
 
 \section{Implementation}
 \label{sec:implementation}
-
 \input{table}
 
-The original EDSL~Feldspar generates values of an algebraic type
+The original EDSL~Feldspar generates values of a GADT
 (called |Dp a| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
 that represent |while| and manifest arrays similar to those
 above. A backend then compiles values of type |Dp a| to C code.
@@ -499,9 +497,12 @@ The transformer from |Qt| to |Dp| performs the following steps.
   It replaces identifiers connected to the type |Maybe|, such as
   |return|, |(>>=)|, and |maybe|, by their definitions.
 \item It normalises the term to ensure the subformula property, using
-  the rules of Section~\ref{sec:subformula}. The normaliser does not
-  yet support all Haskell data types, but does support tuples, and the
-  types |Maybe| and |Vec|.
+  the rules of Section~\ref{sec:subformula}. The normaliser supports
+  a limited set of types, including tuples, |Maybe|, and |Vec|.
+\item It performs simple type inference, which is used to resolve
+  overloading. Overloading is limited to a fixed set of
+  cases, including overloading arithmetic operators at types
+  |Int| and |Float|.
 \item It traverses the term, converting |Qt| to |Dp|.
   It checks that only permitted primitives appear in |Qt|,
   and translates these to their corresponding representation
@@ -512,8 +513,8 @@ The transformer from |Qt| to |Dp| performs the following steps.
 
 An unfortunate feature of typed quasiquotation in GHC is that the
 implementation discards all type information when creating the
-representation of a term.  Type |Qt a| is equivalent to |TH.Q (TH.TExp
-a)|, where |TH| denotes the library for Template Haskell, |TH.Q| is
+representation of a term.  Type |Qt a| is equivalent to |TH.Q (TH.TExp a)|,
+where |TH| denotes the library for Template Haskell, |TH.Q| is
 the quotation monad of Template Haskell (used to look up identifiers
 and generate fresh names), and |TH.TExp a| is the parse tree for a
 quoted expression returning a value of type |a|. Type |TH.TExp a| is
@@ -521,15 +522,9 @@ just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
 in Template Haskell, where |a| is a phantom type variable. Hence, the
 translator from |Qt a| to |Dp a| is forced to re-infer all the type
 information for the subterms of the term of type |Qt a|.  This is why
-we currently translate the |Maybe| monad as a special case, rather
+we support only limited overloading, and why we translate
+the |Maybe| monad as a special case, rather
 than supporting overloading for monad operations in general.
-Moreover, overloaded arithmetic operations are treated as fully
-polymorphic operations, at first; their their type constraints are
-ignored. Just before normalisation, their inferred types are used to
-translate them to their corresponding monomorphic primitives.
-% \shayan{I have added above two lines about how QFeldspar treats
-% overloaded arithmetic operations.}
-
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
 %%  each QDSL, it should be possible to design a single tool for each host language.
@@ -543,29 +538,16 @@ IPGray     & Image Processing (Grayscale)  \\
 IPBW       & Image Processing (Black and White) \\
 FFT        & Fast Fourier Transform \\
 CRC        & Cyclic Redundancy Check \\
-Windowing  & Average array in a sliding window \\
+Window     & Average array in a sliding window \\
 \end{tabular}
 \end{center}
-Figure~\ref{fig:thetable} lists the results. Columns \hct\ and
-\hrt\ list compile-time and run-time in Haskell, and \cct\ and
-\crt\ list compile-time and run-time in C.
-Measurements were done on a quad-core Intel i7-2640M CPU
-running at 2.80 GHz and 3.7 GiB of RAM, with GHC Version 7.8.3 and
-GCC version 4.8.2, running on Ubuntu 14.04 (64-bit).
-Runs for EDSL are shown
-both with and without common subexpression elimination (CSE), which is
-supported by a simple form of observable
-sharing \citep{claessen1999observable, gill2009type}. QDSL does not
-require CSE, since the normalisation algorithm preserves sharing.
-
-% One benchmark, FFT, exhausts memory without CSE.
-All benchmarks
-produce essentially the same C for both QDSL and EDSL, which run in
-essentially the same time.  The Haskell compile time for QDSL is about
-twice that for EDSL, but all other times are comparable.
-% The one
-% exception is FFT, where Feldspar appears to introduce spurious
-% conversions that increase the runtime.
+All five benchmarks run under QDSL and EDSL Feldspar yield
+syntactically identical C code.
+Figure~\ref{fig:thetable} lists the results and methodology.
+QDSL compile times are slightly greater than EDSL,
+and QDSL run times range from twice to ten times that of EDSL,
+the increase being due to normalisation time.
+Our normaliser was not designed to be particularly efficient.
 
 \todo{Shayan}{Why is the Haskell compile time for QDSL twice as long?
 If we expect it is an inefficient implementation of typed quotation,
@@ -625,8 +607,10 @@ reductions of Phase~1 until no more apply, then similarly for Phase~2,
 and finally for Phase~3.  Phase~1 performs let-insertion, naming
 subterms that are not values, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
-in Moggi's metalanguage for monads \citep{Moggi-1991}.  Phase~2
-performs two kinds of reduction: $\beta$ rules apply when an
+in Moggi's metalanguage for monads \citep{Moggi-1991}.
+The rules are designed to leave applications such as |f V W|
+unchanged, rather than transform them to |let g = f V in g W|.
+Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
 introduction (construction) is immediately followed by an elimination
 (deconstruction), and $\kappa$ rules push eliminators closer to
 introducers to enable $\beta$ rules.  Phase~3 ``garbage collects''

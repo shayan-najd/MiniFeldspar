@@ -239,9 +239,8 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-       \expconst{c}{(\overline{V},\hole,\overline{N})}  \mid
-       \expapp{\hole}{M}                                \mid
-       \expapp{V}{\hole}                                \mid
+       c \app \overline{V} \app \hole \app \overline{N} \mid
+       \expapp{L}{\hole}                                \mid
        \exppair{\hole}{M}                               \mid
        \exppair{V}{\hole}                               \mid
        \expfst{\hole}                                   \mid
@@ -334,12 +333,6 @@ Phase 3 (garbage collection)
 %% & Count(x,N) < 2 \\
 \end{array}
 \]
-
-\todo{Sam}{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
-  redundant in $G$. Shayan's original presentation includes
-  $\expapp{M}{\hole}$ in $F$ but not $\expapp{\hole}{M}$ or
-  $\expapp{V}{\hole}$. This was an in order to avoid naming every
-  intermediate partial application.}
 
 \caption{Normalisation Rules}
 \label{fig:norm}
