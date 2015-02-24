@@ -24,6 +24,8 @@ class (Type a , FO a) => Rep a
 
 test :: Bool
 test = ex1 && ex2 && ex3 && ex4
+
+unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
 %endif
 %format P.Int = Int
@@ -485,12 +487,12 @@ memorise  ::  Rep a => Qt (Vec a -> Vec a)
 %                :: Qt (Arr Int -> Arr Int))
 % "AryInt prog (AryInt v0)\n{\n  return v0;\n}"
 For example, if
-\begin{spec}
-blur :: Rep a => Qt (Vec a -> Vec a)
-blur = [|| \a -> $$zipVec  (\x y -> $$sqrt (x*y))
+\begin{code}
+blur :: Qt (Vec Float -> Vec Float)
+blur = [|| \a -> $$zipVec  (\x y -> sqrtFltHsk (x*y))
                            ($$append ($$unit 0) a)
                            ($$append a ($$unit 0)) ||]
-\end{spec}
+\end{code}
 computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
 \begin{center}
