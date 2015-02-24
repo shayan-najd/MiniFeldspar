@@ -5,12 +5,12 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
-import Prelude hiding (min)
+import Prelude
 import Data.Array
 type Arr a = Array Int a
 
-min         ::  Ord a => Dp a ->  Dp a -> Dp a
-min m n     =   (m .<. n) ? (m, n)
+minim         ::  Ord a => Dp a ->  Dp a -> Dp a
+minim m n     =   (m .<. n) ? (m, n)
 
 instance Fractional (Dp Float) where
   a / b          =  Prim2 "(/)" a b
@@ -648,7 +648,7 @@ and norm of a vector.
 zipVec  ::  (Syn a, Syn b) =>
               (a -> b -> c) -> Vec a -> Vec b -> Vec c
 zipVec f (Vec m g) (Vec n h)
-        =   Vec (m `min` n) (\i -> f (g i) (h i))
+        =   Vec (m `minim` n) (\i -> f (g i) (h i))
 
 sumVec  ::  (Syn a, Num a) => Vec a -> a
 sumVec (Vec n g)
