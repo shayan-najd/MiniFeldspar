@@ -819,7 +819,7 @@ and perhaps the first application of quotation to domain-specific
 languages is Lisp macros \citep{Hart-1963}.
 
 This paper uses Haskell, which has been widely used for EDSLs
-\citep{hudak1997domain, bjesse1998lava, reid1999prototyping, 
+\citep{hudak1997domain, bjesse1998lava, reid1999prototyping,
 Gill:14:DSLs-and-Synthesis}.  We constrast QDSL with an EDSL technique
 that combines deep and shallow embedding, as described by
 \citet{svenningsson:combining}, and as used in several Haskell EDSLs
@@ -836,6 +836,7 @@ including Feldspar \citep{FELDSPAR}, Obsidian
 embedded circuit descriptions.  \citet{claessen1999observable} and
 \citet{gill2009type} propose solutions to this problem via extensions
 to Haskell that permit observable sharing.
+\shayan{Gill didn't propose extending Haskell; he provided a library}
 
 A proposition-as-types principle for quotation as a modal logic was
 proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
@@ -884,7 +885,7 @@ So long as type |Maybe| does not appear in the input or output of the
 program, a normaliser that ensures the subformula property could
 guarantee that C code for such constructs need never be generated.
 
-As we noted in the introduction, rather than build a special-purpose tool for
+As we noted in the introduction, rather than building a special-purpose tool for
 each QDSL, it should be possible to design a single tool for each host language.
 Our next step is to design a tool, Haskell QDSL, with the following features.
 \begin{itemize}
@@ -899,6 +900,10 @@ Our next step is to design a tool, Haskell QDSL, with the following features.
 \item The user may supply a type environment indicating which constants
   (or free variables) may appear in typed quasi-quotations.
 \end{itemize}
+
+\shayan{Some of the items are written as noun phrases and some as full
+sentences.}
+
 Such a tool could easily subsume the special-purpose translator from
 |Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
 and lift most of its restrictions. For instance,
@@ -914,6 +919,17 @@ macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
 by naming the concept and drawing attention to the central benefits of
 normalisation and the subformula propety, we may help the concept to
 flower further for years to come.
+
+\shayan{I have a feeling that stressing too much on "naming the
+concept" can backfire. It can make the work seem shallow. We realised
+the concept is useful, analysed what essentially makes it useful,
+generalised it, experimented with it, and now we share our results
+with other researchers. Indeed, we give a name to the specific set of
+already existing (and new) ideas we gather together. And indeed, names
+(i.e. identifying concepts) are powerful things (often
+underestimated). But stressing too much on naming, or putting together
+existing concepts, undermines our fine engineering and scientific
+study of the matter.}
 
 \paragraph*{Acknowledgement}
 Najd is a recipient of the Google Europe Fellowship in Programming
