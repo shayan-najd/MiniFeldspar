@@ -487,8 +487,11 @@ memorise  ::  Rep a => Qt (Vec a -> Vec a)
 For example, if
 \begin{spec}
 blur :: Rep a => Qt (Vec a -> Vec a)
+blur = [|| \a -> $$zipVec  (\x y -> $$sqrt (x*y))
+                           ($$append ($$unit 0) a)
+                           ($$append a ($$unit 0)) ||]
 \end{spec}
-averages adjacent elements of a vector, then one may choose to
+computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
 \begin{center}
 |[||||$$blur . $$blur||||]| ~~~or~~~ |[||||$$blur . $$memorise . $$blur||||]|
@@ -497,7 +500,6 @@ with different trade-offs between recomputation and memory usage.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
-\josef{We never give the definition of blur. I think we should.}
 
 We have described the application of the subformula to array
 fusion as based on ``pull arrays'' \citep{svenningsson:combining},
