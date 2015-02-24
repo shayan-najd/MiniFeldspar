@@ -30,7 +30,6 @@
 \newcommand{\fv}[1]{\mathit{FV}(#1)}
 \newcommand{\rewrite}[1]{\mathbin{\mapsto_{#1}}}
 \newcommand{\hole}{[~]}
-\newcommand{\nv}{P}
 
 %% Typing
 \newcommand{\intro}{\mathcal{I}}
@@ -255,9 +254,9 @@ Phase 1 (let-insertion)
 \[
 \begin{array}{lllll}
 (\mathit{let})
-& F[\nv]
+& F[P]
 & \rewrite{1}
-& \explet{x}{\nv}{F[x]},
+& \explet{x}{P}{F[x]},
 & x \text{ fresh}
 \end{array}
 \]
@@ -272,9 +271,9 @@ G \mathbin{::=}
 \[
 \begin{array}{lllll}
 (\kappa.{\mathit{let}})
-& G[\explet{x}{\nv}{N}]
+& G[\explet{x}{P}{N}]
 & \rewrite{2}
-& \explet{x}{\nv}{G[N]},
+& \explet{x}{P}{G[N]},
 & x \notin \fv{G} \\
 
 (\kappa.{\mathit{case}})
@@ -327,16 +326,16 @@ Phase 3 (garbage collection)
 \begin{array}[t]{@@{}llll@@{\quad}l@@{}}
 
 (\mathit{need})
-& \explet{x}{\nv}{N}
+& \explet{x}{P}{N}
 & \rewrite{3}
 & N,
 & x \notin \fv{N}\\
-%% & \subst{N}{x}{\nv},
+%% & \subst{N}{x}{P},
 %% & Count(x,N) < 2 \\
 \end{array}
 \]
 
-\sam{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
+\todo{Sam}{If $\expapp{\hole}{M}$ appears in $F$ then $\expapp{\hole}{V}$ is
   redundant in $G$. Shayan's original presentation includes
   $\expapp{M}{\hole}$ in $F$ but not $\expapp{\hole}{M}$ or
   $\expapp{V}{\hole}$. This was an in order to avoid naming every

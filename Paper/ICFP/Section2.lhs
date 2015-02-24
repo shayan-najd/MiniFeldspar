@@ -103,10 +103,10 @@ indicated by |[||...||]| and unquoting by |$$(...)|.
 Evaluating |power (-6)| yields the following:
 \begin{code}
 {-"\iffalse"-}
-ex1 = testQt (power (-6)) ([|| \x ->  if x == 0 then 0 else
-      1 / (\x ->  (\y -> y * y)
-          ((\x -> (x * ((\x -> (\y -> y * y)
-           ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||])
+ex1 = testQt (power (-6)) ([||  \x ->  if x == 0 then 0 else
+                                  1 / (\x ->  (\y -> y * y)
+                                    ((\x -> (x * ((\x -> (\y -> y * y)
+                                      ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||])
 \end{code}
 Normalising using the technique of Section~\ref{sec:subformula},
 with variables renamed for readability, yields the following:
@@ -122,20 +122,31 @@ lambda abstraction and function application has been removed; we
 explain below why this is guaranteed by the subformula property.
 From the normalised term it is easy to generate the final C code:
 \begin{lstlisting}
-  float prog (float u) {
-    if (u == 0) {
-      return 0;
-    } else {
-      float v = u * 1;
-      float w = u * (v * v);
-      return 1 / (w * w);
-    }
+float prog (float u) {
+  float w; float v; float r;
+  if (u == 0.0f) {
+    r = 0.0f;
+  } else {
+    v = (u * 1.0f);
+    w = (u * (v * v));
+    r = (1.0f / (w * w));
   }
+  return r;
+}
 \end{lstlisting}
+By default, we always generate a routine called \texttt{prog};
+it is easy to provide the name as an additional parameter if required.
 
-\sam{The above is illegal C. The main function must have return type
-  int. We should use some other name for the function we generate.}
-\shayan{see latex, at this point}
+%  float prog (float u) {
+%    if (u == 0) {
+%      return 0;
+%    } else {
+%      float v = u * 1;
+%      float w = u * (v * v);
+%      return 1 / (w * w);
+%    }
+%  }
+
 % ***Shayan***:
 %               after macro expansion, and alpha renaming variables,
 %               we currently get the following:
@@ -157,29 +168,25 @@ From the normalised term it is easy to generate the final C code:
 %   return r;
 % }
 
-By default, we always generate a routine called \texttt{prog};
-\\ \shayan{The name main is kind of special in C. I used the name
-prog, but feel free to change it to something except main.}
-it is easy to provide the name as an additional parameter if required.
-
 Depending on your point of view, quotation in this form of QDSL is
 either desirable, because it makes manifest the staging, or
 undesirable because it is too noisy.  QDSL enables us to ``steal'' the
-entire syntax of the host language for our DSL.  The EDSL approach can
+entire syntax of the host language for our DSL.  In Haskell, an EDSL can
 use the same syntax for arithmetic operators, but must use a different
-syntax for equality tests and conditionals, as we explain in
+syntax for equality tests and conditionals, as explained in
 Section~\ref{sec:qdsl-vs-edsl}.
-\\ \shayan{We should mention some of such overloading restrictions for
-EDSLs are language specific.}
 
 Within the quotation brackets there appear lambda abstractions and
 function applications, while our intention is to generate first-order
 code. How can the QDSL~Feldspar user be certain that such function
 applications do not render transformation to first-order code
 impossible or introduce additional runtime overhead?
-\shayan{Above sentence should be rephrased. It is too long,
-        and hard to read.}
 The answer is the subformula property.
+\\
+\todo{Shayan}{Suggest rephrasing}
+% \shayan{Above sentence should be rephrased. It is too long,
+%        and hard to read.}
+
 
 \subsection{The subformula property}
 \label{subsec:subformula}
@@ -197,7 +204,7 @@ Here the subformulas of a type are the type itself and the subformulas of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and that types |Int| and |Float| have no
 parts.
-(See Proposition~\ref{prop:subformula} in Section~\ref{sec:subformula}.)
+See Proposition~\ref{prop:subformula} in Section~\ref{sec:subformula}.)
 
 % the only part of |Arr a| is |a|
 
@@ -217,11 +224,16 @@ of type |float|, which is indeed true for the normalised term.
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
 extent of normalisation may be controlled by introducing uninterpreted
-constants.  In a context with recursion, we take |fix :: (a -> a) ->
-a| as an uninterpreted constant.  In a context where we wish to avoid
-unfolding a reduction |L M|, we take |id :: a -> a| as an
-uninterpreted constant, and replace |L M| by |id L M|.
-\josef{We haven't introduced the meta variables |L| and |M| yet, let alone the syntax of terms. Will the reader be able to understand what we mean by the sentence above?}
+constants.  In a context with recursion, we take |fix :: (a -> a) -> a|
+as an uninterpreted constant.  In a context where we wish to avoid
+unfolding an application |L M|, where |L| and |M| are terms,
+we take |id :: a -> a| as an uninterpreted constant,
+and replace |L M| by |id L M|.
+
+(As a technical convenience, we also require constants of a given arity
+to be fully applied, and treat subterms and subformulas of these specially.
+See Section~\ref{sec:subformula}.)
+
 % (Careful readers will have noticed a small difficulty.  One of the
 % free variables of our quoted term is multiplication over floats.  In
 % Haskell, |m*n| abbreviates |(((*) m) n)|, which has |((*) m)| as a
@@ -317,11 +329,8 @@ Rather than using side-effects, |while| takes three
 arguments: a predicate over the current state, of type |s -> Bool|; a
 function from current state to new state, of type |s -> s|; and an
 initial state of type |s|; and it returns a final state of type |s|.
-Since we intend to compile the while loop to C, the type
-of the state is constrained to representable types.
-\\ \shayan{Maybe we should add a sentance mentioning that while is a
-built-in constant; that is why we use it without dollar signs. The
-function qdsl is aware of built-in constructs.}
+So that we may compile |while| loops to C, the type of the state
+is constrained to representable types.
 
 We can define a |for| loop in terms of a |while| loop.
 \begin{code}
@@ -334,7 +343,8 @@ The state of the |while| loop is a pair consisting of a counter and
 the state of the |for| loop. The body |b| of the |for| loop is a function
 that expects both the counter and the state of the |for| loop.
 The counter is discarded when the loop is complete, and the final state
-of the |for| loop returned.
+of the |for| loop returned. Here |while|, like |snd| and |(+)|,
+is a constant known to QDSL Feldspar, and so not enclosed in |$$| antiquotes.
 
 As an example, we can define Fibonacci using a |for| loop.
 \begin{code}
@@ -401,12 +411,11 @@ makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
 lenArr   ::  (Rep a) => Arr a -> Int
 ixArr    ::  (Rep a) => Arr a -> Int -> a
 \end{spec}
-\shayan{Not sure if we need ``Rep'' constraint on these.}
-
 The first populates a manifest array of the given
 size using the given indexing function, the second
 returns the length of the array, and the third returns
-the array element at the given index.
+the array element at the given index.  Array components
+must be representable.
 
 We define functions to convert between the two representations in the
 obvious way.
@@ -422,7 +431,6 @@ It is straightforward to define operations on vectors,
 including combining corresponding elements of two vectors,
 summing the elements of a vector, dot product of two vectors,
 and norm of a vector.
-
 %format sqrtFltHsk = sqrt
 \begin{code}
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
@@ -445,8 +453,11 @@ the first two, and the fourth is defined using the third.
 % that |(*)| be fully applied, so before normalisation
 % |(*)| is expanded to |\x y -> x*y|.
 
-\sam{We haven't yet mentioned anything about constants being fully
-  applied in the sharpened subformula property.}
+The vector representation makes it easy to define any
+function where each vector element is computed independently,
+such as vector concatenation, take, drop, and reverse,
+but is less well suited to functions with dependencies
+between elements, such as a running sum.
 
 Our final function cannot accept |Vec| as input, since
 the |Vec| type is not representable, but it can accept
@@ -463,7 +474,7 @@ float prog (float[] a) {
   return sqrt(x);
 }
 \end{lstlisting}
-\shayan{We currently get a different C code, and I sent you an email about it.}
+\todo{Shayan}{Please provide definitions needed for new code.}
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
@@ -475,7 +486,8 @@ the vector as an array with the following function.
 \begin{spec}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
 \end{spec}
-\shayan{see latex, at this point}
+\todo{Shayan}{This requires |memorise| to be a primitive operation
+  on arrays in QDSL and EDSL Feldspar. Has this been done?}
 % memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 % ***Shayan***: I took the body out, as it is not correct.
 %               In QDSLs, thanks to eta contractions,
@@ -497,7 +509,8 @@ with different trade-offs between recomputation and memory usage.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
-\josef{We never give the definition of blur. I think we should.}
+\\
+\todo{Josef}{Please provide definition of blur.}
 
 We have described the application of the subformula to array
 fusion as based on ``pull arrays'' \citep{svenningsson:combining},

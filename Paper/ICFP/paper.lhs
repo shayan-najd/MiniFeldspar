@@ -1,3 +1,23 @@
+% TODO
+
+% * Revise text to indicate QDSL and EDSL Feldspar generate identical C code
+
+% * Revise description of overloading resolution in Section 3
+
+% * Ensure memorise is described accurately
+
+% * Get Shayan to use sqrt and min.
+
+% * Possibly, introduce class Type and explain how it relates
+%   to Rep?  If done, may need to move some explanation of Arr
+%   from 2.6 to 2.1.
+
+% * Perhaps add something about Template Haskell
+%   and Meta Haskell as alternative approaches?
+
+% * Perhaps add something about closed vs.\ open quotation?
+
+
 \documentclass[authoryear,9pt]{sigplanconf}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -57,23 +77,28 @@
 %%% latex macros
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand{\phil}[1]
-  {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{Phil:} #1}}}}
-\newcommand{\sam}[1]
-  {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{Sam:} #1}}}}
-\newcommand{\shayan}[1]
-  {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{Shayan:} #1}}}}
-\newcommand{\josef}[1]
-  {{\noindent\small\color{red}
-   \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
-                    {\textbf{Josef:} #1}}}}
-%\newcommand{\todo}[1]{}
+% \newcommand{\todo}[2]
+%   {{\noindent\small\color{red}
+%    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+%                     {\textbf{TODO #1:} #2}}}}
+% \newcommand{\phil}[1]
+%   {{\noindent\small\color{red}
+%    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+%                     {\textbf{Phil:} #1}}}}
+% \newcommand{\sam}[1]
+%   {{\noindent\small\color{red}
+%    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+%                     {\textbf{Sam:} #1}}}}
+% \newcommand{\shayan}[1]
+%   {{\noindent\small\color{red}
+%    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+%                     {\textbf{Shayan:} #1}}}}
+% \newcommand{\josef}[1]
+%   {{\noindent\small\color{red}
+%    \framebox{\parbox{\dimexpr\linewidth-2\fboxsep-2\fboxrule}
+%                     {\textbf{Josef:} #1}}}}
+
+\newcommand{\todo}[1]{}
 %\newcommand{\sam}[1]{}
 %\newcommand{\shayan}[1]{}
 
@@ -352,21 +377,22 @@ EDSL such as Feldspar \citep{FELDSPAR} or Nikola \citep{NIKOLA},
 when embedded in Haskell, can exploit
 the overloading of Haskell so that arithmetic operations in both
 languages appear identical, but the same is not true of comparison or
-conditionals.\\
-\sam{Comparisons and conditionals can be overloaded with the
-RebindableSyntax language option.}
-\shayan{RebindableSyntax does not overload conditionals (nor
-comparisons), it overrides them. That is, conditional with
-RebindableSyntax can only have either a type proper for host language,
-or for an embedded language; once conditionals are overriden using
-RebindableSyntax to be used in an EDSL, they cannot be used in the
-host language (in the same module). Hence, one cannot use them to
-write the power function (if expression is used at both levels).  It
-is important that we mention this observation here. There are
-fundamental limitations to what overriding mechanism can achieve in
-Haskell (and even in LMS).}
-\shayan{comparison operator is just a name, which can be overriden
-using module system}
+conditionals.
+% \\
+% \sam{Comparisons and conditionals can be overloaded with the
+% RebindableSyntax language option.}
+% \shayan{RebindableSyntax does not overload conditionals (nor
+% comparisons), it overrides them. That is, conditional with
+% RebindableSyntax can only have either a type proper for host language,
+% or for an embedded language; once conditionals are overriden using
+% RebindableSyntax to be used in an EDSL, they cannot be used in the
+% host language (in the same module). Hence, one cannot use them to
+% write the power function (if expression is used at both levels).  It
+% is important that we mention this observation here. There are
+% fundamental limitations to what overriding mechanism can achieve in
+% Haskell (and even in LMS).}
+% \shayan{comparison operator is just a name, which can be overriden
+% using module system}
 In QDSL, the syntax of the host and embedded languages
 is identical. For instance, this paper presents a QDSL variant of
 Feldspar, again in Haskell, where arithmetic, comparison, and
@@ -392,11 +418,10 @@ in one particular direction or another. \\
 \end{quote}
 
 The subformula property depends on normalisation, but normalisation
-may lead to an exponential blowup in the size of the normalised
-code.
-\sam{The blow-up can be much worse than exponential...}
-In particular, this occurs when there are nested conditional or
-case statements. We explain how the QDSL technique can offer the user
+may lead to an exponential or worse blowup in the size of the normalised
+code when there are nested conditional or
+case statements. 
+We explain how the QDSL technique can offer the user
 control over where normalisation does and does not occur, while still
 maintaining the subformula property. Future work is required to
 consider the trade-offs between full normalisation as required for
@@ -411,9 +436,6 @@ satisfy this property, since the user is required to eyeball quoted
 code to ensure it mentions only permitted operators. If this is
 thought too onerous, it is possible to ensure the property with
 additional preprocessing.
-
-\sam{I find ``QDSL Feldspar'' a bit of a mouthful. Why not
-  ``QFeldspar'' (and ``QHaskell'' and ``EFeldspar'')?}
 
 \vspace{2ex}
 \begin{quote}
@@ -439,11 +461,6 @@ The contributions of this paper are:
   it to characterise when higher-order terms normalise to first-order
   form (Section~\ref{sec:subformula}).
 
-% \item To review the F\# implementation of language-integrated query
-% \citep{cheney:linq} and the Scala LMS implementations of query
-% and [TODO: what else?], and argue that these are instances of QDSL.
-% (Section~\ref{sec:other-qdsls}.)
-
 \item To compare the QDSL variant of Feldspar with the deep and
   shallow embedding approach used in the EDSL variant of Feldspar,
   and show they offer tradeoffs with regard to ease of use
@@ -453,44 +470,10 @@ The contributions of this paper are:
 Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
-\phil{Perhaps add something about Template Haskell
-and Meta Haskell as alternative approaches?}
+% \sam{``cabal install qfeldspar'' goes here?}
 
-\phil{Perhaps add something about closed vs.\ open quotation?}
-
-% \section{A QDSL variant of Feldspar}
-% \label{sec:qfeldspar}
-
-% \section{The subformula property}
-% \label{sec:subformula}
-
-% \section{Implementation}
-% \label{sec:implementation}
-
-% \section{Other examples of QDSLs}
-% \label{sec:other-qdsls}
-
-% \subsection{F\# P-LINQ}
-% \label{subsec:linq}
-
-% \subsection{Scala LMS}
-% \label{subsec:lms}
-
-% \section{A comparison of QDSL and EDSL}
-% \label{sec:qdsl-vs-edsl}
-
-% \section{Related work}
-% \label{sec:related}
-
-% \section{Conclusion}
-% \label{sec:conclusion}
-
-% \bibliographystyle{plainnat}
-% \bibliography{paper}
-
-% \end{document}
-
-\sam{``cabal install qfeldspar'' goes here?}
+\todo{Shayan}{Please write a short paragraph on how to access
+  all related software}
 
 \section{Feldspar as a QDSL}
 \label{sec:qfeldspar}
@@ -543,8 +526,8 @@ Moreover, overloaded arithmetic operations are treated as fully
 polymorphic operations, at first; their their type constraints are
 ignored. Just before normalisation, their inferred types are used to
 translate them to their corresponding monomorphic primitives.
-\shayan{I have added above two lines about how QFeldspar treats
-overloaded arithmetic operations.}
+% \shayan{I have added above two lines about how QFeldspar treats
+% overloaded arithmetic operations.}
 
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
@@ -574,27 +557,18 @@ supported by a simple form of observable
 sharing \citep{claessen1999observable, gill2009type}. QDSL does not
 require CSE, since the normalisation algorithm preserves sharing.
 
-One benchmark, FFT, exhausts memory without CSE. All benchmarks
+% One benchmark, FFT, exhausts memory without CSE.
+All benchmarks
 produce essentially the same C for both QDSL and EDSL, which run in
 essentially the same time.  The Haskell compile time for QDSL is about
-twice that for EDSL, but all other times are comparable.  The one
-exception is FFT, where Feldspar appears to introduce spurious
-conversions that increase the runtime.
+twice that for EDSL, but all other times are comparable.
+% The one
+% exception is FFT, where Feldspar appears to introduce spurious
+% conversions that increase the runtime.
 
-\phil{The first line of the above paragraph can be removed after
-we simplify the table to eliminate the column for EDSL Feldspar
-with CSE. The last line of the above paragraph can be removed
-after Shayan generates new numbers with the new simplifier,
-under which FFT is also comparable for both versions.}
-
-\phil{Shayan: Why is the Haskell compile time for QDSL twice as long?
+\todo{Shayan}{Why is the Haskell compile time for QDSL twice as long?
 If we expect it is an inefficient implementation of typed quotation,
 is there evidence to that effect?}
-
-\josef{I'm a little worried that Feldspar is looking worse than
-necessary in the FFT example. The right way to write FFT is by mixing
-pull- and push arrays and that definition will give good performance
-in Feldspar.}
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -618,22 +592,13 @@ As usual, terms are taken as
 equivalent up to renaming of bound variables. Write $\fv{M}$ for
 the set of free variables of $M$, and $\subst{N}{x}{M}$ for
 capture-avoiding substitution of $M$ for $x$ in $N$.
-%
-%% [SL: not relevant]
-%% Types correspond to propositions and terms to proofs in
-%% minimal propositional logic.
-%
-Let $V$, $W$ range over values, and $\nv$ range over
+Let $V$, $W$ range over values, and $P$ range over
 terms that are not values.
 
 Let $\Gamma$ range over type environments, which are sets of pairs
 of variables with types $x:A$. Write $\Gamma \vdash M:A$ to
 indicate that term $M$ has type $A$ under type environment
 $\Gamma$. Typing rules are standard.
-
-% The grammar of normal forms is given in Figure~\ref{fig:nf}. We reuse
-% $L,M,N$ to range over terms in normal form and $V,W$ to range over
-% values in normal form, and we let $Q$ range over neutral forms.
 
 Reduction rules for normalisation are presented in Figure~\ref{fig:norm}.
 The rules are confluent, so order of application is irrelevant to the
@@ -803,9 +768,6 @@ $\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
-\sam{Is it worth saying something here about in future generalising to
-  higher-order target languages?}
-
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
 %include Section5.lhs
@@ -834,9 +796,8 @@ including Feldspar \citep{FELDSPAR}, Obsidian
 
 \citet{odonnell:sharing} identified loss of sharing in the context of
 embedded circuit descriptions.  \citet{claessen1999observable} and
-\citet{gill2009type} propose solutions to this problem via extensions
-to Haskell that permit observable sharing.
-\shayan{Gill didn't propose extending Haskell; he provided a library}
+\citet{gill2009type} propose ways to support observable sharing in Haskell.
+% \shayan{Gill didn't propose extending Haskell; he provided a library}
 
 A proposition-as-types principle for quotation as a modal logic was
 proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
@@ -850,16 +811,15 @@ Modular Staging \citep{scalalms}.
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
 
-\sam{Mention the work on normalisation with effects: Cooper (DBLP
+\todo{Sam}{Mention the work on normalisation with effects: Cooper (DBLP
   2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
-  Wadler (PEPM 2014). PLW: Sam, please do.}
+  Wadler (PEPM 2014).}
 
-\sam{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
-  2014). PLW: Sam, please do.}
+\todo{Sam}{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
+  2014).}
 
-\sam{We should say a little more about what novel features LMS brings
-  to the table that are not available / harder to achieve in Haskell.
-  PLW: Sam, please do.}
+\todo{Sam}{We should say a little more about what novel features LMS brings
+  to the table that are not available / harder to achieve in Haskell.}
 
 
 \section{Conclusion}
@@ -889,28 +849,24 @@ As we noted in the introduction, rather than building a special-purpose tool for
 each QDSL, it should be possible to design a single tool for each host language.
 Our next step is to design a tool, Haskell QDSL, with the following features.
 \begin{itemize}
-\item Type inference for the terms returned from typed
+\item Perform type inference for the terms returned from typed
   quasi-quotations, restoring type information currently discarded by GHC.
-\item Based on the above, full support for type classes and overloading
-  within quasi-quotation.
-\item The user may choose either an ADT or GADT representation of the
+\item Based on the above, provide full support for type classes
+  and overloading within quasi-quotation.
+\item Permit the user to choose either an ADT or GADT representation of the
   term returned by typed quasi-quotation, whichever is more convenient.
-\item A normaliser to ensure the subformula property, which works with any
-  datatype declared in Haskell.
-\item The user may supply a type environment indicating which constants
+\item Apply a normaliser to ensure the subformula property,
+  which works with any datatype declared in Haskell.
+\item Allow the user to supply a type environment indicating which constants
   (or free variables) may appear in typed quasi-quotations.
 \end{itemize}
-
-\shayan{Some of the items are written as noun phrases and some as full
-sentences.}
-
 Such a tool could easily subsume the special-purpose translator from
 |Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
 and lift most of its restrictions. For instance,
 the current prototype is restricted to the |Maybe| monad, while the
 envisioned tool will work with any monad.
 
-\sam{Say something about adding support for observable sharing hacks?}
+% \sam{Say something about adding support for observable sharing hacks?}
 
 Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
 speaking prose his whole life. Similarly, many of us have used QDSLs for
@@ -920,16 +876,16 @@ by naming the concept and drawing attention to the central benefits of
 normalisation and the subformula propety, we may help the concept to
 flower further for years to come.
 
-\shayan{I have a feeling that stressing too much on "naming the
-concept" can backfire. It can make the work seem shallow. We realised
-the concept is useful, analysed what essentially makes it useful,
-generalised it, experimented with it, and now we share our results
-with other researchers. Indeed, we give a name to the specific set of
-already existing (and new) ideas we gather together. And indeed, names
-(i.e. identifying concepts) are powerful things (often
-underestimated). But stressing too much on naming, or putting together
-existing concepts, undermines our fine engineering and scientific
-study of the matter.}
+% \shayan{I have a feeling that stressing too much on "naming the
+% concept" can backfire. It can make the work seem shallow. We realised
+% the concept is useful, analysed what essentially makes it useful,
+% generalised it, experimented with it, and now we share our results
+% with other researchers. Indeed, we give a name to the specific set of
+% already existing (and new) ideas we gather together. And indeed, names
+% (i.e. identifying concepts) are powerful things (often
+% underestimated). But stressing too much on naming, or putting together
+% existing concepts, undermines our fine engineering and scientific
+% study of the matter.}
 
 \paragraph*{Acknowledgement}
 Najd is a recipient of the Google Europe Fellowship in Programming

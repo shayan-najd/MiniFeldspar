@@ -31,16 +31,14 @@ instance Num (Dp Float) where
 %format >>==  = "\bind"
 
 This section reviews the combination of deep and shallow embeddings
-required to implement Feldspar as an EDSL (EFeldspar), and considers
+required to implement Feldspar as an EDSL, and considers
 the trade-offs between the QDSL and EDSL approaches.  Much of this
 section reprises \citet{svenningsson:combining}.
 
-\josef{This is the first time we use the name "EFeldspar". I suppose it should be introduced earlier.}
-The top-level function of EFeldspar has the type:
+The top-level function of EDSL Feldspar has the type:
 \begin{spec}
 edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
 \end{spec}
-\josef{Should it be |edsl| rather than |qdsl| above?}
 Here |Dp a| is the deep representation of a term of type |a|.
 The deep representation is described in detail in Section~\ref{subsec:deep}
 below, and is chosen to be easy to translate to C.
@@ -91,8 +89,6 @@ Evaluating |power (-6)| yields the following:
 \end{spec}
 Applying common-subexpression elimination, or using a technique such
 as observable sharing, permits recovering the sharing structure.
-\shayan{Above does not read well. I think observable sharing is not a
-technique by itself}
 \[
 \begin{array}{c@@{~~}||@@{~~}l}
 |v| & |(u * 1)|  \\
@@ -122,12 +118,6 @@ may be considered as an unnecessary distraction or as drawing a useful
 distinction between generation-time and run-time.  If one takes the
 former view, the type-based approach to quotation found in C\# and
 Scala might be preferred.
-\shayan{That is, if the host language has proper overloading
-machinery.  For example, Haskell doesn't hence type-based approach is
-not possible sometimes. Moreover, we (at least I, Josef, and Dimitrios
-from MSR) conjecture there is a theoretical limit to what overloading
-can achieve, e.g. consider overloading the implicit fixpoint operator
-in a recursive definition.}
 
 \item QDSL may share the same representation for quoted terms across a
 range of applications; the quoted language is the host language, and
@@ -162,12 +152,6 @@ by applying a technique such as observable sharing
 subexpression elimination may discover common subexpressions that are
 distinct in QDSL; while EDSL with observable sharing yields
 results comparable to sharing-preserving QDSL.
-\shayan{I think observable sharing is not a technique by itself.
-I searched a bit, but could not find a proper phrase to replace it.}
-\shayan{EDSL that does intensional analysis, like LMS, may preserve
-sharing as we do. In fact, LMS has a layer transforming the input AST
-to A-normal form, corresponding to our let insertion. Alas, EFeldspar,
-and the combined technique loses sharing.}
 
 \item Once the deep embedding or the normalised quoted term is
 produced, generating the domain-specific code is similar for both
@@ -175,12 +159,7 @@ approaches.
 
 \end{itemize}
 
-\sam{A point not discussed here is code reuse between host and
-  embedded languages. Links allows exactly the same code to be written
-  once and used both in host and embedded code. QDSLs in Haskell do
-  not (currently). F\# supports an attribute which can be used to
-  reflect an arbitrary module as a quoted AST. What about other EDSL
-  approaches?}
+\todo{Sam}{Write a paragraph on reuse between Host and Quoted languages.}
 
 \subsection{A second example}
 \label{subsec:e-maybe}
@@ -267,28 +246,12 @@ from which the same C code is generated.
 % Here |L|,|M|,|N|,|P|,|Q| range over |Dp| terms, and
 % |M[L:=P]| stands for |M| with each occurence of |L| replaced by |P|.
 
-Hence, an advantage of the EDSL approach---that it generates
-terms essentially in normal form---turns out to be restricted
-to a limited set of types, including functions and products,
-but excluding sums.
-\shayan{There are multiple problems with above sentence:
-(a) There are EFeldspar terms with product type that are not
-    fully normalised when generated (e.g. refer to the complex
-    numbers example that I wrote).
-(b) Why "generating terms essentially in normal form" is attributed
-    to EDSLs? As far as I know, nowhere in the combining deep and
-    shallow embedding paper this was claimed.
-(c) How do we know that there are no counter-examples even for
-function types (i.e. generated terms of function type that are not in
-normal form)?
-
-I suggest removing "including functions and products,
-but excluding sums", and fixing the following correspondingly.}
-
-If one wishes to deal with sum types,
-separate normalisation is required. This is one reason
-why we do not consider normalisation as required by QDSL
-to be particularly onerous.
+Hence, an advantage of the EDSL approach---that it generates terms
+essentially in normal form---turns out to apply sometimes but not
+others. It appears to often work for functions and products, but to
+fail for sums.  In such situations, separate normalisation is
+required. This is one reason why we do not consider normalisation as
+required by QDSL to be particularly onerous.
 
 Here are points of comparison between the two approaches.
 \begin{itemize}
@@ -298,22 +261,15 @@ host language. The example here exploits Haskell |do| notation; the
 embedding of SQL in F\# by \citet{cheney:linq} expoits F\# sequence
 notation. For EDSL, exploiting |do| notation just requires
 instantiating |return| and |(>>=)| correctly. For QDSL, it is
-also necessary for the normaliser to recognise and expand
+also necessary for the translator to recognise and expand
 |do| notation and to substitute appropriate instances of
 |return| and |(>>=)|.
-\shayan{I don't see expansion as normaliser's job; overloading
-resolution happens in the translator. Though, I suppose it depends on
-what we mean by normaliser.}
 
 \item As this example shows, sometimes both QDSL and EDSL may require
 normalisation.  As mentioned previously, for QDSLs the cost of
 building a normaliser might be amortised across several applications.
 In constrast, each EDSL usually has a distinct deep representation and
 so requires a distinct normaliser.
-
-\shayan{We should mention that deep represenations can use
-compositional datatypes (e.g. Axelsson's Syntactic, or Scala's open
-datatypes), and reuse a single normaliser.}
 
 \end{itemize}
 
@@ -341,15 +297,14 @@ data Dp a where
   ArrIx     ::  Dp (Arr a) -> Dp Int -> Dp a
   Variable  ::  String -> Dp a
 \end{code}
-\shayan{One should add Rep constraint to the existential types. Types
-are required for compiling terms to C.}
+\todo{Shayan}{Add Rep to the above as required.}
 
 The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
 \citet{hoas}.
 
-\sam{Technically this isn't true HOAS because it allows exotic terms.}
+% \sam{Technically this isn't true HOAS because it allows exotic terms.}
 
 The deep embedding has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives, arrays,
@@ -472,10 +427,10 @@ a .<. b = Prim2 "(<)" (toDp a) (toDp b)
 Overloading cannot apply here, because Haskell requires
 |(==)| return a result of type |Bool|, while |(.==.)| returns
 a result of type |Dp Bool|, and similarly for |(.<.)|.
-\shayan{We need to mention the argument that overriding do actually
-apply. But, the problem with overriding is that once a syntactic
-entity is fixed to be used i one stage, it cannot be reused in other
-stage.}
+% \shayan{We need to mention the argument that overriding do actually
+% apply. But, the problem with overriding is that once a syntactic
+% entity is fixed to be used i one stage, it cannot be reused in other
+% stage.}
 
 
 \subsection{Embedding pairs}
@@ -556,8 +511,8 @@ is also zero.
 |undef| without changing the deep embedding, but here we have defined |undef|
 entirely as a shallow embedding.  (It appears they underestimated the
 power of their own technique!)
-\shayan{Though I heard you all say otherwise, but I still find above
-provocative (for the reader / reviewer).}
+% \shayan{Though I heard you all say otherwise, but I still find above
+% provocative (for the reader / reviewer).}
 
 \subsection{Embedding option}
 \label{subsec:opt}
@@ -614,8 +569,8 @@ been dubbed the constrained-monad problem
 \citep{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
 We solve it with a trick due to \citet{PerssonAS11}.
 
-\sam{I think Jeremy Yallop may have also covered this kind of issue
-  somewhere in his thesis.}
+% \sam{I think Jeremy Yallop may have also covered this kind of issue
+%   somewhere in his thesis.}
 
 We introduce a second continuation-passing style (CPS) type |Opt|,
 defined in terms of the representation type |Opt_R|.  It is
@@ -705,14 +660,8 @@ normVec     ::  (Syn a, Num a) => Vec a -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
 
-\shayan{Note that I had to hide the name "sqrt" (and "min") imported
-by Prelude, to avoid name clashes.}
-
-The vector representation makes it easy to define any functions when
-each vector element is computed independently, including |drop|,
-|take|, |reverse|, vector concatentation, and the like, but is less
-well suited to functions with dependencies between elements, such as
-computing a running sum.
+% \shayan{Note that I had to hide the name "sqrt" (and "min") imported
+% by Prelude, to avoid name clashes.}
 
 An important consequence of the style of definition we have adopted is
 that it provides lightweight fusion. The definition of |dotVec| would not produce
@@ -746,9 +695,7 @@ memorise (Vec n g)
   = Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
 \end{code}
 
-\shayan{I think in the presence of eta contractions, most uses of above
-reduces to identity. One should add a constructor to Dp to achieve
-memorisation. For now, you may just take out the body.}
+\todo{Shayan}{Need to revise code so that memorise is a primitive.}
 
 The above definition depends on common subexpression elimination
 to ensure |Arr n (toDp . g)| is computed once, rather than once
