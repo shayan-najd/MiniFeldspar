@@ -526,6 +526,23 @@ we support only limited overloading, and why we translate
 the |Maybe| monad as a special case, rather
 than supporting overloading for monad operations in general.
 
+Before compiling |Dp| terms to C code, the backend performs a series of
+optimisations, implemented as two separate phases of
+transformations over |Dp| terms. First, |Dp| terms are normalised
+using the exact replica of the rules used for normalising |Qt| terms
+(as described in Section~\ref{sec:qdsl-vs-edsl}). 
+Second, |Dp| terms are optimised using
+$\eta$ contraction for conditionals and arrays and
+linear inlining of let bindings:
+\[
+\begin{array}{rcl}
+          |if L then M else M| & \rewrite{} & M \\
+|makeArr (lenArr M) (ixArr M)| & \rewrite{} & M \\
+              |let x = M in N| & \rewrite{} & N[x:=M]
+\end{array}
+\]
+where in the final line |x| appears only once in |N|.
+
 %%  As we noted in the introduction, rather than build a special-purpose tool for
 %%  each QDSL, it should be possible to design a single tool for each host language.
 %%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,

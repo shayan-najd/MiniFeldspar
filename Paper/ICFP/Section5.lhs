@@ -5,7 +5,7 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FlexibleContexts #-}
-import Prelude hiding (sqrt,min)
+import Prelude hiding (min)
 import Data.Array
 type Arr a = Array Int a
 
@@ -14,9 +14,10 @@ min m n     =   (m .<. n) ? (m, n)
 
 instance Fractional (Dp Float) where
   a / b          =  Prim2 "(/)" a b
+  fromRational f  =  LitF (fromRational f)
 
-sqrt :: (Syn a, Num a) => a -> Dp Float
-sqrt e = Prim1 "Sqrt" (toDp e)
+instance Floating (Dp Float) where
+  sqrt e = Prim1 "Sqrt" (toDp e)
 
 instance Num (Dp Float) where
   a + b  =  Prim2 "(+)" a b
@@ -656,7 +657,7 @@ sumVec (Vec n g)
 dotVec      ::  (Syn a, Num a) => Vec a -> Vec a -> a
 dotVec u v  =   sumVec (zipVec (*) u v)
 
-normVec     ::  (Syn a, Num a) => Vec a -> Dp Float
+normVec     ::  Vec (Dp Float) -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
 
