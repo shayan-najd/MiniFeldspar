@@ -421,7 +421,7 @@ in one particular direction or another. \\
 The subformula property depends on normalisation, but normalisation
 may lead to an exponential or worse blowup in the size of the normalised
 code when there are nested conditional or
-case statements. 
+case statements.
 We explain how the QDSL technique can offer the user
 control over where normalisation does and does not occur, while still
 maintaining the subformula property. Future work is required to
@@ -529,6 +529,21 @@ ignored. Just before normalisation, their inferred types are used to
 translate them to their corresponding monomorphic primitives.
 % \shayan{I have added above two lines about how QFeldspar treats
 % overloaded arithmetic operations.}
+
+Before compiling |Dp| terms to C code, the backend performs a serrie of
+optimisations to ensure the produced C code is efficient enough for
+execution. The optimisations are implemented in two separate phases of
+transformations over |Dp| terms. Firstly, |Dp| terms are normalised
+using the exact replica of the rules used for normalising |Qt| terms
+(as described in Section~\ref{sec:qdsl-vs-edsl}). Then, in the second
+phase, |Dp| terms are optimised using three rewrite rules:
+(a) $\eta$ contraction for conditionals,
+      $$|if L then M else M| \rewrite{} M$$
+(b) $\eta$ contraction for arrays,
+      $$|makeArr (lenArr M) (ixArr M)| \rewrite{} M$$
+(c) linear inlining of let bindings,
+      $$|let x = M in N| \rewrite{} N[x:=M]$$
+where |x| appears only once in |N|.
 
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
