@@ -1,17 +1,38 @@
 % TODO
 
-% * Ensure memorise is described accurately
+% Delete C code for normVec.
 
-% * Delete or update C code for normVec.
+% Update description of Dp
 
-% * Possibly, introduce class Type and explain how it relates
-%   to Rep?  If done, may need to move some explanation of Arr
-%   from 2.6 to 2.1.
+% Ensure memorise is described accurately
 
-% * Perhaps add something about Template Haskell
-%   and Meta Haskell as alternative approaches?
+% Change `min` to `minim`.
 
-% * Perhaps add something about closed vs.\ open quotation?
+% Tiark: "EDSL requires some term forms, such as comparison and
+% conditionals, to differ between the host and embedded languages."
+% Cite Scala Virtualized, HOSC 2013
+
+% Tiark: "QDSL may share the same representation for quoted terms
+% across a range of applications. EDSL typically develops custom"
+% Cite Modular LMS, ECOOP 2013
+
+% Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing" 
+% Delete claim.
+
+% Tiark: normalisation may be achieved via smart constructors
+
+
+
+% Things to possibly do 
+
+% Possibly, introduce class Type and explain how it relates
+% to Rep?  If done, may need to move some explanation of Arr
+% from 2.6 to 2.1.
+
+% Perhaps add something about Template Haskell
+% and Meta Haskell as alternative approaches?
+
+% Perhaps add something about closed vs.\ open quotation?
 
 
 \documentclass[authoryear,9pt]{sigplanconf}
@@ -561,10 +582,6 @@ QDSL compile times are slightly greater than EDSL,
 and QDSL run times range from twice to ten times that of EDSL,
 the increase being due to normalisation time.
 Our normaliser was not designed to be particularly efficient.
-
-\todo{Shayan}{Why is the Haskell compile time for QDSL twice as long?
-If we expect it is an inefficient implementation of typed quotation,
-is there evidence to that effect?}
 
 \section{The subformula property}
 \label{sec:subformula}
