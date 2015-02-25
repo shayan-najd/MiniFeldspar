@@ -240,7 +240,8 @@ Phase 1 (let-insertion)
   \begin{array}{lcl}
    F &\mathbin{::=}&
        c \app \overline{V} \app \hole \app \overline{N} \mid
-       \expapp{L}{\hole}                                \mid
+       \expapp{\hole}{M}                                \mid
+       \expapp{V}{\hole}                                \mid
        \exppair{\hole}{M}                               \mid
        \exppair{V}{\hole}                               \mid
        \expfst{\hole}                                   \mid
@@ -265,20 +266,37 @@ Phase 1 (let-insertion)
 Phase 2 (symbolic evaluation)
 \[
 G \mathbin{::=}
-    \expapp{\hole}{V} \mid \explet{x}{\hole}{N}
+    %\expapp{\hole}{V} \mid
+    \explet{x}{\hole}{N}
 \]
 \[
 \begin{array}{lllll}
+%% SL: given that G now only has one case we could use the
+%% explicit versions of the $\kappa$-rules, but actually I think
+%% this version is harder to read.
+%%
+%% (\kappa.{\mathit{let}})
+%% & \explet{y}{\explet{x}{L}{M}}{N}
+%% & \rewrite{2}
+%% & \explet{x}{L}{\explet{y}{M}{N}},
+%% & x \notin \fv{M} \\
+%%
+%% (\kappa.{\mathit{case}})
+%% & \explet{z}{\expcase{L}{x}{M}{y}{M'}}{N}
+%% & \rewrite{2}
+%% & \expcase{L}{x}{\explet{z}{M}{N}}{y}{\explet{z}{M'}{N}},
+%% & x,y \notin \fv{N} \\
+
 (\kappa.{\mathit{let}})
-& G[\explet{x}{P}{N}]
+& G[\explet{x}{M}{N}]
 & \rewrite{2}
-& \explet{x}{P}{G[N]},
+& \explet{x}{M}{G[N]},
 & x \notin \fv{G} \\
 
 (\kappa.{\mathit{case}})
-& G[\expcase{V}{x}{M}{y}{N}]
+& G[\expcase{L}{x}{M}{y}{N}]
 & \rewrite{2}
-& \expcase{V}{x}{G[M]}{y}{G[N]},
+& \expcase{L}{x}{G[M]}{y}{G[N]},
 & x,y \notin \fv{G} \\
 
 % (\kappa.{\mathit{case}})

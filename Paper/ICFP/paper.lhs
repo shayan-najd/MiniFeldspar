@@ -638,8 +638,10 @@ and finally for Phase~3.  Phase~1 performs let-insertion, naming
 subterms that are not values, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
 in Moggi's metalanguage for monads \citep{Moggi-1991}.
-The rules are designed to leave applications such as |f V W|
-unchanged, rather than transform them to |let g = f V in g W|.
+%% SL: no longer true.
+%%
+%% The rules are designed to leave applications such as |f V W|
+%% unchanged, rather than transform them to |let g = f V in g W|.
 Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
 introduction (construction) is immediately followed by an elimination
 (deconstruction), and $\kappa$ rules push eliminators closer to
