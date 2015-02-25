@@ -330,6 +330,9 @@ data Dp a where
   ArrLen    ::  Rep a => Dp (Arr a) -> Dp Int
   ArrIx     ::  Dp (Arr a) -> Dp Int -> Dp a
   Variable  ::  String -> Dp a
+  Let       ::  Rep a => Dp a -> (Dp a -> Dp b) -> Dp b
+  Tag       ::  String -> Dp a -> Dp a
+  Save      ::  Dp a -> Dp a
 \end{code}
 \todo{Shayan}{Add Rep to the above as required.}
 
@@ -725,11 +728,11 @@ As with QDSL, there are some situations where fusion is not beneficial.
 We may materialise a vector as an array with the following function.
 \begin{code}
 memorise :: Syn a => Vec a -> Vec a
-memorise (Vec n g)
-  = Vec n (\i -> fromDp (ArrIx (Arr n (toDp . g)) i))
+memorise = fromDp . Save . toDp
 \end{code}
 
-\todo{Shayan}{Need to revise code so that memorise is a primitive.}
+\todo{Phil}{Re: Shayan:Need to revise code so that memorise is a primitive.\\
+            I did so. But descriptions should get updated.}
 
 The above definition depends on common subexpression elimination
 to ensure |Arr n (toDp . g)| is computed once, rather than once
