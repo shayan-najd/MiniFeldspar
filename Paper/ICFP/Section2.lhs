@@ -478,7 +478,6 @@ float prog (float[] a) {
   return sqrt(x);
 }
 \end{lstlisting}
-\todo{Shayan}{Please provide definitions needed for new code.}
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
@@ -490,8 +489,6 @@ the vector as an array with the following function.
 \begin{spec}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
 \end{spec}
-\todo{Shayan}{This requires |memorise| to be a primitive operation
-  on arrays in QDSL and EDSL Feldspar. Has this been done?}
 % memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 % ***Shayan***: I took the body out, as it is not correct.
 %               In QDSLs, thanks to eta contractions,
