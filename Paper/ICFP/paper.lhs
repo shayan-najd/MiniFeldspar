@@ -2,8 +2,6 @@
 
 % * Ensure memorise is described accurately
 
-% * Change `min` to `minim`.
-
 % * Delete or update C code for normVec.
 
 % * Possibly, introduce class Type and explain how it relates
@@ -429,7 +427,7 @@ in many DSLs; possibly a combination of both will prove fruitful.
 Some researchers contend an essential property of a DSL
 which generates target code is that every type-correct term
 should successfully generate code in the target language. EDSL Feldspar
-satisfies this property; but neither 
+satisfies this property; but neither
 P-LINQ of \citet{cheney:linq} nor QDSL Feldspar
 satisfy this property, since the user is required to eyeball quoted
 code to ensure it mentions only permitted operators. If this is
@@ -528,7 +526,7 @@ Before compiling |Dp| terms to C code, the backend performs a series of
 optimisations, implemented as two separate phases of
 transformations over |Dp| terms. First, |Dp| terms are normalised
 using the exact replica of the rules used for normalising |Qt| terms
-(as described in Section~\ref{sec:qdsl-vs-edsl}). 
+(as described in Section~\ref{sec:qdsl-vs-edsl}).
 Second, |Dp| terms are optimised using
 $\eta$ contraction for conditionals and arrays and
 linear inlining of let bindings:

@@ -10,12 +10,12 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGe TypeSynonymInstances #-}
 
-import Prelude hiding (Int,min)
+import Prelude hiding (Int)
 import qualified Prelude as P
 
 import Data.Array(Array)
 
-import QFeldspar.QDSL hiding (div,while,for,qdsl)
+import QFeldspar.QDSL hiding (div,while,for,qdsl,min)
 import qualified QFeldspar.QDSL as QDSL
 
 type C = String
@@ -24,6 +24,8 @@ class (Type a , FO a) => Rep a
 
 test :: Bool
 test = ex1 && ex2 && ex3 && ex4
+
+minim = QDSL.min
 
 unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
@@ -437,7 +439,7 @@ and norm of a vector.
 \begin{code}
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
-                        Vec ($$min m n) (\i -> f (g i) (h i)) ||]
+                        Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
 
 sumVec   ::  (Rep a, Num a) => Qt (Vec a -> a)
 sumVec   =   [|| \(Vec n g) -> $$for n 0 (\i x -> x + g i) ||]

@@ -9,7 +9,7 @@ import Prelude
 import Data.Array
 type Arr a = Array Int a
 
-minim         ::  Ord a => Dp a ->  Dp a -> Dp a
+minim         ::  (Ord a , Rep a) => Dp a ->  Dp a -> Dp a
 minim m n     =   (m .<. n) ? (m, n)
 
 instance Fractional (Dp Float) where
@@ -24,6 +24,38 @@ instance Num (Dp Float) where
   a - b  =  Prim2 "(-)" a b
   a * b  =  Prim2 "(*)" a b
   fromInteger a = LitF (fromInteger a)
+
+data Typ a where
+  Int :: Typ Int
+  Flt :: Typ Float
+  Bol :: Typ Bool
+  Tpl :: Typ a -> Typ b -> Typ (a , b)
+  Ary :: Typ a -> Typ (Arr a)
+
+class Type a where
+  typ :: Typ a
+
+instance Type Int where
+  typ = Int
+
+instance Type Float where
+  typ = Flt
+
+instance Type Bool where
+  typ = Bol
+
+instance (Type a , Type b) => Type (a , b) where
+  typ = Tpl typ typ
+
+instance Type a => Type (Arr a) where
+  typ = Ary typ
+
+class (Type a) => Rep a where
+instance Rep Int
+instance Rep Float
+instance Rep Bool
+instance (Rep a , Rep b) => Rep (a , b)
+instance Rep a => Rep (Arr a)
 
 \end{code}
 %endif
@@ -287,14 +319,15 @@ data Dp a where
   LitF	    ::  Float -> Dp Float
   If	    ::  Dp Bool -> Dp a -> Dp a -> Dp a
   While	    ::  (Dp a -> Dp Bool) ->
-                  (Dp a -> Dp a) -> Dp a -> Dp a
+                (Dp a -> Dp a) -> Dp a -> Dp a
   Pair	    ::  Dp a -> Dp b -> Dp (a,b)
-  Fst	    ::  Dp (a,b) -> Dp a
-  Snd       ::  Dp (a,b) -> Dp b
-  Prim1	    ::  String -> Dp a -> Dp b
-  Prim2     ::  String -> Dp a -> Dp b -> Dp c
+  Fst	    ::  Rep b => Dp (a,b) -> Dp a
+  Snd       ::  Rep a => Dp (a,b) -> Dp b
+  Prim1	    ::  Rep a => String -> Dp a -> Dp b
+  Prim2     ::  (Rep a , Rep b) =>
+                String -> Dp a -> Dp b -> Dp c
   Arr       ::  Dp Int -> (Dp Int -> Dp a) -> Dp (Arr a)
-  ArrLen    ::  Dp (Arr a) -> Dp Int
+  ArrLen    ::  Rep a => Dp (Arr a) -> Dp Int
   ArrIx     ::  Dp (Arr a) -> Dp Int -> Dp a
   Variable  ::  String -> Dp a
 \end{code}
@@ -365,7 +398,7 @@ Construct |Variable| represents a variable.
 We introduce a type class |Syn| that allows us to convert
 shallow embeddings to and from deep embeddings.
 \begin{code}
-class Syn a where
+class Rep (Internal a) => Syn a where
   type Internal a
   toDp    ::  a -> Dp (Internal a)
   fromDp  ::  Dp (Internal a) -> a
@@ -376,7 +409,7 @@ deep embedding |Dp (Internal a)|.
 
 The first instance of |Syn| is |Dp| itself, and is straightforward.
 \begin{code}
-instance Syn (Dp a) where
+instance Rep a => Syn (Dp a) where
   type Internal (Dp a) = a
   toDp    =  id
   fromDp  =  id
