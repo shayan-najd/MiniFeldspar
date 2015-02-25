@@ -2,6 +2,7 @@
 @string{cpp="Certified Programs and Proofs (CPP)"}
 @string{csl="Computer Science Logic (CSL)"}
 @string{dls="Dynamic Languages Symposium (DLS)"}
+@string{dbpl="Database Programming Languages (DBPL)"}
 @string{ecoop="European Conference on Object-Oriented Programming (ECOOP)"}
 @string{esop="European Symposium on Programming (ESOP)"}
 @string{eurosys="European Conference on Computer Systems (EuroSys)"}
@@ -18,6 +19,7 @@
 @string{mfcs="Mathematical Foundations of Computer Science (MFCS)"}                  
 @string{oopsla="Object-Oriented Programming: Systems, Languages, and Applications (OOPSLA)"}
 @string{parle="Parallel Architectures and Languages Europe (PARLE)"}
+@string{pepm="Partial Evaluation meets Program Manipulation (PEPM)"}
 @string{pldi="Programming Language Design and Implementation (PLDI)"}
 @string{plpv="Programming Languages meets Program Verification (PLPV)"}
 @string{pods="Principles of Database Systems (PODS)"}
@@ -46,7 +48,7 @@
 
 @inproceedings{a-normal-form,
   title={The essence of compiling with continuations},
-  author={Cormac Flanagan and Amr Sabryand Bruce F Duba and Matthias Felleisen},
+  author={Cormac Flanagan and Amr Sabry and Bruce F Duba and Matthias Felleisen},
   booktitle=pldi,
   pages={237--247},
   year={1993},
@@ -380,8 +382,8 @@ year={2010},
   number    = {3},
   pages     = {495--505},
   year      = {1996},
-  url       = {http://dx.doi.org/10.1006/jcss.1996.0037},
-  doi       = {10.1006/jcss.1996.0037},
+  OPTurl       = {http://dx.doi.org/10.1006/jcss.1996.0037},
+  OPTdoi       = {10.1006/jcss.1996.0037},
   timestamp = {Sat, 29 Dec 4441584 03:05:52 +},
   biburl    = {http://dblp.uni-trier.de/rec/bib/journals/jcss/Wong96},
   bibsource = {dblp computer science bibliography, http://dblp.org}
@@ -479,4 +481,130 @@ year={2010},
   author={Rompf, Tiark},
   year={2012},
   school={EPFL}
+}
+
+
+% language integrated query through normalisations and effects
+@inproceedings{LindleyC12,
+  author    = {Sam Lindley and
+               James Cheney},
+  title     = {Row-based effect types for database integration},
+  booktitle = tldi,
+  OPTpages     = {91--102},
+  year      = {2012},
+  crossref  = {DBLP:conf/tldi/2012},
+  OPTurl       = {http://doi.acm.org/10.1145/2103786.2103798},
+  OPTdoi       = {10.1145/2103786.2103798},
+  timestamp = {Fri, 18 May 2012 21:47:05 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/tldi/LindleyC12},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@proceedings{DBLP:conf/tldi/2012,
+  editor    = {Benjamin C. Pierce},
+  title     = {tldi},
+  publisher = {{ACM}},
+  year      = {2012},
+  OPTurl       = {http://dl.acm.org/citation.cfm?id=2103786},
+  OPTisbn      = {978-1-4503-1120-5},
+  timestamp = {Sat, 23 Dec 4427245 01:02:08 +Seventh},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/tldi/2012},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+
+@inproceedings{CheneyLRW14,
+  author    = {James Cheney and
+               Sam Lindley and
+               Gabriel Radanne and
+               Philip Wadler},
+  title     = {Effective quotation: relating approaches to language-integrated query},
+  booktitle = pepm,
+  OPTpages     = {15--26},
+  year      = {2014},
+  crossref  = {DBLP:conf/pepm/2014},
+  OPTurl       = {http://doi.acm.org/10.1145/2543728.2543738},
+  OPTdoi       = {10.1145/2543728.2543738},
+  timestamp = {Thu, 09 Jan 2014 10:44:12 +0100},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/pepm/CheneyLRW14},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@proceedings{DBLP:conf/pepm/2014,
+  editor    = {Wei{-}Ngan Chin and
+               Jurriaan Hage},
+  title     = {Proceedings of the {ACM} {SIGPLAN} 2014 workshop on Partial evaluation
+               and program manipulation, {PEPM} 2014, January 20-21, 2014, San Diego,
+               California, {USA}},
+  publisher = {{ACM}},
+  year      = {2014},
+  OPTurl       = {http://dl.acm.org/citation.cfm?id=2543728},
+  OPTisbn      = {978-1-4503-2619-3},
+  timestamp = {Mon, 17 Dec 4447235 19:37:52 +},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/pepm/2014},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+
+
+@inproceedings{CheneyLW14,
+  author    = {James Cheney and
+               Sam Lindley and
+               Philip Wadler},
+  title     = {Query shredding: efficient relational evaluation of queries over nested
+               multisets},
+  booktitle = {SIGMOD},
+  OPTpages     = {1027--1038},
+  year      = {2014},
+  crossref  = {DBLP:conf/sigmod/2014},
+  OPTurl       = {http://doi.acm.org/10.1145/2588555.2612186},
+  OPTdoi       = {10.1145/2588555.2612186},
+  timestamp = {Sun, 22 Jun 2014 11:31:11 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/sigmod/CheneyLW14},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@proceedings{DBLP:conf/sigmod/2014,
+  editor    = {Curtis E. Dyreson and
+               Feifei Li and
+               M. Tamer {\"{O}}zsu},
+  title     = {International Conference on Management of Data, {SIGMOD} 2014, Snowbird,
+               UT, USA, June 22-27, 2014},
+  publisher = {{ACM}},
+  year      = {2014},
+  OPTurl       = {http://dl.acm.org/citation.cfm?id=2588555},
+  OPTisbn      = {978-1-4503-2376-5},
+  timestamp = {Mon, 07 Dec 4429125 03:59:12 +},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/sigmod/2014},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@inproceedings{Cooper09,
+  author    = {Ezra Cooper},
+  title     = {The Script-Writer's Dream: How to Write Great {SQL} in Your Own Language,
+               and Be Sure It Will Succeed},
+  booktitle = dbpl,
+  pages     = {36--51},
+  year      = {2009},
+  crossref  = {DBLP:conf/dbpl/2009},
+  OPTurl       = {http://dx.doi.org/10.1007/978-3-642-03793-1_3},
+  OPTdoi       = {10.1007/978-3-642-03793-1_3},
+  timestamp = {Thu, 20 Aug 2009 15:24:00 +0200},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/dbpl/Cooper09},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
+}
+
+@proceedings{DBLP:conf/dbpl/2009,
+  editor    = {Philippa Gardner and
+               Floris Geerts},
+  title     = {Database Programming Languages - {DBPL} 2009, 12th International Symposium,
+               Lyon, France, August 24, 2009. Proceedings},
+  series    = {Lecture Notes in Computer Science},
+  volume    = {5708},
+  publisher = {Springer},
+  year      = {2009},
+  OPTisbn      = {978-3-642-03792-4},
+  timestamp = {Tue, 05 Apr 4449138 15:30:40 +nce},
+  biburl    = {http://dblp.uni-trier.de/rec/bib/conf/dbpl/2009},
+  bibsource = {dblp computer science bibliography, http://dblp.org}
 }

@@ -825,16 +825,30 @@ C\# and F\# versions of LINQ under .NET
 Modular Staging \citep{scalalms}.
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
+%
+This result builds on a line of work on language integrated query that
+combines normalisation with an effect type
+system~\citep{Cooper09,LindleyC12}.
+%
+\citet{CheneyLRW14} bridge the gap between the effect-based approach
+and QDSLs.
+%
+\citet{CheneyLW14} extend the normalisation approach to account for
+nested results.
 
-\todo{Sam}{Mention the work on normalisation with effects: Cooper (DBLP
-  2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
-  Wadler (PEPM 2014).}
+%% SL: DONE
+%%
+%% \todo{Sam}{Mention the work on normalisation with effects: Cooper (DBLP
+%%   2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
+%%   Wadler (PEPM 2014).}
+%%
+%% \todo{Sam}{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
+%%   2014).}
 
-\todo{Sam}{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
-  2014).}
-
-\todo{Sam}{We should say a little more about what novel features LMS brings
-  to the table that are not available / harder to achieve in Haskell.}
+%% SL: covered by Phil's TODOs based on Tiark's feedback
+%%
+%% \todo{Sam}{We should say a little more about what novel features LMS brings
+%%   to the table that are not available / harder to achieve in Haskell.}
 
 
 \section{Conclusion}
