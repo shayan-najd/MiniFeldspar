@@ -486,9 +486,10 @@ situations where fusion is not beneficial, notably when an
 intermediate vector is accessed many times, in which case fusion will
 cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
-\begin{spec}
+\begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-\end{spec}
+memorise = [|| \ v -> $$toVec (mem ($$fromVec v)) ||]
+\end{code}
 % memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
 % ***Shayan***: I took the body out, as it is not correct.
 %               In QDSLs, thanks to eta contractions,
