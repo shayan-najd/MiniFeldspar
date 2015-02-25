@@ -1,12 +1,10 @@
 % TODO
 
-% * Revise text to indicate QDSL and EDSL Feldspar generate identical C code
-
-% * Revise description of overloading resolution in Section 3
-
 % * Ensure memorise is described accurately
 
-% * Get Shayan to use sqrt and min.
+% * Change `min` to `minim`.
+
+% * Delete or update C code for normVec.
 
 % * Possibly, introduce class Type and explain how it relates
 %   to Rep?  If done, may need to move some explanation of Arr
