@@ -16,14 +16,14 @@
 % across a range of applications. EDSL typically develops custom"
 % Cite Modular LMS, ECOOP 2013
 
-% Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing" 
+% Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing"
 % Delete claim.
 
 % Tiark: normalisation may be achieved via smart constructors
 
 
 
-% Things to possibly do 
+% Things to possibly do
 
 % Possibly, introduce class Type and explain how it relates
 % to Rep?  If done, may need to move some explanation of Arr
@@ -488,6 +488,11 @@ Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
 % \sam{``cabal install qfeldspar'' goes here?}
+
+The repository containing the related source code is accessible at
+Github: \url{https://github.com/shayan-najd/QFeldspar}. It includes
+the QDSL variant of Feldspar, the EDSL variant of Feldspar, benchmark
+programs, and the material required for benchmarking.
 
 \todo{Shayan}{Please write a short paragraph on how to access
   all related software}
