@@ -16,14 +16,14 @@
 % across a range of applications. EDSL typically develops custom"
 % Cite Modular LMS, ECOOP 2013
 
-% Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing" 
+% Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing"
 % Delete claim.
 
 % Tiark: normalisation may be achieved via smart constructors
 
 
 
-% Things to possibly do 
+% Things to possibly do
 
 % Possibly, introduce class Type and explain how it relates
 % to Rep?  If done, may need to move some explanation of Arr
@@ -495,6 +495,11 @@ Section~\ref{sec:conclusion} concludes.
 
 % \sam{``cabal install qfeldspar'' goes here?}
 
+The repository containing the related source code is accessible at
+Github: \url{https://github.com/shayan-najd/QFeldspar}. It includes
+the QDSL variant of Feldspar, the EDSL variant of Feldspar, benchmark
+programs, and the material required for benchmarking.
+
 \todo{Shayan}{Please write a short paragraph on how to access
   all related software}
 
@@ -549,22 +554,27 @@ we support only limited overloading, and why we translate
 the |Maybe| monad as a special case, rather
 than supporting overloading for monad operations in general.
 
-Before compiling |Dp| terms to C code, the backend performs a series of
-optimisations, implemented as two separate phases of
-transformations over |Dp| terms. First, |Dp| terms are normalised
-using the exact replica of the rules used for normalising |Qt| terms
-(as described in Section~\ref{sec:qdsl-vs-edsl}).
-Second, |Dp| terms are optimised using
-$\eta$ contraction for conditionals and arrays and
-linear inlining of let bindings:
+Before compiling |Dp| terms to C code, the backend performs a series
+of optimisations, implemented as three separate phases of
+transformations over |Dp| terms. First, the backend performs common
+subexpression elimination transformation (CSE). The CSE algorithm
+identifies the common subexpressions based on their unique annotations
+(provided by observable sharing) and eliminates them by using let
+bindings. Second, |Dp| terms are normalised using the exact replica of
+the rules used for normalising |Qt| terms (as described in
+Section~\ref{sec:qdsl-vs-edsl}).
+Last, |Dp| terms are optimised using $\eta$ contraction for
+conditionals and arrays
 \[
 \begin{array}{rcl}
           |if L then M else M| & \rewrite{} & M \\
-|makeArr (lenArr M) (ixArr M)| & \rewrite{} & M \\
-              |let x = M in N| & \rewrite{} & N[x:=M]
+|makeArr (lenArr M) (ixArr M)| & \rewrite{} & M
 \end{array}
 \]
-where in the final line |x| appears only once in |N|.
+in addition to a restricted form of linear inlining of let bindings
+that preserves the order of evaluation.
+
+%% shayan: I have not included any examples.
 
 %%  As we noted in the introduction, rather than build a special-purpose tool for
 %%  each QDSL, it should be possible to design a single tool for each host language.
