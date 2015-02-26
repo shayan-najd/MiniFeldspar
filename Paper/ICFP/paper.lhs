@@ -1,29 +1,40 @@
-% TODO
+% Phil TODO
 
-% Delete C code for normVec.
+% Review Sam's additions to related work
 
-% Update description of Dp
+% Tiark: leave open the question of the extent to which LMS partakes
+% of QDSL and deep-and-shallow techniques. [Done]
 
-% Ensure memorise is described accurately
-
-% Change `min` to `minim`.
+% Tiark: Add example after rank proposition. [Done]
 
 % Tiark: "EDSL requires some term forms, such as comparison and
 % conditionals, to differ between the host and embedded languages."
-% Cite Scala Virtualized, HOSC 2013
+% Cite Scala Virtualized, HOSC 2013. [Done]
 
 % Tiark: "QDSL may share the same representation for quoted terms
 % across a range of applications. EDSL typically develops custom"
-% Cite Modular LMS, ECOOP 2013
+% Cite Modular LMS, ECOOP 2013 [Done]
 
 % Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing"
-% Delete claim.
+% Delete claim. [Done]
 
-% Tiark: normalisation may be achieved via smart constructors
+% Tiark: normalisation may be achieved via smart constructors. [Done]
 
+% Change idArr to save. [Done]
+
+% Shayan: Add to Section 3:
+% The polymorphic primitives are the following:
+%  Functions: while, fst, snd, mem, arr, arrLen, arrIx, cmx, (*), (+)
+%  Constructors: True,False, Just, Nothing,Vec, ((,))
+%  Numeric constants
+%  Expanded inline: return, (>>=), maybe, (.).
+% awaiting confirmation from Shayan on (-), (/), unary -.
 
 
 % Things to possibly do
+
+% Tiark: Rewrite abstract and introduction to stress role of constants
+% in the sharpened subformula property.
 
 % Possibly, introduce class Type and explain how it relates
 % to Rep?  If done, may need to move some explanation of Arr
@@ -53,11 +64,6 @@
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
-%format Opt_R = Opt'
-%format some_R = some'
-%format none_R = none'
-%format opt_R = opt'
-%format option_R = option'
 %format ^ = " "
 %format ... = "\cdots"
 %format s_0
@@ -125,14 +131,6 @@
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}[theorem]{Proposition}
-
-\makeatletter
-\renewcommand\bibsection%
-{
-  \section{\refname
-    \@@mkboth{\MakeUppercase{\refname}}{\MakeUppercase{\refname}}}
-}
-\makeatother
 
 \newcommand{\flushr}{{}\mbox{~}\hfill}%{\flushright\vspace{-2ex}}
 
@@ -231,6 +229,7 @@ domain-specific language, DSL, EDSL, QDSL,
 embedded language,
 quotation, normalisation, subformula property
 
+
 \section{Introduction}
 \label{sec:introduction}
 
@@ -280,31 +279,25 @@ comparable.  We compare the QDSL and EDSL variants of Feldspar, and
 assess the tradeoffs between the two approaches.
 
 \citet{Davies-Pfenning-1996,Davies-Pfenning-2001} also suggest
-quotation as a foundation for staged computation, and note
-a propositions-as-types connection between quotation and
-a modal logic; our type |Qt a| corresponds to their
-type $\bigcirc a$.
-% \shayan{Shouldn't this be box type rather than circle?
-% PLW: Circle is correct. You should check the original
-% paper before raising a query of this kind. }
-They also mention in passing the utility of
-normalising quoted terms, although they do not mention the
-subformula property.
+quotation as a foundation for staged computation, and note a
+propositions-as-types connection between quotation and a modal logic;
+our type |Qt a| corresponds to their type $\bigcirc a$.  They also
+mention in passing the utility of normalising quoted terms, although
+they do not mention the subformula property.
 
 The .NET Language-Integrated Query (LINQ) framework as used in C\# and
 F\# \citep{csharplinq,fsharplinq}, and the Lightweight Modular Staging
-(LMS) framework as used in Scala \citep{scalalms}, exhibit
-considerable overlap with the techniques described here.  Notably,
-they use quotation to represent staged DSL programs, and they make use
-to a greater or lesser extent of normalisation.  In F\# LINQ quotation
-is indicated in the normal way (by writing quoted programs inside
-special symbols), while in C\# LINQ and Scala LMS quotation is
-indicated by type inference (quoted terms are given a special type).
+(LMS) framework as used in Scala \citep{scalalms}, exhibit overlap
+with the techniques described here.  Notably, they use quotation to
+represent staged DSL programs, and they make use to a greater or
+lesser extent of normalisation.  In F\# LINQ quotation is indicated in
+the normal way (by writing quoted programs inside special symbols),
+while in C\# LINQ and Scala LMS quotation is indicated by type
+inference (quoted terms are given a special type).
 
-In short, some researchers and developers are already exploiting this
-technique. We propose QDSL as a name to capture the commonalities
-among these approaches, and we observe the utility of the subformula
-property in this context.
+% We propose QDSL as a name to capture the commonalities
+% among these approaches, and we observe the utility of the subformula
+% property in this context.
 
 \vspace{2ex}
 \begin{quote}
@@ -399,7 +392,7 @@ In theory, an EDSL should also steal the syntax of its host language,
 but in practice the theft is often only partial.  For instance, an
 EDSL such as Feldspar \citep{FELDSPAR} or Nikola \citep{NIKOLA},
 when embedded in Haskell, can exploit
-the overloading of Haskell so that arithmetic operations in both
+overloading so that arithmetic operations in both
 languages appear identical, but the same is not true of comparison or
 conditionals.
 % \\
@@ -493,23 +486,17 @@ The contributions of this paper are:
 Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
-% \sam{``cabal install qfeldspar'' goes here?}
+Our QDSL and EDSL variants of Feldspar and benchmarks are
+available on Gitub\footnote{\url{https://github.com/shayan-najd/QFeldspar}}.
 
-The repository containing the related source code is accessible at
-Github: \url{https://github.com/shayan-najd/QFeldspar}. It includes
-the QDSL variant of Feldspar, the EDSL variant of Feldspar, benchmark
-programs, and the material required for benchmarking.
-
-\todo{Shayan}{Please write a short paragraph on how to access
-  all related software}
 
 \section{Feldspar as a QDSL}
 \label{sec:qfeldspar}
 %include Section2.lhs
 
+
 \section{Implementation}
 \label{sec:implementation}
-\input{table}
 
 The original EDSL~Feldspar generates values of a GADT
 (called |Dp a| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
@@ -541,63 +528,54 @@ The transformer from |Qt| to |Dp| performs the following steps.
 
 An unfortunate feature of typed quasiquotation in GHC is that the
 implementation discards all type information when creating the
-representation of a term.  Type |Qt a| is equivalent to |TH.Q (TH.TExp a)|,
-where |TH| denotes the library for Template Haskell, |TH.Q| is
-the quotation monad of Template Haskell (used to look up identifiers
-and generate fresh names), and |TH.TExp a| is the parse tree for a
-quoted expression returning a value of type |a|. Type |TH.TExp a| is
-just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
-in Template Haskell, where |a| is a phantom type variable. Hence, the
-translator from |Qt a| to |Dp a| is forced to re-infer all the type
-information for the subterms of the term of type |Qt a|.  This is why
-we support only limited overloading, and why we translate
-the |Maybe| monad as a special case, rather
-than supporting overloading for monad operations in general.
+representation of a term.  Type |Qt a| is equivalent to the type
+\[
+|TH.Q (TH.TExp a)|
+\]
+where |TH| denotes the library for Template Haskell, |TH.Q| is the
+quotation monad (used to look up identifiers and
+generate fresh names), and |TH.TExp a| is the parse tree for a quoted
+expression returning a value of type |a| (a wrapper for the type
+|TH.Exp| of untyped expressions, with |a| as a phantom variable).
+Thus, the
+translator from |Qt a| to |Dp a| is forced to re-infer all type for
+subterms, and for this reason we support only limited overloading, and we
+translate the |Maybe| monad as a special case rather than supporting
+overloading for monad operations in general.
 
-Before compiling |Dp| terms to C code, the backend performs a series
-of optimisations, implemented as three separate phases of
-transformations over |Dp| terms. First, the backend performs common
-subexpression elimination transformation (CSE). The CSE algorithm
-identifies the common subexpressions based on their unique annotations
-(provided by observable sharing) and eliminates them by using let
-bindings. Second, |Dp| terms are normalised using the exact replica of
-the rules used for normalising |Qt| terms (as described in
-Section~\ref{sec:qdsl-vs-edsl}).
-Last, |Dp| terms are optimised using $\eta$ contraction for
-conditionals and arrays
+The backend performs three transformations over |Dp| terms
+before compiling to C. First, common subexpessions explicitly
+tagged in EDSL Feldsapr source are transformed to |let| bindings.
+Second, |Dp| terms are normalised using exactly the same rules
+used for normalising |Qt| terms, as described in Section~\ref{sec:subformula}.
+Third, |Dp| terms are optimised using $\eta$ contraction for
+conditionals and arrays:
 \[
 \begin{array}{rcl}
           |if L then M else M| & \rewrite{} & M \\
 |makeArr (lenArr M) (ixArr M)| & \rewrite{} & M
 \end{array}
 \]
-in addition to a restricted form of linear inlining of let bindings
+and a restricted form of linear inlining for |let| bindings
 that preserves the order of evaluation.
 
-%% shayan: I have not included any examples.
+\input{table}
 
-%%  As we noted in the introduction, rather than build a special-purpose tool for
-%%  each QDSL, it should be possible to design a single tool for each host language.
-%%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,
-%%  including support for type inference and overloading.
-
-We measured the behaviour of five benchmark programs.
-\begin{center}
-\begin{tabular}{l@@{\quad}l}
-IPGray     & Image Processing (Grayscale)  \\
-IPBW       & Image Processing (Black and White) \\
-FFT        & Fast Fourier Transform \\
-CRC        & Cyclic Redundancy Check \\
-Window     & Average array in a sliding window \\
-\end{tabular}
-\end{center}
-All five benchmarks run under QDSL and EDSL Feldspar yield
+Figure~\ref{fig:thetable} lists lines of code,
+benchmarks used,
+and performance results.
+The translator from |Dp| to C is shared by QDSL and EDSL Feldspar,
+and listed in a separate column.
+All five benchmarks run under QDSL and EDSL Feldspar generate
 syntactically identical C code.
-Figure~\ref{fig:thetable} lists the results and methodology.
+The columns for QDSL and EDSL Feldspar give compile and run
+times for Haskell, while the columns for generated code
+give compile and run times for the generated C.
 QDSL compile times are slightly greater than EDSL,
 and QDSL run times range from twice to ten times that of EDSL,
-the increase being due to normalisation time.
-Our normaliser was not designed to be particularly efficient.
+the increase being due to normalisation time
+(our normaliser was not designed to be particularly efficient).
+
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -654,8 +632,6 @@ and finally for Phase~3.  Phase~1 performs let-insertion, naming
 subterms that are not values, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
 in Moggi's metalanguage for monads \citep{Moggi-1991}.
-%% SL: no longer true.
-%%
 %% The rules are designed to leave applications such as |f V W|
 %% unchanged, rather than transform them to |let g = f V in g W|.
 Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
@@ -778,6 +754,10 @@ Fortunately, the exact property required is not hard to formulate in a
 general way, and is easy to ensure by applying the sharpened
 subformula property.
 
+Rather than fixing on the notion of representability
+as given in Section~\ref{sec:qfeldspar}, we take the
+representable types to be any set closed under subformulas
+that does not include function types.
 We introduce a variant of the usual notion of \emph{rank} of a type,
 with respect to a notion of representability.  A term of type |A -> B|
 has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
@@ -801,9 +781,18 @@ $\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
+In QDSL Feldspar, |while| is a constant with type of rank $2$ and
+other constants have types of rank $1$.  Section~\ref{subsec:arrays}
+gives an example of a normalised term.  By the proposition, each
+subterm has a representable type (boolean, integer, float, or a pair of an
+integer and float) or is a lambda abstraction with bound variables and
+body of representable type; and it is this property which ensures it
+is easy to generate C code from the term.
+
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
 %include Section5.lhs
+
 
 \section{Related work}
 \label{sec:related}
@@ -840,7 +829,12 @@ languages \citep{Nielson-2005}.
 Other approaches to DSL that make use of quotation include
 C\# and F\# versions of LINQ under .NET
 \citep{csharplinq,fsharplinq} and Scala Lightweight
-Modular Staging \citep{scalalms}.
+Modular Staging (LMS) \citep{scalalms}.
+Scala LMS partakes of techniques found in QDSL
+(quotation and normalisation)
+and EDSL (combining shallow and deep embeddings),
+see \citet{rompf2013scala}.
+
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
 %
@@ -935,12 +929,11 @@ flower further for years to come.
 % study of the matter.}
 
 \paragraph*{Acknowledgement}
-Najd is a recipient of the Google Europe Fellowship in Programming
-Technology, and this research is supported in part by this Google
-Fellowship. %% <-- Google's requested format
+Najd is supported by a Google Europe Fellowship in Programming
+Technology.
 Svenningsson is a SICSA Visiting Fellow and is funded by a HiPEAC
-collaboration grant and by the Swedish Foundation for Strategic
-Research, under grant RawFP.
+collaboration grant, and by the Swedish Foundation for Strategic
+Research under grant RawFP.
 Lindley and Wadler are funded by EPSRC Grant EP/K034413/1.
 
 \bibliographystyle{plainnat}

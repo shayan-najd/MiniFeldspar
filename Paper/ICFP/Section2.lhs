@@ -1,8 +1,5 @@
 %format testQt    (x) (y) = "\fi" y
 %format testNrmQt (x) (y) = "\fi" y
-%format arrLen = lenArr
-%format arrIx  = ixArr
-%format arr    = makeArr
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -16,6 +13,7 @@ import qualified Prelude as P
 import Data.Array(Array)
 
 import QFeldspar.QDSL hiding (div,while,for,qdsl,min)
+import qualified QFeldspar.CDSL as CDSL
 import qualified QFeldspar.QDSL as QDSL
 
 type C = String
@@ -23,11 +21,11 @@ type C = String
 class (Type a , FO a) => Rep a
 
 test :: Bool
-test = ex1 && ex2 && ex3 && ex4
+test = ex1 && ex2 && ex3 && ex4 && ex5 && ex6
 
-minim = QDSL.min
+appVec = append
 
-unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
+uniVec = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
 %endif
 %format P.Int = Int
@@ -228,11 +226,25 @@ of type |float|, which is indeed true for the normalised term.
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
 extent of normalisation may be controlled by introducing uninterpreted
-constants.  In a context with recursion, we take |fix :: (a -> a) -> a|
-as an uninterpreted constant.  In a context where we wish to avoid
-unfolding an application |L M|, where |L| and |M| are terms,
-we take |id :: a -> a| as an uninterpreted constant,
-and replace |L M| by |id L M|.
+constants.  In particular, we introduce the uninterpreted constant
+\begin{spec}
+save :: Rep a => a -> a
+\end{spec}
+of arity $1$, which is equivalent to the identity function
+on representable types; a use of |save| appears in
+Section~\ref{subsec:arrays}.
+In a context with recursion, we take 
+\begin{spec}
+fix :: (a -> a) -> a
+\end{spec}
+as an uninterpreted constant.
+
+% In a context where we wish to avoid
+% unfolding an application |L M|, where |L| and |M| are terms,
+% we take |id :: a -> a| as an uninterpreted constant,
+% and replace |L M| by |id L M|.
+% In a context with recursion, we take |fix :: (a -> a) -> a|
+% as an uninterpreted constant.
 
 (As a technical convenience, we also require constants of a given arity
 to be fully applied, and treat subterms and subformulas of these specially.
@@ -292,7 +304,7 @@ power'' n =
 
 %if False
 \begin{code}
-ex3 = testNrmQt (power (-6)) (power'' (-6))
+ex3 = testNrmSmpQt (power (-6)) (power'' (-6))
 ex4 = qdsl (power (-6)) == qdsl (power'' (-6))
 \end{code}
 %endif
@@ -411,32 +423,36 @@ instance (Rep a) => Rep (Arr a)
 
 For arrays, we assume the following primitive operations.
 \begin{spec}
-makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
-lenArr   ::  (Rep a) => Arr a -> Int
-ixArr    ::  (Rep a) => Arr a -> Int -> a
+mkArr   ::  (Rep a) => Int -> (Int -> a) -> Arr a
+lnArr   ::  (Rep a) => Arr a -> Int
+ixArr   ::  (Rep a) => Arr a -> Int -> a
 \end{spec}
 The first populates a manifest array of the given
 size using the given indexing function, the second
 returns the length of the array, and the third returns
-the array element at the given index.  Array components
-must be representable.
+the array element at the given index.
+Array components must be representable.
 
 We define functions to convert between the two representations in the
 obvious way.
 \begin{code}
 toVec        ::  Rep a => Qt (Arr a -> Vec a)
-toVec        =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
+toVec        =   [|| \a -> Vec (lnArr a) (\i -> ixArr a i) ||]
 
 fromVec      ::  Rep a => Qt (Vec a -> Arr a)
-fromVec      =   [|| \(Vec n g) -> arr n g ||]
+fromVec      =   [|| \(Vec n g) -> mkArr n g ||]
 \end{code}
 
 It is straightforward to define operations on vectors,
 including combining corresponding elements of two vectors,
 summing the elements of a vector, dot product of two vectors,
 and norm of a vector.
-%format sqrtFltHsk = sqrt
+When combining two vectors, the length of the result is the
+minimum of the lengths of the arguments.
 \begin{code}
+minim    ::  Ord a => Qt (a -> a -> a)
+minim    =   [|| \x y -> if x < y then x else y ||]
+
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
                         Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
@@ -448,36 +464,74 @@ dotVec   ::  (Rep a, Num a) => Qt (Vec a -> Vec a -> a)
 dotVec   =   [|| \u v -> $$sumVec ($$zipVec (*) u v) ||]
 
 normVec  ::  Qt (Vec Float -> Float)
-normVec  =   [|| \v -> sqrtFltHsk ($$dotVec v v) ||]
+normVec  =   [|| \v -> sqrt ($$dotVec v v) ||]
 \end{code}
-The second of these uses the |for| loop defined in
-Section~\ref{subsec:while}, the third is defined using
-the first two, and the fourth is defined using the third.
-% Recall that our sharpened subformula property required
-% that |(*)| be fully applied, so before normalisation
-% |(*)| is expanded to |\x y -> x*y|.
-
-The vector representation makes it easy to define any
-function where each vector element is computed independently,
-such as vector concatenation, take, drop, and reverse,
-but is less well suited to functions with dependencies
-between elements, such as a running sum.
+The third of these uses the |for| loop defined in
+Section~\ref{subsec:while}.
 
 Our final function cannot accept |Vec| as input, since
 the |Vec| type is not representable, but it can accept
-|Arr| as input. Invoking |qdsl [|||| \v -> $$normVec ($$toVec v) ||||]|
-produces the following C code.
-\begin{lstlisting}
-float prog (float[] a) {
-  float x = 0;
-  int i = 0;
-  while (i < lenArr a) {
-    x = x + a[i] * a[i];
-    i = i+1;
-  }
-  return sqrt(x);
-}
-\end{lstlisting}
+|Arr| as input.  For instance, if we invoke |qdsl| on
+\[
+|[|||| $$normVec . $$toVec ||||]|
+\]
+the quoted term normalises to
+\begin{spec}
+[|| (snd (while  (\ s -> fst s < lnArr a)
+                 (\ s -> let i = fst s in (i+1,
+                   snd s + (ixArr a i * ixArr a i)))
+                 (0 , 0.0))) ||]
+\end{spec}
+%if False
+\begin{code}
+ex5 = testNrmSmpQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\a -> sqrt
+     (snd (while (\ s -> fst s < lnArr a)
+                 (\ s -> let i = fst s
+                         in  (i + 1 , snd s + (ixArr a i * ixArr a i)))
+                 (0 , 0.0)))) ||]
+
+ex6 = testNrmQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\ x0 -> let x1 = lnArr x0 in
+          let x2 = x1 < x1 in
+          if x2
+          then (let x13 = while
+                          (\ x3 -> let x4 = fst x3 in
+                                   x4 < x1)
+                          (\ x5 -> let x6  = fst x5      in
+                                   let x7  = snd x5      in
+                                   let x8  = x6 + 1      in
+                                   let x9  = ixArr x0 x6 in
+                                   let x10 = ixArr x0 x6 in
+                                   let x11 = x10 * x9    in
+                                   let x12 = x7  + x11   in
+                                   (x8 , x12))
+                          (0 , 0.0)
+                in let x14 = snd x13 in
+                   sqrt x14)
+          else (let x13 =  while
+                           (\ x3 -> let x4 = fst x3 in
+                                    x4 < x1)
+                           (\ x5 -> let x6  = fst x5      in
+                                    let x7  = snd x5      in
+                                    let x8  = x6 + 1      in
+                                    let x9  = ixArr x0 x6 in
+                                    let x10 = ixArr x0 x6 in
+                                    let x11 = x10 * x9    in
+                                    let x12 = x7  + x11   in
+                                    (x8 , x12))
+                           (0 , 0.0)
+                in let x14 = snd x13 in
+                   sqrt x14)) ||]
+\end{code}
+%endif
+from which it is easy to generate C code.
+
+The vector representation makes it easy to define any
+function where each vector element is computed independently,
+such as the examples above,
+vector append (|appVec|)
+and creating a vector of one element (|uniVec|),
+but is less well suited to functions with dependencies
+between elements, such as computing a running sum.
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
@@ -488,22 +542,15 @@ cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
 \begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise = [|| \ v -> $$toVec (mem ($$fromVec v)) ||]
+memorise = [|| $$toVec . mem . $$fromVec ||]
 \end{code}
-% memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
-% ***Shayan***: I took the body out, as it is not correct.
-%               In QDSLs, thanks to eta contractions,
-%               "toVec . fromVec" reduces to "id".
-%               I have tested it with QFeldspar:
-% ghci> qdsl ([|| \ a -> $$fromVec ($$memorise ($$toVec a)) ||]
-%                :: Qt (Arr Int -> Arr Int))
-% "AryInt prog (AryInt v0)\n{\n  return v0;\n}"
-For example, if
+Here we interpose |save|, as defined in Section~\ref{subsec:subformula}
+to forestall the fusion that would otherwise occur. For example, if
 \begin{code}
 blur :: Qt (Vec Float -> Vec Float)
-blur = [|| \a -> $$zipVec  (\x y -> sqrtFltHsk (x*y))
-                           ($$append ($$unit 0) a)
-                           ($$append a ($$unit 0)) ||]
+blur = [|| \a -> $$zipVec  (\x y -> sqrt (x*y))
+                           ($$appVec ($$uniVec 0) a)
+                           ($$appVec a ($$uniVec 0)) ||]
 \end{code}
 computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
