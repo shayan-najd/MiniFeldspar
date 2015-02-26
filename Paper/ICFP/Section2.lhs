@@ -1,9 +1,6 @@
 %format testQt    (x) (y) = "\fi" y
 %format testNrmQt (x) (y) = "\fi" y
-%format arrLen = lenArr
-%format arrIx  = ixArr
-%format arr    = makeArr
-%format mem    = memArr
+%format mem    = idArr
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -17,6 +14,7 @@ import qualified Prelude as P
 import Data.Array(Array)
 
 import QFeldspar.QDSL hiding (div,while,for,qdsl,min)
+import qualified QFeldspar.CDSL as CDSL
 import qualified QFeldspar.QDSL as QDSL
 
 type C = String
@@ -24,9 +22,11 @@ type C = String
 class (Type a , FO a) => Rep a
 
 test :: Bool
-test = ex1 && ex2 && ex3 && ex4
+test = ex1 && ex2 && ex3 && ex4 && ex5 && ex6
 
-unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
+appVec = append
+
+uniVec = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
 %endif
 %format P.Int = Int
@@ -291,7 +291,7 @@ power'' n =
 
 %if False
 \begin{code}
-ex3 = testNrmQt (power (-6)) (power'' (-6))
+ex3 = testNrmSmpQt (power (-6)) (power'' (-6))
 ex4 = qdsl (power (-6)) == qdsl (power'' (-6))
 \end{code}
 %endif
@@ -440,7 +440,7 @@ When combining two vectors, the length of the result is the
 minimum of the lengths of the arguments.
 \begin{code}
 minim    ::  Ord a => Qt (a -> a -> a)
-mimim    =   [|| \x y -> if x < y then x else y ||]
+minim    =   [|| \x y -> if x < y then x else y ||]
 
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
@@ -480,6 +480,47 @@ the quoted term normalises to
            let q = snd p in
            sqrt q ||]
 \end{spec}
+%if False
+\begin{code}
+ex5 = testNrmSmpQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\a -> sqrt
+     (snd (while (\ s -> fst s < lnArr a)
+                 (\ s -> let i = fst s
+                         in  (i + 1 , snd s + (ixArr a i * ixArr a i)))
+                 (0 , 0.0)))) ||]
+
+ex6 = testNrmQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\ x0 -> let x1 = lnArr x0 in
+          let x2 = x1 < x1 in
+          if x2
+          then (let x13 = while
+                          (\ x3 -> let x4 = fst x3 in
+                                   x4 < x1)
+                          (\ x5 -> let x6  = fst x5      in
+                                   let x7  = snd x5      in
+                                   let x8  = x6 + 1      in
+                                   let x9  = ixArr x0 x6 in
+                                   let x10 = ixArr x0 x6 in
+                                   let x11 = x10 * x9    in
+                                   let x12 = x7  + x11   in
+                                   (x8 , x12))
+                          (0 , 0.0)
+                in let x14 = snd x13 in
+                   sqrt x14)
+          else (let x13 =  while
+                           (\ x3 -> let x4 = fst x3 in
+                                    x4 < x1)
+                           (\ x5 -> let x6  = fst x5      in
+                                    let x7  = snd x5      in
+                                    let x8  = x6 + 1      in
+                                    let x9  = ixArr x0 x6 in
+                                    let x10 = ixArr x0 x6 in
+                                    let x11 = x10 * x9    in
+                                    let x12 = x7  + x11   in
+                                    (x8 , x12))
+                           (0 , 0.0)
+                in let x14 = snd x13 in
+                   sqrt x14)) ||]
+\end{code}
+%endif
 from which it is easy to generate C code.
 
 The vector representation makes it easy to define any
@@ -499,7 +540,7 @@ cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
 \begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise = [|| $$toVec . idArr . $$fromVec ||]
+memorise = [|| $$toVec . mem . $$fromVec ||]
 \end{code}
 Here we interpose |idArr| to forestall the fusion that would
 otherwise occur. For example, if
