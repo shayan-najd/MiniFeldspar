@@ -2,12 +2,40 @@
 \newcommand{\rt}{\:Run\:}
 
 \begin{figure}
+Lines of Haskell code
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline
+ & \makebox[22pt][c]{shared}
+ & \makebox[22pt][c]{unique}
+ & \makebox[22pt][c]{total}
+\\ \hline
+QDSL Feldspar & 3970 & 1722 & 5962 \\
+EDSL Feldspar & 3970 &  452 & 4422 \\
+\hline
+\end{tabular}
+\end{center}
+
+Benchmarks
+\begin{center}
+\begin{tabular}{|l|l|}
+\hline
+IPGray     & Image Processing (Grayscale)  \\
+IPBW       & Image Processing (Black and White) \\
+FFT        & Fast Fourier Transform \\
+CRC        & Cyclic Redundancy Check \\
+Window     & Average array in a sliding window \\
+\hline
+\end{tabular}
+\end{center}
+
+Performance
 \begin{center}
 \begin{tabular}{|@{\:}l@{\:}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|@{}c@{}|}
 \hline
- & \multicolumn{2}{@{\:}c@{\:}}{QDSL (Haskell)}
- & \multicolumn{2}{|@{\:}c@{\:}}{EDSL (Haskell)}
- & \multicolumn{2}{|@{\:}c@{\:}|}{Generated Code (C)}
+ & \multicolumn{2}{@{\:}c@{\:}}{QDSL Feldspar}
+ & \multicolumn{2}{|@{\:}c@{\:}}{EDSL Feldspar}
+ & \multicolumn{2}{|@{\:}c@{\:}|}{Generated Code}
 \\ \hline
  & \ct & \rt & \ct & \rt & \ct & \rt
 \\ \hline
@@ -26,6 +54,7 @@ Window & 16.22 & 0.08 & 15.06 & 0.01 & 0.06 & 0.25
 Times in seconds; minimum time of ten runs. \\
 Quad-core Intel i7-2640M CPU, 2.80 GHz, 3.7 GiB RAM.\\
 GHC 7.8.3; GCC 4.8.2; Ubuntu 14.04 (64-bit).
+
 \caption{Comparison of QDSL and EDSL Feldspar}
 \label{fig:thetable}
 \end{figure}

@@ -1,10 +1,26 @@
 % TODO
 
+% Tiark: Rewrite abstract and introduction to stress role of constants
+% in the sharpened subformula property.
+
+% Tiark: leave open the question of the extent to which LMS partakes
+% of QDSL and deep-and-shallow techniques.
+
+% Tiark: Add example after last proposition
+
+% Shayan: Add to Section 3:
+% The polymorphic primitives are the following:
+%  Functions: while, fst, snd, mem, arr, arrLen, arrIx, cmx, (*), (+)
+%  Constructors: True,False, Just, Nothing,Vec, ((,))
+%  Numeric constants
+%  Expanded inline: return, (>>=), maybe, (.).
+% awaiting confirmation from Shayan on (-), (/), unary -.
+
+% Shayan: Ensure memorise is described accurately
+
+% Shayan: Update description of Dp
+
 % Delete C code for normVec.
-
-% Update description of Dp
-
-% Ensure memorise is described accurately
 
 % Change `min` to `minim`.
 
@@ -125,14 +141,6 @@
 
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{proposition}[theorem]{Proposition}
-
-\makeatletter
-\renewcommand\bibsection%
-{
-  \section{\refname
-    \@@mkboth{\MakeUppercase{\refname}}{\MakeUppercase{\refname}}}
-}
-\makeatother
 
 \newcommand{\flushr}{{}\mbox{~}\hfill}%{\flushright\vspace{-2ex}}
 
@@ -493,15 +501,8 @@ The contributions of this paper are:
 Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
-% \sam{``cabal install qfeldspar'' goes here?}
-
-The repository containing the related source code is accessible at
-Github: \url{https://github.com/shayan-najd/QFeldspar}. It includes
-the QDSL variant of Feldspar, the EDSL variant of Feldspar, benchmark
-programs, and the material required for benchmarking.
-
-\todo{Shayan}{Please write a short paragraph on how to access
-  all related software}
+Our QDSL and EDSL variants of Feldspar and benchmarks are
+available on Gitub\footnote{\url{https://github.com/shayan-najd/QFeldspar}}.
 
 \section{Feldspar as a QDSL}
 \label{sec:qfeldspar}
@@ -509,7 +510,6 @@ programs, and the material required for benchmarking.
 
 \section{Implementation}
 \label{sec:implementation}
-\input{table}
 
 The original EDSL~Feldspar generates values of a GADT
 (called |Dp a| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
@@ -541,63 +541,53 @@ The transformer from |Qt| to |Dp| performs the following steps.
 
 An unfortunate feature of typed quasiquotation in GHC is that the
 implementation discards all type information when creating the
-representation of a term.  Type |Qt a| is equivalent to |TH.Q (TH.TExp a)|,
-where |TH| denotes the library for Template Haskell, |TH.Q| is
-the quotation monad of Template Haskell (used to look up identifiers
-and generate fresh names), and |TH.TExp a| is the parse tree for a
-quoted expression returning a value of type |a|. Type |TH.TExp a| is
-just a wrapper for |TH.Exp|, the (untyped) parse tree of an expression
-in Template Haskell, where |a| is a phantom type variable. Hence, the
-translator from |Qt a| to |Dp a| is forced to re-infer all the type
-information for the subterms of the term of type |Qt a|.  This is why
-we support only limited overloading, and why we translate
-the |Maybe| monad as a special case, rather
-than supporting overloading for monad operations in general.
+representation of a term.  Type |Qt a| is equivalent to the type
+\[
+|TH.Q (TH.TExp a)|
+\]
+where |TH| denotes the library for Template Haskell, |TH.Q| is the
+quotation monad (used to look up identifiers and
+generate fresh names), and |TH.TExp a| is the parse tree for a quoted
+expression returning a value of type |a| (a wrapper for the type
+|TH.Exp| of untyped expressions, with |a| as a phantom variable).
+Thus, the
+translator from |Qt a| to |Dp a| is forced to re-infer all type for
+subterms, and for this reason we support only limited overloading, and we
+translate the |Maybe| monad as a special case rather than supporting
+overloading for monad operations in general.
 
-Before compiling |Dp| terms to C code, the backend performs a series
-of optimisations, implemented as three separate phases of
-transformations over |Dp| terms. First, the backend performs common
-subexpression elimination transformation (CSE). The CSE algorithm
-identifies the common subexpressions based on their unique annotations
-(provided by observable sharing) and eliminates them by using let
-bindings. Second, |Dp| terms are normalised using the exact replica of
-the rules used for normalising |Qt| terms (as described in
-Section~\ref{sec:qdsl-vs-edsl}).
-Last, |Dp| terms are optimised using $\eta$ contraction for
-conditionals and arrays
+The backend performs three transformations over |Dp| terms
+before compiling to C. First, common subexpessions explicitly
+tagged in EDSL Feldsapr source are transformed to |let| bindings.
+Second, |Dp| terms are normalised using exactly the same rules
+used for normalising |Qt| terms, as described in Section~\ref{sec:subformula}.
+Third, |Dp| terms are optimised using $\eta$ contraction for
+conditionals and arrays:
 \[
 \begin{array}{rcl}
           |if L then M else M| & \rewrite{} & M \\
 |makeArr (lenArr M) (ixArr M)| & \rewrite{} & M
 \end{array}
 \]
-in addition to a restricted form of linear inlining of let bindings
+and a restricted form of linear inlining for |let| bindings
 that preserves the order of evaluation.
 
-%% shayan: I have not included any examples.
+\input{table}
 
-%%  As we noted in the introduction, rather than build a special-purpose tool for
-%%  each QDSL, it should be possible to design a single tool for each host language.
-%%  In the conclusion, we sketch the design of a general purpose tool for Haskell QDSL,
-%%  including support for type inference and overloading.
-
-We measured the behaviour of five benchmark programs.
-\begin{center}
-\begin{tabular}{l@@{\quad}l}
-IPGray     & Image Processing (Grayscale)  \\
-IPBW       & Image Processing (Black and White) \\
-FFT        & Fast Fourier Transform \\
-CRC        & Cyclic Redundancy Check \\
-Window     & Average array in a sliding window \\
-\end{tabular}
-\end{center}
-All five benchmarks run under QDSL and EDSL Feldspar yield
+Figure~\ref{fig:thetable} lists lines of code,
+benchmarks used,
+and performance results.
+The translator from |Dp| to C is shared by QDSL and EDSL Feldspar,
+and listed in a separate column.
+All five benchmarks run under QDSL and EDSL Feldspar generate
 syntactically identical C code.
-Figure~\ref{fig:thetable} lists the results and methodology.
+The columns for QDSL and EDSL Feldspar give compile and run
+times for Haskell, while the columns for generated code
+give compile and run times for the generated C.
 QDSL compile times are slightly greater than EDSL,
 and QDSL run times range from twice to ten times that of EDSL,
-the increase being due to normalisation time.
-Our normaliser was not designed to be particularly efficient.
+the increase being due to normalisation time
+(our normaliser was not designed to be particularly efficient).
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -654,8 +644,6 @@ and finally for Phase~3.  Phase~1 performs let-insertion, naming
 subterms that are not values, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
 in Moggi's metalanguage for monads \citep{Moggi-1991}.
-%% SL: no longer true.
-%%
 %% The rules are designed to leave applications such as |f V W|
 %% unchanged, rather than transform them to |let g = f V in g W|.
 Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
@@ -778,6 +766,10 @@ Fortunately, the exact property required is not hard to formulate in a
 general way, and is easy to ensure by applying the sharpened
 subformula property.
 
+Rather than fixing on the notion of representability
+as given in Section~\ref{sec:qfeldspar}, we take the
+representable types to be any set closed under subformulas
+that does not include function types.
 We introduce a variant of the usual notion of \emph{rank} of a type,
 with respect to a notion of representability.  A term of type |A -> B|
 has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
@@ -800,6 +792,8 @@ with type of rank $1$ can be rewritten in the form
 $\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
+
+\todo{Phil}{Add an example here}
 
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
