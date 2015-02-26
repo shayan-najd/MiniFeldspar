@@ -9,11 +9,8 @@ import Prelude
 import Data.Array
 type Arr a = Array Int a
 
-minim         ::  (Ord a , Rep a) => Dp a ->  Dp a -> Dp a
-minim m n     =   (m .<. n) ? (m, n)
-
 instance Fractional (Dp Float) where
-  a / b          =  Prim2 "(/)" a b
+  a / b           =  Prim2 "(/)" a b
   fromRational f  =  LitF (fromRational f)
 
 instance Floating (Dp Float) where
@@ -104,15 +101,15 @@ in the EDSL variant, meaning that |power n| accepts a representation
 of the argument and returns a representation of that argument raised
 to the $n$'th power.
 
-In EDSL, no quotation is required, and the code looks almost---but not
-quite!---like an unstaged version of power, but with different types.
-Clever encoding tricks, explained later, permit declarations, function
-calls, arithmetic operations, and numbers to appear the same whether
-they are to be executed at generation-time or run-time.  However, as
-explained later, comparison and conditionals appear differently
-depending on whether they are to be executed at generation-time or
-run-time, using |M == N| and |if L then M else N| for the former but
-|M .==. N| and |L ? (M, N)| for the latter.
+In the EDSL variant, no quotation is required, and the code looks
+almost---but not quite!---like an unstaged version of power, but with
+different types.  Clever encoding tricks, explained later, permit
+declarations, function calls, arithmetic operations, and numbers to
+appear the same whether they are to be executed at generation-time or
+run-time.  However, as explained later, comparison and conditionals
+appear differently depending on whether they are to be executed at
+generation-time or run-time, using |M == N| and |if L then M else N|
+for the former but |M .==. N| and |L ? (M, N)| for the latter.
 
 Evaluating |power (-6)| yields the following:
 \begin{spec}
@@ -140,9 +137,11 @@ QDSL as |Qt (a -> b)|, a representation of a function, and in
 EDSL as |Dp a -> Dp b|, a function between representations.
 
 \item QDSL enables the host and embedded languages to appear
-identical.  In contrast, EDSL requires some term forms, such as
-comparison and conditionals, to differ between the host and embedded
-languages.
+identical.  In contrast, in Haskell, EDSL requires some term forms,
+such as comparison and conditionals, to differ between the host and
+embedded languages.  Other languages, notably Scala Virtualised
+\citep{rompf2013scala}, may support more general overloading that
+allows even comparison and conditionals to be identical.
 
 \item QDSL requires syntax to separate quoted and unquoted terms. In
 contrast, EDSL permits the host and embedded languages to intermingle
@@ -155,8 +154,10 @@ Scala might be preferred.
 \item QDSL may share the same representation for quoted terms across a
 range of applications; the quoted language is the host language, and
 does not vary with the specific domain.  In contrast, EDSL typically
-develops custom shallow and deep embeddings for each application,
-although these may follow a fairly standard pattern.
+develops custom shallow and deep embeddings for each application;
+a notable exception is the LMS and Delite frameworks for Scala,
+which provide a deep embedding shared across several disparate DSLs
+\citep{sujeeth2013composition}.
 
 \item QDSL yields an unwieldy term that requires normalisation.  In
 contrast, EDSL yields the term in normalised form in this case, though
@@ -178,13 +179,13 @@ might be amortised across multiple QDSLs for a single language.  In
 the conclusion, we consider the design of a tool for building QDSLs
 that uses a shared normaliser and preprocessor.
 
-\item QDSL preserves sharing. In contrast, EDSL loses sharing, which
-must later be recovered either by common subexpression elimination or
-by applying a technique such as observable sharing
-\citep{claessen1999observable, gill2009type}.  EDSL with common
-subexpression elimination may discover common subexpressions that are
-distinct in QDSL; while EDSL with observable sharing yields
-results comparable to sharing-preserving QDSL.
+% \item QDSL preserves sharing. In contrast, EDSL loses sharing, which
+% must later be recovered either by common subexpression elimination or
+% by applying a technique such as observable sharing
+% \citep{claessen1999observable, gill2009type}.  EDSL with common
+% subexpression elimination may discover common subexpressions that are
+% distinct in QDSL; while EDSL with observable sharing yields
+% results comparable to sharing-preserving QDSL.
 
 \item Once the deep embedding or the normalised quoted term is
 produced, generating the domain-specific code is similar for both
@@ -258,11 +259,15 @@ undef))), (True, (1.0 / ((x * ((x * 1.0) * (x * 1.0))) *
 \end{spec}
 Before, evaluating |power| yielded a term essentially in normal
 form.  However, here rewrite rules need to be repeatedly applied,
-similar to those required to enforce the subformula property
-as described in Section~\ref{sec:subformula}.
+as described in Section~\ref{sec:implementation}.
 After applying these rules, common subexpression
 elimination yields the same structure as in the previous subsection,
 from which the same C code is generated.
+
+Here we have described normalisation via rewriting, but some EDSLs
+achieve normalisation via smart constructors,
+which ensure deep terms are always in normal form
+\citep{rompf2012lightweight}; the two techniques are roughly equivalent.
 
 % Rewrite rules including the following need to be
 % repeatedly applied.
@@ -351,7 +356,7 @@ Constructs |LitB|, |LitI|, |LitF| build literals;
 |Prim1| and |Prim2| represent primitive
 operations, where the string is the name of the operation;
 |MkArr|, |LnArr|, |IxArr|, and |IdArr|
-correspond to the array operations in Section~\ref{subsec:array};
+correspond to the array operations in Section~\ref{subsec:arrays};
 |Let| corresponds to let binding,
 |Tag| indicates common subexpressions,
 and |Variable| is used when translating HOAS to C code.

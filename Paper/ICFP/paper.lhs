@@ -1,17 +1,9 @@
 % Shayan TODO
 
-% Change to mkArr, lnArr, ixArr, idArr.
+% Change to mkArr, lnArr, ixArr.
 
 
 % Phil TODO
-
-% Shayan: Add to Section 3:
-% The polymorphic primitives are the following:
-%  Functions: while, fst, snd, mem, arr, arrLen, arrIx, cmx, (*), (+)
-%  Constructors: True,False, Just, Nothing,Vec, ((,))
-%  Numeric constants
-%  Expanded inline: return, (>>=), maybe, (.).
-% awaiting confirmation from Shayan on (-), (/), unary -.
 
 % Tiark: leave open the question of the extent to which LMS partakes
 % of QDSL and deep-and-shallow techniques. [Done]
@@ -20,18 +12,28 @@
 
 % Tiark: "EDSL requires some term forms, such as comparison and
 % conditionals, to differ between the host and embedded languages."
-% Cite Scala Virtualized, HOSC 2013
+% Cite Scala Virtualized, HOSC 2013. [Done]
 
 % Tiark: "QDSL may share the same representation for quoted terms
 % across a range of applications. EDSL typically develops custom"
-% Cite Modular LMS, ECOOP 2013
+% Cite Modular LMS, ECOOP 2013 [Done]
 
 % Tiark: "QDSL preserves sharing. In contrast, EDSL loses sharing"
-% Delete claim.
+% Delete claim. [Done]
 
-% Tiark: normalisation may be achieved via smart constructors
+% Tiark: normalisation may be achieved via smart constructors. [Done]
 
 % Sam: review additions to related work
+
+% Change idArr to save.
+
+% Shayan: Add to Section 3:
+% The polymorphic primitives are the following:
+%  Functions: while, fst, snd, mem, arr, arrLen, arrIx, cmx, (*), (+)
+%  Constructors: True,False, Just, Nothing,Vec, ((,))
+%  Numeric constants
+%  Expanded inline: return, (>>=), maybe, (.).
+% awaiting confirmation from Shayan on (-), (/), unary -.
 
 
 
@@ -401,7 +403,7 @@ In theory, an EDSL should also steal the syntax of its host language,
 but in practice the theft is often only partial.  For instance, an
 EDSL such as Feldspar \citep{FELDSPAR} or Nikola \citep{NIKOLA},
 when embedded in Haskell, can exploit
-the overloading of Haskell so that arithmetic operations in both
+overloading so that arithmetic operations in both
 languages appear identical, but the same is not true of comparison or
 conditionals.
 % \\
@@ -791,7 +793,7 @@ and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
 In QDSL Feldspar, |while| is a constant with type of rank $2$ and
-other constants have types of rank $1$.  Section~\ref{subsec:array}
+other constants have types of rank $1$.  Section~\ref{subsec:arrays}
 gives an example of a normalised term.  By the proposition, each
 subterm has a representable type (boolean, integer, float, or a pair of an
 integer and float) or is a lambda abstraction with bound variables and
