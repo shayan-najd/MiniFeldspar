@@ -161,6 +161,12 @@
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
+%% SL: we can save a bit of space by merging the first two authors
+%% like this:
+%%
+%% \authorinfo{Shayan Najd \qquad Sam Lindley}
+%%            {The University of Edinburgh}
+%%            {\{sh.najd,sam.lindley\}@@ed.ac.uk}
 \authorinfo{Shayan Najd}
            {The University of Edinburgh}
            {sh.najd@@ed.ac.uk}
