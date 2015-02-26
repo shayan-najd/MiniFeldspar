@@ -112,7 +112,7 @@ they are to be executed at generation-time or run-time.  However, as
 explained later, comparison and conditionals appear differently
 depending on whether they are to be executed at generation-time or
 run-time, using |M == N| and |if L then M else N| for the former but
-|M .==. N| and |L ?  (M, N)| for the latter.
+|M .==. N| and |L ? (M, N)| for the latter.
 
 Evaluating |power (-6)| yields the following:
 \begin{spec}

@@ -1,18 +1,9 @@
-% TODO
-
-% Tiark: Rewrite abstract and introduction to stress role of constants
-% in the sharpened subformula property.
-
-% Tiark: leave open the question of the extent to which LMS partakes
-% of QDSL and deep-and-shallow techniques.
-
-% Tiark: Add example after last proposition
+% Shayan TODO
 
 % Change to mkArr, lnArr, ixArr, idArr.
 
-% Change `minim` to `same`.
 
-% Shayan: Number of lines
+% Phil TODO
 
 % Shayan: Add to Section 3:
 % The polymorphic primitives are the following:
@@ -22,13 +13,10 @@
 %  Expanded inline: return, (>>=), maybe, (.).
 % awaiting confirmation from Shayan on (-), (/), unary -.
 
-% Shayan: Ensure memorise is described accurately
+% Tiark: leave open the question of the extent to which LMS partakes
+% of QDSL and deep-and-shallow techniques. [Done]
 
-% Shayan: Update description of Dp
-
-% Delete C code for normVec.
-
-% Change `min` to `minim`.
+% Tiark: Add example after rank proposition. [Done]
 
 % Tiark: "EDSL requires some term forms, such as comparison and
 % conditionals, to differ between the host and embedded languages."
@@ -43,9 +31,14 @@
 
 % Tiark: normalisation may be achieved via smart constructors
 
+% Sam: review additions to related work
+
 
 
 % Things to possibly do
+
+% Tiark: Rewrite abstract and introduction to stress role of constants
+% in the sharpened subformula property.
 
 % Possibly, introduce class Type and explain how it relates
 % to Rep?  If done, may need to move some explanation of Arr
@@ -245,6 +238,7 @@ domain-specific language, DSL, EDSL, QDSL,
 embedded language,
 quotation, normalisation, subformula property
 
+
 \section{Introduction}
 \label{sec:introduction}
 
@@ -294,31 +288,25 @@ comparable.  We compare the QDSL and EDSL variants of Feldspar, and
 assess the tradeoffs between the two approaches.
 
 \citet{Davies-Pfenning-1996,Davies-Pfenning-2001} also suggest
-quotation as a foundation for staged computation, and note
-a propositions-as-types connection between quotation and
-a modal logic; our type |Qt a| corresponds to their
-type $\bigcirc a$.
-% \shayan{Shouldn't this be box type rather than circle?
-% PLW: Circle is correct. You should check the original
-% paper before raising a query of this kind. }
-They also mention in passing the utility of
-normalising quoted terms, although they do not mention the
-subformula property.
+quotation as a foundation for staged computation, and note a
+propositions-as-types connection between quotation and a modal logic;
+our type |Qt a| corresponds to their type $\bigcirc a$.  They also
+mention in passing the utility of normalising quoted terms, although
+they do not mention the subformula property.
 
 The .NET Language-Integrated Query (LINQ) framework as used in C\# and
 F\# \citep{csharplinq,fsharplinq}, and the Lightweight Modular Staging
-(LMS) framework as used in Scala \citep{scalalms}, exhibit
-considerable overlap with the techniques described here.  Notably,
-they use quotation to represent staged DSL programs, and they make use
-to a greater or lesser extent of normalisation.  In F\# LINQ quotation
-is indicated in the normal way (by writing quoted programs inside
-special symbols), while in C\# LINQ and Scala LMS quotation is
-indicated by type inference (quoted terms are given a special type).
+(LMS) framework as used in Scala \citep{scalalms}, exhibit overlap
+with the techniques described here.  Notably, they use quotation to
+represent staged DSL programs, and they make use to a greater or
+lesser extent of normalisation.  In F\# LINQ quotation is indicated in
+the normal way (by writing quoted programs inside special symbols),
+while in C\# LINQ and Scala LMS quotation is indicated by type
+inference (quoted terms are given a special type).
 
-In short, some researchers and developers are already exploiting this
-technique. We propose QDSL as a name to capture the commonalities
-among these approaches, and we observe the utility of the subformula
-property in this context.
+% We propose QDSL as a name to capture the commonalities
+% among these approaches, and we observe the utility of the subformula
+% property in this context.
 
 \vspace{2ex}
 \begin{quote}
@@ -510,9 +498,11 @@ Section~\ref{sec:conclusion} concludes.
 Our QDSL and EDSL variants of Feldspar and benchmarks are
 available on Gitub\footnote{\url{https://github.com/shayan-najd/QFeldspar}}.
 
+
 \section{Feldspar as a QDSL}
 \label{sec:qfeldspar}
 %include Section2.lhs
+
 
 \section{Implementation}
 \label{sec:implementation}
@@ -594,6 +584,7 @@ QDSL compile times are slightly greater than EDSL,
 and QDSL run times range from twice to ten times that of EDSL,
 the increase being due to normalisation time
 (our normaliser was not designed to be particularly efficient).
+
 
 \section{The subformula property}
 \label{sec:subformula}
@@ -799,11 +790,18 @@ $\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
-\todo{Phil}{Add an example here}
+In QDSL Feldspar, |while| is a constant with type of rank $2$ and
+other constants have types of rank $1$.  Section~\ref{subsec:array}
+gives an example of a normalised term.  By the proposition, each
+subterm has a representable type (boolean, integer, float, or a pair of an
+integer and float) or is a lambda abstraction with bound variables and
+body of representable type; and it is this property which ensures it
+is easy to generate C code from the term.
 
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
 %include Section5.lhs
+
 
 \section{Related work}
 \label{sec:related}
@@ -840,7 +838,12 @@ languages \citep{Nielson-2005}.
 Other approaches to DSL that make use of quotation include
 C\# and F\# versions of LINQ under .NET
 \citep{csharplinq,fsharplinq} and Scala Lightweight
-Modular Staging \citep{scalalms}.
+Modular Staging (LMS) \citep{scalalms}.
+Scala LMS partakes of techniques found in QDSL
+(quotation and normalisation)
+and EDSL (combining shallow and deep embeddings),
+see \citet{rompf2013scala}.
+
 The underlying idea for QDSLs was established
 for F\# LINQ by \citet{cheney:linq}.
 %
@@ -935,12 +938,11 @@ flower further for years to come.
 % study of the matter.}
 
 \paragraph*{Acknowledgement}
-Najd is a recipient of the Google Europe Fellowship in Programming
-Technology, and this research is supported in part by this Google
-Fellowship. %% <-- Google's requested format
+Najd is supported by a Google Europe Fellowship in Programming
+Technology.
 Svenningsson is a SICSA Visiting Fellow and is funded by a HiPEAC
-collaboration grant and by the Swedish Foundation for Strategic
-Research, under grant RawFP.
+collaboration grant, and by the Swedish Foundation for Strategic
+Research under grant RawFP.
 Lindley and Wadler are funded by EPSRC Grant EP/K034413/1.
 
 \bibliographystyle{plainnat}

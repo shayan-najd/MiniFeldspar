@@ -458,6 +458,30 @@ normVec  =   [|| \v -> sqrt ($$dotVec v v) ||]
 The third of these uses the |for| loop defined in
 Section~\ref{subsec:while}.
 
+Our final function cannot accept |Vec| as input, since
+the |Vec| type is not representable, but it can accept
+|Arr| as input.  For instance, if we invoke |qdsl| on
+\[
+|[|||| $$normVec . $$toVec ||||]|
+\]
+the quoted term normalises to
+\begin{spec}
+[|| \a ->  let m = lnArr a in
+           let n = lnArr a in
+           let o = if m < n then m else n in
+           let p = while  (\(i,s) -> i < o)
+                          (\(i,s) -> (i+1,
+                            let w = ixArr a i in
+                            let x = ixArr a i in
+                            let y = w * x in
+                            let z = sqrt y in
+                            s + z))
+                          (0, 0.0) in
+           let q = snd p in
+           sqrt q ||]
+\end{spec}
+from which it is easy to generate C code.
+
 The vector representation makes it easy to define any
 function where each vector element is computed independently,
 such as the examples above,
@@ -465,14 +489,6 @@ vector append (|appVec|)
 and creating a vector of one element (|uniVec|),
 but is less well suited to functions with dependencies
 between elements, such as computing a running sum.
-
-Our final function cannot accept |Vec| as input, since
-the |Vec| type is not representable, but it can accept
-|Arr| as input.  At the top level, we invoke |qdsl| on
-\[
-|[|||| $$normVec . $$toVec ||||]|
-\]
-to produce C code.
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
