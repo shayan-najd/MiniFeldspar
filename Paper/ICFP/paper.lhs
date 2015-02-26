@@ -1,9 +1,6 @@
-% Shayan TODO
-
-% Change to mkArr, lnArr, ixArr.
-
-
 % Phil TODO
+
+% Review Sam's additions to related work
 
 % Tiark: leave open the question of the extent to which LMS partakes
 % of QDSL and deep-and-shallow techniques. [Done]
@@ -23,9 +20,7 @@
 
 % Tiark: normalisation may be achieved via smart constructors. [Done]
 
-% Sam: review additions to related work
-
-% Change idArr to save.
+% Change idArr to save. [Done]
 
 % Shayan: Add to Section 3:
 % The polymorphic primitives are the following:
@@ -34,7 +29,6 @@
 %  Numeric constants
 %  Expanded inline: return, (>>=), maybe, (.).
 % awaiting confirmation from Shayan on (-), (/), unary -.
-
 
 
 % Things to possibly do
@@ -70,11 +64,6 @@
 %format <*> = "\mathbin{{<}\!{*}\!{>}}"
 %format .==. = "\mathbin{{.}{" == "}{.}}"
 %format .<.  = "\mathbin{{.}{" < "}{.}}"
-%format Opt_R = Opt'
-%format some_R = some'
-%format none_R = none'
-%format opt_R = opt'
-%format option_R = option'
 %format ^ = " "
 %format ... = "\cdots"
 %format s_0

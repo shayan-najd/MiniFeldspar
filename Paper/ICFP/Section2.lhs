@@ -1,6 +1,5 @@
 %format testQt    (x) (y) = "\fi" y
 %format testNrmQt (x) (y) = "\fi" y
-%format mem    = idArr
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -227,11 +226,25 @@ of type |float|, which is indeed true for the normalised term.
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
 extent of normalisation may be controlled by introducing uninterpreted
-constants.  In a context with recursion, we take |fix :: (a -> a) -> a|
-as an uninterpreted constant.  In a context where we wish to avoid
-unfolding an application |L M|, where |L| and |M| are terms,
-we take |id :: a -> a| as an uninterpreted constant,
-and replace |L M| by |id L M|.
+constants.  In particular, we introduce the uninterpreted constant
+\begin{spec}
+save :: Rep a => a -> a
+\end{spec}
+of arity $1$, which is equivalent to the identity function
+on representable types; a use of |save| appears in
+Section~\ref{subsec:arrays}.
+In a context with recursion, we take 
+\begin{spec}
+fix :: (a -> a) -> a
+\end{spec}
+as an uninterpreted constant.
+
+% In a context where we wish to avoid
+% unfolding an application |L M|, where |L| and |M| are terms,
+% we take |id :: a -> a| as an uninterpreted constant,
+% and replace |L M| by |id L M|.
+% In a context with recursion, we take |fix :: (a -> a) -> a|
+% as an uninterpreted constant.
 
 (As a technical convenience, we also require constants of a given arity
 to be fully applied, and treat subterms and subformulas of these specially.
@@ -413,13 +426,11 @@ For arrays, we assume the following primitive operations.
 mkArr   ::  (Rep a) => Int -> (Int -> a) -> Arr a
 lnArr   ::  (Rep a) => Arr a -> Int
 ixArr   ::  (Rep a) => Arr a -> Int -> a
-idArr   ::  (Rep a) => Arr a -> Arr a
 \end{spec}
 The first populates a manifest array of the given
 size using the given indexing function, the second
-returns the length of the array, the third returns
-the array element at the given index, and the fourth
-is used to control array fusion as shown below.
+returns the length of the array, and the third returns
+the array element at the given index.
 Array components must be representable.
 
 We define functions to convert between the two representations in the
@@ -466,19 +477,10 @@ the |Vec| type is not representable, but it can accept
 \]
 the quoted term normalises to
 \begin{spec}
-[|| \a ->  let m = lnArr a in
-           let n = lnArr a in
-           let o = if m < n then m else n in
-           let p = while  (\(i,s) -> i < o)
-                          (\(i,s) -> (i+1,
-                            let w = ixArr a i in
-                            let x = ixArr a i in
-                            let y = w * x in
-                            let z = sqrt y in
-                            s + z))
-                          (0, 0.0) in
-           let q = snd p in
-           sqrt q ||]
+[|| (snd (while  (\ s -> fst s < lnArr a)
+                 (\ s -> let i = fst s in (i+1,
+                   snd s + (ixArr a i * ixArr a i)))
+                 (0 , 0.0))) ||]
 \end{spec}
 %if False
 \begin{code}
@@ -542,8 +544,8 @@ the vector as an array with the following function.
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
 memorise = [|| $$toVec . mem . $$fromVec ||]
 \end{code}
-Here we interpose |idArr| to forestall the fusion that would
-otherwise occur. For example, if
+Here we interpose |save|, as defined in Section~\ref{subsec:subformula}
+to forestall the fusion that would otherwise occur. For example, if
 \begin{code}
 blur :: Qt (Vec Float -> Vec Float)
 blur = [|| \a -> $$zipVec  (\x y -> sqrt (x*y))

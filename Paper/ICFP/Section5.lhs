@@ -65,15 +65,27 @@ required to implement Feldspar as an EDSL, and considers
 the trade-offs between the QDSL and EDSL approaches.  Much of this
 section reprises \citet{svenningsson:combining}.
 
+We write |Dp a| is the deep representation of a term of type |a|,
+as described in Section~\ref{subsec:deep}. Terms of the deep
+representation are chosen to be easy to translate to C.
 The top-level function of EDSL Feldspar has the type:
 \begin{spec}
-edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
+edsl :: (Syn a , Syn b) => (a -> b) -> C
 \end{spec}
-Here |Dp a| is the deep representation of a term of type |a|.
-The deep representation is described in detail in Section~\ref{subsec:deep}
-below, and is chosen to be easy to translate to C.
-As before, type |C| represents code in C,
-and type class |Rep| restricts to representable types.
+Here |Syn a| restricts |a| to be a type that can be converted from
+or to a representable type, as described in Section~\ref{subsec:syn}.
+In particular, it has as instances |Syn (Dp a)|, whenever |a| is a
+representable type. As before, type |C| represents code in C.
+
+% The top-level function of EDSL Feldspar has the type:
+% \begin{spec}
+% edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
+% \end{spec}
+% Here |Dp a| is the deep representation of a term of type |a|.
+% The deep representation is described in detail in Section~\ref{subsec:deep}
+% below, and is chosen to be easy to translate to C.
+% As before, type |C| represents code in C,
+% and type class |Rep| restricts to representable types.
 
 
 \subsection{A first example}
@@ -334,7 +346,7 @@ data Dp a where
   MkArr     ::  Dp Int -> (Dp Int -> Dp a) -> Dp (Arr a)
   LnArr     ::  Rep a => Dp (Arr a) -> Dp Int
   IxArr     ::  Dp (Arr a) -> Dp Int -> Dp a
-  IdArr     ::  Dp (Arr a) -> Dp (Arr a)
+  Save      ::  Dp a -> Dp a
   Let       ::  Rep a => Dp a -> (Dp a -> Dp b) -> Dp b
   Tag       ::  String -> Dp a -> Dp a
   Variable  ::  String -> Dp a
@@ -355,13 +367,16 @@ Constructs |LitB|, |LitI|, |LitF| build literals;
 |Pair|, |Fst|, and |Snd| build and decompose pairs;
 |Prim1| and |Prim2| represent primitive
 operations, where the string is the name of the operation;
-|MkArr|, |LnArr|, |IxArr|, and |IdArr|
+|MkArr|, |LnArr|, and |IxArr|
 correspond to the array operations in Section~\ref{subsec:arrays};
+|Save| corresponds to |save| in Section~\ref{subsec:subformula};
 |Let| corresponds to let binding,
 |Tag| indicates common subexpressions,
 and |Variable| is used when translating HOAS to C code.
 
+
 \subsection{Class |Syn|}
+\label{subsec:syn}
 
 We introduce a type class |Syn| that allows us to convert
 shallow embeddings to and from deep embeddings.
@@ -684,8 +699,7 @@ This style of definition again provides fusion. For instance:
 \end{array}
 \]
 Indeed, we can see that by construction that whenever we combine two
-primitives the intermediate vector is always eliminated, a stronger
-guarantee than provided by conventional optimising compilers.
+primitives the intermediate vector is always eliminated.
 
 The type class |Syn| enables conversion between types |Arr| and |Vec|.
 Hence for EDSL, unlike QDSL, explicit calls |toVec| and |fromVec| are
@@ -696,18 +710,18 @@ As with QDSL, there are some situations where fusion is not beneficial.
 We may materialise a vector as an array with the following function.
 \begin{code}
 memorise :: Syn a => Vec a -> Vec a
-memorise = fromDp . MemArr . toDp
+memorise = fromDp . Save . toDp
 \end{code}
-
-The above definition depends on common subexpression elimination
-to ensure |Arr n (toDp . g)| is computed once, rather than once
-for each element of the resulting vector.
-If
+% The above definition depends on common subexpression elimination
+% to ensure |Arr n (toDp . g)| is computed once, rather than once
+% for each element of the resulting vector.
+Here we interpose |Save| to forestall the fusion that would otherwise occur.
+For example, if
 \begin{spec}
 blur :: Syn a => Vec a -> Vec a
 blur v = zipVec  (\x y -> sqrt (x*y))
-                 (append a (unit 0))
-                 (append (unit 0) a)
+                 (appVec a (uniVec 0))
+                 (appVec (uniVec 0) a)
 \end{spec}
 computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either
@@ -716,9 +730,9 @@ compute either
 \end{center}
 with different trade-offs between recomputation and memory usage.
 
-EDSL silently converts between representations, while QDSL forces all
-conversions to be written out; following the pattern that EDSL is more
-compact, while QDSL is more explicit.  For QDSL it is the subformula
-property which guarantees that all intermediate uses of |Vec| are
-eliminated, while for EDSL this is established by operational
-reasoning on the behaviour of the type |Vec|.
+QDSL forces all conversions to be written out, while EDSL silently
+converts between representations; following the pattern that QDSL is
+more explicit, while EDSL is more compact.  For QDSL it is the
+subformula property which guarantees that all intermediate uses of
+|Vec| are eliminated, while for EDSL this is established by
+operational reasoning on the behaviour of the type |Vec|.
