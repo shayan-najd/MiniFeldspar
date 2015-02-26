@@ -326,13 +326,13 @@ data Dp a where
   Prim1	    ::  Rep a => String -> Dp a -> Dp b
   Prim2     ::  (Rep a , Rep b) =>
                 String -> Dp a -> Dp b -> Dp c
-  Arr       ::  Dp Int -> (Dp Int -> Dp a) -> Dp (Arr a)
-  ArrLen    ::  Rep a => Dp (Arr a) -> Dp Int
-  ArrIx     ::  Dp (Arr a) -> Dp Int -> Dp a
-  Variable  ::  String -> Dp a
+  MkArr     ::  Dp Int -> (Dp Int -> Dp a) -> Dp (Arr a)
+  LnArr     ::  Rep a => Dp (Arr a) -> Dp Int
+  IxArr     ::  Dp (Arr a) -> Dp Int -> Dp a
+  IdArr     ::  Dp (Arr a) -> Dp (Arr a)
   Let       ::  Rep a => Dp a -> (Dp a -> Dp b) -> Dp b
   Tag       ::  String -> Dp a -> Dp a
-  Save      ::  Dp a -> Dp a
+  Variable  ::  String -> Dp a
 \end{code}
 \todo{Shayan}{Add Rep to the above as required.}
 
@@ -341,60 +341,20 @@ with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
 \citet{hoas}.
 
-% \sam{Technically this isn't true HOAS because it allows exotic terms.}
-
 The deep embedding has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives, arrays,
 and special-purpose constructs for variables and values.
-Constructs |LitB|, |LitI|, |LitF| build literals.
-Construct |If| builds a conditional.
-Construct |While| resembles |while| in Section~\ref{subsec:while}.
-Constructs |Pair|, |Fst|, and |Snd| build pairs and
-extract the first and second component.
-Constructs |Prim1| and |Prim2| represent primitive
-operations, the string is the name of the operation.
-Construct |Arr| creates a new array from a length and
-a body that computes the array element
-for each index, construct |ArrLen| extracts the length from an array, and
-construct |ArrIx| fetches the element at a given index.
-Construct |Variable| represents a variable.
-
-% The exact semantics is given by the evaluator, |eval|,
-% shown in Figure~\ref{fig:eval}. It is a strict language,
-% so we define an infix strict application operator |(<*>)|.
-% Function |eval| plays no role in generating C, but may be useful for testing.
-%
-% \begin{figure*}
-% \begin{code}
-% (<*>)                 ::  (a -> b) -> a -> b
-% f <*> x               =   seq x (f x)
-%
-% eval                  ::  Dp a -> a
-% eval (LitI i)         =   i
-% eval (LitF x)         =   x
-% eval (LitB b)         =   b
-% eval (If c t e)       =   if eval c then eval t else eval e
-% eval (While c b i)    =   evalWhile (evalFun c) (evalFun b) <*> eval i
-% eval (Pair a b)       =   (,) <*> eval a <*> eval b
-% eval (Fst p)          =   fst <*> eval p
-% eval (Snd p)          =   snd <*> eval p
-% eval (Prim1 _ f a)    =   f <*> eval a
-% eval (Prim2 _ f a b)  =   f <*> eval a <*> eval b
-% eval (Arr n g)        =   array (0,n') [ (i, eval (g (LitI i))) | i <- [0..n'] ]
-%                           where n' = eval n - 1
-% eval (ArrLen a)       =   u-l+1  where (l,u) = bounds (eval a)
-% eval (ArrIx a i)      =   eval a ! eval i
-% eval (Value v)        =   v
-%
-% evalFun               ::  (Dp a -> Dp b) -> a -> b
-% evalFun f x           =   (eval . f . Value) <*> x
-%
-% evalWhile             ::  (a -> Bool) -> (a -> a) -> a -> a
-% evalWhile c b i       =   if c i then evalWhile c b <*> b i else i
-% \end{code}
-% \caption{Evaluator for the deep embedding}
-% \label{fig:eval}
-% \end{figure*}
+Constructs |LitB|, |LitI|, |LitF| build literals;
+|If| builds a conditional.
+|While| corresponds to |while| in Section~\ref{subsec:while};
+|Pair|, |Fst|, and |Snd| build and decompose pairs;
+|Prim1| and |Prim2| represent primitive
+operations, where the string is the name of the operation;
+|MkArr|, |LnArr|, |IxArr|, and |IdArr|
+correspond to the array operations in Section~\ref{subsec:array};
+|Let| corresponds to let binding,
+|Tag| indicates common subexpressions,
+and |Variable| is used when translating HOAS to C code.
 
 \subsection{Class |Syn|}
 
@@ -468,6 +428,12 @@ a result of type |Dp Bool|, and similarly for |(.<.)|.
 % apply. But, the problem with overriding is that once a syntactic
 % entity is fixed to be used i one stage, it cannot be reused in other
 % stage.}
+
+Here is how to compute the minimum of two values.
+\begin{code}
+minim         ::  (Syn a, Ord (Internal a)) => a -> a -> a
+minim x y     =   (x .<. y) ? (x, y)
+\end{code}
 
 
 \subsection{Embedding pairs}
@@ -655,8 +621,8 @@ in Section~\ref{subsec:e-maybe}.
 
 \subsection{Embedding vector}
 
-Recall that values of type |Array| are created by construct |Arr|,
-while |ArrLen| extracts the length and |ArrIx| fetches the element at
+Recall that values of type |Array| are created by construct |MkArr|,
+while |LnArr| extracts the length and |IxArr| fetches the element at
 the given index.  Corresponding to the deep embedding |Array| is a
 shallow embedding |Vec|.
 \begin{code}
@@ -665,8 +631,7 @@ data Vec a = Vec (Dp Int) (Dp Int -> a)
 instance Syn a => Syn (Vec a) where
   type Internal (Vec a) = Array Int (Internal a)
   toDp (Vec n g)    =  Arr n (toDp . g)
-  fromDp a          =  Vec  (ArrLen a)
-                          (\i -> fromDp (ArrIx a i))
+  fromDp a          =  Vec  (LnArr a) (fromDp . IxArr a)
 
 instance Functor Vec where
   fmap f (Vec n g)  =  Vec n (f . g)
@@ -696,23 +661,21 @@ dotVec u v  =   sumVec (zipVec (*) u v)
 normVec     ::  Vec (Dp Float) -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
+Invoking
+\[
+|[|||| normVec . toVec ||||]|
+\]
+generates C code to normalise a vector. If we used a top-level function
+of type |(Syn a, Syn b) => (a -> b) -> C|, then it would insert the
+|toVec| coercion automatically.
 
-% \shayan{Note that I had to hide the name "sqrt" (and "min") imported
-% by Prelude, to avoid name clashes.}
-
-An important consequence of the style of definition we have adopted is
-that it provides lightweight fusion. The definition of |dotVec| would not produce
-good C code if it first computed |zipVec (*) u v|, put the result into an
-intermediate vector |w|, and then computed |sumVec w|. Fortunately, it does
-not. Assume |u| is |Vec m g| and |v| is |Vec n h|. Then we can simplify
-|dotVec u v| as follows:
+This style of definition again provides fusion. For instance:
 \[
 \begin{array}{cl}
-         &  |dotVec u v|  \\
-\leadsto &  |sumVec (zipVec (*) u v)|  \\
-\leadsto &  |sumVec (zipVec (*) (Vec m g) (Vec n h)|  \\
-\leadsto &  |sumVec (Vec (m `min` n) (\i -> g i * h i)|  \\
-\leadsto &  |for (m `min` n) (\i x -> x + g i * h i)|
+  &  |dotVec (Vec m g) (Vec n h)|  \\
+= &  |sumVec (zipVec (*) (Vec m g) (Vec n h)|  \\
+= &  |sumVec (Vec (m `minim` n) (\i -> g i * h i)|  \\
+= &  |for (m `minim` n) (\i x -> x + g i * h i)|
 \end{array}
 \]
 Indeed, we can see that by construction that whenever we combine two
@@ -728,11 +691,8 @@ As with QDSL, there are some situations where fusion is not beneficial.
 We may materialise a vector as an array with the following function.
 \begin{code}
 memorise :: Syn a => Vec a -> Vec a
-memorise = fromDp . Save . toDp
+memorise = fromDp . MemArr . toDp
 \end{code}
-
-\todo{Phil}{Re: Shayan:Need to revise code so that memorise is a primitive.\\
-            I did so. But descriptions should get updated.}
 
 The above definition depends on common subexpression elimination
 to ensure |Arr n (toDp . g)| is computed once, rather than once

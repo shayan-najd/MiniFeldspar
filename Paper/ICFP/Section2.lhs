@@ -3,6 +3,7 @@
 %format arrLen = lenArr
 %format arrIx  = ixArr
 %format arr    = makeArr
+%format mem    = memArr
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -24,8 +25,6 @@ class (Type a , FO a) => Rep a
 
 test :: Bool
 test = ex1 && ex2 && ex3 && ex4
-
-minim = QDSL.min
 
 unit = [|| \ s -> Vec 1  (\ _i -> s) ||]
 \end{code}
@@ -411,32 +410,38 @@ instance (Rep a) => Rep (Arr a)
 
 For arrays, we assume the following primitive operations.
 \begin{spec}
-makeArr  ::  (Rep a) => Int -> (Int -> a) -> Arr a
-lenArr   ::  (Rep a) => Arr a -> Int
-ixArr    ::  (Rep a) => Arr a -> Int -> a
+mkArr   ::  (Rep a) => Int -> (Int -> a) -> Arr a
+lnArr   ::  (Rep a) => Arr a -> Int
+ixArr   ::  (Rep a) => Arr a -> Int -> a
+idArr   ::  (Rep a) => Arr a -> Arr a
 \end{spec}
 The first populates a manifest array of the given
 size using the given indexing function, the second
-returns the length of the array, and the third returns
-the array element at the given index.  Array components
-must be representable.
+returns the length of the array, the third returns
+the array element at the given index, and the fourth
+is used to control array fusion as shown below.
+Array components must be representable.
 
 We define functions to convert between the two representations in the
 obvious way.
 \begin{code}
 toVec        ::  Rep a => Qt (Arr a -> Vec a)
-toVec        =   [|| \a -> Vec (arrLen a) (\i -> arrIx a i) ||]
+toVec        =   [|| \a -> Vec (lnArr a) (\i -> ixArr a i) ||]
 
 fromVec      ::  Rep a => Qt (Vec a -> Arr a)
-fromVec      =   [|| \(Vec n g) -> arr n g ||]
+fromVec      =   [|| \(Vec n g) -> mkArr n g ||]
 \end{code}
 
 It is straightforward to define operations on vectors,
 including combining corresponding elements of two vectors,
 summing the elements of a vector, dot product of two vectors,
 and norm of a vector.
-%format sqrtFltHsk = sqrt
+When combining two vectors, the length of the result is the
+minimum of the lengths of the arguments.
 \begin{code}
+minim    ::  Ord a => Qt (a -> a -> a)
+mimim    =   [|| \x y -> if x < y then x else y ||]
+
 zipVec   ::  Qt ((a -> b -> c) -> Vec a -> Vec b -> Vec c)
 zipVec   =   [||  \f (Vec m g) (Vec n h) ->
                         Vec ($$minim m n) (\i -> f (g i) (h i)) ||]
@@ -448,36 +453,26 @@ dotVec   ::  (Rep a, Num a) => Qt (Vec a -> Vec a -> a)
 dotVec   =   [|| \u v -> $$sumVec ($$zipVec (*) u v) ||]
 
 normVec  ::  Qt (Vec Float -> Float)
-normVec  =   [|| \v -> sqrtFltHsk ($$dotVec v v) ||]
+normVec  =   [|| \v -> sqrt ($$dotVec v v) ||]
 \end{code}
-The second of these uses the |for| loop defined in
-Section~\ref{subsec:while}, the third is defined using
-the first two, and the fourth is defined using the third.
-% Recall that our sharpened subformula property required
-% that |(*)| be fully applied, so before normalisation
-% |(*)| is expanded to |\x y -> x*y|.
+The third of these uses the |for| loop defined in
+Section~\ref{subsec:while}.
 
 The vector representation makes it easy to define any
 function where each vector element is computed independently,
-such as vector concatenation, take, drop, and reverse,
+such as the examples above,
+vector append (|appVec|)
+and creating a vector of one element (|uniVec|),
 but is less well suited to functions with dependencies
-between elements, such as a running sum.
+between elements, such as computing a running sum.
 
 Our final function cannot accept |Vec| as input, since
 the |Vec| type is not representable, but it can accept
-|Arr| as input. Invoking |qdsl [|||| \v -> $$normVec ($$toVec v) ||||]|
-produces the following C code.
-\begin{lstlisting}
-float prog (float[] a) {
-  float x = 0;
-  int i = 0;
-  while (i < lenArr a) {
-    x = x + a[i] * a[i];
-    i = i+1;
-  }
-  return sqrt(x);
-}
-\end{lstlisting}
+|Arr| as input.  At the top level, we invoke |qdsl| on
+\[
+|[|||| $$normVec . $$toVec ||||]|
+\]
+to produce C code.
 
 Types and the subformula property help us to guarantee fusion.  The
 subformula property guarantees that all occurrences of |Vec| must be
@@ -488,22 +483,15 @@ cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
 \begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise = [|| \ v -> $$toVec (mem ($$fromVec v)) ||]
+memorise = [|| $$toVec . idArr . $$fromVec ||]
 \end{code}
-% memorise  =   [|| \v -> $$toVec ($$fromVec v) ||]
-% ***Shayan***: I took the body out, as it is not correct.
-%               In QDSLs, thanks to eta contractions,
-%               "toVec . fromVec" reduces to "id".
-%               I have tested it with QFeldspar:
-% ghci> qdsl ([|| \ a -> $$fromVec ($$memorise ($$toVec a)) ||]
-%                :: Qt (Arr Int -> Arr Int))
-% "AryInt prog (AryInt v0)\n{\n  return v0;\n}"
-For example, if
+Here we interpose |idArr| to forestall the fusion that would
+otherwise occur. For example, if
 \begin{code}
 blur :: Qt (Vec Float -> Vec Float)
-blur = [|| \a -> $$zipVec  (\x y -> sqrtFltHsk (x*y))
-                           ($$append ($$unit 0) a)
-                           ($$append a ($$unit 0)) ||]
+blur = [|| \a -> $$zipVec  (\x y -> sqrt (x*y))
+                           ($$appVec ($$uniVec 0) a)
+                           ($$appVec a ($$uniVec 0)) ||]
 \end{code}
 computes the geometric mean of adjacent elements of a vector, then one may choose to
 compute either

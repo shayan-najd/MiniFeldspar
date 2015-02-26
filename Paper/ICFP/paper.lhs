@@ -8,6 +8,12 @@
 
 % Tiark: Add example after last proposition
 
+% Change to mkArr, lnArr, ixArr, idArr.
+
+% Change `minim` to `same`.
+
+% Shayan: Number of lines
+
 % Shayan: Add to Section 3:
 % The polymorphic primitives are the following:
 %  Functions: while, fst, snd, mem, arr, arrLen, arrIx, cmx, (*), (+)
