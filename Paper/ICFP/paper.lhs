@@ -178,42 +178,21 @@
            {The University of Edinburgh}
            {wadler@@inf.ed.ac.uk}
 
-% \numberofauthors{4}
-% \author{
-% \alignauthor
-% Shayan Najd\\
-%        \affaddr{The University of Edinburgh}\\
-%        \email{sh.najd@@ed.ac.uk}
-% \alignauthor
-% Sam Lindley\\
-%         \affaddr{The University of Edinburgh}\\
-%         \email{sam.lindley@@ed.ac.uk}
-% \alignauthor
-% Josef Svenningsson\\
-%        \affaddr{Chalmers University of Technology}\\
-%        \email{josefs@@chalmers.se}
-% \and
-% \alignauthor
-% Philip Wadler\\
-%        \affaddr{The University of Edinburgh}\\
-%        \email{wadler@@inf.ed.ac.uk}
-% }
-
 \maketitle
 
 \begin{abstract}
 
-We describe a new approach to domain specific languages (DSLs), called
-Quoted DSLs (QDSLs), that resurrects two old ideas: quotation, from
-McCarthy's Lisp of 1960, and the subformula property, from Gentzen's
-natural deduction of 1935.  Quoted terms allow the DSL to share the
-syntax and type system of the host language.  Normalising quoted terms
-ensures the subformula property, which guarantees that one can use
-higher-order or nested types in the source while guaranteeing
-first-order or flat types in the target, and enables using types to
-guide fusion.  We test our ideas by re-implementing Feldspar, which
-was originally implemented as an Embedded DSL (EDSL), as a QDSL; and
-we compare the QDSL and EDSL variants.
+We describe a new approach to domain specific languages (DSLs),
+called Quoted DSLs (QDSLs), that resurrects two old ideas:
+quotation, from McCarthy's Lisp of 1960, and the subformula
+property, from Gentzen's natural deduction of 1935.  Quoted terms
+allow the DSL to share the syntax and type system of the host
+language.  Normalising quoted terms ensures the subformula property,
+which guarantees that one can use higher-order types in the source
+while guaranteeing first-order types in the target, and enables
+using types to guide fusion.  We test our ideas by re-implementing
+Feldspar, which was originally implemented as an Embedded DSL
+(EDSL), as a QDSL; and we compare the QDSL and EDSL variants.
 
 \end{abstract}
 
@@ -253,7 +232,7 @@ which was introduced in 1960 and had macros as early as 1963.  Today,
 a more fashionable technique is Embdedded DSLs (EDSLs), which may use
 shallow embedding, deep embedding, or a combination of the two. Our
 goal in this paper is to reinvigorate the idea of building DSLs via
-quotation, by introducing a new approach which we dub Quoted DSLs
+quotation, by introducing an approach we dub Quoted DSLs
 (QDSLs).  A key feature of QDSLs is the use of normalisation to ensure
 the subformula property, first proposed by Gentzen in 1935.
 
@@ -418,7 +397,7 @@ to the host.
 
 An EDSL may also steal the normalisation rules of its host language,
 using evaluation in the host to normalise terms of the
-target. Section~\ref{sec:qdsl-vs-edsl}
+target, but again the theft is often only partial. Section~\ref{sec:qdsl-vs-edsl}
 compares QDSL and EDSL variants of Feldspar. In the first example, it
 is indeed the case that the EDSL achieves by evaluation of host terms
 what the QDSL achieves by normalisation of quoted terms.  However, in
@@ -508,7 +487,7 @@ shares the EDSL~Feldspar backend.
 The transformer from |Qt| to |Dp| performs the following steps.
 \begin{itemize}
 \item In any context where a constant $c$ is not fully applied,
-  it replaces $c$ with $\expabs{\overline{x}}{}{c \app \overline{x}}$.
+  it replaces $c$ with $\lambda \overline{x}.\, c \app \overline{x}$.
   It replaces identifiers connected to the type |Maybe|, such as
   |return|, |(>>=)|, and |maybe|, by their definitions.
 \item It normalises the term to ensure the subformula property, using
@@ -523,7 +502,7 @@ The transformer from |Qt| to |Dp| performs the following steps.
   and translates these to their corresponding representation
   in |Dp|. Permitted primitives include:
   |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
-  |while|, |makeArr|, |lenArr|, and |ixArr|.
+  |while|, |makeArr|, |lenArr|, |ixArr|, and |save|.
 \end{itemize}
 
 An unfortunate feature of typed quasiquotation in GHC is that the
@@ -545,7 +524,8 @@ overloading for monad operations in general.
 
 The backend performs three transformations over |Dp| terms
 before compiling to C. First, common subexpessions are recognised
-via observable sharing \citep{claessen1999observable} and transformed to |let| bindings.
+% via observable sharing \citep{claessen1999observable}
+and transformed to |let| bindings.
 Second, |Dp| terms are normalised using exactly the same rules
 used for normalising |Qt| terms, as described in Section~\ref{sec:subformula}.
 Third, |Dp| terms are optimised using $\eta$ contraction for
@@ -906,14 +886,6 @@ restrictions.
 
 % \sam{Say something about adding support for observable sharing hacks?}
 
-Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
-speaking prose his whole life. Similarly, many of us have used QDSLs for
-years, if not by that name. DSL via quotation lies at the heart of Lisp
-macros, Microsoft LINQ, and Scala LMS, to name but three.
-By naming the concept and drawing attention to the benefits of
-normalisation and the subformula propety, we hope to help the concept to
-prosper for years to come.
-
 % \shayan{I have a feeling that stressing too much on "naming the
 % concept" can backfire. It can make the work seem shallow. We realised
 % the concept is useful, analysed what essentially makes it useful,
@@ -924,6 +896,28 @@ prosper for years to come.
 % underestimated). But stressing too much on naming, or putting together
 % existing concepts, undermines our fine engineering and scientific
 % study of the matter.}
+
+% Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
+% speaking prose his whole life. Similarly, many of us have used QDSLs for
+% years, if not by that name. DSL via quotation lies at the heart of Lisp
+% macros, Microsoft LINQ, and Scala LMS, to name but three.
+% By naming the concept and drawing attention to the benefits of
+% normalisation and the subformula propety, we hope to help the concept to
+% prosper for years to come.
+
+\begin{quote}
+  These forty years now I've been
+  speaking in prose without knowing it!
+  \flushr --- Moliere
+\end{quote}
+
+Like Moli\`{e}re's Monsieur Jourdain, many of us have used QDSLs for
+years, if not by that name. DSL via quotation lies at the heart of Lisp
+macros, Microsoft LINQ, and Scala LMS, to name but three.
+By naming the concept and drawing attention to the benefits of
+normalisation and the subformula propety, we hope to help the concept to
+prosper for years to come.
+
 
 \paragraph*{Acknowledgement}
 Najd is supported by a Google Europe Fellowship in Programming

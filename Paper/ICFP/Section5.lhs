@@ -204,8 +204,6 @@ approaches.
 
 \end{itemize}
 
-\todo{Sam}{Write a paragraph on reuse between Host and Quoted languages.}
-
 \subsection{A second example}
 \label{subsec:e-maybe}
 
@@ -348,11 +346,12 @@ data Dp a where
   Variable  ::  String -> Dp a
 \end{code}
 % Tag       ::  String -> Dp a -> Dp a
-
-The type above represents a low level, pure functional language
+Type |Dp| represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
 abstract syntax (HOAS) to represent constructs with variable binding
 \citet{hoas}.
+Our code obeys the invariant that we only write |Dp a|
+when |Rep a| holds, that is, when type |a| is representable.
 
 The deep embedding has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives, arrays,
