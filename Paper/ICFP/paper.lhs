@@ -278,7 +278,7 @@ design, and show that the performance of the two versions is
 comparable.  We compare the QDSL and EDSL variants of Feldspar, and
 assess the tradeoffs between the two approaches.
 
-\citet{Davies-Pfenning-1996,Davies-Pfenning-2001} also suggest
+\citet{Davies-Pfenning-2001} also suggest
 quotation as a foundation for staged computation, and note a
 propositions-as-types connection between quotation and a modal logic;
 our type |Qt a| corresponds to their type $\bigcirc a$.  They also
@@ -363,7 +363,7 @@ Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
 
 As another example, the third bullet point above corresponds to a
 standard conservativity result for databases, namely that nested
-queries are no more expressive than flat queries \citep{Wong-1993,Wong-1996}.
+queries are no more expressive than flat queries \citep{Wong-1996}.
 This conservativity result, as implied by the subformula property, is
 used by \citet{cheney:linq} to show that queries that use intermediate
 nesting can be translated to SQL, which only queries flat tables and
@@ -824,7 +824,7 @@ library features that support sharing without needing to extend the
 language.
 
 A proposition-as-types principle for quotation as a modal logic was
-proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
+proposed by \citet{Davies-Pfenning-2001}.  As
 they note, their technique has close connections to two-level
 languages \citep{Nielson-2005} and partial evaluation
 \citep{jones1993partial}.
@@ -858,51 +858,63 @@ A good idea can be much better than a new one. \\
 \flushr -- Gerard Berry
 \end{quote}
 
-We have compared EDSLs and QDSLs, arguing that QDSLs offer competing
-expressiveness and efficiency. EDSLs often (but not always) mimic the
-syntax of the host language, and often (but not always) perform
-normalisation in the host languages, while QDSLs (always) steal the
-syntax of the host language, and (always) ensure the subformula property,
-at the cost of requiring a normaliser.
+We have compared QDSLs and EDSLs, arguing that QDSLs offer competing
+expressiveness and efficiency.
+% EDSLs often (but not always) mimic the
+% syntax of the host language, and often (but not always) perform
+% normalisation in the host languages, while QDSLs (always) steal the
+% syntax of the host language, and (always) ensure the subformula property,
+% at the cost of requiring a normaliser.
 
 The subformula property may have applications in DSLs other that
 QDSLs. For instance, after Section~\ref{subsec:opt} of this paper was
-drafted, it occurred to us that a different approach to options in
-EDSL would be to extend type |Dp| with constructs for type |Maybe|.
+drafted, it occurred to us that a different approach
+% to options in EDSL
+would be to extend type |Dp| with constructs for type |Maybe|.
 So long as type |Maybe| does not appear in the input or output of the
 program, a normaliser that ensures the subformula property could
 guarantee that C code for such constructs need never be generated.
 
-As we noted in the introduction, rather than building a special-purpose tool for
-each QDSL, it should be possible to design a single tool for each host language.
-Our next step is to design a tool, Haskell QDSL, with the following features.
-\begin{itemize}
-\item Perform type inference for the terms returned from typed
-  quasi-quotations, restoring type information currently discarded by GHC.
-\item Based on the above, provide full support for type classes
-  and overloading within quasi-quotation.
-\item Permit the user to choose either an ADT or GADT representation of the
-  term returned by typed quasi-quotation, whichever is more convenient.
-\item Apply a normaliser to ensure the subformula property,
-  which works with any datatype declared in Haskell.
-\item Allow the user to supply a type environment indicating which constants
-  (or free variables) may appear in typed quasi-quotations.
-\end{itemize}
-Such a tool could easily subsume the special-purpose translator from
-|Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
-and lift most of its restrictions. For instance,
-the current prototype is restricted to the |Maybe| monad, while the
-envisioned tool will work with any monad.
+Rather than building a special-purpose tool for each QDSL, it should
+be possible to design a single tool for each host language.  Our next
+step is to design a QDSL library for Haskell that restores the type
+information for quasi-quotations currencly discarded by GHC and uses
+this to support type classes and overloading in full, and to supply a
+more general normaliser.  Such a tool would subsume the
+special-purpose translator from |Qt| to |Dp| described at the
+beginning of Section~\ref{sec:implementation}, and lift most of its
+restrictions.
+
+% Rather than building a special-purpose tool for
+% each QDSL, it should be possible to design a single tool for each host language.
+% Our next step is to design a tool, Haskell QDSL, with the following features.
+% \begin{itemize}
+% \item Perform type inference for the terms returned from typed
+%   quasi-quotations, restoring type information currently discarded by GHC.
+% \item Based on the above, provide full support for type classes
+%   and overloading within quasi-quotation.
+% \item Permit the user to choose either an ADT or GADT representation of the
+%   term returned by typed quasi-quotation, whichever is more convenient.
+% \item Apply a normaliser to ensure the subformula property,
+%   which works with any datatype declared in Haskell.
+% \item Allow the user to supply a type environment indicating which constants
+%   (or free variables) may appear in typed quasi-quotations.
+% \end{itemize}
+% Such a tool could easily subsume the special-purpose translator from
+% |Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
+% and lift most of its restrictions. For instance,
+% the current prototype is restricted to the |Maybe| monad, while the
+% envisioned tool will work with any monad.
 
 % \sam{Say something about adding support for observable sharing hacks?}
 
 Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
 speaking prose his whole life. Similarly, many of us have used QDSLs for
-years, if not by that name. DSL via quotation is the heart of Lisp
-macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
-by naming the concept and drawing attention to the central benefits of
-normalisation and the subformula propety, we may help the concept to
-flower further for years to come.
+years, if not by that name. DSL via quotation lies at the heart of Lisp
+macros, Microsoft LINQ, and Scala LMS, to name but three.
+By naming the concept and drawing attention to the benefits of
+normalisation and the subformula propety, we hope to help the concept to
+prosper for years to come.
 
 % \shayan{I have a feeling that stressing too much on "naming the
 % concept" can backfire. It can make the work seem shallow. We realised

@@ -37,6 +37,21 @@
 // @string{tlca="Typed Lambda Calculi and Applications (TLCA)"}
 // @string{tldi="Types in Language Design and Implementation (TLDI)"}
 
+// @string{acta="Acta Informatica"}
+// @string{compsurv="Computing Surveys"}                  
+// @string{entcs="Electronic Notes in Theoretical Computer Science"}
+// @string{hosc="Higher-Order and Symbolic Computation"}
+// @string{iandc="Information and Computation"}
+// @string{jacm="Journal of the ACM"}                  
+// @string{jcss="Journal of Computer and Systems Science"}                  
+// @string{jfp="Journal of Functional Programming"}
+// @string{jsl="Journal of Symbolic Logic"}                  
+// @string{lispsc="Lisp and Symbolic Computation"}                  
+// @string{lncs="Lecture Notes in Computer Science"}
+// @string{mscs="Mathematical Structures in Computer Science"}                  
+// @string{tcs="Theoretical Computer Science"}
+// @string{toplas="Transactions on Programming Languages and Systems"}
+
 @string{aplas="APLAS"}                  
 @string{concur="CONCUR"}                  
 @string{cpp="CPP"}
@@ -71,25 +86,27 @@
 @string{popl="POPL"}
 @string{ppdp="PPDP"}
 @string{scheme="Scheme"}
+@string{sigmod="SIGMOD"}                  
 @string{stop="STOP"}
 @string{tfp="TFP"}
 @string{tlca="TLCA"}
 @string{tldi="TLDI"}
 
 @string{acta="Acta Informatica"}
+@string{cacm="CACM"}                  
 @string{compsurv="Computing Surveys"}                  
-@string{entcs="Electronic Notes in Theoretical Computer Science"}
-@string{hosc="Higher-Order and Symbolic Computation"}
-@string{iandc="Information and Computation"}
-@string{jacm="Journal of the ACM"}                  
-@string{jcss="Journal of Computer and Systems Science"}                  
-@string{jfp="Journal of Functional Programming"}
-@string{jsl="Journal of Symbolic Logic"}                  
+@string{entcs="ENTCS"}
+@string{hosc="HOSC"}
+@string{iandc="I\&C"}
+@string{jacm="JACM"}                  
+@string{jcss="JCSS"}                  
+@string{jfp="JFP"}
+@string{jsl="JSL"}                  
 @string{lispsc="Lisp and Symbolic Computation"}                  
-@string{lncs="Lecture Notes in Computer Science"}
-@string{mscs="Mathematical Structures in Computer Science"}                  
-@string{tcs="Theoretical Computer Science"}
-@string{toplas="Transactions on Programming Languages and Systems"}
+@string{lncs="LNCS"}
+@string{mscs="MSCS"}                  
+@string{tcs="TCS"}
+@string{toplas="TOPLAS"}
 
 @inproceedings{a-normal-form,
   title={The essence of compiling with continuations},
@@ -204,20 +221,21 @@
   publisher = {ACM},
 }
 @inproceedings{FELDSPAR,
-author={Axelsson, E. and Claessen, K. and D\'{e}vai, G. and Horv\'{a}th, Z. and
-   Keijzer, K. and Lyckeg\r{a}rd, B. and Persson, A. and Sheeran, M. and Svenningsson,
-   J. and Vajdax, A.},
+author={E. Axelsson and others},                  
 title={{F}eldspar: {A} Domain Specific Language for Digital Signal Processing Algorithms},
 booktitle={{MEMOCODE}},
 year={2010},
 }
+// author={Axelsson, E. and Claessen, K. and D\'{e}vai, G. and Horv\'{a}th, Z. and
+//    Keijzer, K. and Lyckeg\r{a}rd, B. and Persson, A. and Sheeran, M. and Svenningsson,
+//   J. and Vajdax, A.},
 
 @inproceedings{reid1999prototyping,
   author={Reid, A. and Peterson, J. and Hager, G. and Hudak, P.},
   title={Prototyping Real-time Vision Systems: An Experiment in {DSL} Design},
   booktitle=icse,
   year={1999},
-  publisher={ACM},
+//publisher={ACM},
 }
 
 @inproceedings{bjesse1998lava,
@@ -225,7 +243,7 @@ year={2010},
   title={{Lava}: Hardware Design in {Haskell}},
   booktitle=icfp,
   year={1998},
-  publisher={ACM},
+//publisher={ACM},
 }
 
 @inproceedings{ankner2013edsl,
@@ -233,7 +251,7 @@ year={2010},
  title={An {EDSL} approach to high performance {Haskell} programming},
   booktitle=haskell,
   year={2013},
-  publisher={ACM},
+//publisher={ACM},
 }
 
 @inproceedings{gill2009type,
@@ -241,7 +259,7 @@ year={2010},
   title={Type-safe observable sharing in {Haskell}},
   booktitle=haskell,
   year={2009},
-  publisher={ACM},
+//publisher={ACM},
 }
 
 @inproceedings{hughes1999restricted,
@@ -249,7 +267,7 @@ year={2010},
   title={Restricted data types in {Haskell}},
   booktitle=haskell,
   year={1999},
-  publisher={ACM},
+//publisher={ACM},
 }
 @inproceedings{claessen:push,
   author={Claessen, K. and Sheeran, M. and Svensson, B.},
@@ -295,7 +313,7 @@ year={2010},
 
 @article{Bentley-1986,
  author = {Bentley, J.},
- title = {Programming pearls: little languages},
+ title = {Programming pearls: {L}ittle languages},
  journal = cacm,
  volume = {29},
  number = {8},
@@ -356,7 +374,7 @@ year={2010},
 @incollection{odonnell:sharing,
   title={Generating netlists from executable circuit specifications in a pure functional language},
   author={John O'Donnell},
-  booktitle={Functional Programming},
+  booktitle={Functional Programming, Glasgow},
 //pages={178--194},
   year={1993},
   publisher={Springer}
@@ -383,7 +401,7 @@ year={2010},
   year        = {1963}
 }
 @article{McCarthy-1960,
-  title={Recursive functions of symbolic expressions and their computation by machine, Part I},  author={McCarthy, John},
+  title={Recursive functions of symbolic expressions and their computation by machine, {P}art {I}},  author={McCarthy, John},
   journal=cacm,
   volume={3},
   number={4},
@@ -438,14 +456,16 @@ year={2010},
 @incollection{Howard-1980,
   author    = {W. A. Howard},
   title     = {The formulae-as-types notion of construction},
-  booktitle = {To H.~B.~Curry:
-               Essays on Combinatory Logic, Lambda Calculus, and Formalism},
+  booktitle = {To H.~B.~Curry},
   editors   = {J. P. Seldin and J. R. Hindley},
   year      = {1980},
   pages     = {479--491},
   publisher = {Academic Press},
-  note      = {The original version was circulated privately in 1969.}
 }
+//  booktitle = {To H.~B.~Curry:
+//               Essays on Combinatory Logic, Lambda Calculus, and Formalism},
+//  note      = {The original version was circulated privately in 1969.}
+                  
 @article{Wadler-2015,
   author      = {Philip Wadler},
   title       = {Propositions as Types},
@@ -511,7 +531,7 @@ year={2010},
 }
 @incollection{sujeeth2013composition,
   title={Composition and reuse with compiled domain-specific languages},
-  author={Sujeeth, Arvind K and Rompf, Tiark and Brown, Kevin J and Lee, HyoukJoong and Chafi, Hassan and Popic, Victoria and Wu, Michael and Prokopec, Aleksandar and Jovanovic, Vojin and Odersky, Martin and others},
+  author={Arvind K Sujeeth and others},
   booktitle=ecoop,
 //pages={52--78},
   year={2013},
@@ -559,17 +579,18 @@ year={2010},
                Sam Lindley and
                Gabriel Radanne and
                Philip Wadler},
-  title     = {Effective quotation: relating approaches to language-integrated query},
+  title     = {Effective quotation},
   booktitle = pepm,
 //OPTpages     = {15--26},
   year      = {2014},
-  crossref  = {DBLP:conf/pepm/2014},
+//crossref  = {DBLP:conf/pepm/2014},
 //OPTurl       = {http://doi.acm.org/10.1145/2543728.2543738},
 //OPTdoi       = {10.1145/2543728.2543738},
 //timestamp = {Thu, 09 Jan 2014 10:44:12 +0100},
 //biburl    = {http://dblp.uni-trier.de/rec/bib/conf/pepm/CheneyLRW14},
 //bibsource = {dblp computer science bibliography, http://dblp.org}
 }
+title     = {Effective quotation: relating approaches to language-integrated query},
 
 @proceedings{DBLP:conf/pepm/2014,
   editor    = {Wei{-}Ngan Chin and
@@ -585,23 +606,23 @@ year={2010},
 }
 
 
-
 @inproceedings{CheneyLW14,
   author    = {James Cheney and
                Sam Lindley and
                Philip Wadler},
-  title     = {Query shredding: efficient relational evaluation of queries over nested
-               multisets},
+  title     = {Query shredding},
   booktitle = sigmod,
 //OPTpages     = {1027--1038},
   year      = {2014},
-  crossref  = {DBLP:conf/sigmod/2014},
+//crossref  = {DBLP:conf/sigmod/2014},
 //OPTurl       = {http://doi.acm.org/10.1145/2588555.2612186},
 //OPTdoi       = {10.1145/2588555.2612186},
 //timestamp = {Sun, 22 Jun 2014 11:31:11 +0200},
 //biburl    = {http://dblp.uni-trier.de/rec/bib/conf/sigmod/CheneyLW14},
 //bibsource = {dblp computer science bibliography, http://dblp.org}
 }
+//  title     = {Query shredding: efficient relational evaluation of queries over nested
+//               multisets},
 
 @proceedings{DBLP:conf/sigmod/2014,
   editor    = {Curtis E. Dyreson and
@@ -619,9 +640,8 @@ year={2010},
 
 @inproceedings{Cooper09,
   author    = {Ezra Cooper},
-  title     = {The Script-Writer's Dream: How to Write Great {SQL} in Your Own Language,
-               and Be Sure It Will Succeed},
   booktitle = dbpl,
+  title     = {The Script-Writer's Dream},
 //pages     = {36--51},
   year      = {2009},
 //crossref  = {DBLP:conf/dbpl/2009},
@@ -631,6 +651,8 @@ year={2010},
 //biburl    = {http://dblp.uni-trier.de/rec/bib/conf/dbpl/Cooper09},
 //bibsource = {dblp computer science bibliography, http://dblp.org}
 }
+//  title     = {The Script-Writer's Dream: How to Write Great {SQL} in Your Own Language,
+//               and Be Sure It Will Succeed},
 
 @proceedings{DBLP:conf/dbpl/2009,
   editor    = {Philippa Gardner and
