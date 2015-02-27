@@ -820,7 +820,7 @@ including Feldspar \citep{FELDSPAR}, Obsidian
 \citet{odonnell:sharing} identified loss of sharing in the context of
 embedded circuit descriptions.  \citet{claessen1999observable} extended
 Haskell to support observable sharing.  \citet{gill2009type} proposes
-library features that support sharing without needing to extend the
+library features that support sharing without need to extend the
 language.
 
 A proposition-as-types principle for quotation as a modal logic was
@@ -830,7 +830,7 @@ languages \citep{Nielson-2005} and partial evaluation
 \citep{jones1993partial}.
 
 Other approaches to DSL that make use of quotation include
-C\# and F\# versions of LINQ under .NET
+C\# and F\# versions of LINQ
 \citep{csharplinq,fsharplinq} and Scala Lightweight
 Modular Staging (LMS) \citep{scalalms}.
 Scala LMS exploits techniques found in both QDSL

@@ -360,7 +360,8 @@ abstract syntax (HOAS) to represent constructs with variable binding
 
 The deep embedding has boolean, integer, and floating point literals,
 conditionals, while loops, pairs, primitives, arrays,
-and special-purpose constructs for variables and values.
+and special-purpose constructs to disable normalisation,
+for let binding, and for variables.
 Constructs |LitB|, |LitI|, |LitF| build literals;
 |If| builds a conditional.
 |While| corresponds to |while| in Section~\ref{subsec:while};
@@ -543,7 +544,7 @@ power of their own technique!)
 
 We now explain in detail the |Opt| type seen in Section~\ref{subsec:maybe}.
 
-The deep-and-shallow technique cleverly represents deep embeddding
+The deep-and-shallow technique represents deep embeddding
 |Dp (a,b)| by shallow embedding |(Dp a, Dp b)|.  Hence, it is tempting to
 represent |Dp (Maybe a)| by |Maybe (Dp a)|, but this cannot work,
 because |fromDp| would have to decide at generation-time whether to
@@ -555,7 +556,7 @@ Instead, \citet{svenningsson:combining} represent values of type
 type |a|.  For a value corresponding to |Just x|, the boolean is true
 and the value is |x|, while for one corresponding to |Nothing|, the
 boolean is false and the value is |undef|.  We define |some'|,
-|none'|, and |opt'| as the analogues of |Just|, |Nothing|, and
+|none'|, and |option'| as the analogues of |Just|, |Nothing|, and
 |maybe|.  The |Syn| instance is straightforward, mapping options to
 and from the pairs already defined for |Dp|.
 \begin{code}
@@ -597,12 +598,12 @@ We solve it with a trick due to \citet{PerssonAS11}.
 % \sam{I think Jeremy Yallop may have also covered this kind of issue
 %   somewhere in his thesis.}
 
-We introduce a second continuation-passing style (CPS) type |Opt|,
-defined in terms of the representation type |Opt'|.  It is
-straightforward to define |Monad| and |Syn| instances for the CPS
-type, operations to lift the representation type to CPS and to lower
-CPS to the representation type, and to lift |some|, |none|, and
-|option| from the representation type to the CPS type.
+We introduce a continuation-passing style (CPS) type, |Opt|,
+defined in terms of |Opt'|.  It is
+straightforward to define |Monad| and |Syn| instances,
+operations to lift the representation type to lift and lower
+one type to the other, and to lift |some|, |none|, and
+|option| to the CPS type.
 The |lift| operation is closely related to the |(>>=)| operation
 we could not define above; it is properly typed,
 thanks to the type constraint on |b| in the definition of |Opt a|.
