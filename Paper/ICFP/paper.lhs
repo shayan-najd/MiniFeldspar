@@ -759,7 +759,7 @@ with respect to a notion of representability.  A term of type |A -> B|
 has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
 rank of |B|, while a term of representable type has rank $0$.
 We say a term is \emph{first-order} when every subterm is either
-representable, or is of the form $\lambda \overline{x} N$
+representable, or is of the form $\lambda \overline{x}.\, N$
 where each bound variable and the body is of representable type.
 
 The following characterises translation to a first-order language.
@@ -772,7 +772,8 @@ normalises to a term that is first-order.
 \end{proposition}
 %\vspace{-1ex}
 The property follows immediately by observing that any term $L$
-of rank $1$ can be rewritten to the form $\lambda \overline{x} L \app \overline{x}$
+of rank $1$ can be rewritten to the form
+$\lambda \overline{y}.\, (L \app \overline{y})$
 where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
