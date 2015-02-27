@@ -359,7 +359,7 @@ only uses conjunction. Equivalently, any lambda calculus term that
 mentions only pair types in its free variables and result, even if it
 uses functions, can be put in a normal form that only uses pairs. Such
 a result is related to the first bullet point above; see
-Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
+Proposition~\ref{prop:fo} in Section~\ref{sec:subformula}.
 
 As another example, the third bullet point above corresponds to a
 standard conservativity result for databases, namely that nested
@@ -580,11 +580,11 @@ the increase being due to normalisation time
 \section{The subformula property}
 \label{sec:subformula}
 
-This section introduces a collection of reduction rules for
-normalising terms that enforces the subformula property
-while ensuring sharing is preserved. The rules adapt to
+This section introduces a reduction rules for
+normalising terms that enforce the subformula property
+while preserving sharing. The rules adapt to
 both call-by-need and call-by-value.
-
+%
 We work with simple types. The only polymorphism in our examples
 corresponds to instantiating constants (such as $\mathit{while}$) at
 different types.
@@ -682,11 +682,8 @@ The type of a constant $c$ of arity $k$ is written
 \[
 c : A_1 \to \cdots A_k \to B
 \]
-%% [SL: no need to talk about the subtypes of c as it is not a subterm
-%% unless fully applied]
-%%
-%% and its subtypes are itself and $A_1$, \ldots, $A_k$, and $B$
-%% (but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
+and its subformulas are itself and $A_1$, \ldots, $A_k$, and $B$
+(but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
 An application of a constant $c$ of arity $k$ is written
 \[
 c \app M_1 \app \cdots \app M_k
@@ -696,7 +693,6 @@ and its subterms are itself and $M_1$, \ldots, $M_k$
 Free variables are equivalent to constants of arity zero.
 
 Terms in normal form satisfy the subformula property.
-
 \begin{proposition}[Subformula property]
 \label{prop:subformula}
 If $\Gamma \vdash M:A$ and $M$ is in normal form,
@@ -709,26 +705,26 @@ The differences are that we have introduced fully applied constants
 (to enable the sharpened subformula property, below), and that our
 reduction rules introduce |let|, in order to ensure sharing is preserved.
 
-Normalisation may lead to an exponential increase in the size
-of a term, for instance when there are nested |case| expressions. This
-was not a problem for the examples we considered in
-Section~\ref{sec:implementation}, but may be a problem in some
-contexts. Normalisation may be controlled by introduction of
-uninterpreted constants (see Section~\ref{subsec:subformula}),
-but further work is needed to understand the contexts in which
+Normalisation may lead to an exponential or worse blow up in the size
+of a term, for instance when there are nested |case| expressions.
+The benchmarks in Section~\ref{sec:implementation} do not suffer
+from blow up, but it may be a problem in some contexts.
+Normalisation may be controlled by introduction of
+uninterpreted constants, as in Section~\ref{subsec:subformula}.
+Further work is needed to understand when
 complete normalisation is
-desirable and the contexts in which it is problematic.
+desirable and when it is problematic.
 
 Examination of the proof in \citet{Prawitz-1965} shows that in fact
 normalisation achieves a sharper property.
-\begin{proposition}[Sharpened subformula property]
+\begin{proposition}[Sharpened subformula]
 \label{prop:sharpened}
 If $\Gamma \vdash M:A$ and $M$ is in normal form, then every proper
 subterm of $M$ that is not a free variable or a subterm of a constant
 application has a type that is a proper subformula of $A$ or a proper
 subformula of a type in $\Gamma$.
 \end{proposition}
-So far as we know, we are the first to formulate the sharpened version.
+We believe we are the first to formulate the sharpened version.
 
 The sharpened subformula property says nothing about the types of
 subterms of constant applications, but such types are immediately apparent by
@@ -740,44 +736,44 @@ $M_i$ that is not a free variable of $M_i$ or a subterm of a constant
 application has a type that is a proper subformula of $A_i$ or a
 proper subformula of the type of one of its free variables.
 
-In Section~\ref{sec:qfeldspar}, an important property is that every
+In Section~\ref{sec:qfeldspar}, we require that every
 top-level term passed to |qdsl| is suitable for translation to C after
-normalisation.  Here we are interested in C as a \emph{first-order}
-language. The exact property required is somewhat subtle. One might at
-first guess the required property is that every subterm is
-representable, in the sense introduced in
-Section~\ref{subsec:top}, but this is not quite right. The
-top-level term is a function from a representable type to a
-representable type. And the constant |while| expects subterms of type
-|s -> Bool| and |s -> s|, where the state |s| is representable.
-Fortunately, the exact property required is not hard to formulate in a
-general way, and is easy to ensure by applying the sharpened
-subformula property.
+normalisation, and any DSL translating to
+a \emph{first-order} language must impose a similar requirement.
+One might at first guess the required property is that every
+subterm is \emph{representable}, in the sense introduced in
+Section~\ref{subsec:top}, but this is not quite right. The top-level
+term is a function from a representable type to a representable type,
+and the constant |while| expects subterms of type |s -> Bool|
+and |s -> s|, where the state |s| is representable.  Fortunately,
+the property required is not hard to formulate in a general way,
+and is easy to ensure by applying the sharpened subformula property.
 
-Rather than fixing on the notion of representability
-as given in Section~\ref{sec:qfeldspar}, we take the
+% Rather than fixing on the notion of representability
+% as given in Section~\ref{sec:qfeldspar},
+Take the
 representable types to be any set closed under subformulas
 that does not include function types.
 We introduce a variant of the usual notion of \emph{rank} of a type,
 with respect to a notion of representability.  A term of type |A -> B|
 has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
 rank of |B|, while a term of representable type has rank $0$.
+We say a term is \emph{first-order} when every subterm is either
+representable, or is of the form $\lambda \overline{x} N$
+where each bound variable and the body is of representable type.
 
-The property we need to ensure ease of translation to C
-(or any other first-order language) is as follows.
-
-\begin{proposition}[Rank and representability]
-\label{prop:rank}
-Consider a term $M$ of rank $1$, where every free variable of $M$ has
-rank $0$ and every constant in $M$ has rank at most $2$.  Then $M$
-normalises to a form where every subterm either is of representable
-type or is of the form $\expabs{\overline{x}}{}{N}$ where each of the
-bound variables $x_i$ and the body $N$ has representable type.
+The following characterises translation to a first-order language.
+\vspace{-2ex}
+\begin{proposition}[First-order]
+\label{prop:fo}
+Consider a term of rank $1$, where every free variable has
+rank $0$ and every constant has rank at most $2$.  Then the term
+normalises to a term that is first-order.
 \end{proposition}
-
+%\vspace{-1ex}
 The property follows immediately by observing that any term $L$
-with type of rank $1$ can be rewritten in the form
-$\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
+of rank $1$ can be rewritten to the form $\lambda \overline{x} L \app \overline{x}$
+where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
@@ -788,6 +784,7 @@ subterm has a representable type (boolean, integer, float, or a pair of an
 integer and float) or is a lambda abstraction with bound variables and
 body of representable type; and it is this property which ensures it
 is easy to generate C code from the term.
+
 
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}

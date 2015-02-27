@@ -91,12 +91,9 @@ power n =
   else if n == 0 then
     [|| \x -> 1 ||]
   else if even n then
-    [|| \x -> $$sqr ($$(power (n `div` 2)) x) ||]
+    [|| \x -> let y = $$(power (n `div` 2)) x in y * y ||]
   else
     [|| \x -> x * ($$(power (n-1)) x) ||]
-
-sqr  ::  Qt (Float -> Float)
-sqr  =   [|| \y -> y * y ||]
 \end{code}
 The typed quasi-quoting mechanism of Template Haskell is used to
 indicate which code executes at which time.  Unquoted code executes at
@@ -293,7 +290,7 @@ power' n =
     [|| \x -> return 1 ||]
   else if even n then
     [|| \x -> do  y <- $$(power' (n `div` 2)) x
-                  return ($$sqr y) ||]
+                  return (y * y) ||]
   else
     [|| \x -> do  y <- $$(power' (n-1)) x
                   return (x*y) ||]
@@ -302,14 +299,13 @@ power'' ::  P.Int -> Qt (Float -> Float)
 power'' n =
   [|| \ x ->  maybe 0 (\y -> y) ($$(power' n) x)||]
 \end{code}
-
 %if False
 \begin{code}
 ex3 = testNrmSmpQt (power (-6)) (power'' (-6))
 ex4 = qdsl (power (-6)) == qdsl (power'' (-6))
 \end{code}
 %endif
-Here |sqr| is as before. Evaluation and normalisation of
+Evaluation and normalisation of
 |power (-6)| and |power'' (-6)| yield identical terms
 (up to renaming), and hence applying |qdsl| to these yields
 identical C code.
