@@ -546,13 +546,14 @@ benchmarks used,
 and performance results.
 The translator from |Dp| to C is shared by QDSL and EDSL Feldspar,
 and listed in a separate column.
-All five benchmarks run under QDSL and EDSL Feldspar generate
-syntactically identical C code.
+All five benchmarks run under QDSL and EDSL Felsdpar generate
+identical C code, up to permutation of independent assignments, with
+identical compile and run times.
 The columns for QDSL and EDSL Feldspar give compile and run
 times for Haskell, while the columns for generated code
 give compile and run times for the generated C.
 QDSL compile times are slightly greater than EDSL,
-and QDSL run times range from twice to ten times that of EDSL,
+and QDSL run times range from identical to four times that of EDSL,
 the increase being due to normalisation time
 (our normaliser was not designed to be particularly efficient).
 
@@ -593,7 +594,7 @@ of strong normalisation. It is easy to confirm that all
 of the reduction rules preserve sharing and preserve order of evaluation.
 
 Write $M \mapsto_i N$ to indicate that $M$ reduces to $N$ in phase
-$i$. 
+$i$.
 Let $F$ and $G$ range over two different forms of evaluation
 frame used in Phases~1 and~2 respectively. Write $\fv{F}$ for the
 set of free variables of $F$, and similarly for $G$.
