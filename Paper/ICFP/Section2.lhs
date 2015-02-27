@@ -1,5 +1,6 @@
 %format testQt    (x) (y) = "\fi" y
 %format testNrmQt (x) (y) = "\fi" y
+%format testNrmSmpQt (x) (y) = "\fi" y
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -21,7 +22,7 @@ type C = String
 class (Type a , FO a) => Rep a
 
 test :: Bool
-test = ex1 && ex2 && ex3 && ex4 && ex5 && ex6
+test = ex1 && ex2 && ex3 && ex4 && ex5
 
 appVec = append
 
@@ -100,7 +101,7 @@ sqr  =   [|| \y -> y * y ||]
 The typed quasi-quoting mechanism of Template Haskell is used to
 indicate which code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by |[||...||]| and unquoting by |$$(...)|.
+indicated by |[||||...||||]| and unquoting by |$$(...)|.
 
 Evaluating |power (-6)| yields the following:
 \begin{code}
@@ -233,7 +234,7 @@ save :: Rep a => a -> a
 of arity $1$, which is equivalent to the identity function
 on representable types; a use of |save| appears in
 Section~\ref{subsec:arrays}.
-In a context with recursion, we take 
+In a context with recursion, we take
 \begin{spec}
 fix :: (a -> a) -> a
 \end{spec}
@@ -476,53 +477,13 @@ the |Vec| type is not representable, but it can accept
 |[|||| $$normVec . $$toVec ||||]|
 \]
 the quoted term normalises to
-\begin{spec}
-[|| (snd (while  (\ s -> fst s < lnArr a)
-                 (\ s -> let i = fst s in (i+1,
-                   snd s + (ixArr a i * ixArr a i)))
-                 (0 , 0.0))) ||]
-\end{spec}
-%if False
 \begin{code}
-ex5 = testNrmSmpQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\a -> sqrt
-     (snd (while (\ s -> fst s < lnArr a)
-                 (\ s -> let i = fst s
-                         in  (i + 1 , snd s + (ixArr a i * ixArr a i)))
-                 (0 , 0.0)))) ||]
-
-ex6 = testNrmQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\ x0 -> let x1 = lnArr x0 in
-          let x2 = x1 < x1 in
-          if x2
-          then (let x13 = while
-                          (\ x3 -> let x4 = fst x3 in
-                                   x4 < x1)
-                          (\ x5 -> let x6  = fst x5      in
-                                   let x7  = snd x5      in
-                                   let x8  = x6 + 1      in
-                                   let x9  = ixArr x0 x6 in
-                                   let x10 = ixArr x0 x6 in
-                                   let x11 = x10 * x9    in
-                                   let x12 = x7  + x11   in
-                                   (x8 , x12))
-                          (0 , 0.0)
-                in let x14 = snd x13 in
-                   sqrt x14)
-          else (let x13 =  while
-                           (\ x3 -> let x4 = fst x3 in
-                                    x4 < x1)
-                           (\ x5 -> let x6  = fst x5      in
-                                    let x7  = snd x5      in
-                                    let x8  = x6 + 1      in
-                                    let x9  = ixArr x0 x6 in
-                                    let x10 = ixArr x0 x6 in
-                                    let x11 = x10 * x9    in
-                                    let x12 = x7  + x11   in
-                                    (x8 , x12))
-                           (0 , 0.0)
-                in let x14 = snd x13 in
-                   sqrt x14)) ||]
+{-"\iffalse"-}
+ex5 = testNrmSmpQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\a -> sqrt (snd (while (\ s -> fst s < lnArr a)
+                                     (\ s -> let i = fst s in
+                                             (i + 1 , snd s + (ixArr a i * ixArr a i)))
+                                     (0 , 0.0)))) ||]
 \end{code}
-%endif
 from which it is easy to generate C code.
 
 The vector representation makes it easy to define any
@@ -542,7 +503,7 @@ cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
 \begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise = [|| $$toVec . mem . $$fromVec ||]
+memorise = [|| $$toVec . save . $$fromVec ||]
 \end{code}
 Here we interpose |save|, as defined in Section~\ref{subsec:subformula}
 to forestall the fusion that would otherwise occur. For example, if
