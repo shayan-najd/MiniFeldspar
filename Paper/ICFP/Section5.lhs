@@ -65,27 +65,27 @@ required to implement Feldspar as an EDSL, and considers
 the trade-offs between the QDSL and EDSL approaches.  Much of this
 section reprises \citet{svenningsson:combining}.
 
-We write |Dp a| is the deep representation of a term of type |a|,
-as described in Section~\ref{subsec:deep}. Terms of the deep
-representation are chosen to be easy to translate to C.
 The top-level function of EDSL Feldspar has the type:
 \begin{spec}
-edsl :: (Syn a , Syn b) => (a -> b) -> C
+edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
 \end{spec}
-Here |Syn a| restricts |a| to be a type that can be converted from
-or to a representable type, as described in Section~\ref{subsec:syn}.
-In particular, it has as instances |Syn (Dp a)|, whenever |a| is a
-representable type. As before, type |C| represents code in C.
+Here |Dp a| is the deep representation of a term of type |a|.
+The deep representation is described in detail in Section~\ref{subsec:deep}
+below, and is chosen to be easy to translate to C.
+As before, type |C| represents code in C,
+and type class |Rep| restricts to representable types.
 
+% We write |Dp a| is the deep representation of a term of type |a|,
+% as described in Section~\ref{subsec:deep}. Terms of the deep
+% representation are chosen to be easy to translate to C.
 % The top-level function of EDSL Feldspar has the type:
 % \begin{spec}
-% edsl :: (Rep a , Rep b) => (Dp a -> Dp b) -> C
+% edsl :: (Syn a , Syn b) => (a -> b) -> C
 % \end{spec}
-% Here |Dp a| is the deep representation of a term of type |a|.
-% The deep representation is described in detail in Section~\ref{subsec:deep}
-% below, and is chosen to be easy to translate to C.
-% As before, type |C| represents code in C,
-% and type class |Rep| restricts to representable types.
+% Here |Syn a| restricts |a| to be a type that can be converted from
+% or to a representable type, as described in Section~\ref{subsec:syn}.
+% In particular, it has as instances |Syn (Dp a)|, whenever |a| is a
+% representable type. As before, type |C| represents code in C.
 
 
 \subsection{A first example}
@@ -129,8 +129,9 @@ Evaluating |power (-6)| yields the following:
   1 / (  (u * ((u * 1) * (u * 1))) *
          (u * ((u * 1) * (u * 1))))))
 \end{spec}
-Applying common-subexpression elimination, or using a technique such
-as observable sharing, permits recovering the sharing structure.
+Applying common-subexpression elimination, for instance
+via observable sharing \citep{claessen1999observable},
+permits recovering the sharing structure.
 \[
 \begin{array}{c@@{~~}||@@{~~}l}
 |v| & |(u * 1)|  \\
@@ -348,10 +349,9 @@ data Dp a where
   IxArr     ::  Dp (Arr a) -> Dp Int -> Dp a
   Save      ::  Dp a -> Dp a
   Let       ::  Rep a => Dp a -> (Dp a -> Dp b) -> Dp b
-  Tag       ::  String -> Dp a -> Dp a
   Variable  ::  String -> Dp a
 \end{code}
-\todo{Shayan}{Add Rep to the above as required.}
+% Tag       ::  String -> Dp a -> Dp a
 
 The type above represents a low level, pure functional language
 with a straightforward translation to C. It uses higher-order
@@ -371,7 +371,7 @@ operations, where the string is the name of the operation;
 correspond to the array operations in Section~\ref{subsec:arrays};
 |Save| corresponds to |save| in Section~\ref{subsec:subformula};
 |Let| corresponds to let binding,
-|Tag| indicates common subexpressions,
+% |Tag| indicates common subexpressions,
 and |Variable| is used when translating HOAS to C code.
 
 
@@ -458,8 +458,8 @@ minim x y     =   (x .<. y) ? (x, y)
 
 \subsection{Embedding pairs}
 
-We set up a correspondence between host language pairs
-in the shallow embedding and target language pairs in the deep embedding.
+Host language pairs in the shallow embedding
+correspond to target language pairs in the deep embedding.
 \begin{code}
 instance (Syn a, Syn b) => Syn (a,b) where
   type  Internal (a,b) = (Internal a, Internal b)
@@ -537,6 +537,7 @@ power of their own technique!)
 % \shayan{Though I heard you all say otherwise, but I still find above
 % provocative (for the reader / reviewer).}
 
+
 \subsection{Embedding option}
 \label{subsec:opt}
 
@@ -550,53 +551,54 @@ return |Just| or |Nothing|, but which to use is not known until
 run-time.
 
 Instead, \citet{svenningsson:combining} represent values of type
-|Maybe a| by the type |Opt_R a|, which pairs a boolean with a value of
+|Maybe a| by the type |Opt' a|, which pairs a boolean with a value of
 type |a|.  For a value corresponding to |Just x|, the boolean is true
 and the value is |x|, while for one corresponding to |Nothing|, the
-boolean is false and the value is |undef|.  We define |some_R|,
-|none_R|, and |opt_R| as the analogues of |Just|, |Nothing|, and
+boolean is false and the value is |undef|.  We define |some'|,
+|none'|, and |opt'| as the analogues of |Just|, |Nothing|, and
 |maybe|.  The |Syn| instance is straightforward, mapping options to
 and from the pairs already defined for |Dp|.
 \begin{code}
-data Opt_R a = Opt_R { def :: Dp Bool, val :: a }
+data Opt' a = Opt' { def :: Dp Bool, val :: a }
 
-instance Syn a => Syn (Opt_R a) where
-  type Internal (Opt_R a) = (Bool, Internal a)
-  toDp (Opt_R b x)  =  Pair b (toDp x)
-  fromDp p          =  Opt_R (Fst p) (fromDp (Snd p))
+instance Syn a => Syn (Opt' a) where
+  type Internal (Opt' a) = (Bool, Internal a)
+  toDp (Opt' b x)  =  Pair b (toDp x)
+  fromDp p         =  Opt' (Fst p) (fromDp (Snd p))
 
-some_R          ::  a -> Opt_R a
-some_R x        =   Opt_R true x
+some'          ::  a -> Opt' a
+some' x        =   Opt' true x
 
-none_R          ::  Undef a => Opt_R a
-none_R          =   Opt_R false undef
+none'          ::  Undef a => Opt' a
+none'          =   Opt' false undef
 
-option_R        ::  Syn b => b -> (a -> b) -> Opt_R a -> b
-option_R d f o  =   def o ? (f (val o), d)
+option'        ::  Syn b => b -> (a -> b) -> Opt' a -> b
+option' d f o  =   def o ? (f (val o), d)
 \end{code}
 
-The next obvious step is to define a suitable monad over the type |Opt_R|.
+The next obvious step is to define a suitable monad over the type |Opt'|.
 The natural definitions to use are as follows:
-\begin{code}
-returnn    ::  a -> Opt_R a
-returnn x  =   some_R x
+\begin{spec}
+return    ::  a -> Opt' a
+return x  =   some' x
 
-(>>==)     ::  (Undef b) => Opt_R a -> (a -> Opt_R b) -> Opt_R b
-o >>== g   =   Opt_R  (def o ? (def (g (val o)), false))
-                      (def o ? (val (g (val o)), undef))
-\end{code}
+(>>=)     ::  (Undef b) => Opt' a -> (a -> Opt' b) -> Opt' b
+o >>= g   =   Opt'  (def o ? (def (g (val o)), false))
+                    (def o ? (val (g (val o)), undef))
+\end{spec}
 However, this adds type constraint |Undef b|
 to the type of |(>>=)|, which is not permitted.
 The need to add such constraints often arises, and has
 been dubbed the constrained-monad problem
-\citep{hughes1999restricted,SculthorpeBGG13,SvenningssonS13}.
+\citep{hughes1999restricted,SvenningssonS13}.
+% SculthorpeBGG13
 We solve it with a trick due to \citet{PerssonAS11}.
 
 % \sam{I think Jeremy Yallop may have also covered this kind of issue
 %   somewhere in his thesis.}
 
 We introduce a second continuation-passing style (CPS) type |Opt|,
-defined in terms of the representation type |Opt_R|.  It is
+defined in terms of the representation type |Opt'|.  It is
 straightforward to define |Monad| and |Syn| instances for the CPS
 type, operations to lift the representation type to CPS and to lower
 CPS to the representation type, and to lift |some|, |none|, and
@@ -607,7 +609,7 @@ thanks to the type constraint on |b| in the definition of |Opt a|.
 
 \begin{code}
 newtype Opt a =
-  O { unO :: forall b . Undef b => ((a -> Opt_R b) -> Opt_R b) }
+  O { unO :: forall b . Undef b => ((a -> Opt' b) -> Opt' b) }
 
 instance Monad Opt where
   return x    =  O (\g -> g x)
@@ -618,22 +620,21 @@ instance Undef a => Syn (Opt a) where
   fromDp  =  lift . fromDp
   toDp    =  toDp . lower
 
-lift     ::  Opt_R a -> Opt a
-lift o   =   O (\g -> Opt_R  (def o ? (def (g (val o)), false))
-                             (def o ? (val (g (val o)), undef)))
+lift :: Opt' a -> Opt a
+lift o =  O (\g -> Opt'  (def o ? (def (g (val o)), false))
+                         (def o ? (val (g (val o)), undef)))
 
-lower    ::  Undef a => Opt a -> Opt_R a
-lower m  =   unO m some_R
+lower :: Undef a => Opt a -> Opt' a
+lower m = unO m some'
 
-none     ::  Undef a => Opt a
-none     =   lift none_R
+none :: Undef a => Opt a
+none =  lift none'
 
-some     ::  a -> Opt a
-some a   =   lift (some_R a)
+some :: a -> Opt a
+some a = lift (some' a)
 
-option        ::  (Undef a, Undef b) =>
-                    b -> (a -> b) -> Opt a -> b
-option d f o  = option_R d f (lower o)
+option :: (Undef a, Syn b) => b -> (a -> b) -> Opt a -> b
+option d f o = option' d f (lower o)
 \end{code}
 These definitions support the EDSL code presented
 in Section~\ref{subsec:e-maybe}.
@@ -656,7 +657,7 @@ instance Syn a => Syn (Vec a) where
 instance Functor Vec where
   fmap f (Vec n g)  =  Vec n (f . g)
 \end{code}
-The constructor |Vec| resembles the constructor |Arr|, but the former
+Constructor |Vec| resembles |Arr|, but the former
 constructs a high-level representation of the array and the latter an
 actual array.
 It is straightforward to make |Vec| an instance of |Functor|.
@@ -728,7 +729,7 @@ compute either
 \begin{center}
 |blur . blur| ~~~or~~~ |blur . memorise . blur|
 \end{center}
-with different trade-offs between recomputation and memory usage.
+with different trade-offs between recomputation and memory use.
 
 QDSL forces all conversions to be written out, while EDSL silently
 converts between representations; following the pattern that QDSL is

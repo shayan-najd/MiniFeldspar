@@ -1,5 +1,8 @@
 % Phil TODO
 
+% Delete Tag from Dp. Add brief explanation of observable sharing
+% via comparison of pointers.
+
 % Review Sam's additions to related work
 
 % Tiark: leave open the question of the extent to which LMS partakes
@@ -159,18 +162,15 @@
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
-%% SL: we can save a bit of space by merging the first two authors
-%% like this:
-%%
-%% \authorinfo{Shayan Najd \qquad Sam Lindley}
-%%            {The University of Edinburgh}
-%%            {\{sh.najd,sam.lindley\}@@ed.ac.uk}
-\authorinfo{Shayan Najd}
+\authorinfo{Shayan Najd \qquad Sam Lindley}
            {The University of Edinburgh}
-           {sh.najd@@ed.ac.uk}
-\authorinfo{Sam Lindley}
-           {The University of Edinburgh}
-           {sam.lindley@@ed.ac.uk}
+           {\{sh.najd,sam.lindley\}@@ed.ac.uk}
+% \authorinfo{Shayan Najd}
+%            {The University of Edinburgh}
+%            {sh.najd@@ed.ac.uk}
+% \authorinfo{Sam Lindley}
+%            {The University of Edinburgh}
+%            {sam.lindley@@ed.ac.uk}
 \authorinfo{Josef Svenningsson}
            {Chalmers University of Technology}
            {josefs@@chalmers.se}
@@ -487,7 +487,7 @@ Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
 Our QDSL and EDSL variants of Feldspar and benchmarks are
-available on Gitub\footnote{\url{https://github.com/shayan-najd/QFeldspar}}.
+available at \url{https://github.com/shayan-najd/QFeldspar}.
 
 
 \section{Feldspar as a QDSL}
@@ -544,8 +544,8 @@ translate the |Maybe| monad as a special case rather than supporting
 overloading for monad operations in general.
 
 The backend performs three transformations over |Dp| terms
-before compiling to C. First, common subexpessions explicitly
-tagged in EDSL Feldsapr source are transformed to |let| bindings.
+before compiling to C. First, common subexpessions are recognised
+via observable sharing \citep{claessen1999observable} and transformed to |let| bindings.
 Second, |Dp| terms are normalised using exactly the same rules
 used for normalising |Qt| terms, as described in Section~\ref{sec:subformula}.
 Third, |Dp| terms are optimised using $\eta$ contraction for
@@ -599,11 +599,10 @@ As usual, terms are taken as
 equivalent up to renaming of bound variables. Write $\fv{M}$ for
 the set of free variables of $M$, and $\subst{N}{x}{M}$ for
 capture-avoiding substitution of $M$ for $x$ in $N$.
-Let $V$, $W$ range over values, and $P$ range over
-terms that are not values.
+Let $V$, $W$ range over values.
 
-Let $\Gamma$ range over type environments, which are sets of pairs
-of variables with types $x:A$. Write $\Gamma \vdash M:A$ to
+Let $\Gamma$ range over type environments, which pair
+variables with types, and write $\Gamma \vdash M:A$ to
 indicate that term $M$ has type $A$ under type environment
 $\Gamma$. Typing rules are standard.
 
@@ -614,12 +613,11 @@ of strong normalisation. It is easy to confirm that all
 of the reduction rules preserve sharing and preserve order of evaluation.
 
 Write $M \mapsto_i N$ to indicate that $M$ reduces to $N$ in phase
-$i$. Only Phases~1 and 2 are required to normalise terms, but if the
-semantics is call-by-need then Phase~3 may also be applied.
+$i$. 
 Let $F$ and $G$ range over two different forms of evaluation
-frame used in Phases~1 and~2 respectively. We write $\fv{F}$ for the
-set of free variables of $F$, and similarly for $G$.  The reduction
-relation is closed under compatible closure.
+frame used in Phases~1 and~2 respectively. Write $\fv{F}$ for the
+set of free variables of $F$, and similarly for $G$.
+Reductions are closed under compatible closure.
 
 \figterm
 %\figtyping
@@ -629,9 +627,11 @@ relation is closed under compatible closure.
 The normalisation procedure consists of exhaustively applying the
 reductions of Phase~1 until no more apply, then similarly for Phase~2,
 and finally for Phase~3.  Phase~1 performs let-insertion, naming
-subterms that are not values, along the lines of a translation to
+subterms, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
 in Moggi's metalanguage for monads \citep{Moggi-1991}.
+% As an optimisation, this transformation may be restricted to
+% only introduce let bindings for terms that are not values.
 %% The rules are designed to leave applications such as |f V W|
 %% unchanged, rather than transform them to |let g = f V in g W|.
 Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
@@ -803,8 +803,9 @@ and perhaps the first application of quotation to domain-specific
 languages is Lisp macros \citep{Hart-1963}.
 
 This paper uses Haskell, which has been widely used for EDSLs
-\citep{hudak1997domain, bjesse1998lava, reid1999prototyping,
-Gill:14:DSLs-and-Synthesis}.  We constrast QDSL with an EDSL technique
+\citep{hudak1997domain}.
+%  bjesse1998lava, reid1999prototyping, Gill:14:DSLs-and-Synthesis
+We constrast QDSL with an EDSL technique
 that combines deep and shallow embedding, as described by
 \citet{svenningsson:combining}, and as used in several Haskell EDSLs
 including Feldspar \citep{FELDSPAR}, Obsidian
@@ -817,50 +818,36 @@ including Feldspar \citep{FELDSPAR}, Obsidian
 % and streams as used in Feldspar \citep{feldspar-github}.
 
 \citet{odonnell:sharing} identified loss of sharing in the context of
-embedded circuit descriptions.  \citet{claessen1999observable} and
-\citet{gill2009type} propose ways to support observable sharing in Haskell.
-% \shayan{Gill didn't propose extending Haskell; he provided a library}
+embedded circuit descriptions.  \citet{claessen1999observable} extended
+Haskell to support observable sharing.  \citet{gill2009type} proposes
+library features that support sharing without needing to extend the
+language.
 
 A proposition-as-types principle for quotation as a modal logic was
 proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
 they note, their technique has close connections to two-level
-languages \citep{Nielson-2005}.
+languages \citep{Nielson-2005} and partial evaluation
+\citep{jones1993partial}.
 
 Other approaches to DSL that make use of quotation include
 C\# and F\# versions of LINQ under .NET
 \citep{csharplinq,fsharplinq} and Scala Lightweight
 Modular Staging (LMS) \citep{scalalms}.
-Scala LMS partakes of techniques found in QDSL
+Scala LMS exploits techniques found in both QDSL
 (quotation and normalisation)
 and EDSL (combining shallow and deep embeddings),
-see \citet{rompf2013scala}.
+see \citet{rompf2013scala}, and exploits reuse to
+allow multiple DSLs to share infrastructure
+see \citet{sujeeth2013composition}.
 
 The underlying idea for QDSLs was established
-for F\# LINQ by \citet{cheney:linq}.
+for F\# LINQ by \citet{cheney:linq}, and extended
+to nested results by \citet{CheneyLW14}.
 %
-This result builds on a line of work on language integrated query that
-combines normalisation with an effect type
-system~\citep{Cooper09,LindleyC12}.
-%
-\citet{CheneyLRW14} bridge the gap between the effect-based approach
-and QDSLs.
-%
-\citet{CheneyLW14} extend the normalisation approach to account for
-nested results.
-
-%% SL: DONE
-%%
-%% \todo{Sam}{Mention the work on normalisation with effects: Cooper (DBLP
-%%   2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
-%%   Wadler (PEPM 2014).}
-%%
-%% \todo{Sam}{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
-%%   2014).}
-
-%% SL: covered by Phil's TODOs based on Tiark's feedback
-%%
-%% \todo{Sam}{We should say a little more about what novel features LMS brings
-%%   to the table that are not available / harder to achieve in Haskell.}
+Related work combines language-integrated query
+with effect types \citep{Cooper09,LindleyC12}.
+\citet{CheneyLRW14} compare approaches
+based on quotation and effects.
 
 
 \section{Conclusion}

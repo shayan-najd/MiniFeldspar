@@ -479,10 +479,11 @@ the |Vec| type is not representable, but it can accept
 the quoted term normalises to
 \begin{code}
 {-"\iffalse"-}
-ex5 = testNrmSmpQt ([|| $$normVec . $$toVec ||]) [|| (\a -> sqrt (snd (while (\ s -> fst s < lnArr a)
-                                     (\ s -> let i = fst s in
-                                             (i + 1 , snd s + (ixArr a i * ixArr a i)))
-                                     (0 , 0.0)))) ||]
+ex5 = testNrmSmpQt ([|| $$normVec . $$toVec ||]) [|| \a ->  sqrt (snd
+                                                     (while  (\ s -> fst s < lnArr a)
+                                                             (\ s -> let i = fst s in 
+                                                                 (i + 1, snd s + (ixArr a i * ixArr a i)))
+                                                             (0 , 0.0))) ||]
 \end{code}
 from which it is easy to generate C code.
 
@@ -518,7 +519,7 @@ compute either
 \begin{center}
 |[||||$$blur . $$blur||||]| ~~~or~~~ |[||||$$blur . $$memorise . $$blur||||]|
 \end{center}
-with different trade-offs between recomputation and memory usage.
+with different trade-offs between recomputation and memory use.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
