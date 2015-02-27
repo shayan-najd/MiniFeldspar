@@ -555,82 +555,31 @@ boolean is false and the value is |undef|.  We define |some'|,
 |maybe|.  The |Syn| instance is straightforward, mapping options to
 and from the pairs already defined for |Dp|.
 \begin{code}
-data Opt' a = Opt' { def :: Dp Bool, val :: a }
+data Opt a = Opt { def :: Dp Bool, val :: a }
 
-instance Syn a => Syn (Opt' a) where
-  type Internal (Opt' a) = (Bool, Internal a)
-  toDp (Opt' b x)  =  Pair b (toDp x)
-  fromDp p         =  Opt' (Fst p) (fromDp (Snd p))
+instance Syn a => Syn (Opt a) where
+  type Internal (Opt a) = (Bool, Internal a)
+  toDp (Opt b x)  =  Pair b (toDp x)
+  fromDp p         =  Opt (Fst p) (fromDp (Snd p))
 
-some'          ::  a -> Opt' a
-some' x        =   Opt' true x
+some          ::  a -> Opt a
+some x        =   Opt true x
 
-none'          ::  Undef a => Opt' a
-none'          =   Opt' false undef
+none          ::  Undef a => Opt a
+none          =   Opt false undef
 
-option'        ::  Syn b => b -> (a -> b) -> Opt' a -> b
-option' d f o  =   def o ? (f (val o), d)
+option        ::  Syn b => b -> (a -> b) -> Opt a -> b
+option d f o  =   def o ? (f (val o), d)
 \end{code}
 
-The next obvious step is to define a suitable monad over the type |Opt'|.
-The natural definitions to use are as follows:
-\begin{spec}
-return    ::  a -> Opt' a
-return x  =   some' x
-
-(>>=)     ::  (Undef b) => Opt' a -> (a -> Opt' b) -> Opt' b
-o >>= g   =   Opt'  (def o ? (def (g (val o)), false))
-                    (def o ? (val (g (val o)), undef))
-\end{spec}
-However, this adds type constraint |Undef b|
-to the type of |(>>=)|, which is not permitted.
-The need to add such constraints often arises, and has
-been dubbed the constrained-monad problem
-\citep{hughes1999restricted,SvenningssonS13}.
-% SculthorpeBGG13
-We solve it with a trick due to \citet{PerssonAS11}.
-
-% \sam{I think Jeremy Yallop may have also covered this kind of issue
-%   somewhere in his thesis.}
-
-We introduce a continuation-passing style (CPS) type, |Opt|,
-defined in terms of |Opt'|.  It is
-straightforward to define |Monad| and |Syn| instances,
-operations to lift the representation type to lift and lower
-one type to the other, and to lift |some|, |none|, and
-|option| to the CPS type.
-The |lift| operation is closely related to the |(>>=)| operation
-we could not define above; it is properly typed,
-thanks to the type constraint on |b| in the definition of |Opt a|.
-
+Finally, we can define a suitable monad over |Opt|. Some care has to 
+be taken to construct a type correct |(>>=)|; the code below
+shows one possible implementation.
 \begin{code}
-newtype Opt a =
-  O { unO :: forall b . Undef b => ((a -> Opt' b) -> Opt' b) }
-
 instance Monad Opt where
-  return x    =  O (\g -> g x)
-  m >>= k     =  O (\g -> unO m (\x -> unO (k x) g))
-
-instance Undef a => Syn (Opt a) where
-  type Internal (Opt a) = (Bool, Internal a)
-  fromDp  =  lift . fromDp
-  toDp    =  toDp . lower
-
-lift :: Opt' a -> Opt a
-lift o =  O (\g -> Opt'  (def o ? (def (g (val o)), false))
-                         (def o ? (val (g (val o)), undef)))
-
-lower :: Undef a => Opt a -> Opt' a
-lower m = unO m some'
-
-none :: Undef a => Opt a
-none =  lift none'
-
-some :: a -> Opt a
-some a = lift (some' a)
-
-option :: (Undef a, Syn b) => b -> (a -> b) -> Opt a -> b
-option d f o = option' d f (lower o)
+  return x    = some x
+  o >>= g     = b { def = def o ? (def b, false) }
+    where b = g (val o)
 \end{code}
 These definitions support the EDSL code presented
 in Section~\ref{subsec:e-maybe}.
