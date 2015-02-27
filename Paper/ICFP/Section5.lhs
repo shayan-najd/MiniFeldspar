@@ -647,7 +647,7 @@ data Vec a = Vec (Dp Int) (Dp Int -> a)
 
 instance Syn a => Syn (Vec a) where
   type Internal (Vec a) = Array Int (Internal a)
-  toDp (Vec n g)    =  Arr n (toDp . g)
+  toDp (Vec n g)    =  MkArr n (toDp . g)
   fromDp a          =  Vec  (LnArr a) (fromDp . IxArr a)
 
 instance Functor Vec where
