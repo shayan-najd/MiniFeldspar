@@ -162,7 +162,7 @@
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
-\authorinfo{Shayan Najd \qquad Sam Lindley}
+\authorinfo{Shayan Najd \and Sam Lindley}
            {The University of Edinburgh}
            {\{sh.najd,sam.lindley\}@@ed.ac.uk}
 % \authorinfo{Shayan Najd}
