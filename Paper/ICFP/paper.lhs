@@ -1,5 +1,8 @@
 % Phil TODO
 
+% Delete Tag from Dp. Add brief explanation of observable sharing
+% via comparison of pointers.
+
 % Review Sam's additions to related work
 
 % Tiark: leave open the question of the extent to which LMS partakes
@@ -159,18 +162,15 @@
 \title{Everything old is new again:\\
        Quoted Domain Specific Languages}
 
-%% SL: we can save a bit of space by merging the first two authors
-%% like this:
-%%
-%% \authorinfo{Shayan Najd \qquad Sam Lindley}
-%%            {The University of Edinburgh}
-%%            {\{sh.najd,sam.lindley\}@@ed.ac.uk}
-\authorinfo{Shayan Najd}
+\authorinfo{Shayan Najd \qquad Sam Lindley}
            {The University of Edinburgh}
-           {sh.najd@@ed.ac.uk}
-\authorinfo{Sam Lindley}
-           {The University of Edinburgh}
-           {sam.lindley@@ed.ac.uk}
+           {\{sh.najd,sam.lindley\}@@ed.ac.uk}
+% \authorinfo{Shayan Najd}
+%            {The University of Edinburgh}
+%            {sh.najd@@ed.ac.uk}
+% \authorinfo{Sam Lindley}
+%            {The University of Edinburgh}
+%            {sam.lindley@@ed.ac.uk}
 \authorinfo{Josef Svenningsson}
            {Chalmers University of Technology}
            {josefs@@chalmers.se}
@@ -178,42 +178,21 @@
            {The University of Edinburgh}
            {wadler@@inf.ed.ac.uk}
 
-% \numberofauthors{4}
-% \author{
-% \alignauthor
-% Shayan Najd\\
-%        \affaddr{The University of Edinburgh}\\
-%        \email{sh.najd@@ed.ac.uk}
-% \alignauthor
-% Sam Lindley\\
-%         \affaddr{The University of Edinburgh}\\
-%         \email{sam.lindley@@ed.ac.uk}
-% \alignauthor
-% Josef Svenningsson\\
-%        \affaddr{Chalmers University of Technology}\\
-%        \email{josefs@@chalmers.se}
-% \and
-% \alignauthor
-% Philip Wadler\\
-%        \affaddr{The University of Edinburgh}\\
-%        \email{wadler@@inf.ed.ac.uk}
-% }
-
 \maketitle
 
 \begin{abstract}
 
-We describe a new approach to domain specific languages (DSLs), called
-Quoted DSLs (QDSLs), that resurrects two old ideas: quotation, from
-McCarthy's Lisp of 1960, and the subformula property, from Gentzen's
-natural deduction of 1935.  Quoted terms allow the DSL to share the
-syntax and type system of the host language.  Normalising quoted terms
-ensures the subformula property, which guarantees that one can use
-higher-order or nested types in the source while guaranteeing
-first-order or flat types in the target, and enables using types to
-guide fusion.  We test our ideas by re-implementing Feldspar, which
-was originally implemented as an Embedded DSL (EDSL), as a QDSL; and
-we compare the QDSL and EDSL variants.
+We describe a new approach to domain specific languages (DSLs),
+called Quoted DSLs (QDSLs), that resurrects two old ideas:
+quotation, from McCarthy's Lisp of 1960, and the subformula
+property, from Gentzen's natural deduction of 1935.  Quoted terms
+allow the DSL to share the syntax and type system of the host
+language.  Normalising quoted terms ensures the subformula property,
+which guarantees that one can use higher-order types in the source
+while guaranteeing first-order types in the target, and enables
+using types to guide fusion.  We test our ideas by re-implementing
+Feldspar, which was originally implemented as an Embedded DSL
+(EDSL), as a QDSL; and we compare the QDSL and EDSL variants.
 
 \end{abstract}
 
@@ -253,7 +232,7 @@ which was introduced in 1960 and had macros as early as 1963.  Today,
 a more fashionable technique is Embdedded DSLs (EDSLs), which may use
 shallow embedding, deep embedding, or a combination of the two. Our
 goal in this paper is to reinvigorate the idea of building DSLs via
-quotation, by introducing a new approach which we dub Quoted DSLs
+quotation, by introducing an approach we dub Quoted DSLs
 (QDSLs).  A key feature of QDSLs is the use of normalisation to ensure
 the subformula property, first proposed by Gentzen in 1935.
 
@@ -278,7 +257,7 @@ design, and show that the performance of the two versions is
 comparable.  We compare the QDSL and EDSL variants of Feldspar, and
 assess the tradeoffs between the two approaches.
 
-\citet{Davies-Pfenning-1996,Davies-Pfenning-2001} also suggest
+\citet{Davies-Pfenning-2001} also suggest
 quotation as a foundation for staged computation, and note a
 propositions-as-types connection between quotation and a modal logic;
 our type |Qt a| corresponds to their type $\bigcirc a$.  They also
@@ -359,11 +338,11 @@ only uses conjunction. Equivalently, any lambda calculus term that
 mentions only pair types in its free variables and result, even if it
 uses functions, can be put in a normal form that only uses pairs. Such
 a result is related to the first bullet point above; see
-Proposition~\ref{prop:rank} in Section~\ref{sec:subformula}.
+Proposition~\ref{prop:fo} in Section~\ref{sec:subformula}.
 
 As another example, the third bullet point above corresponds to a
 standard conservativity result for databases, namely that nested
-queries are no more expressive than flat queries \citep{Wong-1993,Wong-1996}.
+queries are no more expressive than flat queries \citep{Wong-1996}.
 This conservativity result, as implied by the subformula property, is
 used by \citet{cheney:linq} to show that queries that use intermediate
 nesting can be translated to SQL, which only queries flat tables and
@@ -418,7 +397,7 @@ to the host.
 
 An EDSL may also steal the normalisation rules of its host language,
 using evaluation in the host to normalise terms of the
-target. Section~\ref{sec:qdsl-vs-edsl}
+target, but again the theft is often only partial. Section~\ref{sec:qdsl-vs-edsl}
 compares QDSL and EDSL variants of Feldspar. In the first example, it
 is indeed the case that the EDSL achieves by evaluation of host terms
 what the QDSL achieves by normalisation of quoted terms.  However, in
@@ -487,7 +466,7 @@ Section~\ref{sec:related} describes related work, and
 Section~\ref{sec:conclusion} concludes.
 
 Our QDSL and EDSL variants of Feldspar and benchmarks are
-available on Gitub\footnote{\url{https://github.com/shayan-najd/QFeldspar}}.
+available at \url{https://github.com/shayan-najd/QFeldspar}.
 
 
 \section{Feldspar as a QDSL}
@@ -508,7 +487,7 @@ shares the EDSL~Feldspar backend.
 The transformer from |Qt| to |Dp| performs the following steps.
 \begin{itemize}
 \item In any context where a constant $c$ is not fully applied,
-  it replaces $c$ with $\expabs{\overline{x}}{}{c \app \overline{x}}$.
+  it replaces $c$ with $\lambda \overline{x}.\, c \app \overline{x}$.
   It replaces identifiers connected to the type |Maybe|, such as
   |return|, |(>>=)|, and |maybe|, by their definitions.
 \item It normalises the term to ensure the subformula property, using
@@ -523,7 +502,7 @@ The transformer from |Qt| to |Dp| performs the following steps.
   and translates these to their corresponding representation
   in |Dp|. Permitted primitives include:
   |(==)|, |(<)|, |(+)|, |(*)|, and similar, plus
-  |while|, |makeArr|, |lenArr|, and |ixArr|.
+  |while|, |makeArr|, |lenArr|, |ixArr|, and |save|.
 \end{itemize}
 
 An unfortunate feature of typed quasiquotation in GHC is that the
@@ -544,8 +523,9 @@ translate the |Maybe| monad as a special case rather than supporting
 overloading for monad operations in general.
 
 The backend performs three transformations over |Dp| terms
-before compiling to C. First, common subexpessions explicitly
-tagged in EDSL Feldsapr source are transformed to |let| bindings.
+before compiling to C. First, common subexpessions are recognised
+% via observable sharing \citep{claessen1999observable}
+and transformed to |let| bindings.
 Second, |Dp| terms are normalised using exactly the same rules
 used for normalising |Qt| terms, as described in Section~\ref{sec:subformula}.
 Third, |Dp| terms are optimised using $\eta$ contraction for
@@ -566,13 +546,14 @@ benchmarks used,
 and performance results.
 The translator from |Dp| to C is shared by QDSL and EDSL Feldspar,
 and listed in a separate column.
-All five benchmarks run under QDSL and EDSL Feldspar generate
-syntactically identical C code.
+All five benchmarks run under QDSL and EDSL Felsdpar generate
+identical C code, up to permutation of independent assignments, with
+identical compile and run times.
 The columns for QDSL and EDSL Feldspar give compile and run
 times for Haskell, while the columns for generated code
 give compile and run times for the generated C.
 QDSL compile times are slightly greater than EDSL,
-and QDSL run times range from twice to ten times that of EDSL,
+and QDSL run times range from identical to four times that of EDSL,
 the increase being due to normalisation time
 (our normaliser was not designed to be particularly efficient).
 
@@ -580,11 +561,11 @@ the increase being due to normalisation time
 \section{The subformula property}
 \label{sec:subformula}
 
-This section introduces a collection of reduction rules for
-normalising terms that enforces the subformula property
-while ensuring sharing is preserved. The rules adapt to
+This section introduces a reduction rules for
+normalising terms that enforce the subformula property
+while preserving sharing. The rules adapt to
 both call-by-need and call-by-value.
-
+%
 We work with simple types. The only polymorphism in our examples
 corresponds to instantiating constants (such as $\mathit{while}$) at
 different types.
@@ -599,11 +580,10 @@ As usual, terms are taken as
 equivalent up to renaming of bound variables. Write $\fv{M}$ for
 the set of free variables of $M$, and $\subst{N}{x}{M}$ for
 capture-avoiding substitution of $M$ for $x$ in $N$.
-Let $V$, $W$ range over values, and $P$ range over
-terms that are not values.
+Let $V$, $W$ range over values.
 
-Let $\Gamma$ range over type environments, which are sets of pairs
-of variables with types $x:A$. Write $\Gamma \vdash M:A$ to
+Let $\Gamma$ range over type environments, which pair
+variables with types, and write $\Gamma \vdash M:A$ to
 indicate that term $M$ has type $A$ under type environment
 $\Gamma$. Typing rules are standard.
 
@@ -614,12 +594,11 @@ of strong normalisation. It is easy to confirm that all
 of the reduction rules preserve sharing and preserve order of evaluation.
 
 Write $M \mapsto_i N$ to indicate that $M$ reduces to $N$ in phase
-$i$. Only Phases~1 and 2 are required to normalise terms, but if the
-semantics is call-by-need then Phase~3 may also be applied.
+$i$.
 Let $F$ and $G$ range over two different forms of evaluation
-frame used in Phases~1 and~2 respectively. We write $\fv{F}$ for the
-set of free variables of $F$, and similarly for $G$.  The reduction
-relation is closed under compatible closure.
+frame used in Phases~1 and~2 respectively. Write $\fv{F}$ for the
+set of free variables of $F$, and similarly for $G$.
+Reductions are closed under compatible closure.
 
 \figterm
 %\figtyping
@@ -629,9 +608,11 @@ relation is closed under compatible closure.
 The normalisation procedure consists of exhaustively applying the
 reductions of Phase~1 until no more apply, then similarly for Phase~2,
 and finally for Phase~3.  Phase~1 performs let-insertion, naming
-subterms that are not values, along the lines of a translation to
+subterms, along the lines of a translation to
 A-normal form \citep{a-normal-form} or reductions (let.1) and (let.2)
 in Moggi's metalanguage for monads \citep{Moggi-1991}.
+% As an optimisation, this transformation may be restricted to
+% only introduce let bindings for terms that are not values.
 %% The rules are designed to leave applications such as |f V W|
 %% unchanged, rather than transform them to |let g = f V in g W|.
 Phase~2 performs two kinds of reduction: $\beta$ rules apply when an
@@ -682,11 +663,8 @@ The type of a constant $c$ of arity $k$ is written
 \[
 c : A_1 \to \cdots A_k \to B
 \]
-%% [SL: no need to talk about the subtypes of c as it is not a subterm
-%% unless fully applied]
-%%
-%% and its subtypes are itself and $A_1$, \ldots, $A_k$, and $B$
-%% (but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
+and its subformulas are itself and $A_1$, \ldots, $A_k$, and $B$
+(but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
 An application of a constant $c$ of arity $k$ is written
 \[
 c \app M_1 \app \cdots \app M_k
@@ -696,7 +674,6 @@ and its subterms are itself and $M_1$, \ldots, $M_k$
 Free variables are equivalent to constants of arity zero.
 
 Terms in normal form satisfy the subformula property.
-
 \begin{proposition}[Subformula property]
 \label{prop:subformula}
 If $\Gamma \vdash M:A$ and $M$ is in normal form,
@@ -709,26 +686,26 @@ The differences are that we have introduced fully applied constants
 (to enable the sharpened subformula property, below), and that our
 reduction rules introduce |let|, in order to ensure sharing is preserved.
 
-Normalisation may lead to an exponential increase in the size
-of a term, for instance when there are nested |case| expressions. This
-was not a problem for the examples we considered in
-Section~\ref{sec:implementation}, but may be a problem in some
-contexts. Normalisation may be controlled by introduction of
-uninterpreted constants (see Section~\ref{subsec:subformula}),
-but further work is needed to understand the contexts in which
+Normalisation may lead to an exponential or worse blow up in the size
+of a term, for instance when there are nested |case| expressions.
+The benchmarks in Section~\ref{sec:implementation} do not suffer
+from blow up, but it may be a problem in some contexts.
+Normalisation may be controlled by introduction of
+uninterpreted constants, as in Section~\ref{subsec:subformula}.
+Further work is needed to understand when
 complete normalisation is
-desirable and the contexts in which it is problematic.
+desirable and when it is problematic.
 
 Examination of the proof in \citet{Prawitz-1965} shows that in fact
 normalisation achieves a sharper property.
-\begin{proposition}[Sharpened subformula property]
+\begin{proposition}[Sharpened subformula]
 \label{prop:sharpened}
 If $\Gamma \vdash M:A$ and $M$ is in normal form, then every proper
 subterm of $M$ that is not a free variable or a subterm of a constant
 application has a type that is a proper subformula of $A$ or a proper
 subformula of a type in $\Gamma$.
 \end{proposition}
-So far as we know, we are the first to formulate the sharpened version.
+We believe we are the first to formulate the sharpened version.
 
 The sharpened subformula property says nothing about the types of
 subterms of constant applications, but such types are immediately apparent by
@@ -740,44 +717,45 @@ $M_i$ that is not a free variable of $M_i$ or a subterm of a constant
 application has a type that is a proper subformula of $A_i$ or a
 proper subformula of the type of one of its free variables.
 
-In Section~\ref{sec:qfeldspar}, an important property is that every
+In Section~\ref{sec:qfeldspar}, we require that every
 top-level term passed to |qdsl| is suitable for translation to C after
-normalisation.  Here we are interested in C as a \emph{first-order}
-language. The exact property required is somewhat subtle. One might at
-first guess the required property is that every subterm is
-representable, in the sense introduced in
-Section~\ref{subsec:top}, but this is not quite right. The
-top-level term is a function from a representable type to a
-representable type. And the constant |while| expects subterms of type
-|s -> Bool| and |s -> s|, where the state |s| is representable.
-Fortunately, the exact property required is not hard to formulate in a
-general way, and is easy to ensure by applying the sharpened
-subformula property.
+normalisation, and any DSL translating to
+a \emph{first-order} language must impose a similar requirement.
+One might at first guess the required property is that every
+subterm is \emph{representable}, in the sense introduced in
+Section~\ref{subsec:top}, but this is not quite right. The top-level
+term is a function from a representable type to a representable type,
+and the constant |while| expects subterms of type |s -> Bool|
+and |s -> s|, where the state |s| is representable.  Fortunately,
+the property required is not hard to formulate in a general way,
+and is easy to ensure by applying the sharpened subformula property.
 
-Rather than fixing on the notion of representability
-as given in Section~\ref{sec:qfeldspar}, we take the
+% Rather than fixing on the notion of representability
+% as given in Section~\ref{sec:qfeldspar},
+Take the
 representable types to be any set closed under subformulas
 that does not include function types.
 We introduce a variant of the usual notion of \emph{rank} of a type,
 with respect to a notion of representability.  A term of type |A -> B|
 has rank $\min(m+1,n)$ where $m$ is the rank of |A| and $n$ is the
 rank of |B|, while a term of representable type has rank $0$.
+We say a term is \emph{first-order} when every subterm is either
+representable, or is of the form $\lambda \overline{x}.\, N$
+where each bound variable and the body is of representable type.
 
-The property we need to ensure ease of translation to C
-(or any other first-order language) is as follows.
-
-\begin{proposition}[Rank and representability]
-\label{prop:rank}
-Consider a term $M$ of rank $1$, where every free variable of $M$ has
-rank $0$ and every constant in $M$ has rank at most $2$.  Then $M$
-normalises to a form where every subterm either is of representable
-type or is of the form $\expabs{\overline{x}}{}{N}$ where each of the
-bound variables $x_i$ and the body $N$ has representable type.
+The following characterises translation to a first-order language.
+\vspace{-2ex}
+\begin{proposition}[First-order]
+\label{prop:fo}
+Consider a term of rank $1$, where every free variable has
+rank $0$ and every constant has rank at most $2$.  Then the term
+normalises to a term that is first-order.
 \end{proposition}
-
+%\vspace{-1ex}
 The property follows immediately by observing that any term $L$
-with type of rank $1$ can be rewritten in the form
-$\expabs{\overline{x}}{}{L \app \overline{x}}$ where each bound variable
+of rank $1$ can be rewritten to the form
+$\lambda \overline{y}.\, (L \app \overline{y})$
+where each bound variable
 and the body has representable type, and then normalising and applying
 the sharpened subformula property.
 
@@ -788,6 +766,7 @@ subterm has a representable type (boolean, integer, float, or a pair of an
 integer and float) or is a lambda abstraction with bound variables and
 body of representable type; and it is this property which ensures it
 is easy to generate C code from the term.
+
 
 \section{Feldspar as an EDSL}
 \label{sec:qdsl-vs-edsl}
@@ -803,8 +782,9 @@ and perhaps the first application of quotation to domain-specific
 languages is Lisp macros \citep{Hart-1963}.
 
 This paper uses Haskell, which has been widely used for EDSLs
-\citep{hudak1997domain, bjesse1998lava, reid1999prototyping,
-Gill:14:DSLs-and-Synthesis}.  We constrast QDSL with an EDSL technique
+\citep{hudak1997domain}.
+%  bjesse1998lava, reid1999prototyping, Gill:14:DSLs-and-Synthesis
+We constrast QDSL with an EDSL technique
 that combines deep and shallow embedding, as described by
 \citet{svenningsson:combining}, and as used in several Haskell EDSLs
 including Feldspar \citep{FELDSPAR}, Obsidian
@@ -817,50 +797,36 @@ including Feldspar \citep{FELDSPAR}, Obsidian
 % and streams as used in Feldspar \citep{feldspar-github}.
 
 \citet{odonnell:sharing} identified loss of sharing in the context of
-embedded circuit descriptions.  \citet{claessen1999observable} and
-\citet{gill2009type} propose ways to support observable sharing in Haskell.
-% \shayan{Gill didn't propose extending Haskell; he provided a library}
+embedded circuit descriptions.  \citet{claessen1999observable} extended
+Haskell to support observable sharing.  \citet{gill2009type} proposes
+library features that support sharing without need to extend the
+language.
 
 A proposition-as-types principle for quotation as a modal logic was
-proposed by \citet{Davies-Pfenning-1996,Davies-Pfenning-2001}.  As
+proposed by \citet{Davies-Pfenning-2001}.  As
 they note, their technique has close connections to two-level
-languages \citep{Nielson-2005}.
+languages \citep{Nielson-2005} and partial evaluation
+\citep{jones1993partial}.
 
 Other approaches to DSL that make use of quotation include
-C\# and F\# versions of LINQ under .NET
+C\# and F\# versions of LINQ
 \citep{csharplinq,fsharplinq} and Scala Lightweight
 Modular Staging (LMS) \citep{scalalms}.
-Scala LMS partakes of techniques found in QDSL
+Scala LMS exploits techniques found in both QDSL
 (quotation and normalisation)
 and EDSL (combining shallow and deep embeddings),
-see \citet{rompf2013scala}.
+see \citet{rompf2013scala}, and exploits reuse to
+allow multiple DSLs to share infrastructure
+see \citet{sujeeth2013composition}.
 
 The underlying idea for QDSLs was established
-for F\# LINQ by \citet{cheney:linq}.
+for F\# LINQ by \citet{cheney:linq}, and extended
+to nested results by \citet{CheneyLW14}.
 %
-This result builds on a line of work on language integrated query that
-combines normalisation with an effect type
-system~\citep{Cooper09,LindleyC12}.
-%
-\citet{CheneyLRW14} bridge the gap between the effect-based approach
-and QDSLs.
-%
-\citet{CheneyLW14} extend the normalisation approach to account for
-nested results.
-
-%% SL: DONE
-%%
-%% \todo{Sam}{Mention the work on normalisation with effects: Cooper (DBLP
-%%   2006), Cheney and Lindley (TLDI 2012), Cheney, Lindley, Radanne,
-%%   Wadler (PEPM 2014).}
-%%
-%% \todo{Sam}{Mention the shredding paper: Cheney, Lindley, and Wadler (SIGMOD
-%%   2014).}
-
-%% SL: covered by Phil's TODOs based on Tiark's feedback
-%%
-%% \todo{Sam}{We should say a little more about what novel features LMS brings
-%%   to the table that are not available / harder to achieve in Haskell.}
+Related work combines language-integrated query
+with effect types \citep{Cooper09,LindleyC12}.
+\citet{CheneyLRW14} compare approaches
+based on quotation and effects.
 
 
 \section{Conclusion}
@@ -871,51 +837,55 @@ A good idea can be much better than a new one. \\
 \flushr -- Gerard Berry
 \end{quote}
 
-We have compared EDSLs and QDSLs, arguing that QDSLs offer competing
-expressiveness and efficiency. EDSLs often (but not always) mimic the
-syntax of the host language, and often (but not always) perform
-normalisation in the host languages, while QDSLs (always) steal the
-syntax of the host language, and (always) ensure the subformula property,
-at the cost of requiring a normaliser.
+We have compared QDSLs and EDSLs, arguing that QDSLs offer competing
+expressiveness and efficiency.
+% EDSLs often (but not always) mimic the
+% syntax of the host language, and often (but not always) perform
+% normalisation in the host languages, while QDSLs (always) steal the
+% syntax of the host language, and (always) ensure the subformula property,
+% at the cost of requiring a normaliser.
 
 The subformula property may have applications in DSLs other that
 QDSLs. For instance, after Section~\ref{subsec:opt} of this paper was
-drafted, it occurred to us that a different approach to options in
-EDSL would be to extend type |Dp| with constructs for type |Maybe|.
+drafted, it occurred to us that a different approach
+% to options in EDSL
+would be to extend type |Dp| with constructs for type |Maybe|.
 So long as type |Maybe| does not appear in the input or output of the
 program, a normaliser that ensures the subformula property could
 guarantee that C code for such constructs need never be generated.
 
-As we noted in the introduction, rather than building a special-purpose tool for
-each QDSL, it should be possible to design a single tool for each host language.
-Our next step is to design a tool, Haskell QDSL, with the following features.
-\begin{itemize}
-\item Perform type inference for the terms returned from typed
-  quasi-quotations, restoring type information currently discarded by GHC.
-\item Based on the above, provide full support for type classes
-  and overloading within quasi-quotation.
-\item Permit the user to choose either an ADT or GADT representation of the
-  term returned by typed quasi-quotation, whichever is more convenient.
-\item Apply a normaliser to ensure the subformula property,
-  which works with any datatype declared in Haskell.
-\item Allow the user to supply a type environment indicating which constants
-  (or free variables) may appear in typed quasi-quotations.
-\end{itemize}
-Such a tool could easily subsume the special-purpose translator from
-|Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
-and lift most of its restrictions. For instance,
-the current prototype is restricted to the |Maybe| monad, while the
-envisioned tool will work with any monad.
+Rather than building a special-purpose tool for each QDSL, it should
+be possible to design a single tool for each host language.  Our next
+step is to design a QDSL library for Haskell that restores the type
+information for quasi-quotations currencly discarded by GHC and uses
+this to support type classes and overloading in full, and to supply a
+more general normaliser.  Such a tool would subsume the
+special-purpose translator from |Qt| to |Dp| described at the
+beginning of Section~\ref{sec:implementation}, and lift most of its
+restrictions.
+
+% Rather than building a special-purpose tool for
+% each QDSL, it should be possible to design a single tool for each host language.
+% Our next step is to design a tool, Haskell QDSL, with the following features.
+% \begin{itemize}
+% \item Perform type inference for the terms returned from typed
+%   quasi-quotations, restoring type information currently discarded by GHC.
+% \item Based on the above, provide full support for type classes
+%   and overloading within quasi-quotation.
+% \item Permit the user to choose either an ADT or GADT representation of the
+%   term returned by typed quasi-quotation, whichever is more convenient.
+% \item Apply a normaliser to ensure the subformula property,
+%   which works with any datatype declared in Haskell.
+% \item Allow the user to supply a type environment indicating which constants
+%   (or free variables) may appear in typed quasi-quotations.
+% \end{itemize}
+% Such a tool could easily subsume the special-purpose translator from
+% |Qt| to |Dp| described at the beginning of Section~\ref{sec:implementation},
+% and lift most of its restrictions. For instance,
+% the current prototype is restricted to the |Maybe| monad, while the
+% envisioned tool will work with any monad.
 
 % \sam{Say something about adding support for observable sharing hacks?}
-
-Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
-speaking prose his whole life. Similarly, many of us have used QDSLs for
-years, if not by that name. DSL via quotation is the heart of Lisp
-macros, Microsoft LINQ, and Scala LMS, to name but three. We hope that
-by naming the concept and drawing attention to the central benefits of
-normalisation and the subformula propety, we may help the concept to
-flower further for years to come.
 
 % \shayan{I have a feeling that stressing too much on "naming the
 % concept" can backfire. It can make the work seem shallow. We realised
@@ -927,6 +897,28 @@ flower further for years to come.
 % underestimated). But stressing too much on naming, or putting together
 % existing concepts, undermines our fine engineering and scientific
 % study of the matter.}
+
+% Moli\`{e}re's Monsieur Jourdain was bemused to discover he had been
+% speaking prose his whole life. Similarly, many of us have used QDSLs for
+% years, if not by that name. DSL via quotation lies at the heart of Lisp
+% macros, Microsoft LINQ, and Scala LMS, to name but three.
+% By naming the concept and drawing attention to the benefits of
+% normalisation and the subformula propety, we hope to help the concept to
+% prosper for years to come.
+
+\begin{quote}
+  These forty years now I've been
+  speaking in prose without knowing it!
+  \flushr --- Moliere
+\end{quote}
+
+Like Moli\`{e}re's Monsieur Jourdain, many of us have used QDSLs for
+years, if not by that name. DSL via quotation lies at the heart of Lisp
+macros, Microsoft LINQ, and Scala LMS, to name but three.
+By naming the concept and drawing attention to the benefits of
+normalisation and the subformula propety, we hope to help the concept to
+prosper for years to come.
+
 
 \paragraph*{Acknowledgement}
 Najd is supported by a Google Europe Fellowship in Programming

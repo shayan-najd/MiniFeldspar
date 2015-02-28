@@ -66,18 +66,18 @@
   \exppair{V}{W}   \mid
   \expinl{V}{B}    \mid
   \expinr{A}{W}
-\\[1ex]
-\text{Non-Values} & P & ::= &
-  \expconst{c}{\overline{M}}	\mid
-  \expapp{L}{M}                 \mid
-  \explet{x}{M}{N}              \mid
-  \exppair{P}{N}                \mid
-  \exppair{V}{P}                \mid
-  \expfst{P}                   	\mid
-  \expsnd{P}                    \mid \\&&&
-  \expinl{P}{\tm{B}}		\mid
-  \expinr{\tm{A}}{P}           	\mid
-  \expcase{L}{x}{M}{y}{N}
+% \\[1ex]
+% \text{Non-Values} & P & ::= &
+%   \expconst{c}{\overline{M}}  \mid
+%   \expapp{L}{M}               \mid
+%   \explet{x}{M}{N}            \mid
+%   \exppair{P}{N}              \mid
+%   \exppair{V}{P}              \mid
+%   \expfst{P}                  \mid
+%   \expsnd{P}                  \mid \\&&&
+%   \expinl{P}{\tm{B}}          \mid
+%   \expinr{\tm{A}}{P}          \mid
+%   \expcase{L}{x}{M}{y}{N}
 \end{array}
 \]
 
@@ -239,7 +239,7 @@ Phase 1 (let-insertion)
 \[
   \begin{array}{lcl}
    F &\mathbin{::=}&
-       c \app \overline{V} \app \hole \app \overline{N} \mid
+%      c \app \overline{V} \app \hole \app \overline{N} \mid
        \expapp{\hole}{M}                                \mid
        \expapp{V}{\hole}                                \mid
        \exppair{\hole}{M}                               \mid
@@ -254,10 +254,10 @@ Phase 1 (let-insertion)
 \[
 \begin{array}{lllll}
 (\mathit{let})
-& F[P]
+& F[M]
 & \rewrite{1}
-& \explet{x}{P}{F[x]},
-& x \text{ fresh}
+& \explet{x}{M}{F[x]},
+& \text{$x$ fresh, $M$ not a value}
 \end{array}
 \]
 
@@ -343,7 +343,7 @@ Phase 3 (garbage collection)
 \begin{array}[t]{@@{}llll@@{\quad}l@@{}}
 
 (\mathit{need})
-& \explet{x}{P}{N}
+& \explet{x}{M}{N}
 & \rewrite{3}
 & N,
 & x \notin \fv{N}\\

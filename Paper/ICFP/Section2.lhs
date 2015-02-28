@@ -1,5 +1,6 @@
 %format testQt    (x) (y) = "\fi" y
 %format testNrmQt (x) (y) = "\fi" y
+%format testNrmSmpQt (x) (y) = "\fi" y
 %if False
 \begin{code}
 {-# LANGUAGE TemplateHaskell #-}
@@ -21,7 +22,7 @@ type C = String
 class (Type a , FO a) => Rep a
 
 test :: Bool
-test = ex1 && ex2 && ex3 && ex4 && ex5 && ex6
+test = ex1 && ex2 && ex3 && ex4 && ex5
 
 appVec = append
 
@@ -33,8 +34,8 @@ uniVec = [|| \ s -> Vec 1  (\ _i -> s) ||]
 Feldspar is an EDSL for writing signal-processing software, that
 generates code in C \citep{FELDSPAR}. We present a variant,
 QDSL~Feldspar, that follows the structure of the previous design closely,
-but using the methods of QDSL rather than EDSL. We make a detailed
-comparison of the QDSL and EDSL designs in Section~\ref{sec:qdsl-vs-edsl}.
+but using the methods of QDSL rather than EDSL.
+Section~\ref{sec:qdsl-vs-edsl} compares the QDSL and EDSL designs.
 
 % \subsection{Design}
 % \label{subsec:qfeldspar-design}
@@ -56,12 +57,12 @@ Here |Qt a| represents a Haskell term of type |a|, its
 \emph{quoted} representation, and type |C| represents code in C.
 The top-level function expects a quoted term representing
 a function from type |a| to type |b|, and returns C code
-that represents this function.
+that computes the function.
 % (a @main@ routine) ***Shayan***: it produces a C function, not a main routine
 
-Not all types representable in Haskell are easily representable
-in the target language, C. For instance, we do not wish our target
-C code to manipulate higher-order functions.  The argument
+Not all types representable in Haskell are easily representable in C.
+For instance, we do not wish our target C code to manipulate higher-order functions.
+The argument
 type |a| and result type |b| of the main function must be representable,
 which is indicated by the type-class restrictions |Rep a| and |Rep b|.
 Representable types include integers, floats, and pairs where the components
@@ -76,8 +77,8 @@ It is easy to add triples and larger tuples.
 \subsection{A first example}
 \label{subsec:power}
 
-Let's begin by considering the ``hello world'' of program generation,
-the power function, raising a float to a given integer.
+Let's begin with the ``hello world'' of program generation,
+the power function.
 Since division by zero is undefined, we
 arbitrarily choose that raising zero to a negative power yields zero.
 Here is an optimised power function represented using QDSL:
@@ -90,27 +91,31 @@ power n =
   else if n == 0 then
     [|| \x -> 1 ||]
   else if even n then
-    [|| \x -> $$sqr ($$(power (n `div` 2)) x) ||]
+    [|| \x -> let y = $$(power (n `div` 2)) x in y * y ||]
   else
     [|| \x -> x * ($$(power (n-1)) x) ||]
-
-sqr  ::  Qt (Float -> Float)
-sqr  =   [|| \y -> y * y ||]
 \end{code}
 The typed quasi-quoting mechanism of Template Haskell is used to
 indicate which code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
-indicated by |[||...||]| and unquoting by |$$(...)|.
+indicated by |[||||...||||]| and unquoting by |$$(...)|.
 
 Evaluating |power (-6)| yields the following:
+% \begin{code}
+% {-"\iffalse"-}
+% ex1 = testQt (power (-6)) ([||  \x ->  if x == 0 then 0 else
+%                                   1 / ((\x ->  (\y -> y * y)
+%                                     ((\x -> (x * ((\x -> (\y -> y * y)
+%                                       ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x) ||])
+% \end{code}
 \begin{code}
 {-"\iffalse"-}
-ex1 = testQt (power (-6)) ([||  \x ->  if x == 0 then 0 else
-                                  1 / (\x ->  (\y -> y * y)
-                                    ((\x -> (x * ((\x -> (\y -> y * y)
-                                      ((\x -> (x * ((\x -> 1) x))) x)) x))) x)) x ||])
+ex1 = testQt (power (-6)) ([||  \x -> if x == 0 then 0 else 1/
+                                  (\x -> let y = (\x -> x *
+                                    (\x -> let y = (\x -> x * (\x -> 1) x) x
+                                      in y * y) x) x in y * y) x ||])
 \end{code}
-Normalising using the technique of Section~\ref{sec:subformula},
+Normalising as described in Section~\ref{sec:subformula},
 with variables renamed for readability, yields the following:
 \begin{code}
 {-"\iffalse"-}
@@ -126,10 +131,10 @@ From the normalised term it is easy to generate the final C code:
 \begin{lstlisting}
 float prog (float u) {
   float w; float v; float r;
-  if (u == 0.0f) {
-    r = 0.0f;
+  if (u == 0.0) {
+    r = 0.0;
   } else {
-    v = (u * 1.0f);
+    v = (u * 1.0);
     w = (u * (v * v));
     r = (1.0f / (w * w));
   }
@@ -184,8 +189,8 @@ code. How can the QDSL~Feldspar user be certain that such function
 applications do not render transformation to first-order code
 impossible or introduce additional runtime overhead?
 The answer is the subformula property.
-\\
-\todo{Shayan}{Suggest rephrasing}
+% \\
+% \todo{Shayan}{Suggest rephrasing}
 % \shayan{Above sentence should be rephrased. It is too long,
 %        and hard to read.}
 
@@ -196,21 +201,20 @@ The answer is the subformula property.
 Gentzen's subformula property guarantees that any proof can be
 normalised so that the only formulas that appear within it are
 subformulas of one of the hypotheses or of the conclusion of the
-proof.  Viewed through the lens of Propositions as Types
-\citep{Howard-1980,Wadler-2015}, also known as the Curry-Howard
-isomorphism, Gentzen's subformula property guarantees that any term
+proof.  Viewed through the lens of Propositions as Types,
+Gentzen's subformula property guarantees that any term
 can be normalised so that the type of each of its subterms is a
 subformula of either the type of one of its free variables (corresponding
 to hypotheses) or the term itself (corresponding to the conclusion).
 Here the subformulas of a type are the type itself and the subformulas of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
-|(a,b)| are |a| and |b|, and that types |Int| and |Float| have no
+|(a,b)| are |a| and |b|, and types |Int| and |Float| have no
 parts.
-See Proposition~\ref{prop:subformula} in Section~\ref{sec:subformula}.)
+(See Proposition~\ref{prop:subformula}.)
 
 % the only part of |Arr a| is |a|
 
-Further, it is easy to sharpen Gentzen's proof to guarantee a
+Further, it is easy to adapt the original proof to guarantee a
 sharpened subformula property: any term can be normalised so that the
 type of each of its proper subterms is a proper subtype of either the
 type of one of its free variables (corresponding to hypotheses) or the
@@ -221,7 +225,7 @@ save for the type itself.  In the example of the previous subsection,
 the sharpened subformula property guarantees that after normalisation
 a closed term of type |float -> float| will only have proper subterms
 of type |float|, which is indeed true for the normalised term.
-(See Proposition~\ref{prop:sharpened} in Section~\ref{sec:subformula}.)
+(See Proposition~\ref{prop:sharpened}.)
 
 The subformula property depends on normalisation of terms, but
 complete normalisation is not always possible or desirable.  The
@@ -231,9 +235,11 @@ constants.  In particular, we introduce the uninterpreted constant
 save :: Rep a => a -> a
 \end{spec}
 of arity $1$, which is equivalent to the identity function
-on representable types; a use of |save| appears in
-Section~\ref{subsec:arrays}.
-In a context with recursion, we take 
+on representable types.  Unfolding of an application |L M|
+can be inhibited by rewriting it in the form |save L M|,
+where |L| and |M| are arbitrary terms.
+A use of |save| appears in Section~\ref{subsec:arrays}.
+In a context with recursion, we take
 \begin{spec}
 fix :: (a -> a) -> a
 \end{spec}
@@ -246,9 +252,9 @@ as an uninterpreted constant.
 % In a context with recursion, we take |fix :: (a -> a) -> a|
 % as an uninterpreted constant.
 
-(As a technical convenience, we also require constants of a given arity
-to be fully applied, and treat subterms and subformulas of these specially.
-See Section~\ref{sec:subformula}.)
+% (As a technical convenience, we also require constants of a given arity
+% to be fully applied, and treat subterms and subformulas of these specially.
+% See Section~\ref{sec:subformula}.)
 
 % (Careful readers will have noticed a small difficulty.  One of the
 % free variables of our quoted term is multiplication over floats.  In
@@ -266,11 +272,11 @@ See Section~\ref{sec:subformula}.)
 
 In the previous code, we arbitrarily chose that raising zero to a
 negative power yields zero. Say that we wish to exploit the |Maybe|
-type of Haskell to refactor the code, separating identifying the
+type of Haskell to refactor the code, by separating identification of the
 exceptional case (negative exponent of zero) from choosing a value for
 this case (zero).  We decompose |power| into two functions |power'|
 and |power''|, where the first returns |Nothing| in the exceptional
-case, and the second maps |Nothing| to a suitable default value.
+case, and the second maps |Nothing| to a suitable value.
 
 The |Maybe| type is a part of the Haskell standard prelude.
 \begin{spec}
@@ -292,7 +298,7 @@ power' n =
     [|| \x -> return 1 ||]
   else if even n then
     [|| \x -> do  y <- $$(power' (n `div` 2)) x
-                  return ($$sqr y) ||]
+                  return (y * y) ||]
   else
     [|| \x -> do  y <- $$(power' (n-1)) x
                   return (x*y) ||]
@@ -301,14 +307,13 @@ power'' ::  P.Int -> Qt (Float -> Float)
 power'' n =
   [|| \ x ->  maybe 0 (\y -> y) ($$(power' n) x)||]
 \end{code}
-
 %if False
 \begin{code}
 ex3 = testNrmSmpQt (power (-6)) (power'' (-6))
 ex4 = qdsl (power (-6)) == qdsl (power'' (-6))
 \end{code}
 %endif
-Here |sqr| is as before. Evaluation and normalisation of
+Evaluation and normalisation of
 |power (-6)| and |power'' (-6)| yield identical terms
 (up to renaming), and hence applying |qdsl| to these yields
 identical C code.
@@ -317,11 +322,10 @@ The subformula property is key: because the final type of the result
 does not involve |Maybe| it is certain that normalisation will remove
 all its occurrences.  Occurrences of |do| notation are expanded to
 applications of |(>>=)|, as usual.  Rather than taking |return|,
-|(>>=)|, and |maybe| as free variables (whose types have subformulas
+|(>>=)|, and |maybe| as uninterpreted constants (whose types have subformulas
 involving |Maybe|), we treat them as known definitions to be
-eliminated by the normaliser.  The |Maybe| type is a sum type, and
-normalisation for sums is as described in
-Section~\ref{sec:subformula}.
+eliminated by the normaliser.  Type |Maybe| is a sum type,
+and is normalised as described in Section~\ref{sec:subformula}.
 
 % We have chosen not to make |Maybe| a representable type, which
 % prohibits its use as argument or result of the top-level function
@@ -476,53 +480,14 @@ the |Vec| type is not representable, but it can accept
 |[|||| $$normVec . $$toVec ||||]|
 \]
 the quoted term normalises to
-\begin{spec}
-[|| (snd (while  (\ s -> fst s < lnArr a)
-                 (\ s -> let i = fst s in (i+1,
-                   snd s + (ixArr a i * ixArr a i)))
-                 (0 , 0.0))) ||]
-\end{spec}
-%if False
 \begin{code}
-ex5 = testNrmSmpQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\a -> sqrt
-     (snd (while (\ s -> fst s < lnArr a)
-                 (\ s -> let i = fst s
-                         in  (i + 1 , snd s + (ixArr a i * ixArr a i)))
-                 (0 , 0.0)))) ||]
-
-ex6 = testNrmQt ([|| \ v -> $$normVec ($$toVec v) ||]) [|| (\ x0 -> let x1 = lnArr x0 in
-          let x2 = x1 < x1 in
-          if x2
-          then (let x13 = while
-                          (\ x3 -> let x4 = fst x3 in
-                                   x4 < x1)
-                          (\ x5 -> let x6  = fst x5      in
-                                   let x7  = snd x5      in
-                                   let x8  = x6 + 1      in
-                                   let x9  = ixArr x0 x6 in
-                                   let x10 = ixArr x0 x6 in
-                                   let x11 = x10 * x9    in
-                                   let x12 = x7  + x11   in
-                                   (x8 , x12))
-                          (0 , 0.0)
-                in let x14 = snd x13 in
-                   sqrt x14)
-          else (let x13 =  while
-                           (\ x3 -> let x4 = fst x3 in
-                                    x4 < x1)
-                           (\ x5 -> let x6  = fst x5      in
-                                    let x7  = snd x5      in
-                                    let x8  = x6 + 1      in
-                                    let x9  = ixArr x0 x6 in
-                                    let x10 = ixArr x0 x6 in
-                                    let x11 = x10 * x9    in
-                                    let x12 = x7  + x11   in
-                                    (x8 , x12))
-                           (0 , 0.0)
-                in let x14 = snd x13 in
-                   sqrt x14)) ||]
+{-"\iffalse"-}
+ex5 = testNrmSmpQt ([|| $$normVec . $$toVec ||]) [|| \a ->  sqrt (snd
+                                                     (while  (\ s -> fst s < lnArr a)
+                                                             (\ s -> let i = fst s in 
+                                                                 (i + 1, snd s + (ixArr a i * ixArr a i)))
+                                                             (0 , 0.0))) ||]
 \end{code}
-%endif
 from which it is easy to generate C code.
 
 The vector representation makes it easy to define any
@@ -542,7 +507,7 @@ cause the elements to be recomputed. An alternative is to materialise
 the vector as an array with the following function.
 \begin{code}
 memorise  ::  Rep a => Qt (Vec a -> Vec a)
-memorise = [|| $$toVec . mem . $$fromVec ||]
+memorise = [|| $$toVec . save . $$fromVec ||]
 \end{code}
 Here we interpose |save|, as defined in Section~\ref{subsec:subformula}
 to forestall the fusion that would otherwise occur. For example, if
@@ -557,7 +522,7 @@ compute either
 \begin{center}
 |[||||$$blur . $$blur||||]| ~~~or~~~ |[||||$$blur . $$memorise . $$blur||||]|
 \end{center}
-with different trade-offs between recomputation and memory usage.
+with different trade-offs between recomputation and memory use.
 Strong guarantees for fusion in combination with |memorise| give the
 programmer a simple interface which provides powerful optimisations
 combined with fine control over memory usage.
