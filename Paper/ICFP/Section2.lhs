@@ -111,9 +111,9 @@ Evaluating |power (-6)| yields the following:
 \begin{code}
 {-"\iffalse"-}
 ex1 = testQt (power (-6)) ([||  \x -> if x == 0 then 0 else 1/
-                                  (\x -> let y = (\x -> x *
-                                    (\x -> let y = (\x -> x * (\x -> 1) x) x
-                                      in y * y) x) x in y * y) x ||])
+                                  (\x -> let {y = (\x -> x *
+                                    (\x -> let {y = (\x -> x * (\x -> 1) x) x}
+                                      in y * y) x) x} in y * y) x ||])
 \end{code}
 Normalising as described in Section~\ref{sec:subformula},
 with variables renamed for readability, yields the following:
@@ -205,7 +205,7 @@ proof.  Viewed through the lens of Propositions as Types,
 Gentzen's subformula property guarantees that any term
 can be normalised so that the type of each of its subterms is a
 subformula of either the type of one of its free variables (corresponding
-to hypotheses) or the term itself (corresponding to the conclusion).
+to hypotheses) or of the term itself (corresponding to the conclusion).
 Here the subformulas of a type are the type itself and the subformulas of
 its parts, where the parts of |a -> b| are |a| and |b|, the parts of
 |(a,b)| are |a| and |b|, and types |Int| and |Float| have no
@@ -216,7 +216,7 @@ parts.
 
 Further, it is easy to adapt the original proof to guarantee a
 sharpened subformula property: any term can be normalised so that the
-type of each of its proper subterms is a proper subtype of either the
+type of each of its proper subterms is a proper subformula of either the
 type of one of its free variables (corresponding to hypotheses) or the
 term itself (corresponding to the conclusion).  Here the proper
 subterms of a term are all subterms save for free variables and the
@@ -484,7 +484,7 @@ the quoted term normalises to
 {-"\iffalse"-}
 ex5 = testNrmSmpQt ([|| $$normVec . $$toVec ||]) [|| \a ->  sqrt (snd
                                                      (while  (\ s -> fst s < lnArr a)
-                                                             (\ s -> let i = fst s in 
+                                                             (\ s -> let i = fst s in
                                                                  (i + 1, snd s + (ixArr a i * ixArr a i)))
                                                              (0 , 0.0))) ||]
 \end{code}

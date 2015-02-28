@@ -128,7 +128,7 @@ Evaluating |power (-6)| yields the following:
          (u * ((u * 1) * (u * 1))))))
 \end{spec}
 Applying common-subexpression elimination, for instance
-via observable sharing \citep{claessen1999observable},
+via observable sharing \citep{claessen1999observable,gill2009type},
 permits recovering the sharing structure.
 \[
 \begin{array}{c@@{~~}||@@{~~}l}
@@ -680,7 +680,7 @@ normVec v   =   sqrt (dotVec v v)
 \end{code}
 Invoking
 \[
-|[|||| normVec . toVec ||||]|
+|edsl (normVec . toVec)|
 \]
 generates C code to normalise a vector. If we used a top-level function
 of type |(Syn a, Syn b) => (a -> b) -> C|, then it would insert the

@@ -478,7 +478,7 @@ available at \url{https://github.com/shayan-najd/QFeldspar}.
 \label{sec:implementation}
 
 The original EDSL~Feldspar generates values of a GADT
-(called |Dp a| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
+(called |Dp| in Section~\ref{sec:qdsl-vs-edsl}), with constructs
 that represent |while| and manifest arrays similar to those
 above. A backend then compiles values of type |Dp a| to C code.
 QDSL~Feldspar provides a transformer from |Qt a| to |Dp a|, and
@@ -507,7 +507,7 @@ The transformer from |Qt| to |Dp| performs the following steps.
 
 An unfortunate feature of typed quasiquotation in GHC is that the
 implementation discards all type information when creating the
-representation of a term.  Type |Qt a| is equivalent to the type
+representation of a term.  Type |Qt a| is a synonym for the type
 \[
 |TH.Q (TH.TExp a)|
 \]
