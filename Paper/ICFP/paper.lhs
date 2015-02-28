@@ -561,10 +561,9 @@ the increase being due to normalisation time
 \section{The subformula property}
 \label{sec:subformula}
 
-This section introduces a reduction rules for
-normalising terms that enforce the subformula property
-while preserving sharing. The rules adapt to
-both call-by-need and call-by-value.
+This section introduces reduction rules for normalising terms that
+enforce the subformula property while preserving sharing. The rules
+adapt to both call-by-need and call-by-value.
 %
 We work with simple types. The only polymorphism in our examples
 corresponds to instantiating constants (such as $\mathit{while}$) at
@@ -576,6 +575,10 @@ functions ($A \to B$), products ($A \times B$), and sums ($A + B$).
 Let $L$, $M$, $N$ range over terms, and $x$, $y$, $z$ range over
 variables.  Let $c$ range over constants, which are fully
 applied according to their arity, as discussed below.
+%
+As constant applications are non-values, we represent literals as free
+variables.
+%
 As usual, terms are taken as
 equivalent up to renaming of bound variables. Write $\fv{M}$ for
 the set of free variables of $M$, and $\subst{N}{x}{M}$ for
