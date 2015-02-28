@@ -121,14 +121,16 @@ appear differently depending on whether they are to be executed at
 generation-time or run-time, using |M == N| and |if L then M else N|
 for the former but |M .==. N| and |L ? (M, N)| for the latter.
 
-Evaluating |power (-6)| yields the following:
+Invoking |edsl (power (-6))| generates code to raise a number to its |-6| power.
+Evaluating |power (-6) u|, where |u| is a term representing a variable of type |Dp Float|,
+yields the following:
 \begin{spec}
-(\ u -> (u .==. 0) ? (0,
+(u .==. 0) ? (0,
   1 / (  (u * ((u * 1) * (u * 1))) *
-         (u * ((u * 1) * (u * 1))))))
+         (u * ((u * 1) * (u * 1)))))
 \end{spec}
-Applying common-subexpression elimination, for instance
-via observable sharing \citep{claessen1999observable,gill2009type},
+Applying common-subexpression elimination
+% for instance, via observable sharing \citep{claessen1999observable,gill2009type},
 permits recovering the sharing structure.
 \[
 \begin{array}{c@@{~~}||@@{~~}l}
@@ -678,9 +680,9 @@ dotVec u v  =   sumVec (zipVec (*) u v)
 normVec     ::  Vec (Dp Float) -> Dp Float
 normVec v   =   sqrt (dotVec v v)
 \end{code}
-Invoking
+Invoking |edsl| on
 \[
-|edsl (normVec . toVec)|
+|normVec . toVec|
 \]
 generates C code to normalise a vector. If we used a top-level function
 of type |(Syn a, Syn b) => (a -> b) -> C|, then it would insert the

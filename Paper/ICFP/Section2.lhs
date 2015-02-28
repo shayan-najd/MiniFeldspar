@@ -72,7 +72,6 @@ instance Rep Int
 instance Rep Float
 instance (Rep a, Rep b) => Rep (a,b)
 \end{code}
-It is easy to add triples and larger tuples.
 
 \subsection{A first example}
 \label{subsec:power}
@@ -100,6 +99,7 @@ indicate which code executes at which time.  Unquoted code executes at
 generation-time while quoted code executes at run-time. Quoting is
 indicated by |[||||...||||]| and unquoting by |$$(...)|.
 
+Invoking |qdsl (power (-6))| generates code to raise a number to its |-6| power.
 Evaluating |power (-6)| yields the following:
 % \begin{code}
 % {-"\iffalse"-}

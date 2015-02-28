@@ -664,10 +664,10 @@ separate construct to avoid consideration of irrelevant subformulas
 and subterms.
 The type of a constant $c$ of arity $k$ is written
 \[
-c : A_1 \to \cdots A_k \to B
+c : A_1 \to \cdots \to A_k \to B
 \]
 and its subformulas are itself and $A_1$, \ldots, $A_k$, and $B$
-(but not $A_i \to \ldots \to A_k \to B$ for $i > 1$).
+(but not $A_i \to \cdots \to A_k \to B$ for $i > 1$).
 An application of a constant $c$ of arity $k$ is written
 \[
 c \app M_1 \app \cdots \app M_k
