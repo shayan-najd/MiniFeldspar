@@ -22,3 +22,8 @@ clean:
 
 clean-all: clean
 	rm -f paper.pdf
+
+git:
+	git add paper.lhs Section2.lhs Section5.lhs formalism.tex table.tex paper.bib
+	git commit -m "commit"
+	git push
