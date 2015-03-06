@@ -1,3 +1,7 @@
+% TODO
+
+% Add James Cheney and Tiark Rompf to acknowledgements
+
 % Phil TODO
 
 % Delete Tag from Dp. Add brief explanation of observable sharing
