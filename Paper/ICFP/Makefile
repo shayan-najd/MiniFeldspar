@@ -27,3 +27,7 @@ git:
 	git add paper.lhs Section2.lhs Section5.lhs formalism.tex table.tex paper.bib
 	git commit -m "commit"
 	git push
+
+publish: paper.pdf
+	cp paper.pdf ~/web/papers/qdsl/qdsl.pdf
+
