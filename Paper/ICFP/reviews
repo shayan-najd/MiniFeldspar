@@ -1,0 +1,244 @@
+Review #15A
+Overall merit
+2. Weak reject
+Reviewer expertise
+3. Knowledgeable
+Paper summary
+
+This paper calls for a renaissance in quote-based DSLs, which the
+authors call QDSLs. Currently, embedded DSLs as popular, and this
+paper is a detailed comparison between the deeply embedded DSL
+Feldspar, and a new, quote-based, DSL. Quote-based DSLs are an old
+idea, but with recent innovations in Haskell's Template Haskell, along
+with normalization, give a competitive alternative. This paper
+investigates Haskell QDSLs in detail, and explains how something
+called the "subformula" property can help guarantee normalization.
+Evaluation
+This is an interesting paper, but light on contribution, and contains
+a number of shortcomings. Seeing the (full-scale DSL) Feldspar ported
+to use QDSLs was the main contribution I saw, and I enjoyed better
+understanding the tradeoffs here. However the benefits from QDSLs are
+not clearly articulated. Further, the normalization algorithm is similar to
+what is done in the folklore already. 
+
+### Contributions
+
+(1) Introducing QDSLs. This appears to a leverage of the new version
+of Template Haskell, combined with a normalization that guarantees
+first order results. 
+
+(2) Measure QDSLs and EDSLs. This was interesting, but not surprising.
+
+(2) The normalization algorithm. See above. This was a contribution,
+but similar to what is done already. For example, Secrets of the
+Glasgow Inliner outlines a similar scheme for optimizing core that is
+often used to simplify core-like languages.
+
+(4) Compare QDSLs and EDSLs.
+
+Really this is two contributions: QDSLs (cf. EDSLs), and the normalization.
+Comments for author(s)
+Keywords domain-specific language => domain-specific language*s*,
+DSL => DSLs, ...
+
+I do not like the use of quotations throughout the paper (though I get
+the joke). It distracts from the message of the paper. At least indent
+them differently that regular text, if you choose to keep them.
+
+dub => name or call
+
+How can you compare performance of DSLs? Code side, DSL author code size? Quality of output.
+
+The Davis and Pfenning (2001) paragraph, and the following paragraph belongs in
+a related work section, and distract the reader from getting to your main points.
+
+"satisfy the subformula property" -- you state this without defining what it is.
+
+"every proof" -- of what?
+
+An example would be really, really useful at the foot of page 1.
+
+what does "subformula of the types" mean?
+
+"the may write HO terms ..." - I do not know what you mean here. Do
+you mean HO will always be normalized away? (The other two bullets are
+clearer)
+
+"The subformula property .." This paragraph, and the next one, read verbosely, 
+again blocking the way to the main ideas and examples.
+
+"a sharpened version" is sharpen a technical term here?
+
+"EDSL is great" => "EDSLs are great"
+
+"the property with additional" -- *what* property
+
+The start of Section 2.1 is really clear. As I reader, I know what you
+are trying to do from the text.
+
+You may want to use sub-scripts for the power (-6) example.
+
+"By default we always .. " -- you could delete this entire
+(distracting) sentence.
+
+If you are talking about Maybe and (>>=), then use 'do', explain
+'do'-notation.
+
+"because the final type ... all occurrences" -- of power'
+
+type Arr a = Array Int a 
+data Vec a = ...
+
+-- I missed the 'type' on first reading, and thought that Array was a
+constructor.
+
+$$normVec <- there is sometimes a space after the $$
+
+You state that Vec a is not representable, but the type Qt (Vec a ->
+Vec a) is your type. How does this work? Is this only for internal
+(DSL) functions, and not top-level functions?
+
+"phantom variable" - cite phantom types
+
+"identical compile and run times" - what does this mean? If the same
+code is generated, well, yes, they will be identical.
+
+Is the N in G and the N in (k.let) the same N?
+
+What you mean by N[x:=V] (Do you lose sharing, or is this a syntax for a form of let)
+
+For EDSL, exploiting do notation - cite ICFP'13, Simple and Compositional Reification
+of Monadic Embedded Languages (I realize that you cite this later).
+
+dubbed the constrained monad problem - you could cite, ICFP'13, The
+Constrained-Monad Problem.
+
+IFL'11 is cite inconsistently in the bibliography.
+[Text] Plain textReview #15B
+Overall merit
+4. Accept
+Reviewer expertise
+2. Some familiarity
+Paper summary
+The authors present a new approach to DSLs based on quotation, making
+novel use of the "subformula property" from natural deduction to
+guarantee (for example) that the target contains only uses first-order
+types even if the source uses higher-order types.
+Evaluation
+This paper makes an interesting contribution, taking a principled
+approach to the building of DSLs via quotation, found for example in
+the C# and F# LINQ frameworks. The paper is very readable and the
+examples are well chosen to illustrate the contrasting approaches of
+QDSL and EDSL.
+
+I am however not *totally* convinced that the subformula property is
+quite as central a notion in DSLs as the authors propose. It seems
+very suited to the example of higher-order source vs first-order
+target, but in other cases wouldn't limitations of the "feature set"
+of the target language be less connected to type constructors?
+Comments for author(s)
+Section 1. "Consider intuitionistic logic with conjunction". But
+*without* implication, presumably.
+
+Seciton 1. "However, in other cases, the EDSL must perform
+normalisation of the deep embedding...". Can you give an example?
+
+Figure 1. The run times in columns 3 and 5 seem almost too small to
+observe.
+
+Figure 3. The \kappa.case rule duplicates its context. Is this a problem?
+[Text] Plain textReview #15C
+Overall merit
+2. Weak reject
+Reviewer expertise
+3. Knowledgeable
+Paper summary
+
+This paper advocates combining the old idea of quoted domain specific
+languages, which has been used in Lisp for decades, with a "sharpened"
+version of Gentzen's subformula property to create DSLs with different
+properties than the EDSLs often seen in a language like Haskell.
+
+The main results are the example QDSLs that show off the utility of
+the sharpened subformula property, along with the sharpened property,
+and discussion of its usage.
+
+The strength of this paper are in the code snippets and examples,
+which generally felt readable and insightful, and the sharpened
+subformula property, which I found interesting.  I quite liked reading
+the code, even though I'm not a Haskell expert.
+
+The weakness of the paper is its poor organization, and how long it
+takes to get to concrete examples.  Had this been a pearl, I would
+have quit reading before the end of page 2, when I still had no
+concrete idea of what a QDSL was.  The paper could get to the point
+much more quickly.  Also, I had trouble understanding exactly what is
+new in this paper.  Since QDSLs have been around in Lisp for so long,
+how come no one talks about the subformula property in those
+languages? Or is this only something that concerns static typing? I
+think the paper would benefit from a discussion of the subformula and
+sharpened subformula properties in the context of Lisp, which would
+make more clear what is new is the paper, how much is reliant on the
+Haskell type system, and maybe allow Lisp programmers to gain insight
+as well.
+
+Evaluation
+
+From a writing standpoint, the quality of the paper is poor.  I became
+frustrated and bored by the very long, abstract introduction, which
+effectively included another related work section.  The first concrete
+example isn't until page 3.  I didn't really understand what the paper
+was about until I was almost halfway through, which I found annoying.
+
+As far as I can tell these results are correct.  The benchmark
+results, however, seem uninspiring and basically uninteresting.  Also,
+when most of the timings are 0.01 seconds, I'm not sure sure how
+informative the benchmarks are.
+
+The novelty of the paper is difficult to assess.  Section 5 seems
+largely rehashed from an existing paper, and its not clear to me which
+of these QDSL examples are appearing in print for the first time.  The
+authors are very up front about saying they are combining two old
+ideas.  However, the quoted DSL feels different enough in Haskell than
+in Lisp that I have trouble understanding how the two subformula
+properties maps back onto Lisp.  Do Lispers have a name for this
+property?  Does the idea pop up there as well?  To what extent does
+the utility of the property rely on static typing?  Could Typed Racket
+programmers benefit from these observations?  Because the paper
+appropriates a technique from its original setting, but never reflects
+back on the original host language, I have trouble understanding how
+many of these observations are really novel.  Mapping these ideas back
+to Lisp might greatly strengthen the paper, and make it of much wider
+interest.
+
+Without understanding how these ideas map back to Lisp, I don't fully
+understand the importance of the paper.  These ideas seem potentially
+useful in Haskell, although I don't have enough expertise in Haskell
+to really understand the tradeoffs between QDSLs and EDSLs in that
+language.
+
+Given these uncertainties, and the fairly poor writing and
+organization, I rate the paper as (borderline) 'weak reject'.  I'm on
+the fence because the sharpened subformula property seems interesting,
+and because I like the code snippets.  With more work this could be a
+much stronger paper.  Comments for author(s) I suggest making the
+introduction much shorter, and getting to concrete examples much more
+quickly.  I found the introduction too abstract to be useful, and the
+discussion of the related work up front didn't really help, since I
+didn't yet know what the paper was talking about.
+
+The writing in general could use a great deal of polishing, and the
+overall structure could use work.
+
+Does the subformula property appear in Lisp QDSLs as well?  Do Lispers
+even have a name for it?  Or it is implicit and invisible in Lisp?
+Does it depend on a static type system?  Could you use these
+observations when defining a DSL in Common Lisp, Racket or Typed
+Racket?  How do hygienic macros change the way things work, with
+respect to quotation and the subformula property?  Can you compare
+QDSLs and EDSLs in Lisp?  Addressing these issues makes the new
+observations really stand out, and makes the paper of far greater
+interest to Lispers.  Are you just stealing from Lisp?  Maybe you have
+something valuable to give back...
+
+

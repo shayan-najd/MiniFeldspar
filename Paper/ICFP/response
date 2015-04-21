@@ -1,0 +1,53 @@
+Reviewer A
+
+The list of contributions omits our main contribution. To quote from
+our introduction: "A key feature of QDSLs is the use of normalisation
+to ensure the subformula property, first proposed by Gentzen in
+1935. ... [We] formulate a sharpened version of the subformula
+property and apply it to characterise when higher-order terms
+normalise to first-order form."
+
+The reviewer writes "the normalization algorithm is similar to what is
+done in the folklore already."  Publishing an idea well known in
+folklore strikes us as valuable.  So far as we know, with the
+exception of Cheney et al (ICFP 2013), no existing work on DSLs refers
+to the subformula property, folklore or otherwise.  We'd be grateful
+for any references to normalisers for higher-order DSLs that guarantee
+to generate first-order code.
+
+
+
+Reviewer B
+
+The reviewer questions whether the subformula property has uses beyond
+translation to first-order languages.  The introduction mentions two
+other uses: "Users of the DSL ... may write a sequence of loops over
+arrays while guaranteeing to generate code that fuses those loops;
+... [or] may write intermediate terms with nested collections while
+guaranteeing to generate code that operates on flat data."  Even if
+its applicability were restricted to first-order target languages, that
+is such a wide range as to be of value.  Still, it's a fair point, and
+we will highlight exploring the extent of validity of the subformula
+property as future work.
+
+
+Reviewer C
+
+Referring to the subformula property, the reviewer asks: "Do Lispers
+have a name for this property?  Does the idea pop up there as well? To
+what extent does the utility of the property rely on static typing?
+Could Typed Racket programmers benefit from these observations?"  The
+subformula property has been around since 1935.  So far as we know, no
+one pointed out its significance until Cheney et al (ICFP 2013); and
+the claim of its widespread applicability originates with our paper.
+The subformula property is tied to types, so its applicability to Lisp
+is unclear.  Any language with typed quotation should be suited to
+QDSLs (e.g., where a quoted term of type a has a type analogous to our
+Qt a).  This includes F# or Scala.  So far as we know, Typed Racket
+does not support typed quotations, and so would not be suitable; but
+it should be easy to extend Typed Racket or other typed functional
+languages to support typed quotation.
+
+
+
+
