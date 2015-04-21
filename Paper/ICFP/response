@@ -42,11 +42,16 @@ one pointed out its significance until Cheney et al (ICFP 2013); and
 the claim of its widespread applicability originates with our paper.
 The subformula property is tied to types, so its applicability to Lisp
 is unclear.  Any language with typed quotation should be suited to
-QDSLs (e.g., where a quoted term of type a has a type analogous to our
-Qt a).  This includes F# or Scala.  So far as we know, Typed Racket
+QDSLs (e.g., where a quoted term of type 'A' has a type analogous to our
+'Qt A').  This includes F# or Scala.  So far as we know, Typed Racket
 does not support typed quotations, and so would not be suitable; but
 it should be easy to extend Typed Racket or other typed functional
-languages to support typed quotation.
+languages to support typed quotation. Moreover, there is no restriction 
+on how types are provided; types can be provided both via static typing, 
+or via dynamic typing. In the context of dynamic typing, reasoning about
+the object language (e.g., lack of higher-order terms, or fusion of 
+arrays) naturally happens at host language runtime (i.e., when target 
+code, like C code, is being generated).
 
 
 
