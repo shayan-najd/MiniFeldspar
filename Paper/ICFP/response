@@ -4,7 +4,7 @@ paper.)
 A: Contributions
 
 The reviewer's list of contributions omits our main contribution, use
-of the subformula property.  In the introduction, we write:
+of the subformula property. In the introduction, we write:
 
   "A key feature of QDSLs is the use of normalisation
   to ensure the subformula property, first proposed by Gentzen in
@@ -16,7 +16,7 @@ A: "Normalisation seems known in folklore"
 
 With the exception of Cheney, Lindley, and Wadler (ICFP 2013), no
 existing work on DSLs refers to the subformula property, folklore or
-otherwise.  Regardless, publishing an known in folklore but
+otherwise. Regardless, publishing a result known in folklore but
 unpublished strikes us as valuable.
 
 A: Substitution
@@ -28,8 +28,8 @@ time, as is well known.
 B: Limited utility
 
 Reviewer B suggests utility of the subformula property is limited to
-DSLs where the target is a first-order language.  In the
-introducution, we list three applications.
+DSLs where the target is a first-order language. In the
+introduction, we list three applications.
 
   * "write higher-order terms while guaranteeing to generate
      first-order code"
@@ -43,13 +43,13 @@ introducution, we list three applications.
 C: "I didn't understand what the paper was about until I was halfway
 through"
 
-Can you please state which examples led to your understanding?  We can
+Can you please state which examples led to your understanding? We can
 try to move them earlier.
 
 C: Section 5 seems largely rehashed
 
 As noted, we compare EDSLs as in Axelson and Svenningsson (2012) to
-QDSLs.  This requires repeating parts of the earlier paper.
+QDSLs. This requires repeating parts of the earlier paper.
 
 C: Do Lispers have a name for this property?
 
@@ -68,14 +68,11 @@ terms.
 C: How about Typed Racket?
 
 We depend upon typed closed quotations (our type |Qt a|), which are
-supported in Haskell and F#.  Typed Racket only supports untyped
+supported in Haskell and F#. Typed Racket only supports untyped
 quotation, but it may not be difficult to add typed quotation.
 
 C: What about hygienic macros?
 
 Hygienic macros are helpful for open quotations, whereas we restrict
-ourselves to closed quotations.  Open vs closed quotation is discussed
+ourselves to closed quotations. Open vs closed quotation is discussed
 at length in Section 5 of Cheney, Lindley, and Wadler (ICFP 2013).
-
-
-
