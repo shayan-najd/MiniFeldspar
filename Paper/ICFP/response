@@ -1,78 +1,71 @@
-(Each answer below implies a clarification we will make to the final
-paper.)
+(Each answer below implies a clarification we will make to the final paper.)
 
 A: Contributions
 
-The reviewer's list of contributions omits our main contribution, use
-of the subformula property. In the introduction, we write:
+The reviewer's list of contributions omits our main contribution, use of the
+subformula property. In the introduction, we write:
 
-  "A key feature of QDSLs is the use of normalisation
-  to ensure the subformula property, first proposed by Gentzen in
-  1935. ... [We] formulate a sharpened version of the subformula
-  property and apply it to characterise when higher-order terms
-  normalise to first-order form."
+  "A key feature of QDSLs is the use of normalisation to ensure the subformula
+  property, first proposed by Gentzen in 1935. ... [We] formulate a sharpened
+  version of the subformula property and apply it to characterise when
+  higher-order terms normalise to first-order form."
 
 A: "Normalisation seems known in folklore"
 
-With the exception of Cheney, Lindley, and Wadler (ICFP 2013), no
-existing work on DSLs refers to the subformula property, folklore or
-otherwise. Regardless, publishing a result known in folklore but
-unpublished strikes us as valuable.
+With the exception of Cheney, Lindley, and Wadler (ICFP 2013), no existing work
+on DSLs refers to the subformula property, folklore or otherwise. Regardless,
+publishing a result known in folklore but unpublished strikes us as valuable.
 
 A: Substitution
 
 Notation N[x:=V] denotes substitution with loss of sharing (not let).
-Substitution of values for variables does not increase computation
-time, as is well known.
+Substitution of values for variables does not increase computation time, as is
+well known.
 
 B: Limited utility
 
-Reviewer B suggests utility of the subformula property is limited to
-DSLs where the target is a first-order language. In the
-introduction, we list three applications.
+Reviewer B suggests utility of the subformula property is limited to DSLs where
+the target is a first-order language. In the introduction, we list three
+applications.
 
-  * "write higher-order terms while guaranteeing to generate
-     first-order code"
+  * "write higher-order terms while guaranteeing to generate first-order code"
 
-  * "write a sequence of loops over arrays while guaranteeing
-     to generate code that fuses those loops"
+  * "write a sequence of loops over arrays while guaranteeing to generate code
+     that fuses those loops"
 
-  * "write intermediate terms with nested collections while
-     guaranteeing to generate code that operates on flat data"
+  * "write intermediate terms with nested collections while guaranteeing to
+     generate code that operates on flat data"
 
-C: "I didn't understand what the paper was about until I was halfway
-through"
+C: "I didn't understand what the paper was about until I was halfway through"
 
-Can you please state which examples led to your understanding? We can
-try to move them earlier.
+Can you please state which examples led to your understanding? We can try to
+move them earlier.
 
 C: Section 5 seems largely rehashed
 
-As noted, we compare EDSLs as in Axelson and Svenningsson (2012) to
-QDSLs. This requires repeating parts of the earlier paper.
+As noted, we compare EDSLs as in Axelson and Svenningsson (2012) to QDSLs, which
+requires repeating parts of the earlier paper.
 
 C: Do Lispers have a name for this property?
 
-The subformula property has been around since 1935, but no one pointed
-out its significance until Cheney, Lindley, and Wadler (ICFP 2013);
-and the claim of its widespread applicability originates with our
-paper.
+The subformula property has been around since 1935, but no one pointed out its
+significance until Cheney, Lindley, and Wadler (ICFP 2013); and the claim of its
+widespread applicability originates with our paper.
 
 C: Can the ideas apply in Lisp?
 
-Our normalisation rules do not depend on types, and so could be
-applied to a DSL in a dynamically typed language, such as Racket.
-However, the guarantees of the subformula property apply only to typed
-terms.
+Our normalisation rules do not depend on types, and so could be applied to a DSL
+in a dynamically typed language, such as Racket.  However, the guarantees of the
+subformula property apply only to typed terms.
 
 C: How about Typed Racket?
 
-We depend upon typed closed quotations (our type |Qt a|), which are
-supported in Haskell and F#. Typed Racket only supports untyped
-quotation, but it may not be difficult to add typed quotation.
+We depend upon typed closed quotations (our type |Qt a|), which are supported in
+Haskell and F#. Typed Racket only supports untyped quotation, but it may not be
+difficult to add typed quotation.
 
 C: What about hygienic macros?
 
-Hygienic macros are helpful for open quotations, whereas we restrict
-ourselves to closed quotations. Open vs closed quotation is discussed
-at length in Section 5 of Cheney, Lindley, and Wadler (ICFP 2013).
+Hygienic macros are helpful for open quotations, whereas we restrict ourselves
+to closed quotations. Open vs closed quotation is discussed at length in Section
+5 of Cheney, Lindley, and Wadler (ICFP 2013).
