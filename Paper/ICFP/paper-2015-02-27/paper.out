@@ -1,0 +1,21 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}
+\BOOKMARK [1][-]{section.2}{Feldspar as a QDSL}{}
+\BOOKMARK [2][-]{subsection.2.1}{The top level}{section.2}
+\BOOKMARK [2][-]{subsection.2.2}{A first example}{section.2}
+\BOOKMARK [2][-]{subsection.2.3}{The subformula property}{section.2}
+\BOOKMARK [2][-]{subsection.2.4}{A second example}{section.2}
+\BOOKMARK [2][-]{subsection.2.5}{While}{section.2}
+\BOOKMARK [2][-]{subsection.2.6}{Arrays}{section.2}
+\BOOKMARK [1][-]{section.3}{Implementation}{}
+\BOOKMARK [1][-]{section.4}{The subformula property}{}
+\BOOKMARK [1][-]{section.5}{Feldspar as an EDSL}{}
+\BOOKMARK [2][-]{subsection.5.1}{A first example}{section.5}
+\BOOKMARK [2][-]{subsection.5.2}{A second example}{section.5}
+\BOOKMARK [2][-]{subsection.5.3}{The deep embedding}{section.5}
+\BOOKMARK [2][-]{subsection.5.4}{Class Syn}{section.5}
+\BOOKMARK [2][-]{subsection.5.5}{Embedding pairs}{section.5}
+\BOOKMARK [2][-]{subsection.5.6}{Embedding undefined}{section.5}
+\BOOKMARK [2][-]{subsection.5.7}{Embedding option}{section.5}
+\BOOKMARK [2][-]{subsection.5.8}{Embedding vector}{section.5}
+\BOOKMARK [1][-]{section.6}{Related work}{}
+\BOOKMARK [1][-]{section.7}{Conclusion}{}

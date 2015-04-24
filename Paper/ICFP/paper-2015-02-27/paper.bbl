@@ -1,0 +1,270 @@
+\begin{thebibliography}{48}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Ankner and Svenningsson(2013)]{ankner2013edsl}
+J.~Ankner and J.~Svenningsson.
+\newblock An {EDSL} approach to high performance {Haskell} programming.
+\newblock In \emph{Haskell}, 2013.
+
+\bibitem[Axelsson et~al.(2010)]{FELDSPAR}
+E.~Axelsson et~al.
+\newblock {F}eldspar: {A} domain specific language for digital signal
+  processing algorithms.
+\newblock In \emph{{MEMOCODE}}, 2010.
+
+\bibitem[Bentley(1986)]{Bentley-1986}
+J.~Bentley.
+\newblock Programming pearls: {L}ittle languages.
+\newblock \emph{CACM}, 29\penalty0 (8), 1986.
+
+\bibitem[Bjesse et~al.(1998)Bjesse, Claessen, Sheeran, and
+  Singh]{bjesse1998lava}
+P.~Bjesse, K.~Claessen, M.~Sheeran, and S.~Singh.
+\newblock {Lava}: Hardware design in {Haskell}.
+\newblock In \emph{ICFP}, 1998.
+
+\bibitem[Chakravarty et~al.(2005)Chakravarty, Keller, Peyton~Jones, and
+  Marlow]{type-families}
+M.~Chakravarty, G.~Keller, S.~Peyton~Jones, and S.~Marlow.
+\newblock Associated types with class.
+\newblock In \emph{POPL}. ACM, 2005.
+
+\bibitem[Cheney et~al.(2013)Cheney, Lindley, and Wadler]{cheney:linq}
+J.~Cheney, S.~Lindley, and P.~Wadler.
+\newblock A practical theory of language-integrated query.
+\newblock In \emph{ICFP}. ACM, 2013.
+
+\bibitem[Cheney et~al.(2014{\natexlab{a}})Cheney, Lindley, Radanne, and
+  Wadler]{CheneyLRW14}
+James Cheney, Sam Lindley, Gabriel Radanne, and Philip Wadler.
+\newblock Effective quotation.
+\newblock In \emph{PEPM}, 2014{\natexlab{a}}.
+
+\bibitem[Cheney et~al.(2014{\natexlab{b}})Cheney, Lindley, and
+  Wadler]{CheneyLW14}
+James Cheney, Sam Lindley, and Philip Wadler.
+\newblock Query shredding.
+\newblock In \emph{SIGMOD}, 2014{\natexlab{b}}.
+
+\bibitem[Claessen and Sands(1999)]{claessen1999observable}
+K.~Claessen and D.~Sands.
+\newblock Observable sharing for functional circuit description.
+\newblock In \emph{{ASIAN}}. Springer, 1999.
+
+\bibitem[Claessen et~al.(2012)Claessen, Sheeran, and Svensson]{claessen:push}
+K.~Claessen, M.~Sheeran, and B.~Svensson.
+\newblock Expressive array constructs in an embedded {GPU} kernel programming
+  language.
+\newblock In \emph{{DAMP}}. ACM, 2012.
+
+\bibitem[Cooper(2009)]{Cooper09}
+Ezra Cooper.
+\newblock The script-writer's dream.
+\newblock In \emph{DBPL}, 2009.
+
+\bibitem[Davies and Pfenning(1996)]{Davies-Pfenning-1996}
+Rowan Davies and Frank Pfenning.
+\newblock A modal analysis of staged computation.
+\newblock In Jr. Guy~Steele, editor, \emph{POPL}, St. Petersburg Beach,
+  Florida, 1996. ACM.
+
+\bibitem[Davies and Pfenning(2001)]{Davies-Pfenning-2001}
+Rowan Davies and Frank Pfenning.
+\newblock A modal analysis of staged computation.
+\newblock \emph{JACM}, 48\penalty0 (3), 2001.
+
+\bibitem[Flanagan et~al.(1993)Flanagan, Sabry, Duba, and
+  Felleisen]{a-normal-form}
+Cormac Flanagan, Amr Sabry, Bruce~F Duba, and Matthias Felleisen.
+\newblock The essence of compiling with continuations.
+\newblock In \emph{PLDI}. ACM, 1993.
+
+\bibitem[Gentzen(1935)]{Gentzen-1935}
+Gerhard Gentzen.
+\newblock Untersuchungen {\"u}ber das logische schlie{\ss}en. i.
+\newblock \emph{Mathematische zeitschrift}, 39\penalty0 (1), 1935.
+
+\bibitem[Gill(2014)]{Gill:14:DSLs-and-Synthesis}
+A.~Gill.
+\newblock Domain-specific languages and code synthesis using {Haskell}.
+\newblock \emph{Commun. ACM}, 57\penalty0 (6), 2014.
+
+\bibitem[Gill(2009)]{gill2009type}
+A.~Gill.
+\newblock Type-safe observable sharing in {Haskell}.
+\newblock In \emph{Haskell}, 2009.
+
+\bibitem[Giorgidze and Nilsson(2011)]{giorgidze2011embedding}
+G.~Giorgidze and H.~Nilsson.
+\newblock Embedding a functional hybrid modelling language in {Haskell}.
+\newblock In \emph{{IFL}}. Springer, 2011.
+
+\bibitem[Hart(1963)]{Hart-1963}
+Timothy~P. Hart.
+\newblock {MACRO} definitions for {LISP}.
+\newblock Technical Report AIM-057, MIT, 1963.
+
+\bibitem[Howard(1980)]{Howard-1980}
+W.~A. Howard.
+\newblock The formulae-as-types notion of construction.
+\newblock In \emph{To H.~B.~Curry}, pages 479--491. Academic Press, 1980.
+
+\bibitem[Hudak(1997)]{hudak1997domain}
+P.~Hudak.
+\newblock Domain-specific languages.
+\newblock \emph{Handbook of Programming Languages}, 3, 1997.
+
+\bibitem[Hughes(1999)]{hughes1999restricted}
+J.~Hughes.
+\newblock Restricted data types in {Haskell}.
+\newblock In \emph{Haskell}, 1999.
+
+\bibitem[Lindley(2007)]{Lindley07}
+S.~Lindley.
+\newblock Extensional rewriting with sums.
+\newblock In \emph{TLCA}. Springer, 2007.
+
+\bibitem[Lindley and Cheney(2012)]{LindleyC12}
+Sam Lindley and James Cheney.
+\newblock Row-based effect types for database integration.
+\newblock In Benjamin~C. Pierce, editor, \emph{TLDI}. {ACM}, 2012.
+
+\bibitem[Mainland(2012)]{metahaskell}
+G.~Mainland.
+\newblock Explicitly heterogeneous metaprogramming with {M}eta{H}askell.
+\newblock In \emph{ICFP}. ACM, 2012.
+
+\bibitem[Mainland and Morrisett(2010)]{NIKOLA}
+G.~Mainland and G.~Morrisett.
+\newblock {{Nikola}: embedding compiled {GPU} functions in {Haskell}}.
+\newblock In \emph{Haskell}. ACM, 2010.
+
+\bibitem[Maraist et~al.(1998)Maraist, Odersky, and Wadler]{call-by-need}
+J.~Maraist, M.~Odersky, and P.~Wadler.
+\newblock The call-by-need lambda calculus.
+\newblock \emph{JFP}, 8\penalty0 (03), 1998.
+
+\bibitem[McCarthy(1960)]{McCarthy-1960}
+John McCarthy.
+\newblock Recursive functions of symbolic expressions and their computation by
+  machine, {P}art {I}.
+\newblock \emph{CACM}, 3\penalty0 (4), 1960.
+
+\bibitem[Meijer et~al.(2006)Meijer, Beckman, and Bierman]{csharplinq}
+E.~Meijer, B.~Beckman, and G.~Bierman.
+\newblock {LINQ}: reconciling object, relations and {XML} in the {.NET}
+  framework.
+\newblock In \emph{SIGMOD}. ACM, 2006.
+
+\bibitem[Moggi(1991)]{Moggi-1991}
+Eugenio Moggi.
+\newblock Notions of computation and monads.
+\newblock \emph{I\&C}, 93\penalty0 (1), 1991.
+
+\bibitem[Nielson and Nielson(2005)]{Nielson-2005}
+Flemming Nielson and Hanne~Riis Nielson.
+\newblock \emph{Two-level functional languages}.
+\newblock Cambridge University Press, 2005.
+
+\bibitem[O'Donnell(1993)]{odonnell:sharing}
+John O'Donnell.
+\newblock Generating netlists from executable circuit specifications in a pure
+  functional language.
+\newblock In \emph{Functional Programming, Glasgow}. Springer, 1993.
+
+\bibitem[Persson et~al.(2011)Persson, Axelsson, and Svenningsson]{PerssonAS11}
+A.~Persson, E.~Axelsson, and J.~Svenningsson.
+\newblock Generic monadic constructs for embedded languages.
+\newblock In \emph{IFL}, 2011.
+
+\bibitem[Pfenning and Elliot(1988)]{hoas}
+F.~Pfenning and C.~Elliot.
+\newblock Higher-order abstract syntax.
+\newblock In \emph{PLDI}, 1988.
+
+\bibitem[Prawitz(1965)]{Prawitz-1965}
+Dag Prawitz.
+\newblock \emph{Natural Deduction: A Proof-Theoretical Study}.
+\newblock Almqvist and Wiksell, Stockholm, 1965.
+
+\bibitem[Reid et~al.(1999)Reid, Peterson, Hager, and
+  Hudak]{reid1999prototyping}
+A.~Reid, J.~Peterson, G.~Hager, and P.~Hudak.
+\newblock Prototyping real-time vision systems: An experiment in {DSL} design.
+\newblock In \emph{ICSE}, 1999.
+
+\bibitem[Rompf and Odersky(2010)]{scalalms}
+T.~Rompf and M.~Odersky.
+\newblock Lightweight modular staging: a pragmatic approach to runtime code
+  generation and compiled {DSL}s.
+\newblock In \emph{GPCE}. ACM, 2010.
+
+\bibitem[Rompf(2012)]{rompf2012lightweight}
+Tiark Rompf.
+\newblock \emph{Lightweight Modular Staging and Embedded Compilers: Abstraction
+  without Regret for High-Level High-Performance Programming}.
+\newblock PhD thesis, EPFL, 2012.
+
+\bibitem[Rompf et~al.(2013)Rompf, Amin, Moors, Haller, and
+  Odersky]{rompf2013scala}
+Tiark Rompf, Nada Amin, Adriaan Moors, Philipp Haller, and Martin Odersky.
+\newblock Scala-virtualized: Linguistic reuse for deep embeddings.
+\newblock \emph{HOSC}, 2013.
+
+\bibitem[Sculthorpe et~al.(2013)Sculthorpe, Bracker, Giorgidze, and
+  Gill]{SculthorpeBGG13}
+N.~Sculthorpe, J.~Bracker, G.~Giorgidze, and A.~Gill.
+\newblock The constrained-monad problem.
+\newblock In \emph{ICFP}. ACM, 2013.
+
+\bibitem[Sujeeth et~al.(2013)]{sujeeth2013composition}
+Arvind~K Sujeeth et~al.
+\newblock Composition and reuse with compiled domain-specific languages.
+\newblock In \emph{ECOOP}. Springer, 2013.
+
+\bibitem[Svenningsson and Axelsson(2012)]{svenningsson:combining}
+J.~Svenningsson and E.~Axelsson.
+\newblock Combining deep and shallow embedding for {EDSL}.
+\newblock In \emph{TFP}. Springer, 2012.
+
+\bibitem[Svenningsson and Svensson(2013)]{SvenningssonS13}
+J.~Svenningsson and B.~Svensson.
+\newblock Simple and compositional reification of monadic embedded languages.
+\newblock In \emph{ICFP}. ACM, 2013.
+
+\bibitem[Svensson et~al.(2011)Svensson, Sheeran, and
+  Claessen]{svensson2011obsidian}
+J.~Svensson, M.~Sheeran, and K.~Claessen.
+\newblock {Obsidian}: A domain specific embedded language for parallel
+  programming of graphics processors.
+\newblock In \emph{IFL}. Springer, 2011.
+
+\bibitem[Syme(2006)]{fsharplinq}
+Don Syme.
+\newblock Leveraging {.NET} meta-programming components from {F\#}: integrated
+  queries and interoperable heterogeneous execution.
+\newblock In \emph{ML}. ACM, 2006.
+
+\bibitem[Wadler(2015)]{Wadler-2015}
+Philip Wadler.
+\newblock Propositions as types.
+\newblock \emph{CACM}, 2015.
+\newblock To appear.
+
+\bibitem[Wong(1993)]{Wong-1993}
+Limsoon Wong.
+\newblock Normal forms and conservative properties for query languages over
+  collection types.
+\newblock In \emph{PODS}. ACM, 1993.
+
+\bibitem[Wong(1996)]{Wong-1996}
+Limsoon Wong.
+\newblock Normal forms and conservative extension properties for query
+  languages over collection types.
+\newblock \emph{JCSS}, 52\penalty0 (3), 1996.
+
+\end{thebibliography}
